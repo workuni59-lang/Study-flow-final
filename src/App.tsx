@@ -464,16 +464,7 @@ const AppContent = () => {
 
   return (
     <div 
-      className={`min-h-screen flex flex-col lg:flex-row transition-colors duration-1000 relative overflow-hidden ${
-        themeConfig.atmosphere === 'indigo' ? 'bg-[#f8fafc] dark:bg-slate-950' :
-        themeConfig.atmosphere === 'rose' ? 'bg-[#fff5f5] dark:bg-[#1a0f0f]' :
-        themeConfig.atmosphere === 'emerald' ? 'bg-[#f2fcf5] dark:bg-[#0f1a13]' :
-        themeConfig.atmosphere === 'violet' ? 'bg-[#f8f5ff] dark:bg-[#130f1a]' :
-        themeConfig.atmosphere === 'amber' ? 'bg-[#fffbf2] dark:bg-[#1a160f]' :
-        themeConfig.atmosphere === 'cyan' ? 'bg-[#f2fbff] dark:bg-[#0f181a]' :
-        themeConfig.atmosphere === 'pink' ? 'bg-[#fff2f9] dark:bg-[#1a0f16]' :
-        'bg-[#f8fafc] dark:bg-slate-950'
-      }`}
+      className="min-h-screen flex flex-col lg:flex-row transition-colors duration-1000 relative overflow-hidden"
     >
       <WallpaperEngine />
       

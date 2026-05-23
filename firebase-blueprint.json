@@ -1,0 +1,64 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "User profile data stored in Firestore.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The unique user ID." },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "examType": { "type": "string", "enum": ["University Finals", "Board Exams", "Professional Certs", "Standardized Tests", "Other"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "createdAt"]
+    },
+    "StudyPlan": {
+      "title": "Study Plan",
+      "description": "A generated study timetable.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "examType": { "type": "string" },
+        "startDate": { "type": "string", "format": "date" },
+        "endDate": { "type": "string", "format": "date" },
+        "subjects": { "type": "array", "items": { "type": "string" } },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "title", "createdAt"]
+    },
+    "StudySession": {
+      "title": "Study Session",
+      "description": "A specific study session within a plan.",
+      "type": "object",
+      "properties": {
+        "planId": { "type": "string" },
+        "title": { "type": "string" },
+        "subject": { "type": "string" },
+        "startTime": { "type": "string", "format": "date-time" },
+        "endTime": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["pending", "completed", "missed"] },
+        "googleEventId": { "type": "string", "description": "ID of the synced Google Calendar event." },
+        "googleTaskId": { "type": "string", "description": "ID of the synced Google Task." }
+      },
+      "required": ["planId", "title", "startTime", "endTime", "status"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles."
+    },
+    "/studyPlans/{planId}": {
+      "schema": "StudyPlan",
+      "description": "Top-level study plans."
+    },
+    "/studyPlans/{planId}/sessions/{sessionId}": {
+      "schema": "StudySession",
+      "description": "Sessions for a study plan."
+    }
+  }
+}

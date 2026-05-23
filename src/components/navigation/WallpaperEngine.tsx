@@ -1,8 +1,43 @@
-import React, { useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { motion, useSpring, useMotionValue, useTransform } from 'motion/react';
 import { useStudy } from '../../context/StudyContext';
 
 export const WallpaperEngine = () => {
   const { themeConfig } = useStudy();
+
+  // Snappier Mouse Tracking (Reduced damping, higher stiffness)
+  const mouseX = useMotionValue(0.5);
+  const mouseY = useMotionValue(0.5);
+
+  const springX = useSpring(mouseX, { damping: 25, stiffness: 150 });
+  const springY = useSpring(mouseY, { damping: 25, stiffness: 150 });
+
+  // Drastically increased displacement ranges for dramatic "World Class" feel
+  const meshX1 = useTransform(springX, [0, 1], [-100, 100]);
+  const meshY1 = useTransform(springY, [0, 1], [-100, 100]);
+  const meshX2 = useTransform(springX, [0, 1], [150, -150]);
+  const meshY2 = useTransform(springY, [0, 1], [150, -150]);
+  const meshX3 = useTransform(springX, [0, 1], [-50, 50]);
+  const meshY3 = useTransform(springY, [0, 1], [50, -50]);
+  
+  const auroraX = useTransform(springX, [0, 1], [-250, 250]);
+  const starX = useTransform(springX, [0, 1], [-45, 45]);
+  const starY = useTransform(springY, [0, 1], [-45, 45]);
+  const dotsX = useTransform(springX, [0, 1], [-20, 20]);
+  const dotsY = useTransform(springY, [0, 1], [-20, 20]);
+
+  // High-intensity cursor lens
+  const lensX = useTransform(springX, [0, 1], ["0%", "100%"]);
+  const lensY = useTransform(springY, [0, 1], ["0%", "100%"]);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseX.set(e.clientX / window.innerWidth);
+      mouseY.set(e.clientY / window.innerHeight);
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [mouseX, mouseY]);
 
   const baseBackgrounds: Record<string, string> = {
     indigo: 'bg-[#f8fafc] dark:bg-slate-950',
@@ -15,78 +50,124 @@ export const WallpaperEngine = () => {
     slate: 'bg-[#f8fafc] dark:bg-slate-950',
   };
 
-  const baseClass = baseBackgrounds[themeConfig.atmosphere] || baseBackgrounds.indigo;
+  const atmosphereGlows: Record<string, string> = {
+    indigo: 'bg-indigo-500/20',
+    rose: 'bg-rose-500/20',
+    emerald: 'bg-emerald-500/20',
+    violet: 'bg-violet-600/20',
+    amber: 'bg-amber-500/20',
+    cyan: 'bg-cyan-400/20',
+    pink: 'bg-pink-400/20',
+  };
 
-  // Use pure CSS for animations to prevent JS thread lag
+  const baseClass = baseBackgrounds[themeConfig.atmosphere] || baseBackgrounds.indigo;
+  const currentGlow = atmosphereGlows[themeConfig.atmosphere] || atmosphereGlows.indigo;
+
   const renderWallpaper = () => {
     return (
       <div className={`fixed inset-0 pointer-events-none -z-20 transition-colors duration-1000 ${baseClass}`}>
         <style>
           {`
-            @keyframes drift {
-              0% { transform: translate3d(0, 0, 0) scale(1); }
-              50% { transform: translate3d(50px, 30px, 0) scale(1.1); }
-              100% { transform: translate3d(0, 0, 0) scale(1); }
+            @keyframes aurora-wave-fast {
+              0%, 100% { transform: skewX(-20deg) translateX(-10%); opacity: 0.4; }
+              50% { transform: skewX(-15deg) translateX(10%); opacity: 0.8; }
             }
-            @keyframes pulse-slow {
-              0%, 100% { opacity: 0.1; transform: scale(1); }
-              50% { opacity: 0.3; transform: scale(1.2); }
+            @keyframes twinkle-star-vibrant {
+              0%, 100% { opacity: 0.3; transform: scale(1) shadow(0 0 2px white); }
+              50% { opacity: 1; transform: scale(1.8) shadow(0 0 12px white); }
             }
-            @keyframes twinkle {
-              0%, 100% { opacity: 0.1; }
-              50% { opacity: 0.5; }
-            }
-            .animate-drift { animation: drift 20s infinite linear; }
-            .animate-pulse-slow { animation: pulse-slow 10s infinite ease-in-out; }
-            .animate-twinkle { animation: twinkle 4s infinite ease-in-out; }
           `}
         </style>
 
-        {/* Mesh: High-performance CSS drift */}
+        {/* Dynamic Focus Lens (Always present, subtle but reactive) */}
+        <motion.div 
+          style={{ left: lensX, top: lensY, willChange: "transform" }}
+          className={`absolute w-[40vw] h-[40vw] rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2 opacity-30 ${currentGlow}`}
+        />
+
+        {/* Animated Mesh: High-displace Interactive Blobs */}
         {themeConfig.wallpaper === 'mesh' && (
-          <div className="absolute inset-0 overflow-hidden opacity-40">
-            <div className="absolute -top-1/4 -left-1/4 w-full h-full rounded-full blur-[120px] bg-indigo-500/20 animate-drift" />
-            <div className="absolute -bottom-1/4 -right-1/4 w-full h-full rounded-full blur-[120px] bg-violet-600/20 animate-drift" style={{ animationDirection: 'reverse', animationDuration: '25s' }} />
+          <div className="absolute inset-0 overflow-hidden opacity-80">
+            <motion.div 
+              style={{ x: meshX1, y: meshY1, willChange: "transform" }}
+              className="absolute top-[-20%] left-[-20%] w-[80%] h-[80%] rounded-full blur-[140px] bg-indigo-500/40 animate-pulse"
+            />
+            <motion.div 
+              style={{ x: meshX2, y: meshY2, willChange: "transform" }}
+              className="absolute bottom-[-10%] right-[-10%] w-[90%] h-[90%] rounded-full blur-[160px] bg-violet-600/30"
+            />
+            <motion.div 
+              style={{ x: meshX3, y: meshY3, willChange: "transform" }}
+              className="absolute top-[10%] right-[5%] w-[50%] h-[50%] rounded-full blur-[120px] bg-cyan-400/20"
+            />
           </div>
         )}
 
-        {/* Aurora: Pure CSS gradient pulses */}
+        {/* Arctic Aurora: High-energy Shifting Panels */}
         {themeConfig.wallpaper === 'aurora' && (
-          <div className="absolute inset-0 overflow-hidden opacity-60">
-            <div className="absolute inset-0 bg-gradient-to-t from-transparent via-cyan-400/10 to-transparent blur-[120px] animate-pulse-slow" />
-            <div className="absolute inset-0 bg-gradient-to-t from-transparent via-indigo-400/10 to-transparent blur-[140px] animate-pulse-slow" style={{ animationDelay: '2s' }} />
+          <div className="absolute inset-0 overflow-hidden">
+             <motion.div 
+               style={{ x: auroraX, willChange: "transform" }}
+               className="absolute inset-x-[-20%] inset-y-0 flex justify-around opacity-60 blur-[80px]"
+             >
+                {[...Array(4)].map((_, i) => (
+                  <div 
+                    key={i}
+                    className="w-1/5 h-[140%] bg-gradient-to-b from-cyan-400/40 via-indigo-500/30 to-transparent"
+                    style={{ 
+                      animation: `aurora-wave-fast ${8 + i * 2}s infinite ease-in-out`,
+                      animationDelay: `${i * 1.5}s`
+                    }}
+                  />
+                ))}
+             </motion.div>
+             <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
           </div>
         )}
 
-        {/* Stardust: Static grid with twinkle for zero lag */}
+        {/* Deep Space: Extreme 3D Parallax */}
         {themeConfig.wallpaper === 'stardust' && (
-          <div className="absolute inset-0 opacity-60">
-            {[...Array(15)].map((_, i) => (
+          <motion.div 
+            style={{ x: starX, y: starY, willChange: "transform" }}
+            className="absolute inset-[-10%]"
+          >
+            {[...Array(40)].map((_, i) => (
               <div
                 key={i}
-                className="absolute w-1 h-1 bg-white rounded-full shadow-[0_0_8px_white] animate-twinkle"
+                className="absolute w-1.5 h-1.5 bg-white rounded-full"
                 style={{ 
-                  left: (Math.sin(i * 123) * 50 + 50) + "%", 
-                  top: (Math.cos(i * 456) * 50 + 50) + "%",
-                  animationDelay: (i * 0.5) + "s"
+                  left: (Math.abs(Math.sin(i * 1337)) * 100) + "%", 
+                  top: (Math.abs(Math.cos(i * 7331)) * 100) + "%",
+                  animation: `twinkle-star-vibrant ${2 + (i % 4)}s infinite ease-in-out`,
+                  animationDelay: `${i * 0.1}s`,
+                  boxShadow: '0 0 10px rgba(255,255,255,0.5)'
                 }}
               />
             ))}
-          </div>
+          </motion.div>
         )}
 
-        {/* Dots: Standard geometric grid */}
+        {/* Focus Dots: Dramatic Grid Tilt */}
         {themeConfig.wallpaper === 'dots' && (
-          <div className="absolute inset-0 opacity-[0.08] dark:opacity-[0.15]" 
+          <motion.div 
             style={{ 
-              backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)',
-              backgroundSize: '40px 40px'
-            }} 
+              x: dotsX, 
+              y: dotsY,
+              willChange: "transform",
+              backgroundImage: `radial-gradient(circle at center, #6366f1 2px, transparent 2px)`,
+              backgroundSize: '56px 56px'
+            }}
+            className="absolute inset-[-20%] opacity-[0.2] dark:opacity-[0.35]" 
           />
+        )}
+
+        {/* Clean Solid: Immersive Corner Glows */}
+        {themeConfig.wallpaper === 'minimal' && (
+          <div className="absolute inset-0 bg-gradient-to-tr from-black/10 via-transparent to-white/5 dark:from-black/40 dark:to-white/5" />
         )}
       </div>
     );
   };
 
-  return useMemo(() => renderWallpaper(), [themeConfig.wallpaper, themeConfig.atmosphere]);
+  return renderWallpaper();
 };

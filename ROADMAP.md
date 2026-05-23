@@ -36,10 +36,10 @@ This roadmap outlines the evolution of Study Flow from a minimalist dashboard to
 - [x] **Streak Mechanics:** Basic daily streak tracking.
 - [x] **Achievements & Badges:** Hall of Mastery with rarity tiers.
 - [x] **Unlock Notifications:** Real-time corner popups for accomplishments.
-- [ ] **Atmosphere Gating:** Lock premium themes behind level requirements.
-- [ ] **Daily Quests:** 3 randomized daily objectives for bonus XP.
-- [ ] **Study Analytics:** Weekly velocity charts and focus patterns.
-- [ ] **Streak Protection:** "Shield" mechanics to prevent reset on missed days.
+- [x] **Atmosphere Gating:** Lock premium themes behind level requirements.
+- [x] **Daily Quests:** 3 randomized daily objectives for bonus XP.
+- [x] **Study Analytics:** Weekly velocity charts and focus patterns.
+- [x] **Streak Protection:** "Shield" mechanics to prevent reset on missed days.
 
 ## Phase 5: Integration & Sync (Mock to Real)
 **Goal:** Professional-grade connectivity.

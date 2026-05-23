@@ -1,0 +1,504 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { storage } from '../services/storage';
+import { UserStats, Badge, ACHIEVEMENTS, Achievement, Quest, calculateLevel, XP_PER_TASK, XP_PER_FOCUS_MINUTE, AtmosphereId, WallpaperId } from '../lib/gamification';
+
+interface MockUser {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+  photoURL: string | null;
+}
+
+export type MasteryLevel = 'Red' | 'Amber' | 'Green';
+
+export interface Topic {
+  id: string;
+  title: string;
+  mastery: MasteryLevel;
+}
+
+export interface Subject {
+  id: string;
+  name: string;
+  topics: Topic[];
+  color?: string;
+}
+
+export interface Task {
+  id: string;
+  title: string;
+  completed: boolean;
+  category: string;
+  priority?: string;
+  dueDate?: string;
+}
+
+export interface ThemeConfig {
+  atmosphere: AtmosphereId;
+  wallpaper: WallpaperId;
+}
+
+interface StudyContextType {
+  user: MockUser | null;
+  loading: boolean;
+  accessToken: string | null;
+  subjects: Subject[];
+  tasks: Task[];
+  quests: Quest[];
+  themeConfig: ThemeConfig;
+  userStats: UserStats;
+  unlockedBadges: Badge[];
+  activeNotification: Achievement | null;
+  setThemeConfig: (config: ThemeConfig) => void;
+  signIn: () => Promise<void>;
+  logout: () => Promise<void>;
+  addSubject: (name: string, color?: string, initialTopics?: string[]) => void;
+  deleteSubject: (id: string) => void;
+  addTopic: (subjectId: string, title: string) => void;
+  updateTopicMastery: (subjectId: string, topicId: string, mastery: MasteryLevel) => void;
+  deleteTopic: (subjectId: string, topicId: string) => void;
+  addTask: (title: string, category: string, priority: string, dueDate?: string) => void;
+  toggleTask: (id: string) => void;
+  deleteTask: (id: string) => void;
+  recalibrateTasks: () => void;
+  setTasks: (tasks: Task[]) => void;
+  addXP: (amount: number) => void;
+  completeFocusSession: (seconds: number) => void;
+  closeNotification: () => void;
+  buyShield: () => void;
+  togglePremium: () => void;
+}
+
+const StudyContext = createContext<StudyContextType | undefined>(undefined);
+
+const MOCK_USER: MockUser = {
+  uid: 'mock-user-123',
+  email: 'demo@studyflow.com',
+  displayName: 'Demo Student',
+  photoURL: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix',
+};
+
+const INITIAL_STATS: UserStats = {
+  xp: 0,
+  level: 1,
+  currentStreak: 0,
+  bestStreak: 0,
+  lastActiveDate: null,
+  totalFocusSeconds: 0,
+  totalTasksCompleted: 0,
+  dailyXPHistory: {},
+  hasShield: false,
+  isPremium: false
+};
+
+export function StudyProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<MockUser | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [accessToken, setAccessToken] = useState<string | null>('mock-access-token');
+  
+  const [tasks, setTasks] = useState<Task[]>(() => {
+    const saved = storage.getTasks();
+    return saved || [
+      { id: '1', title: 'Review Biology Chapter 4: Photosynthesis', completed: false, category: 'Biology', priority: 'High Yield' },
+      { id: '2', title: 'Math Practice: Calculus Integrals', completed: true, category: 'Mathematics', priority: 'Deep Review' },
+    ];
+  });
+
+  const [subjects, setSubjects] = useState<Subject[]>(() => {
+    return storage.getSubjects() || [
+      { id: '1', name: 'Molecular Biology', topics: [
+        { id: 't1', title: 'DNA Replication', mastery: 'Green' },
+        { id: 't2', title: 'Cell Cycle', mastery: 'Amber' },
+        { id: 't3', title: 'Protein Synthesis', mastery: 'Red' },
+      ], color: 'indigo' },
+      { id: '2', name: 'Advanced Mathematics', topics: [
+        { id: 't4', title: 'Vector Calculus', mastery: 'Amber' },
+        { id: 't5', title: 'Linear Algebra', mastery: 'Green' },
+      ], color: 'rose' }
+    ];
+  });
+
+  const [themeConfig, setThemeConfig] = useState<ThemeConfig>(() => {
+    return storage.getThemeConfig() || { atmosphere: 'indigo', wallpaper: 'mesh' };
+  });
+
+  const [userStats, setUserStats] = useState<UserStats>(() => {
+    const saved = storage.getUserStats();
+    if (!saved) return INITIAL_STATS;
+    return {
+      ...INITIAL_STATS,
+      ...saved,
+      dailyXPHistory: saved.dailyXPHistory || {}
+    };
+  });
+  const [unlockedBadges, setUnlockedBadges] = useState<Badge[]>(() => storage.getUnlockedBadges() || []);
+  const [quests, setQuests] = useState<Quest[]>(() => storage.getDailyQuests() || []);
+  const [activeNotification, setActiveNotification] = useState<Achievement | null>(null);
+  const [notificationQueue, setNotificationQueue] = useState<Achievement[]>([]);
+
+  useEffect(() => {
+    storage.saveSubjects(subjects);
+  }, [subjects]);
+
+  useEffect(() => {
+    storage.saveTasks(tasks);
+  }, [tasks]);
+
+  useEffect(() => {
+    storage.saveThemeConfig(themeConfig);
+    document.documentElement.setAttribute('data-atmosphere', themeConfig.atmosphere);
+    document.documentElement.setAttribute('data-wallpaper', themeConfig.wallpaper);
+  }, [themeConfig]);
+
+  useEffect(() => {
+    storage.saveUserStats(userStats);
+    checkAchievements();
+  }, [userStats]);
+
+  useEffect(() => {
+    storage.saveUnlockedBadges(unlockedBadges);
+  }, [unlockedBadges]);
+
+  useEffect(() => {
+    storage.saveDailyQuests(quests);
+  }, [quests]);
+
+  // Notification Queue Processor
+  useEffect(() => {
+    if (!activeNotification && notificationQueue.length > 0) {
+      const next = notificationQueue[0];
+      setNotificationQueue(prev => prev.slice(1));
+      setActiveNotification(next);
+    }
+  }, [notificationQueue, activeNotification]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const signIn = async () => {
+    setUser(MOCK_USER);
+    updateStreak();
+    generateDailyQuests();
+  };
+
+  const logout = async () => {
+    setUser(null);
+  };
+
+  const generateDailyQuests = () => {
+    const today = new Date().toISOString().split('T')[0];
+    const savedQuests = storage.getDailyQuests() || [];
+    
+    if (savedQuests.length > 0 && savedQuests[0].id.startsWith(today)) return;
+
+    const newQuests: Quest[] = [
+      {
+        id: `${today}-q1`,
+        title: 'The Sprint',
+        description: 'Complete 3 study tasks today.',
+        requirement: 3,
+        progress: 0,
+        xpReward: 150,
+        type: 'tasks',
+        completed: false
+      },
+      {
+        id: `${today}-q2`,
+        title: 'Deep Diver',
+        description: 'Accumulate 30 minutes of focus time.',
+        requirement: 1800, // seconds
+        progress: 0,
+        xpReward: 200,
+        type: 'focus',
+        completed: false
+      },
+      {
+        id: `${today}-q3`,
+        title: 'Topic Master',
+        description: 'Achieve Green mastery on 1 new topic.',
+        requirement: 1,
+        progress: 0,
+        xpReward: 250,
+        type: 'mastery',
+        completed: false
+      }
+    ];
+
+    setQuests(newQuests);
+    storage.saveDailyQuests(newQuests);
+  };
+
+  const updateQuestProgress = (type: Quest['type'], amount: number) => {
+    setQuests(prev => prev.map(q => {
+      if (q.type === type && !q.completed) {
+        const newProgress = q.progress + amount;
+        const isNowCompleted = newProgress >= q.requirement;
+        if (isNowCompleted) {
+          addXP(q.xpReward);
+        }
+        return {
+          ...q,
+          progress: Math.min(newProgress, q.requirement),
+          completed: isNowCompleted
+        };
+      }
+      return q;
+    }));
+  };
+
+  const updateStreak = () => {
+    const today = new Date().toISOString().split('T')[0];
+    const lastActive = userStats.lastActiveDate;
+
+    if (lastActive === today) return;
+
+    let newStreak = userStats.currentStreak;
+    let shieldConsumed = false;
+
+    if (lastActive) {
+      const lastDate = new Date(lastActive);
+      const todayDate = new Date(today);
+      const diffDays = Math.floor((todayDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
+
+      if (diffDays === 1) {
+        newStreak += 1;
+      } else if (diffDays > 1) {
+        if (userStats.hasShield) {
+          shieldConsumed = true;
+          newStreak += 1; // Preserve streak
+          alert("Streak Shield Consumed! Your streak has been preserved.");
+        } else {
+          newStreak = 1;
+        }
+      }
+    } else {
+      newStreak = 1;
+    }
+
+    setUserStats(prev => ({
+      ...prev,
+      currentStreak: newStreak,
+      bestStreak: Math.max(prev.bestStreak, newStreak),
+      lastActiveDate: today,
+      hasShield: shieldConsumed ? false : prev.hasShield
+    }));
+  };
+
+  const addXP = (amount: number) => {
+    const today = new Date().toISOString().split('T')[0];
+    setUserStats(prev => {
+      const newXP = prev.xp + amount;
+      const newLevel = calculateLevel(newXP);
+      const newHistory = { ...prev.dailyXPHistory };
+      newHistory[today] = (newHistory[today] || 0) + amount;
+      
+      return { 
+        ...prev, 
+        xp: newXP, 
+        level: newLevel,
+        dailyXPHistory: newHistory
+      };
+    });
+  };
+
+  const buyShield = () => {
+    const COST = 1000;
+    if (userStats.xp < COST) {
+      alert("Not enough XP! You need 1,000 XP to buy a Streak Shield.");
+      return;
+    }
+    if (userStats.hasShield) {
+      alert("You already have an active Streak Shield!");
+      return;
+    }
+
+    setUserStats(prev => ({
+      ...prev,
+      xp: prev.xp - COST,
+      hasShield: true
+    }));
+    alert("Streak Shield Activated! Your streak is now protected for one missed day.");
+  };
+
+  const togglePremium = () => {
+    setUserStats(prev => ({
+      ...prev,
+      isPremium: !prev.isPremium
+    }));
+  };
+
+  const checkAchievements = () => {
+    const newlyUnlocked: Achievement[] = [];
+    
+    ACHIEVEMENTS.forEach(achievement => {
+      if (unlockedBadges.some(b => b.achievementId === achievement.id)) return;
+
+      let met = false;
+      switch (achievement.type) {
+        case 'tasks':
+          if (userStats.totalTasksCompleted >= achievement.requirement) met = true;
+          break;
+        case 'focus':
+          if (userStats.totalFocusSeconds >= achievement.requirement) met = true;
+          break;
+        case 'streak':
+          if (userStats.currentStreak >= achievement.requirement) met = true;
+          break;
+        case 'mastery':
+          const greenTopics = subjects.reduce((acc, s) => acc + s.topics.filter(t => t.mastery === 'Green').length, 0);
+          if (greenTopics >= achievement.requirement) met = true;
+          break;
+      }
+
+      if (met) {
+        const newBadge: Badge = {
+          id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+          achievementId: achievement.id,
+          unlockedAt: new Date().toISOString()
+        };
+        setUnlockedBadges(prev => [...prev, newBadge]);
+        newlyUnlocked.push(achievement);
+      }
+    });
+
+    if (newlyUnlocked.length > 0) {
+      setNotificationQueue(prev => [...prev, ...newlyUnlocked]);
+    }
+  };
+
+  const addTask = (title: string, category: string, priority: string, dueDate?: string) => {
+    const newTask: Task = {
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      title, category, priority, completed: false, dueDate
+    };
+    setTasks(prev => [newTask, ...prev]);
+  };
+
+  const toggleTask = (id: string) => {
+    setTasks(prev => {
+      const newTasks = prev.map(t => {
+        if (t.id === id) {
+          const wasCompleted = t.completed;
+          if (!wasCompleted) {
+            addXP(XP_PER_TASK);
+            setUserStats(s => ({ ...s, totalTasksCompleted: s.totalTasksCompleted + 1 }));
+            updateQuestProgress('tasks', 1);
+          }
+          return { ...t, completed: !t.completed };
+        }
+        return t;
+      });
+      return newTasks;
+    });
+  };
+
+  const deleteTask = (id: string) => {
+    setTasks(prev => prev.filter(t => t.id !== id));
+  };
+
+  const recalibrateTasks = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const overdueTasks = tasks.filter(t => !t.completed && t.dueDate && new Date(t.dueDate) < today);
+    if (overdueTasks.length === 0) {
+      alert("No overdue tasks found! Your schedule is on track.");
+      return;
+    }
+    const remainingTasks = tasks.filter(t => !overdueTasks.find(ot => ot.id === t.id));
+    const updatedOverdue = overdueTasks.map((t, index) => {
+      const newDate = new Date();
+      newDate.setDate(newDate.getDate() + (index % 3));
+      return { ...t, dueDate: newDate.toISOString().split('T')[0] };
+    });
+    setTasks([...remainingTasks, ...updatedOverdue]);
+    alert(`Successfully rescheduled ${overdueTasks.length} overdue tasks!`);
+  };
+
+  const addSubject = (name: string, color?: string, initialTopics: string[] = []) => {
+    const newSubject: Subject = {
+      id: Date.now().toString(),
+      name,
+      topics: initialTopics.map(title => ({
+        id: Math.random().toString(36).substr(2, 9),
+        title, mastery: 'Red'
+      })),
+      color: color || 'indigo'
+    };
+    setSubjects([...subjects, newSubject]);
+  };
+
+  const deleteSubject = (id: string) => {
+    setSubjects(subjects.filter(s => s.id !== id));
+  };
+
+  const addTopic = (subjectId: string, title: string) => {
+    setSubjects(subjects.map(s => {
+      if (s.id === subjectId) {
+        return { ...s, topics: [...s.topics, { id: Date.now().toString(), title, mastery: 'Red' }] };
+      }
+      return s;
+    }));
+  };
+
+  const updateTopicMastery = (subjectId: string, topicId: string, mastery: MasteryLevel) => {
+    setSubjects(subjects.map(s => {
+      if (s.id === subjectId) {
+        const wasGreen = s.topics.find(t => t.id === topicId)?.mastery === 'Green';
+        const isNowGreen = mastery === 'Green';
+        if (!wasGreen && isNowGreen) {
+          updateQuestProgress('mastery', 1);
+          addXP(100);
+        }
+        return { ...s, topics: s.topics.map(t => t.id === topicId ? { ...t, mastery } : t) };
+      }
+      return s;
+    }));
+  };
+
+  const deleteTopic = (subjectId: string, topicId: string) => {
+    setSubjects(subjects.map(s => {
+      if (s.id === subjectId) {
+        return { ...s, topics: s.topics.filter(t => t.id !== topicId) };
+      }
+      return s;
+    }));
+  };
+
+  const completeFocusSession = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const xpEarned = minutes * XP_PER_FOCUS_MINUTE;
+    addXP(xpEarned);
+    updateQuestProgress('focus', seconds);
+    setUserStats(prev => ({
+      ...prev,
+      totalFocusSeconds: prev.totalFocusSeconds + seconds
+    }));
+  };
+
+  const closeNotification = () => {
+    setActiveNotification(null);
+  };
+
+  return (
+    <StudyContext.Provider value={{ 
+      user, loading, accessToken, subjects, tasks, quests, themeConfig, userStats, unlockedBadges, activeNotification,
+      setThemeConfig, signIn, logout, addSubject, deleteSubject, addTopic,
+      updateTopicMastery, deleteTopic, addTask, toggleTask, deleteTask, recalibrateTasks,
+      setTasks, addXP, completeFocusSession, closeNotification, buyShield, togglePremium
+    }}>
+      {children}
+    </StudyContext.Provider>
+  );
+}
+
+export function useStudy() {
+  const context = useContext(StudyContext);
+  if (context === undefined) {
+    throw new Error('useStudy must be used within a StudyProvider');
+  }
+  return context;
+}

@@ -41,7 +41,7 @@ export interface UserStats {
 }
 
 export type AtmosphereId = 'indigo' | 'emerald' | 'rose' | 'amber' | 'violet' | 'slate' | 'cyan' | 'pink';
-export type WallpaperId = 'minimal' | 'dots' | 'mesh' | 'aurora' | 'stardust';
+export type WallpaperId = 'none' | 'minimal' | 'dots' | 'mesh' | 'aurora' | 'stardust';
 
 export interface Atmosphere {
   id: AtmosphereId;
@@ -69,6 +69,7 @@ export const ATMOSPHERES: Atmosphere[] = [
 ];
 
 export const WALLPAPERS: Wallpaper[] = [
+  { id: 'none', name: 'Disabled', isPremium: false },
   { id: 'minimal', name: 'Clean Solid', isPremium: false },
   { id: 'dots', name: 'Focus Dots', isPremium: false },
   { id: 'mesh', name: 'Animated Mesh', isPremium: true },

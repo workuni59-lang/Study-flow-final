@@ -13,55 +13,22 @@ import { AddExamModal } from './dashboard/AddExamModal';
 import { DailyReflection } from './dashboard/DailyReflection';
 import { PathToMastery } from './subjects/PathToMastery';
 import { DailyQuests } from './dashboard/DailyQuests';
+import { DevMenu } from './dashboard/DevMenu';
 import { storage } from '../services/storage';
 import { getDailyQuote } from '../lib/quotes';
 
 const Dashboard = () => {
   const { 
     user, logout, subjects, tasks, addTask, toggleTask, deleteTask, setTasks, 
-    userStats 
+    userStats, exams, addExam, deleteExam, selectedExamForPath, setSelectedExamForPath 
   } = useStudy();
   
   const [isAddingTask, setIsAddingTask] = useState(false);
   const [isAddingExam, setIsAddingExam] = useState(false);
   const [isReflecting, setIsReflecting] = useState(false);
-  const [selectedExamForPath, setSelectedExamForPath] = useState<any>(null);
   const [quote] = useState(getDailyQuote());
 
-  const [exams, setExams] = useState(() => {
-    const saved = storage.getExams();
-    return saved || [
-      { id: '1', subject: 'Advanced Mathematics', type: 'Final Exam', date: 'May 24', daysLeft: 4 },
-      { id: '2', subject: 'Molecular Biology', type: 'Midterm', date: 'May 28', daysLeft: 8 },
-    ];
-  });
-
-  useEffect(() => {
-    storage.saveExams(exams);
-  }, [exams]);
-
   const handleTimerTick = () => {
-  };
-
-  const addExam = (subject: string, type: string, date: string, subjectId?: string) => {
-    const targetDate = new Date(date);
-    const today = new Date();
-    const diffTime = targetDate.getTime() - today.getTime();
-    const diffDays = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
-    
-    const newExam = {
-      id: Date.now().toString(),
-      subject,
-      type,
-      date: targetDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      daysLeft: diffDays,
-      subjectId
-    };
-    setExams([...exams, newExam].sort((a, b) => a.daysLeft - b.daysLeft));
-  };
-
-  const deleteExam = (id: string) => {
-    setExams(exams.filter(e => e.id !== id));
   };
 
   const handleCompleteDay = () => {
@@ -148,7 +115,7 @@ const Dashboard = () => {
 
         <AddExamModal 
           isOpen={isAddingExam} 
-          onClose={() => setIsAddingExam(true)} 
+          onClose={() => setIsAddingExam(false)} 
           onAdd={addExam} 
         />
 
@@ -173,6 +140,8 @@ const Dashboard = () => {
             daysLeft={selectedExamForPath.daysLeft}
           />
         )}
+
+        <DevMenu />
       </div>
     </div>
   );

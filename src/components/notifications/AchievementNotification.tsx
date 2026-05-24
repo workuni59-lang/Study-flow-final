@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Trophy, CheckCircle, Zap, Waves, Flame, Star } from 'lucide-react';
+import { Trophy, CheckCircle, Zap, Waves, Flame, Star, Sparkles } from 'lucide-react';
 import { Achievement, Rarity } from '../../lib/gamification';
 
 const ICON_MAP: Record<string, any> = {
@@ -18,6 +18,13 @@ const RARITY_COLORS: Record<Rarity, string> = {
   Legendary: 'bg-amber-500'
 };
 
+const RARITY_GLOW: Record<Rarity, string> = {
+  Common: 'shadow-slate-500/20',
+  Rare: 'shadow-indigo-500/40',
+  Epic: 'shadow-violet-500/40',
+  Legendary: 'shadow-amber-500/60'
+};
+
 interface AchievementNotificationProps {
   achievement: Achievement | null;
   onClose: () => void;
@@ -30,57 +37,74 @@ export const AchievementNotification = ({ achievement, onClose }: AchievementNot
     <AnimatePresence>
       {achievement && (
         <motion.div
-          initial={{ opacity: 0, y: -20, x: 20, scale: 0.9 }}
-          animate={{ opacity: 1, y: 0, x: 0, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-          className="fixed top-6 right-6 z-[200] w-full max-w-sm"
+          initial={{ opacity: 0, y: -150, scale: 0.3, rotate: -15 }}
+          animate={{ 
+            opacity: 1, 
+            y: 0, 
+            scale: 1, 
+            rotate: 0,
+            transition: { 
+              type: 'spring', 
+              stiffness: 260, 
+              damping: 20 
+            }
+          }}
+          exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
+          className="fixed top-12 left-1/2 -translate-x-1/2 z-[400] w-full max-w-sm px-6"
         >
-          <div className="relative group">
-            {/* Ambient Glow */}
-            <div className={`absolute inset-0 rounded-[32px] blur-2xl opacity-20 group-hover:opacity-40 transition-opacity ${RARITY_COLORS[achievement.rarity]}`} />
+          <motion.div 
+            animate={{ x: [0, -2, 2, -2, 2, 0] }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="relative group"
+          >
+            {/* Massive Ambient Glow */}
+            <div className={`absolute -inset-4 rounded-[40px] blur-3xl opacity-30 group-hover:opacity-50 transition-opacity ${RARITY_COLORS[achievement.rarity]}`} />
             
-            <div className="relative bg-white dark:bg-slate-900 rounded-[32px] p-6 shadow-2xl border border-slate-100 dark:border-slate-800 flex items-center gap-5 overflow-hidden">
-              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 text-white shadow-lg ${RARITY_COLORS[achievement.rarity]}`}>
-                <Icon className="w-7 h-7" />
-              </div>
+            <div className={`relative bg-white dark:bg-slate-900 rounded-[32px] p-1 border-2 border-white/20 shadow-2xl overflow-hidden ${RARITY_GLOW[achievement.rarity]}`}>
               
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[8px] font-black uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400">Achievement Unlocked</span>
-                  <div className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700" />
-                  <span className={`text-[8px] font-black uppercase tracking-widest ${achievement.rarity === 'Legendary' ? 'text-amber-500' : 'text-slate-400'}`}>
-                    {achievement.rarity}
-                  </span>
+              {/* Animated Shimmer Stripe */}
+              <motion.div 
+                animate={{ x: ['-100%', '200%'] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12 pointer-events-none"
+              />
+
+              <div className="p-6 flex items-center gap-5">
+                <motion.div 
+                  initial={{ rotate: -45, scale: 0 }}
+                  animate={{ rotate: 0, scale: 1 }}
+                  transition={{ delay: 0.2, type: 'spring' }}
+                  className={`w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 text-white shadow-xl ${RARITY_COLORS[achievement.rarity]}`}
+                >
+                  <Icon className="w-8 h-8" />
+                </motion.div>
+                
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Sparkles className="w-3 h-3 text-amber-500 animate-pulse" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400">Mastery Unlocked</span>
+                  </div>
+                  <h4 className="text-xl font-display font-black dark:text-white leading-tight truncate">
+                    {achievement.title}
+                  </h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-bold line-clamp-1 uppercase tracking-wider">
+                    {achievement.rarity} Rank
+                  </p>
                 </div>
-                <h4 className="text-lg font-display font-black dark:text-white leading-tight truncate">
-                  {achievement.title}
-                </h4>
-                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium line-clamp-1">
-                  {achievement.description}
-                </p>
               </div>
 
-              {/* Sparkle Decoration for Rare+ */}
-              {achievement.rarity !== 'Common' && (
+              {/* Progress Bar / Timeout indicator */}
+              <div className="h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full mx-6 mb-4 overflow-hidden">
                 <motion.div 
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-                  className="absolute -right-4 -bottom-4 opacity-10"
-                >
-                  <Star className="w-16 h-16" />
-                </motion.div>
-              )}
+                  initial={{ width: "100%" }}
+                  animate={{ width: "0%" }}
+                  transition={{ duration: 6, ease: "linear" }}
+                  onAnimationComplete={onClose}
+                  className={`h-full ${RARITY_COLORS[achievement.rarity]}`}
+                />
+              </div>
             </div>
-            
-            {/* Progress Bar / Timeout indicator */}
-            <motion.div 
-              initial={{ width: "100%" }}
-              animate={{ width: "0%" }}
-              transition={{ duration: 5, ease: "linear" }}
-              onAnimationComplete={onClose}
-              className={`absolute bottom-0 left-8 right-8 h-1 rounded-full opacity-30 ${RARITY_COLORS[achievement.rarity]}`}
-            />
-          </div>
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>

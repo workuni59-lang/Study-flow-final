@@ -9,6 +9,9 @@ import Dashboard from './components/Dashboard';
 import { SubjectsView } from './components/subjects/SubjectsView';
 import { AchievementsView } from './components/achievements/AchievementsView';
 import { AchievementNotification } from './components/notifications/AchievementNotification';
+import { Confetti } from './components/notifications/Confetti';
+import { LevelUpModal } from './components/modals/LevelUpModal';
+import { PanicModeUI } from './components/dashboard/PanicModeUI';
 import { WallpaperEngine } from './components/navigation/WallpaperEngine';
 import { storage } from './services/storage';
 import { NavRail } from './components/navigation/NavRail';
@@ -432,12 +435,22 @@ const LandingPage = ({ isDark, setIsDark }: { isDark: boolean, setIsDark: (val: 
 };
 
 const AppContent = () => {
-  const { user, loading, themeConfig, activeNotification, closeNotification } = useStudy();
+  const { user, loading, themeConfig, userStats, activeNotification, confettiActive, closeNotification } = useStudy();
   const [activeView, setActiveView] = useState<'dashboard' | 'subjects' | 'achievements'>('dashboard');
   const [isDark, setIsDark] = useState(() => {
     const saved = storage.getTheme();
     return saved !== null ? saved : false;
   });
+
+  const [showLevelUp, setShowLevelUp] = useState(false);
+  const [prevLevel, setPrevLevel] = useState(userStats ? userStats.level : 1);
+
+  useEffect(() => {
+    if (userStats && userStats.level > prevLevel) {
+      setShowLevelUp(true);
+      setPrevLevel(userStats.level);
+    }
+  }, [userStats?.level, prevLevel]);
 
   useEffect(() => {
     if (isDark) {
@@ -514,6 +527,16 @@ const AppContent = () => {
         achievement={activeNotification} 
         onClose={closeNotification} 
       />
+
+      <Confetti active={confettiActive} />
+
+      <LevelUpModal 
+        level={userStats.level} 
+        isOpen={showLevelUp} 
+        onClose={() => setShowLevelUp(false)} 
+      />
+
+      <PanicModeUI />
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { storage } from '../services/storage';
 import { UserStats, Badge, ACHIEVEMENTS, Achievement, Quest, calculateLevel, XP_PER_TASK, XP_PER_FOCUS_MINUTE, AtmosphereId, WallpaperId } from '../lib/gamification';
 
@@ -33,6 +33,15 @@ export interface Task {
   dueDate?: string;
 }
 
+export interface Exam {
+  id: string;
+  subject: string;
+  type: string;
+  date: string;
+  daysLeft: number;
+  subjectId?: string;
+}
+
 export interface ThemeConfig {
   atmosphere: AtmosphereId;
   wallpaper: WallpaperId;
@@ -44,11 +53,15 @@ interface StudyContextType {
   accessToken: string | null;
   subjects: Subject[];
   tasks: Task[];
+  exams: Exam[];
   quests: Quest[];
   themeConfig: ThemeConfig;
   userStats: UserStats;
   unlockedBadges: Badge[];
   activeNotification: Achievement | null;
+  confettiActive: boolean;
+  panicModeActive: boolean;
+  selectedExamForPath: Exam | null;
   setThemeConfig: (config: ThemeConfig) => void;
   signIn: () => Promise<void>;
   logout: () => Promise<void>;
@@ -60,6 +73,8 @@ interface StudyContextType {
   addTask: (title: string, category: string, priority: string, dueDate?: string) => void;
   toggleTask: (id: string) => void;
   deleteTask: (id: string) => void;
+  addExam: (subject: string, type: string, date: string, subjectId?: string) => void;
+  deleteExam: (id: string) => void;
   recalibrateTasks: () => void;
   setTasks: (tasks: Task[]) => void;
   addXP: (amount: number) => void;
@@ -67,6 +82,10 @@ interface StudyContextType {
   closeNotification: () => void;
   buyShield: () => void;
   togglePremium: () => void;
+  triggerConfetti: () => void;
+  resetStreak: () => void;
+  setPanicMode: (active: boolean) => void;
+  setSelectedExamForPath: (exam: Exam | null) => void;
 }
 
 const StudyContext = createContext<StudyContextType | undefined>(undefined);
@@ -118,6 +137,14 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     ];
   });
 
+  const [exams, setExams] = useState<Exam[]>(() => {
+    const saved = storage.getExams();
+    return saved || [
+      { id: '1', subject: 'Advanced Mathematics', type: 'Final Exam', date: 'May 24', daysLeft: 4, subjectId: '2' },
+      { id: '2', subject: 'Molecular Biology', type: 'Midterm', date: 'May 28', daysLeft: 8, subjectId: '1' },
+    ];
+  });
+
   const [themeConfig, setThemeConfig] = useState<ThemeConfig>(() => {
     return storage.getThemeConfig() || { atmosphere: 'indigo', wallpaper: 'mesh' };
   });
@@ -135,6 +162,9 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   const [quests, setQuests] = useState<Quest[]>(() => storage.getDailyQuests() || []);
   const [activeNotification, setActiveNotification] = useState<Achievement | null>(null);
   const [notificationQueue, setNotificationQueue] = useState<Achievement[]>([]);
+  const [confettiActive, setConfettiActive] = useState(false);
+  const [panicModeActive, setPanicModeActive] = useState(false);
+  const [selectedExamForPath, setSelectedExamForPath] = useState<Exam | null>(null);
 
   useEffect(() => {
     storage.saveSubjects(subjects);
@@ -143,6 +173,10 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     storage.saveTasks(tasks);
   }, [tasks]);
+
+  useEffect(() => {
+    storage.saveExams(exams);
+  }, [exams]);
 
   useEffect(() => {
     storage.saveThemeConfig(themeConfig);
@@ -169,6 +203,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       const next = notificationQueue[0];
       setNotificationQueue(prev => prev.slice(1));
       setActiveNotification(next);
+      triggerConfetti();
     }
   }, [notificationQueue, activeNotification]);
 
@@ -189,7 +224,23 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   };
 
-  const generateDailyQuests = () => {
+  const triggerConfetti = () => {
+    setConfettiActive(true);
+    setTimeout(() => setConfettiActive(false), 500);
+  };
+
+  const resetStreak = () => {
+    setUserStats(prev => ({ ...prev, currentStreak: 0 }));
+  };
+
+  const setPanicMode = (active: boolean) => {
+    setPanicModeActive(active);
+    if (active) {
+      setThemeConfig({ ...themeConfig, atmosphere: 'slate' });
+    }
+  };
+
+  const generateDailyQuests = useCallback(() => {
     const today = new Date().toISOString().split('T')[0];
     const savedQuests = storage.getDailyQuests() || [];
     
@@ -230,7 +281,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
 
     setQuests(newQuests);
     storage.saveDailyQuests(newQuests);
-  };
+  }, []);
 
   const updateQuestProgress = (type: Quest['type'], amount: number) => {
     setQuests(prev => prev.map(q => {
@@ -239,6 +290,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
         const isNowCompleted = newProgress >= q.requirement;
         if (isNowCompleted) {
           addXP(q.xpReward);
+          triggerConfetti();
         }
         return {
           ...q,
@@ -400,6 +452,27 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     setTasks(prev => prev.filter(t => t.id !== id));
   };
 
+  const addExam = (subject: string, type: string, date: string, subjectId?: string) => {
+    const targetDate = new Date(date);
+    const today = new Date();
+    const diffTime = targetDate.getTime() - today.getTime();
+    const diffDays = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+    
+    const newExam: Exam = {
+      id: Date.now().toString(),
+      subject,
+      type,
+      date: targetDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      daysLeft: diffDays,
+      subjectId
+    };
+    setExams([...exams, newExam].sort((a, b) => a.daysLeft - b.daysLeft));
+  };
+
+  const deleteExam = (id: string) => {
+    setExams(exams.filter(e => e.id !== id));
+  };
+
   const recalibrateTasks = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -452,6 +525,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
         if (!wasGreen && isNowGreen) {
           updateQuestProgress('mastery', 1);
           addXP(100);
+          triggerConfetti();
         }
         return { ...s, topics: s.topics.map(t => t.id === topicId ? { ...t, mastery } : t) };
       }
@@ -485,10 +559,11 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <StudyContext.Provider value={{ 
-      user, loading, accessToken, subjects, tasks, quests, themeConfig, userStats, unlockedBadges, activeNotification,
-      setThemeConfig, signIn, logout, addSubject, deleteSubject, addTopic,
-      updateTopicMastery, deleteTopic, addTask, toggleTask, deleteTask, recalibrateTasks,
-      setTasks, addXP, completeFocusSession, closeNotification, buyShield, togglePremium
+      user, loading, accessToken, subjects, tasks, exams, quests, themeConfig, userStats, unlockedBadges, activeNotification,
+      confettiActive, panicModeActive, selectedExamForPath, setThemeConfig, signIn, logout, addSubject, deleteSubject, addTopic,
+      updateTopicMastery, deleteTopic, addTask, toggleTask, deleteTask, addExam, deleteExam, recalibrateTasks,
+      setTasks, addXP, completeFocusSession, closeNotification, buyShield, togglePremium, triggerConfetti, resetStreak, setPanicMode,
+      setSelectedExamForPath
     }}>
       {children}
     </StudyContext.Provider>

@@ -1,6 +1,6 @@
 /**
  * Storage Service Abstraction
- * Currently implements localStorage but can be swapped for cloud providers later.
+ * High-reliability implementation with global error catching.
  */
 
 const STORAGE_KEYS = {
@@ -16,94 +16,69 @@ const STORAGE_KEYS = {
   DAILY_QUESTS: 'study_flow_daily_quests',
 };
 
+const safeGet = (key: string) => {
+  try {
+    const data = localStorage.getItem(key);
+    if (!data) return null;
+    return JSON.parse(data);
+  } catch (e) {
+    console.error(`Storage read error for ${key}:`, e);
+    return null;
+  }
+};
+
+const safeSet = (key: string, value: any) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (e) {
+    console.error(`Storage write error for ${key}:`, e);
+  }
+};
+
 export const storage = {
   // --- Gamification ---
-  saveUserStats: (stats: any) => {
-    localStorage.setItem(STORAGE_KEYS.USER_STATS, JSON.stringify(stats));
-  },
-  getUserStats: (): any | null => {
-    const data = localStorage.getItem(STORAGE_KEYS.USER_STATS);
-    return data ? JSON.parse(data) : null;
-  },
-  saveUnlockedBadges: (badges: any[]) => {
-    localStorage.setItem(STORAGE_KEYS.UNLOCKED_BADGES, JSON.stringify(badges));
-  },
-  getUnlockedBadges: (): any[] | null => {
-    const data = localStorage.getItem(STORAGE_KEYS.UNLOCKED_BADGES);
-    return data ? JSON.parse(data) : null;
-  },
-  saveDailyQuests: (quests: any[]) => {
-    localStorage.setItem(STORAGE_KEYS.DAILY_QUESTS, JSON.stringify(quests));
-  },
-  getDailyQuests: (): any[] | null => {
-    const data = localStorage.getItem(STORAGE_KEYS.DAILY_QUESTS);
-    return data ? JSON.parse(data) : null;
-  },
+  saveUserStats: (stats: any) => safeSet(STORAGE_KEYS.USER_STATS, stats),
+  getUserStats: (): any | null => safeGet(STORAGE_KEYS.USER_STATS),
+  
+  saveUnlockedBadges: (badges: any[]) => safeSet(STORAGE_KEYS.UNLOCKED_BADGES, badges),
+  getUnlockedBadges: (): any[] | null => safeGet(STORAGE_KEYS.UNLOCKED_BADGES),
+  
+  saveDailyQuests: (quests: any[]) => safeSet(STORAGE_KEYS.DAILY_QUESTS, quests),
+  getDailyQuests: (): any[] | null => safeGet(STORAGE_KEYS.DAILY_QUESTS),
 
   // --- Themes ---
-  saveThemeConfig: (config: any) => {
-    localStorage.setItem(STORAGE_KEYS.THEME_CONFIG, JSON.stringify(config));
-  },
-  getThemeConfig: (): any | null => {
-    const data = localStorage.getItem(STORAGE_KEYS.THEME_CONFIG);
-    return data ? JSON.parse(data) : null;
-  },
+  saveThemeConfig: (config: any) => safeSet(STORAGE_KEYS.THEME_CONFIG, config),
+  getThemeConfig: (): any | null => safeGet(STORAGE_KEYS.THEME_CONFIG),
 
   // --- Subjects ---
-  saveSubjects: (subjects: any[]) => {
-    localStorage.setItem(STORAGE_KEYS.SUBJECTS, JSON.stringify(subjects));
-  },
-  getSubjects: (): any[] | null => {
-    const data = localStorage.getItem(STORAGE_KEYS.SUBJECTS);
-    return data ? JSON.parse(data) : null;
-  },
+  saveSubjects: (subjects: any[]) => safeSet(STORAGE_KEYS.SUBJECTS, subjects),
+  getSubjects: (): any[] | null => safeGet(STORAGE_KEYS.SUBJECTS),
 
   // --- Tasks ---
-  saveTasks: (tasks: any[]) => {
-    localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(tasks));
-  },
-  getTasks: (): any[] | null => {
-    const data = localStorage.getItem(STORAGE_KEYS.TASKS);
-    return data ? JSON.parse(data) : null;
-  },
+  saveTasks: (tasks: any[]) => safeSet(STORAGE_KEYS.TASKS, tasks),
+  getTasks: (): any[] | null => safeGet(STORAGE_KEYS.TASKS),
 
   // --- Exams ---
-  saveExams: (exams: any[]) => {
-    localStorage.setItem(STORAGE_KEYS.EXAMS, JSON.stringify(exams));
-  },
-  getExams: (): any[] | null => {
-    const data = localStorage.getItem(STORAGE_KEYS.EXAMS);
-    return data ? JSON.parse(data) : null;
-  },
+  saveExams: (exams: any[]) => safeSet(STORAGE_KEYS.EXAMS, exams),
+  getExams: (): any[] | null => safeGet(STORAGE_KEYS.EXAMS),
 
   // --- Stats ---
-  saveStats: (stats: any) => {
-    localStorage.setItem(STORAGE_KEYS.STATS, JSON.stringify(stats));
-  },
-  getStats: (): any | null => {
-    const data = localStorage.getItem(STORAGE_KEYS.STATS);
-    return data ? JSON.parse(data) : null;
-  },
+  saveStats: (stats: any) => safeSet(STORAGE_KEYS.STATS, stats),
+  getStats: (): any | null => safeGet(STORAGE_KEYS.STATS),
 
   // --- Settings & State ---
-  saveTheme: (isDark: boolean) => {
-    localStorage.setItem(STORAGE_KEYS.THEME, JSON.stringify(isDark));
-  },
-  getTheme: (): boolean | null => {
-    const data = localStorage.getItem(STORAGE_KEYS.THEME);
-    return data ? JSON.parse(data) : null;
-  },
+  saveTheme: (isDark: boolean) => safeSet(STORAGE_KEYS.THEME, isDark),
+  getTheme: (): boolean | null => safeGet(STORAGE_KEYS.THEME),
 
-  saveTimerState: (seconds: number) => {
-    localStorage.setItem(STORAGE_KEYS.TIMER, JSON.stringify(seconds));
-  },
-  getTimerState: (): number | null => {
-    const data = localStorage.getItem(STORAGE_KEYS.TIMER);
-    return data ? JSON.parse(data) : null;
-  },
+  saveTimerState: (seconds: number) => safeSet(STORAGE_KEYS.TIMER, seconds),
+  getTimerState: (): number | null => safeGet(STORAGE_KEYS.TIMER),
 
   // --- Generic ---
   clearAll: () => {
-    localStorage.clear();
+    try {
+      localStorage.clear();
+    } catch (e) {
+      console.error("Storage clear error:", e);
+    }
   }
 };

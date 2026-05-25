@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { 
   LogOut, 
-  Zap, 
+  Zap,
+  Plus,
+  ArrowRight
 } from 'lucide-react';
 import { useStudy } from '../context/StudyContext';
 import { TodayTasks } from './dashboard/TodayTasks';
@@ -45,19 +47,20 @@ const Dashboard = () => {
   return (
     <div className="p-6 md:p-12">
       <div className="max-w-7xl mx-auto">
-        <header className="mb-12 md:mb-20 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
+        <header className="mb-12 md:mb-16 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
            <div className="max-w-2xl">
               <h1 className="text-3xl md:text-5xl font-display font-black tracking-tighter dark:text-white uppercase mb-6">
                 Welcome back, <span className="text-indigo-600">{user?.displayName?.split(' ')[0]}</span>
               </h1>
+              
               <div className="flex gap-4 items-start bg-white dark:bg-slate-900/50 p-6 rounded-[32px] border border-slate-100 dark:border-slate-800 shadow-sm">
-                 <div className="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 shrink-0">
+                <div className="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 shrink-0">
                     <Zap className="w-5 h-5 fill-current" />
-                 </div>
-                 <div>
+                </div>
+                <div>
                     <p className="text-slate-600 dark:text-slate-300 font-medium italic text-sm md:text-base leading-relaxed">"{quote.text}"</p>
                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-2">— {quote.author}</p>
-                 </div>
+                </div>
               </div>
            </div>
 

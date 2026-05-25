@@ -65,7 +65,7 @@ interface StudyContextType {
   setThemeConfig: (config: ThemeConfig) => void;
   signIn: () => Promise<void>;
   logout: () => Promise<void>;
-  addSubject: (name: string, color?: string, initialTopics?: string[]) => void;
+  addSubject: (name: string, color?: string, initialTopics?: string[]) => string;
   deleteSubject: (id: string) => void;
   addTopic: (subjectId: string, title: string) => void;
   updateTopicMastery: (subjectId: string, topicId: string, mastery: MasteryLevel) => void;
@@ -137,12 +137,9 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
 
   // --- Synchronization Hooks ---
 
-  // 1. Exam Countdown Sync (Runs on mount/load)
   useEffect(() => {
     setExams(prev => prev.map(exam => {
-      // Logic to re-calculate daysLeft based on current real-world date
       const targetDate = new Date(exam.date);
-      // Note: Since our storage date string is month/day, we assume current year
       if (isNaN(targetDate.getTime())) {
          const currentYear = new Date().getFullYear();
          const dateWithYear = `${exam.date}, ${currentYear}`;
@@ -155,7 +152,6 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     }));
   }, []);
 
-  // 2. Persistence Sync
   useEffect(() => { storage.saveSubjects(subjects); }, [subjects]);
   useEffect(() => { storage.saveTasks(tasks); }, [tasks]);
   useEffect(() => { storage.saveExams(exams); }, [exams]);
@@ -168,7 +164,6 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => { storage.saveUnlockedBadges(unlockedBadges); }, [unlockedBadges]);
   useEffect(() => { storage.saveDailyQuests(quests); }, [quests]);
 
-  // 3. Notification Queue Processor
   useEffect(() => {
     if (!activeNotification && notificationQueue.length > 0) {
       const next = notificationQueue[0];
@@ -350,11 +345,13 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     setTasks([...remainingTasks, ...updatedOverdue]);
   };
 
-  const addSubject = (name: string, color?: string, initialTopics: string[] = []) => {
+  const addSubject = (name: string, color?: string, initialTopics: string[] = []): string => {
+    const id = Date.now().toString() + Math.random().toString(36).substr(2, 5);
     const newSubject: Subject = {
-      id: Date.now().toString(), name, topics: initialTopics.map(title => ({ id: Math.random().toString(36).substr(2, 9), title, mastery: 'Red' })), color: color || 'indigo'
+      id, name, topics: initialTopics.map(title => ({ id: Math.random().toString(36).substr(2, 9), title, mastery: 'Red' })), color: color || 'indigo'
     };
-    setSubjects([...subjects, newSubject]);
+    setSubjects(prev => [...prev, newSubject]);
+    return id;
   };
 
   const deleteSubject = (id: string) => setSubjects(subjects.filter(s => s.id !== id));

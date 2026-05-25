@@ -3,7 +3,8 @@ import {
   LogOut, 
   Zap,
   Plus,
-  ArrowRight
+  ArrowRight,
+  Crown
 } from 'lucide-react';
 import { useStudy } from '../context/StudyContext';
 import { TodayTasks } from './dashboard/TodayTasks';
@@ -15,9 +16,9 @@ import { AddExamModal } from './dashboard/AddExamModal';
 import { DailyReflection } from './dashboard/DailyReflection';
 import { PathToMastery } from './subjects/PathToMastery';
 import { DailyQuests } from './dashboard/DailyQuests';
+import { ZenHero } from './dashboard/ZenHero';
 import { DevMenu } from './dashboard/DevMenu';
 import { storage } from '../services/storage';
-import { getDailyQuote } from '../lib/quotes';
 
 const Dashboard = () => {
   const { 
@@ -28,7 +29,6 @@ const Dashboard = () => {
   const [isAddingTask, setIsAddingTask] = useState(false);
   const [isAddingExam, setIsAddingExam] = useState(false);
   const [isReflecting, setIsReflecting] = useState(false);
-  const [quote] = useState(getDailyQuote());
 
   const handleTimerTick = () => {
   };
@@ -45,43 +45,31 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="p-6 md:p-12">
+    <div className="p-6 md:p-12 pb-32">
       <div className="max-w-7xl mx-auto">
-        <header className="mb-12 md:mb-16 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
-           <div className="max-w-2xl">
-              <h1 className="text-3xl md:text-5xl font-display font-black tracking-tighter dark:text-white uppercase mb-6">
-                Welcome back, <span className="text-indigo-600">{user?.displayName?.split(' ')[0]}</span>
-              </h1>
-              
-              <div className="flex gap-4 items-start bg-white dark:bg-slate-900/50 p-6 rounded-[32px] border border-slate-100 dark:border-slate-800 shadow-sm">
-                <div className="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 shrink-0">
-                    <Zap className="w-5 h-5 fill-current" />
-                </div>
-                <div>
-                    <p className="text-slate-600 dark:text-slate-300 font-medium italic text-sm md:text-base leading-relaxed">"{quote.text}"</p>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-2">— {quote.author}</p>
-                </div>
+        {/* Floating Profile & Logout (Compact) */}
+        <div className="flex justify-end mb-8">
+           <div className="flex items-center gap-4 bg-white/5 dark:bg-slate-900/40 backdrop-blur-xl p-2 pl-4 rounded-2xl border border-white/10 shadow-xl">
+              <div className="flex flex-col items-end">
+                <span className="font-bold dark:text-white text-xs">{user?.displayName}</span>
+                <span className="text-[8px] font-black uppercase tracking-widest text-slate-500">Elite Scholar</span>
               </div>
-           </div>
-
-           <div className="flex items-center gap-4 shrink-0 bg-white dark:bg-slate-900/50 p-3 rounded-[24px] border border-slate-100 dark:border-slate-800">
-              <div className="hidden md:flex flex-col items-end px-2">
-                <span className="font-bold dark:text-white text-sm">{user?.displayName}</span>
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{user?.email}</span>
-              </div>
-              <img src={user?.photoURL || ''} className="w-12 h-12 md:w-14 md:h-14 rounded-2xl border-2 border-white dark:border-slate-800 shadow-sm" />
-              <button onClick={logout} className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 hover:text-rose-500 transition-colors">
-                <LogOut className="w-5 h-5" />
+              <img src={user?.photoURL || ''} className="w-10 h-10 rounded-xl border border-white/10" />
+              <button onClick={logout} className="p-2 rounded-xl bg-white/5 hover:text-rose-500 transition-colors">
+                <LogOut className="w-4 h-4" />
               </button>
            </div>
-        </header>
+        </div>
 
-        <div className="mb-12">
+        {/* Zen Hero Section */}
+        <ZenHero />
+
+        <div className="mb-20">
           <DailyQuests />
         </div>
 
         <main className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 items-start">
-          {/* Desktop Right Column (4/12) - Timer & Deadlines */}
+          {/* Timer & Deadlines (Right Column) */}
           <aside className="lg:col-span-4 lg:order-2 flex flex-col gap-8">
             <StudyTimer onTick={handleTimerTick} />
             <UpcomingExams 
@@ -92,7 +80,7 @@ const Dashboard = () => {
             />
           </aside>
 
-          {/* Desktop Left Column (8/12) - Tasks & Progress */}
+          {/* Tasks & Progress (Left Column) */}
           <section className="lg:col-span-8 lg:order-1 flex flex-col gap-8">
             <TodayTasks 
               tasks={tasks} 

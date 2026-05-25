@@ -40,8 +40,8 @@ export interface UserStats {
   isPremium: boolean;
 }
 
-export type AtmosphereId = 'indigo' | 'emerald' | 'rose' | 'amber' | 'violet' | 'slate' | 'cyan' | 'pink';
-export type WallpaperId = 'none' | 'minimal' | 'dots' | 'mesh' | 'aurora' | 'stardust';
+export type AtmosphereId = 'indigo' | 'emerald' | 'rose' | 'amber' | 'violet' | 'slate' | 'cyan' | 'pink' | 'neon';
+export type WallpaperId = 'none' | 'minimal' | 'dots' | 'mesh' | 'aurora' | 'stardust' | 'cyberpunk' | 'zen' | 'tokyo' | 'forest' | 'cafe' | 'mountain' | 'library' | 'ocean' | 'desert' | 'space-station' | 'rainy-street' | 'custom';
 
 export interface Atmosphere {
   id: AtmosphereId;
@@ -55,6 +55,9 @@ export interface Wallpaper {
   id: WallpaperId;
   name: string;
   isPremium: boolean;
+  type: 'animated' | 'image' | 'custom';
+  url?: string;
+  category?: 'Nature' | 'Urban' | 'Cozy' | 'Abstract';
 }
 
 export const ATMOSPHERES: Atmosphere[] = [
@@ -66,63 +69,46 @@ export const ATMOSPHERES: Atmosphere[] = [
   { id: 'violet', name: 'Midnight', color: 'bg-violet-600', isPremium: true, levelRequired: 1 },
   { id: 'cyan', name: 'Glacier', color: 'bg-cyan-500', isPremium: true, levelRequired: 1 },
   { id: 'pink', name: 'Sakura', color: 'bg-pink-500', isPremium: true, levelRequired: 1 },
+  { id: 'neon', name: 'Elite Neon', color: 'bg-fuchsia-600', isPremium: true, levelRequired: 1 },
 ];
 
 export const WALLPAPERS: Wallpaper[] = [
-  { id: 'none', name: 'Disabled', isPremium: false },
-  { id: 'minimal', name: 'Clean Solid', isPremium: false },
-  { id: 'dots', name: 'Focus Dots', isPremium: false },
-  { id: 'mesh', name: 'Animated Mesh', isPremium: true },
-  { id: 'aurora', name: 'Arctic Aurora', isPremium: true },
-  { id: 'stardust', name: 'Deep Space', isPremium: true },
+  { id: 'none', name: 'Disabled', isPremium: false, type: 'animated' },
+  { id: 'minimal', name: 'Clean Solid', isPremium: false, type: 'animated' },
+  { id: 'dots', name: 'Focus Dots', isPremium: false, type: 'animated' },
+  { id: 'mesh', name: 'Animated Mesh', isPremium: true, type: 'animated' },
+  { id: 'aurora', name: 'Arctic Aurora', isPremium: true, type: 'animated' },
+  { id: 'stardust', name: 'Deep Space', isPremium: true, type: 'animated' },
+  { id: 'cyberpunk', name: 'Cyber Library', isPremium: true, type: 'animated' },
+  { id: 'zen', name: 'Zen Garden', isPremium: true, type: 'animated' },
+  
+  // NATURE
+  { id: 'forest', name: 'Emerald Forest', isPremium: true, type: 'image', category: 'Nature', url: 'https://images.unsplash.com/photo-1511497584788-876760111969?auto=format&fit=crop&w=2000&q=80' },
+  { id: 'mountain', name: 'Silent Peak', isPremium: true, type: 'image', category: 'Nature', url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=2000&q=80' },
+  { id: 'ocean', name: 'Deep Blue', isPremium: true, type: 'image', category: 'Nature', url: 'https://images.unsplash.com/photo-1505118380757-91f5f5632de0?auto=format&fit=crop&w=2000&q=80' },
+  { id: 'desert', name: 'Golden Sands', isPremium: true, type: 'image', category: 'Nature', url: 'https://images.unsplash.com/photo-1473580044384-7ba9967e16a0?auto=format&fit=crop&w=2000&q=80' },
+  
+  // URBAN
+  { id: 'tokyo', name: 'Tokyo Midnight', isPremium: true, type: 'image', category: 'Urban', url: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=2000&q=80' },
+  { id: 'rainy-street', name: 'Rainy Seattle', isPremium: true, type: 'image', category: 'Urban', url: 'https://images.unsplash.com/photo-1515549832467-8c441fe749dc?auto=format&fit=crop&w=2000&q=80' },
+  
+  // COZY
+  { id: 'cafe', name: 'Rainy Cafe', isPremium: true, type: 'image', category: 'Cozy', url: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=2000&q=80' },
+  { id: 'library', name: 'Old Library', isPremium: true, type: 'image', category: 'Cozy', url: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=2000&q=80' },
+  
+  // ABSTRACT / SPACE
+  { id: 'space-station', name: 'Orbit View', isPremium: true, type: 'image', category: 'Abstract', url: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=2000&q=80' },
+
+  // SPECIAL
+  { id: 'custom', name: 'Custom URL', isPremium: true, type: 'custom' },
 ];
 
 export const ACHIEVEMENTS: Achievement[] = [
-  {
-    id: 'first-step',
-    title: 'First Step',
-    description: 'Complete your first study task.',
-    icon: 'CheckCircle',
-    rarity: 'Common',
-    requirement: 1,
-    type: 'tasks'
-  },
-  {
-    id: 'task-master',
-    title: 'Task Master',
-    description: 'Complete 50 tasks.',
-    icon: 'Zap',
-    rarity: 'Rare',
-    requirement: 50,
-    type: 'tasks'
-  },
-  {
-    id: 'deep-diver',
-    title: 'Deep Diver',
-    description: 'Focus for a total of 10 hours.',
-    icon: 'Waves',
-    rarity: 'Rare',
-    requirement: 36000,
-    type: 'focus'
-  },
-  {
-    id: 'consistency-king',
-    title: 'Consistency King',
-    description: 'Maintain a 7-day study streak.',
-    icon: 'Flame',
-    rarity: 'Epic',
-    requirement: 7,
-    type: 'streak'
-  },
-  {
-    id: 'mastery-path',
-    title: 'Mastery Path',
-    description: 'Master 10 topics (Green status).',
-    icon: 'Trophy',
-    rarity: 'Legendary',
-    requirement: 10,
-    type: 'mastery'
-  }
+  { id: 'first-step', title: 'First Step', description: 'Complete your first study task.', icon: 'CheckCircle', rarity: 'Common', requirement: 1, type: 'tasks' },
+  { id: 'task-master', title: 'Task Master', description: 'Complete 50 tasks.', icon: 'Zap', rarity: 'Rare', requirement: 50, type: 'tasks' },
+  { id: 'deep-diver', title: 'Deep Diver', description: 'Focus for a total of 10 hours.', icon: 'Waves', rarity: 'Rare', requirement: 36000, type: 'focus' },
+  { id: 'consistency-king', title: 'Consistency King', description: 'Maintain a 7-day study streak.', icon: 'Flame', rarity: 'Epic', requirement: 7, type: 'streak' },
+  { id: 'mastery-path', title: 'Mastery Path', description: 'Master 10 topics (Green status).', icon: 'Trophy', rarity: 'Legendary', requirement: 10, type: 'mastery' }
 ];
 
 export const ATMOSPHERE_REQUIREMENTS: Record<string, number> = {
@@ -162,17 +148,10 @@ export const getProgressToNextLevel = (xp: number) => {
   let currentLevelXP = xp;
   let level = 1;
   let requiredForNext = XP_LEVEL_BASE;
-  
   while (currentLevelXP >= requiredForNext) {
     currentLevelXP -= requiredForNext;
     level++;
     requiredForNext = Math.floor(requiredForNext * XP_LEVEL_MULTIPLIER);
   }
-  
-  return {
-    level,
-    currentXP: currentLevelXP,
-    requiredXP: requiredForNext,
-    percentage: (currentLevelXP / requiredForNext) * 100
-  };
+  return { level, currentXP: currentLevelXP, requiredXP: requiredForNext, percentage: (currentLevelXP / requiredForNext) * 100 };
 };

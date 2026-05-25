@@ -8,6 +8,7 @@ import { StudyProvider, useStudy } from './context/StudyContext';
 import Dashboard from './components/Dashboard';
 import { SubjectsView } from './components/subjects/SubjectsView';
 import { AchievementsView } from './components/achievements/AchievementsView';
+import { SettingsView } from './components/navigation/SettingsView';
 import { AchievementNotification } from './components/notifications/AchievementNotification';
 import { Confetti } from './components/notifications/Confetti';
 import { LevelUpModal } from './components/modals/LevelUpModal';
@@ -436,7 +437,7 @@ const LandingPage = ({ isDark, setIsDark }: { isDark: boolean, setIsDark: (val: 
 
 const AppContent = () => {
   const { user, loading, themeConfig, userStats, activeNotification, confettiActive, closeNotification } = useStudy();
-  const [activeView, setActiveView] = useState<'dashboard' | 'subjects' | 'achievements'>('dashboard');
+  const [activeView, setActiveView] = useState<'dashboard' | 'subjects' | 'achievements' | 'settings'>('dashboard');
   const [isDark, setIsDark] = useState(() => {
     const saved = storage.getTheme();
     return saved !== null ? saved : false;
@@ -518,6 +519,18 @@ const AppContent = () => {
               className="p-6 md:p-12"
             >
               <AchievementsView />
+            </motion.div>
+          )}
+          {activeView === 'settings' && (
+            <motion.div
+              key="settings"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className="p-6 md:p-12"
+            >
+              <SettingsView />
             </motion.div>
           )}
         </AnimatePresence>

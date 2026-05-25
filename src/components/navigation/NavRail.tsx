@@ -1,13 +1,15 @@
 import React from 'react';
-import { LayoutDashboard, BookOpen, Settings, Zap, Trophy } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Settings, Zap, Trophy, Crown } from 'lucide-react';
 import { motion } from 'motion/react';
+import { useStudy } from '../../context/StudyContext';
 
 interface NavRailProps {
-  activeView: 'dashboard' | 'subjects' | 'achievements';
-  onViewChange: (view: 'dashboard' | 'subjects' | 'achievements') => void;
+  activeView: 'dashboard' | 'subjects' | 'achievements' | 'settings';
+  onViewChange: (view: 'dashboard' | 'subjects' | 'achievements' | 'settings') => void;
 }
 
 export const NavRail = ({ activeView, onViewChange }: NavRailProps) => {
+  const { userStats } = useStudy();
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'subjects', label: 'Subjects', icon: BookOpen },
@@ -18,8 +20,18 @@ export const NavRail = ({ activeView, onViewChange }: NavRailProps) => {
     <>
       {/* Desktop Sidebar (Rail) */}
       <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 w-24 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800 flex-col items-center py-10 z-50">
-        <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-indigo-600/20 mb-12">
+        <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-indigo-600/20 mb-12 relative group cursor-pointer" onClick={() => onViewChange('dashboard')}>
           <Zap className="w-7 h-7 fill-current" />
+          {userStats.isPremium && (
+            <motion.div 
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className="absolute -top-2 -right-2 w-6 h-6 bg-amber-500 rounded-full border-2 border-white dark:border-slate-900 flex items-center justify-center shadow-lg"
+              title="Elite Scholar Active"
+            >
+              <Crown className="w-3 h-3 text-white" />
+            </motion.div>
+          )}
         </div>
 
         <nav className="flex flex-col gap-8">
@@ -48,15 +60,25 @@ export const NavRail = ({ activeView, onViewChange }: NavRailProps) => {
         </nav>
 
         <div className="mt-auto">
-          <button className="p-4 rounded-2xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+          <button 
+            onClick={() => onViewChange('settings')}
+            className={`p-4 rounded-2xl transition-all relative group ${
+              activeView === 'settings' 
+                ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400' 
+                : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+            }`}
+          >
             <Settings className="w-6 h-6" />
+            <span className="absolute left-full ml-4 px-3 py-1.5 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity whitespace-nowrap">
+              Settings
+            </span>
           </button>
         </div>
       </aside>
 
       {/* Mobile Bottom Bar */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-slate-100 dark:border-slate-800 px-6 py-4 flex justify-around items-center z-50 pb-safe">
-        {navItems.map((item) => (
+        {[...navItems, { id: 'settings', label: 'Settings', icon: Settings }].map((item: any) => (
           <button
             key={item.id}
             onClick={() => onViewChange(item.id)}

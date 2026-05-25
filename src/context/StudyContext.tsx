@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { storage } from '../services/storage';
 import { UserStats, Badge, ACHIEVEMENTS, Achievement, Quest, calculateLevel, XP_PER_TASK, XP_PER_FOCUS_MINUTE, AtmosphereId, WallpaperId } from '../lib/gamification';
 
@@ -45,6 +45,14 @@ export interface Exam {
 export interface ThemeConfig {
   atmosphere: AtmosphereId;
   wallpaper: WallpaperId;
+  customWallpaperUrl?: string;
+  // Granular Controls (Flocus style)
+  blur: number; // 0-20px
+  brightness: number; // 0-100%
+  saturation: number; // 0-200%
+  showGreeting: boolean;
+  showQuote: boolean;
+  showClock: boolean;
 }
 
 interface StudyContextType {
@@ -63,6 +71,7 @@ interface StudyContextType {
   panicModeActive: boolean;
   selectedExamForPath: Exam | null;
   setThemeConfig: (config: ThemeConfig) => void;
+  updateUser: (data: Partial<MockUser>) => void;
   signIn: () => Promise<void>;
   logout: () => Promise<void>;
   addSubject: (name: string, color?: string, initialTopics?: string[]) => string;
@@ -110,6 +119,17 @@ const INITIAL_STATS: UserStats = {
   isPremium: false
 };
 
+const DEFAULT_THEME: ThemeConfig = {
+  atmosphere: 'indigo',
+  wallpaper: 'mesh',
+  blur: 0,
+  brightness: 100,
+  saturation: 100,
+  showGreeting: true,
+  showQuote: true,
+  showClock: true
+};
+
 export function StudyProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<MockUser | null>(null);
   const [loading, setLoading] = useState(true);
@@ -118,7 +138,11 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   const [tasks, setTasks] = useState<Task[]>(() => storage.getTasks() || []);
   const [subjects, setSubjects] = useState<Subject[]>(() => storage.getSubjects() || []);
   const [exams, setExams] = useState<Exam[]>(() => storage.getExams() || []);
-  const [themeConfig, setThemeConfig] = useState<ThemeConfig>(() => storage.getThemeConfig() || { atmosphere: 'indigo', wallpaper: 'mesh' });
+  
+  const [themeConfig, setThemeConfig] = useState<ThemeConfig>(() => {
+    const saved = storage.getThemeConfig();
+    return { ...DEFAULT_THEME, ...saved };
+  });
 
   const [userStats, setUserStats] = useState<UserStats>(() => {
     const saved = storage.getUserStats();
@@ -135,8 +159,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   const [panicModeActive, setPanicModeActive] = useState(false);
   const [selectedExamForPath, setSelectedExamForPath] = useState<Exam | null>(null);
 
-  // --- Synchronization Hooks ---
-
+  // Synchronization Hooks
   useEffect(() => {
     setExams(prev => prev.map(exam => {
       const targetDate = new Date(exam.date);
@@ -160,10 +183,12 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     document.documentElement.setAttribute('data-atmosphere', themeConfig.atmosphere);
     document.documentElement.setAttribute('data-wallpaper', themeConfig.wallpaper);
   }, [themeConfig]);
-  useEffect(() => { storage.saveUserStats(userStats); checkAchievements(); }, [userStats]);
+  
+  useEffect(() => { storage.saveUserStats(userStats); }, [userStats]);
   useEffect(() => { storage.saveUnlockedBadges(unlockedBadges); }, [unlockedBadges]);
   useEffect(() => { storage.saveDailyQuests(quests); }, [quests]);
 
+  // Notification Queue Processor
   useEffect(() => {
     if (!activeNotification && notificationQueue.length > 0) {
       const next = notificationQueue[0];
@@ -178,8 +203,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     return () => clearTimeout(timer);
   }, []);
 
-  // --- Core Actions ---
-
+  // Core Actions
   const signIn = async () => {
     setUser(MOCK_USER);
     updateStreak();
@@ -187,6 +211,10 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = async () => { setUser(null); };
+
+  const updateUser = (data: Partial<MockUser>) => {
+    setUser(prev => prev ? { ...prev, ...data } : null);
+  };
 
   const triggerConfetti = () => {
     setConfettiActive(true);
@@ -264,7 +292,9 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       const newLevel = calculateLevel(newXP);
       const newHistory = { ...prev.dailyXPHistory };
       newHistory[today] = (newHistory[today] || 0) + amount;
-      return { ...prev, xp: newXP, level: newLevel, dailyXPHistory: newHistory };
+      const nextStats = { ...prev, xp: newXP, level: newLevel, dailyXPHistory: newHistory };
+      checkAchievements(nextStats);
+      return nextStats;
     });
   };
 
@@ -276,18 +306,31 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   };
 
   const togglePremium = () => {
-    setUserStats(prev => ({ ...prev, isPremium: !prev.isPremium }));
+    setUserStats(prev => {
+      const nextPremium = !prev.isPremium;
+      return {
+        ...prev,
+        isPremium: nextPremium,
+        hasShield: nextPremium ? true : prev.hasShield
+      };
+    });
   };
 
-  const checkAchievements = () => {
+  useEffect(() => {
+    if (userStats.isPremium && !userStats.hasShield) {
+      setUserStats(prev => ({ ...prev, hasShield: true }));
+    }
+  }, [userStats.isPremium, userStats.hasShield]);
+
+  const checkAchievements = (stats: UserStats) => {
     const newlyUnlocked: Achievement[] = [];
     ACHIEVEMENTS.forEach(achievement => {
       if (unlockedBadges.some(b => b.achievementId === achievement.id)) return;
       let met = false;
       switch (achievement.type) {
-        case 'tasks': if (userStats.totalTasksCompleted >= achievement.requirement) met = true; break;
-        case 'focus': if (userStats.totalFocusSeconds >= achievement.requirement) met = true; break;
-        case 'streak': if (userStats.currentStreak >= achievement.requirement) met = true; break;
+        case 'tasks': if (stats.totalTasksCompleted >= achievement.requirement) met = true; break;
+        case 'focus': if (stats.totalFocusSeconds >= achievement.requirement) met = true; break;
+        case 'streak': if (stats.currentStreak >= achievement.requirement) met = true; break;
         case 'mastery':
           const greenTopics = subjects.reduce((acc, s) => acc + s.topics.filter(t => t.mastery === 'Green').length, 0);
           if (greenTopics >= achievement.requirement) met = true;
@@ -295,7 +338,10 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       }
       if (met) {
         const newBadge: Badge = { id: Date.now().toString() + Math.random().toString(36).substr(2, 9), achievementId: achievement.id, unlockedAt: new Date().toISOString() };
-        setUnlockedBadges(prev => [...prev, newBadge]);
+        setUnlockedBadges(prev => {
+           if (prev.some(b => b.achievementId === achievement.id)) return prev;
+           return [...prev, newBadge];
+        });
         newlyUnlocked.push(achievement);
       }
     });
@@ -312,7 +358,11 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       if (t.id === id) {
         if (!t.completed) {
           addXP(XP_PER_TASK);
-          setUserStats(s => ({ ...s, totalTasksCompleted: s.totalTasksCompleted + 1 }));
+          setUserStats(s => {
+            const next = { ...s, totalTasksCompleted: s.totalTasksCompleted + 1 };
+            checkAchievements(next);
+            return next;
+          });
           updateQuestProgress('tasks', 1);
         }
         return { ...t, completed: !t.completed };
@@ -383,18 +433,22 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     const minutes = Math.floor(seconds / 60);
     addXP(minutes * XP_PER_FOCUS_MINUTE);
     updateQuestProgress('focus', seconds);
-    setUserStats(prev => ({ ...prev, totalFocusSeconds: prev.totalFocusSeconds + seconds }));
+    setUserStats(prev => {
+      const next = { ...prev, totalFocusSeconds: prev.totalFocusSeconds + seconds };
+      checkAchievements(next);
+      return next;
+    });
   };
 
   const closeNotification = () => { setActiveNotification(null); };
 
-  // --- Optimization: Memoize the Context Value ---
+  // Optimization: Memoize the Context Value
   const contextValue = useMemo(() => ({
     user, loading, accessToken, subjects, tasks, exams, quests, themeConfig, userStats, unlockedBadges, activeNotification,
     confettiActive, panicModeActive, selectedExamForPath, setThemeConfig, signIn, logout, addSubject, deleteSubject, addTopic,
     updateTopicMastery, deleteTopic, addTask, toggleTask, deleteTask, addExam, deleteExam, recalibrateTasks,
     setTasks, addXP, completeFocusSession, closeNotification, buyShield, togglePremium, triggerConfetti, resetStreak, setPanicMode,
-    setSelectedExamForPath
+    setSelectedExamForPath, updateUser
   }), [
     user, loading, accessToken, subjects, tasks, exams, quests, themeConfig, userStats, unlockedBadges, activeNotification,
     confettiActive, panicModeActive, selectedExamForPath

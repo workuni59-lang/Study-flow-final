@@ -4,6 +4,7 @@ import { motion } from 'motion/react';
 import { GamificationOverview } from '../dashboard/GamificationOverview';
 import { AchievementsGrid } from '../dashboard/AchievementsGrid';
 import { StudyAnalytics } from '../dashboard/StudyAnalytics';
+import { ActivityHeatmap } from './ActivityHeatmap';
 
 export const AchievementsView = () => {
   return (
@@ -37,6 +38,8 @@ export const AchievementsView = () => {
            <StudyAnalytics />
         </div>
       </div>
+
+      <ActivityHeatmap />
       
       <AchievementsGrid />
       

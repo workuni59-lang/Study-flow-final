@@ -11,48 +11,46 @@ interface NavRailProps {
 export const NavRail = ({ activeView, onViewChange }: NavRailProps) => {
   const { userStats } = useStudy();
   const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'dashboard', label: 'Home', icon: LayoutDashboard },
     { id: 'subjects', label: 'Subjects', icon: BookOpen },
-    { id: 'achievements', label: 'Trophy Room', icon: Trophy },
+    { id: 'achievements', label: 'Progress', icon: Trophy },
   ] as const;
 
   return (
     <>
-      {/* Desktop Sidebar (Rail) */}
-      <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 w-24 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800 flex-col items-center py-10 z-50">
-        <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-indigo-600/20 mb-12 relative group cursor-pointer" onClick={() => onViewChange('dashboard')}>
-          <Zap className="w-7 h-7 fill-current" />
+      <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 w-20 bg-white/60 dark:bg-slate-900/60 backdrop-blur-2xl border-r border-slate-100/50 dark:border-slate-800/30 flex-col items-center py-8 z-50">
+        <div className="w-10 h-10 bg-brand rounded-xl flex items-center justify-center text-white shadow-lg shadow-brand/20 mb-10 relative group cursor-pointer" onClick={() => onViewChange('dashboard')}>
+          <Zap className="w-5 h-5 fill-current" />
           {userStats.isPremium && (
             <motion.div 
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              className="absolute -top-2 -right-2 w-6 h-6 bg-amber-500 rounded-full border-2 border-white dark:border-slate-900 flex items-center justify-center shadow-lg"
-              title="Elite Scholar Active"
+              className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-amber-500 rounded-full border-2 border-white dark:border-slate-900 flex items-center justify-center shadow-lg"
             >
-              <Crown className="w-3 h-3 text-white" />
+              <Crown className="w-2.5 h-2.5 text-white" />
             </motion.div>
           )}
         </div>
 
-        <nav className="flex flex-col gap-8">
+        <nav className="flex flex-col gap-6">
           {navItems.map((item) => (
             <button
               key={item.id}
               onClick={() => onViewChange(item.id)}
-              className={`p-4 rounded-2xl transition-all relative group ${
+              className={`p-3 rounded-xl transition-all relative group ${
                 activeView === item.id 
-                  ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400' 
+                  ? 'bg-brand/10 text-brand' 
                   : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
               }`}
             >
-              <item.icon className="w-6 h-6" />
-              <span className="absolute left-full ml-4 px-3 py-1.5 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity whitespace-nowrap">
+              <item.icon className="w-5 h-5" />
+              <span className="absolute left-full ml-3 px-2 py-1 bg-slate-900 text-white text-[9px] font-medium rounded-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-xl">
                 {item.label}
               </span>
               {activeView === item.id && (
                 <motion.div 
                   layoutId="activeRail"
-                  className="absolute -left-4 top-2 bottom-2 w-1.5 bg-indigo-600 rounded-r-full"
+                  className="absolute -left-3 top-1 bottom-1 w-1 bg-brand rounded-r-full"
                 />
               )}
             </button>
@@ -62,34 +60,33 @@ export const NavRail = ({ activeView, onViewChange }: NavRailProps) => {
         <div className="mt-auto">
           <button 
             onClick={() => onViewChange('settings')}
-            className={`p-4 rounded-2xl transition-all relative group ${
+            className={`p-3 rounded-xl transition-all relative group ${
               activeView === 'settings' 
-                ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400' 
+                ? 'bg-brand/10 text-brand' 
                 : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
             }`}
           >
-            <Settings className="w-6 h-6" />
-            <span className="absolute left-full ml-4 px-3 py-1.5 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity whitespace-nowrap">
+            <Settings className="w-5 h-5" />
+            <span className="absolute left-full ml-3 px-2 py-1 bg-slate-900 text-white text-[9px] font-medium rounded-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-xl">
               Settings
             </span>
           </button>
         </div>
       </aside>
 
-      {/* Mobile Bottom Bar */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-slate-100 dark:border-slate-800 px-6 py-4 flex justify-around items-center z-50 pb-safe">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl border-t border-slate-100/50 dark:border-slate-800/30 px-4 py-3 flex justify-around items-center z-50">
         {[...navItems, { id: 'settings', label: 'Settings', icon: Settings }].map((item: any) => (
           <button
             key={item.id}
             onClick={() => onViewChange(item.id)}
             className={`flex flex-col items-center gap-1 transition-colors ${
               activeView === item.id 
-                ? 'text-indigo-600 dark:text-indigo-400' 
+                ? 'text-brand' 
                 : 'text-slate-400'
             }`}
           >
-            <item.icon className={`w-6 h-6 transition-transform ${activeView === item.id ? 'scale-110' : ''}`} />
-            <span className="text-[10px] font-black uppercase tracking-tighter">{item.label}</span>
+            <item.icon className={`w-5 h-5 transition-transform ${activeView === item.id ? 'scale-110' : ''}`} />
+            <span className="text-[9px] font-medium tracking-wide">{item.label}</span>
           </button>
         ))}
       </nav>

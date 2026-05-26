@@ -1,10 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   LogOut, 
-  Zap,
-  Plus,
-  ArrowRight,
-  Crown
+  Plus
 } from 'lucide-react';
 import { useStudy } from '../context/StudyContext';
 import { TodayTasks } from './dashboard/TodayTasks';
@@ -18,7 +15,6 @@ import { PathToMastery } from './subjects/PathToMastery';
 import { DailyQuests } from './dashboard/DailyQuests';
 import { ZenHero } from './dashboard/ZenHero';
 import { DevMenu } from './dashboard/DevMenu';
-import { storage } from '../services/storage';
 
 const Dashboard = () => {
   const { 
@@ -29,9 +25,6 @@ const Dashboard = () => {
   const [isAddingTask, setIsAddingTask] = useState(false);
   const [isAddingExam, setIsAddingExam] = useState(false);
   const [isReflecting, setIsReflecting] = useState(false);
-
-  const handleTimerTick = () => {
-  };
 
   const handleCompleteDay = () => {
     setIsReflecting(false);
@@ -45,43 +38,45 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="p-6 md:p-12 pb-32">
-      <div className="max-w-7xl mx-auto">
-        {/* Floating Profile & Logout (Compact) */}
-        <div className="flex justify-end mb-8">
-           <div className="flex items-center gap-4 bg-white/5 dark:bg-slate-900/40 backdrop-blur-xl p-2 pl-4 rounded-2xl border border-white/10 shadow-xl">
-              <div className="flex flex-col items-end">
-                <span className="font-bold dark:text-white text-xs">{user?.displayName}</span>
-                <span className="text-[8px] font-black uppercase tracking-widest text-slate-500">Elite Scholar</span>
-              </div>
-              <img src={user?.photoURL || ''} className="w-10 h-10 rounded-xl border border-white/10" />
-              <button onClick={logout} className="p-2 rounded-xl bg-white/5 hover:text-rose-500 transition-colors">
-                <LogOut className="w-4 h-4" />
-              </button>
-           </div>
+    <div className="min-h-screen p-4 sm:p-6 md:p-10 pb-32">
+      <div className="max-w-6xl mx-auto">
+        {/* Minimal Profile Bar */}
+        <div className="flex items-center justify-end mb-6">
+          <div className="flex items-center gap-3 px-4 py-2 bg-white/30 dark:bg-slate-900/30 backdrop-blur-xl rounded-2xl border border-white/20 dark:border-slate-800/20">
+            <div className="text-right">
+              <p className="text-sm font-medium dark:text-white/90 leading-tight">{user?.displayName}</p>
+              <p className="text-[9px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Scholar</p>
+            </div>
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand to-violet-600 flex items-center justify-center text-white text-sm font-bold shadow-lg shadow-brand/20">
+              {user?.displayName?.charAt(0) || 'S'}
+            </div>
+            <button onClick={logout} className="p-2 rounded-xl text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition-all">
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
-        {/* Zen Hero Section */}
+        {/* Central Hero Section */}
         <ZenHero />
 
-        <div className="mb-20">
+        {/* Daily Quests */}
+        <div className="mb-12">
           <DailyQuests />
         </div>
 
-        <main className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 items-start">
-          {/* Timer & Deadlines (Right Column) */}
-          <aside className="lg:col-span-4 lg:order-2 flex flex-col gap-8">
-            <StudyTimer onTick={handleTimerTick} />
-            <UpcomingExams 
-              exams={exams} 
-              onDelete={deleteExam} 
-              onAdd={() => setIsAddingExam(true)} 
-              onViewPath={(exam) => setSelectedExamForPath(exam)}
-            />
-          </aside>
-
-          {/* Tasks & Progress (Left Column) */}
-          <section className="lg:col-span-8 lg:order-1 flex flex-col gap-8">
+        {/* Main Content Grid */}
+        <main className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start">
+          {/* Left: Tasks & Progress */}
+          <section className="lg:col-span-7 flex flex-col gap-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-display font-semibold dark:text-white/90 tracking-tight">Today's Focus</h2>
+              <button 
+                onClick={() => setIsAddingTask(true)}
+                className="p-2.5 bg-brand text-white rounded-xl hover:bg-brand-dark transition-colors shadow-lg shadow-brand/20"
+              >
+                <Plus className="w-5 h-5" />
+              </button>
+            </div>
             <TodayTasks 
               tasks={tasks} 
               onToggle={toggleTask} 
@@ -96,20 +91,30 @@ const Dashboard = () => {
               totalFocusSeconds={userStats.totalFocusSeconds} 
             />
           </section>
+
+          {/* Right: Timer & Deadlines */}
+          <aside className="lg:col-span-5 flex flex-col gap-6">
+            <StudyTimer />
+            <UpcomingExams 
+              exams={exams} 
+              onDelete={deleteExam} 
+              onAdd={() => setIsAddingExam(true)} 
+              onViewPath={(exam) => setSelectedExamForPath(exam)}
+            />
+          </aside>
         </main>
 
+        {/* Modals */}
         <AddTaskModal 
           isOpen={isAddingTask} 
           onClose={() => setIsAddingTask(false)} 
           onAdd={addTask} 
         />
-
         <AddExamModal 
           isOpen={isAddingExam} 
           onClose={() => setIsAddingExam(false)} 
           onAdd={addExam} 
         />
-
         <DailyReflection 
           isOpen={isReflecting}
           onClose={() => setIsReflecting(false)}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Target, Zap, Clock, CheckCircle2, Star } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { useStudy } from '../../context/StudyContext';
 import { Quest } from '../../lib/gamification';
 
@@ -24,13 +24,13 @@ export const DailyQuests = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h3 className="text-xl font-display font-black dark:text-white uppercase tracking-tight">Daily Quests</h3>
-        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Refreshes Daily</span>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-display font-semibold dark:text-white/80 tracking-tight">Daily Quests</h3>
+        <span className="text-[9px] font-medium uppercase tracking-wider text-slate-400">Refreshes daily</span>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {quests.map((quest) => {
           const Icon = getIcon(quest.type);
           const percentage = (quest.progress / quest.requirement) * 100;
@@ -38,40 +38,38 @@ export const DailyQuests = () => {
           return (
             <div 
               key={quest.id}
-              className={`p-6 rounded-[32px] border transition-all relative overflow-hidden flex flex-col ${
+              className={`p-4 rounded-2xl border transition-all flex flex-col backdrop-blur-xl shadow-lg ${
                 quest.completed 
-                  ? 'bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-800/50' 
-                  : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800'
+                  ? 'bg-emerald-50/50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800/40' 
+                  : 'bg-white/40 dark:bg-slate-900/40 border-white/20 dark:border-white/[0.06]'
               }`}
             >
-              <div className="flex justify-between items-start mb-4">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${quest.completed ? 'bg-emerald-500 text-white' : 'bg-slate-50 dark:bg-slate-800 text-slate-400'}`}>
-                  {quest.completed ? <CheckCircle2 className="w-6 h-6" /> : <Icon className="w-5 h-5" />}
+              <div className="flex items-start justify-between mb-3">
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${quest.completed ? 'bg-emerald-500 text-white' : 'bg-white/40 dark:bg-slate-800/40 text-slate-400'}`}>
+                  {quest.completed ? <CheckCircle2 className="w-4 h-4" /> : <Icon className="w-4 h-4" />}
                 </div>
-                <div className="text-right">
-                  <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 block">+{quest.xpReward} XP</span>
-                </div>
+                <span className="text-[9px] font-semibold text-brand/70">+{quest.xpReward} XP</span>
               </div>
 
-              <h4 className={`font-bold text-sm mb-1 ${quest.completed ? 'text-emerald-700 dark:text-emerald-400' : 'dark:text-white'}`}>
+              <h4 className={`text-sm font-medium mb-0.5 ${quest.completed ? 'text-emerald-600 dark:text-emerald-400' : 'dark:text-white/80'}`}>
                 {quest.title}
               </h4>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium leading-relaxed mb-4 flex-1">
+              <p className="text-[10px] text-slate-400 dark:text-slate-500 leading-relaxed mb-3 flex-1">
                 {quest.description}
               </p>
 
-              <div className="space-y-2">
-                <div className="flex justify-between items-center text-[8px] font-black uppercase tracking-widest">
-                  <span className={quest.completed ? 'text-emerald-600' : 'text-slate-400'}>
-                    {quest.completed ? 'Complete' : 'In Progress'}
+              <div className="space-y-1.5">
+                <div className="flex justify-between text-[8px] font-medium uppercase tracking-wider">
+                  <span className={quest.completed ? 'text-emerald-500' : 'text-slate-400'}>
+                    {quest.completed ? 'Done' : 'Progress'}
                   </span>
-                  <span className="dark:text-slate-400">{getProgressLabel(quest)}</span>
+                  <span className="text-slate-400">{getProgressLabel(quest)}</span>
                 </div>
-                <div className="w-full h-1.5 bg-slate-50 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-100 dark:border-slate-800">
+                <div className="w-full h-1 bg-slate-100 dark:bg-slate-800/50 rounded-full overflow-hidden">
                   <motion.div 
                     initial={{ width: 0 }}
                     animate={{ width: `${Math.min(percentage, 100)}%` }}
-                    className={`h-full rounded-full ${quest.completed ? 'bg-emerald-500' : 'bg-indigo-600'}`}
+                    className={`h-full rounded-full ${quest.completed ? 'bg-emerald-500' : 'bg-brand/60'}`}
                   />
                 </div>
               </div>

@@ -3,26 +3,21 @@ import { motion } from 'motion/react';
 import { Crown } from 'lucide-react';
 import { useStudy } from '../../context/StudyContext';
 import { getDailyQuote } from '../../lib/quotes';
+import ClockRenderer from '../clock/ClockRenderer';
 
 export const ZenHero = () => {
-  const { user, userStats, themeConfig } = useStudy();
+  const { user, userStats, themeConfig, focusSession } = useStudy();
   const [time, setTime] = useState(new Date());
   const [quote] = useState(getDailyQuote());
+  const [clockReady, setClockReady] = useState(false);
 
   useEffect(() => {
-    const timer = setInterval(() => setTime(new Date()), 1000);
+    const timer = setInterval(() => {
+      setTime(new Date());
+      setClockReady(true);
+    }, 1000);
     return () => clearInterval(timer);
   }, []);
-
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('en-US', { 
-      hour: '2-digit', 
-      minute: '2-digit',
-      hour12: true 
-    }).split(' ');
-  };
-
-  const [timeStr, ampm] = formatTime(time);
 
   const getGreeting = () => {
     const hour = time.getHours();
@@ -42,14 +37,9 @@ export const ZenHero = () => {
         animate={{ opacity: 1, y: 0 }}
         className="relative z-10 w-full max-w-4xl mx-auto px-4"
       >
-        {themeConfig.showClock && (
-          <div className="flex items-baseline justify-center gap-3 md:gap-5 mb-6 md:mb-8">
-            <h1 className="text-7xl md:text-[9rem] font-display font-medium tracking-tight dark:text-white leading-none tabular-nums select-none">
-              {timeStr}
-            </h1>
-            <span className="text-lg md:text-2xl font-medium tracking-wide text-brand/40 dark:text-brand-light/30">
-              {ampm}
-            </span>
+        {themeConfig.showClock && clockReady && (
+          <div className="mb-6 md:mb-8">
+            <ClockRenderer time={time} focusState={focusSession} />
           </div>
         )}
 

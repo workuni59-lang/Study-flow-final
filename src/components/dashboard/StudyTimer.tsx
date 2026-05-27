@@ -43,7 +43,7 @@ const PRESETS: Preset[] = [
 interface StudyTimerProps { onTick?: () => void; compact?: boolean; }
 
 export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
-  const { themeConfig, setThemeConfig, completeFocusSession, userStats, triggerConfetti } = useStudy();
+  const { themeConfig, setThemeConfig, completeFocusSession, userStats, triggerConfetti, setFocusSession } = useStudy();
   
   const [activePreset, setActivePreset] = useState<Preset>(PRESETS[0]);
   const [mode, setMode] = useState<TimerMode>('focus');
@@ -115,11 +115,17 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
         }
         if (onTick) onTick();
       }, 1000);
-    } else if (timeLeft === 0) {
+    }
+    
+    // Sync focus session state to context for clock integration
+    const totalForMode = mode === 'focus' ? activePreset.focus * 60 : mode === 'shortBreak' ? activePreset.short * 60 : activePreset.long * 60;
+    setFocusSession({ mode: isActive ? mode : 'idle', timeLeft, totalTime: totalForMode, isActive, sessionsCompleted });
+    
+    if (timeLeft === 0) {
       handleTimerComplete();
     }
     return () => clearInterval(interval);
-  }, [isActive, timeLeft, mode]);
+  }, [isActive, timeLeft, mode, sessionsCompleted, activePreset.id]);
 
   const handleTimerComplete = () => {
     setIsActive(false);

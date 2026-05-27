@@ -1,6 +1,13 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { storage } from '../services/storage';
 import { UserStats, Badge, ACHIEVEMENTS, Achievement, Quest, calculateLevel, XP_PER_TASK, XP_PER_FOCUS_MINUTE, AtmosphereId, WallpaperId, PetState, PetFood, PET_FOODS, PET_SPECIES, PET_SKINS, INITIAL_PET_STATE, PET_HUNGER_DECAY_PER_HOUR, PET_WEAK_THRESHOLD, PET_WEAK_DURATION_MS, PET_DORMANT_DURATION_MS, PetHealth, PetEvent, PetEventType } from '../lib/gamification';
+export interface FocusSessionState {
+  mode: 'focus' | 'shortBreak' | 'longBreak' | 'idle';
+  timeLeft: number;
+  totalTime: number;
+  isActive: boolean;
+  sessionsCompleted: number;
+}
 
 interface MockUser {
   uid: string;
@@ -105,6 +112,8 @@ interface StudyContextType {
   tickPet: () => void;
   petEvent: PetEvent | null;
   firePetEvent: (type: PetEventType) => void;
+  focusSession: FocusSessionState | null;
+  setFocusSession: (state: FocusSessionState | null) => void;
 }
 
 const StudyContext = createContext<StudyContextType | undefined>(undefined);
@@ -178,6 +187,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   const [confettiActive, setConfettiActive] = useState(false);
   const [panicModeActive, setPanicModeActive] = useState(false);
   const [selectedExamForPath, setSelectedExamForPath] = useState<Exam | null>(null);
+  const [focusSession, setFocusSession] = useState<FocusSessionState | null>(null);
 
   // Synchronization Hooks
   useEffect(() => {
@@ -599,13 +609,13 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   // Optimization: Memoize the Context Value
   const contextValue = useMemo(() => ({
     user, loading, accessToken, subjects, tasks, exams, quests, themeConfig, userStats, unlockedBadges, activeNotification,
-    confettiActive, panicModeActive, selectedExamForPath, petState, setThemeConfig, signIn, logout, addSubject, deleteSubject, addTopic,
+    confettiActive, panicModeActive, selectedExamForPath, petState, focusSession, setFocusSession, setThemeConfig, signIn, logout, addSubject, deleteSubject, addTopic,
     updateTopicMastery, deleteTopic, addTask, toggleTask, deleteTask, addExam, deleteExam, recalibrateTasks,
     setTasks, addXP, completeFocusSession, closeNotification, buyShield, togglePremium, triggerConfetti, resetStreak, setPanicMode,
     setSelectedExamForPath, updateUser, feedPet, petInteract, changePetSpecies, changePetSkin, purchaseSkin, setPetName, tickPet, petEvent, firePetEvent
   }), [
     user, loading, accessToken, subjects, tasks, exams, quests, themeConfig, userStats, unlockedBadges, activeNotification,
-    confettiActive, panicModeActive, selectedExamForPath, petState, petEvent
+    confettiActive, panicModeActive, selectedExamForPath, petState, petEvent, focusSession
   ]);
 
   return (

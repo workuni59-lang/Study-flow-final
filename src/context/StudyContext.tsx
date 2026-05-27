@@ -9,13 +9,6 @@ export interface FocusSessionState {
   sessionsCompleted: number;
 }
 
-interface MockUser {
-  uid: string;
-  email: string | null;
-  displayName: string | null;
-  photoURL: string | null;
-}
-
 export type MasteryLevel = 'Red' | 'Amber' | 'Green';
 
 export interface Topic {
@@ -63,8 +56,6 @@ export interface ThemeConfig {
 }
 
 interface StudyContextType {
-  user: MockUser | null;
-  loading: boolean;
   accessToken: string | null;
   subjects: Subject[];
   tasks: Task[];
@@ -79,9 +70,6 @@ interface StudyContextType {
   selectedExamForPath: Exam | null;
   petState: PetState;
   setThemeConfig: (config: ThemeConfig) => void;
-  updateUser: (data: Partial<MockUser>) => void;
-  signIn: () => Promise<void>;
-  logout: () => Promise<void>;
   addSubject: (name: string, color?: string, initialTopics?: string[]) => string;
   deleteSubject: (id: string) => void;
   addTopic: (subjectId: string, title: string) => void;
@@ -96,6 +84,7 @@ interface StudyContextType {
   setTasks: (tasks: Task[]) => void;
   addXP: (amount: number) => void;
   completeFocusSession: (seconds: number) => void;
+  logSession: (record: import('../lib/gamification').SessionRecord) => void;
   closeNotification: () => void;
   buyShield: () => void;
   togglePremium: () => void;
@@ -118,13 +107,6 @@ interface StudyContextType {
 
 const StudyContext = createContext<StudyContextType | undefined>(undefined);
 
-const MOCK_USER: MockUser = {
-  uid: 'mock-user-123',
-  email: 'demo@studyflow.com',
-  displayName: 'Demo Student',
-  photoURL: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix',
-};
-
 const INITIAL_STATS: UserStats = {
   xp: 0,
   level: 1,
@@ -134,6 +116,7 @@ const INITIAL_STATS: UserStats = {
   totalFocusSeconds: 0,
   totalTasksCompleted: 0,
   dailyXPHistory: {},
+  sessionHistory: [],
   hasShield: false,
   isPremium: false
 };
@@ -150,8 +133,6 @@ const DEFAULT_THEME: ThemeConfig = {
 };
 
 export function StudyProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<MockUser | null>(null);
-  const [loading, setLoading] = useState(true);
   const [accessToken, setAccessToken] = useState<string | null>('mock-access-token');
   
   const [tasks, setTasks] = useState<Task[]>(() => storage.getTasks() || []);
@@ -166,7 +147,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   const [userStats, setUserStats] = useState<UserStats>(() => {
     const saved = storage.getUserStats();
     if (!saved) return INITIAL_STATS;
-    return { ...INITIAL_STATS, ...saved, dailyXPHistory: saved.dailyXPHistory || {} };
+    return { ...INITIAL_STATS, ...saved, dailyXPHistory: saved.dailyXPHistory || {}, sessionHistory: saved.sessionHistory || [] };
   });
 
   const [unlockedBadges, setUnlockedBadges] = useState<Badge[]>(() => storage.getUnlockedBadges() || []);
@@ -228,24 +209,6 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       triggerConfetti();
     }
   }, [notificationQueue, activeNotification]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => { setLoading(false); }, 500);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Core Actions
-  const signIn = async () => {
-    setUser(MOCK_USER);
-    updateStreak();
-    generateDailyQuests();
-  };
-
-  const logout = async () => { setUser(null); };
-
-  const updateUser = (data: Partial<MockUser>) => {
-    setUser(prev => prev ? { ...prev, ...data } : null);
-  };
 
   const triggerConfetti = () => {
     setConfettiActive(true);
@@ -491,6 +454,13 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     firePetEvent('focus_done');
   };
 
+  const logSession = (record: import('../lib/gamification').SessionRecord) => {
+    setUserStats(prev => ({
+      ...prev,
+      sessionHistory: [...prev.sessionHistory, record],
+    }));
+  };
+
   const closeNotification = () => { setActiveNotification(null); };
 
   // ─── Pet Actions ───────────────────────────────────────────────
@@ -608,13 +578,13 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
 
   // Optimization: Memoize the Context Value
   const contextValue = useMemo(() => ({
-    user, loading, accessToken, subjects, tasks, exams, quests, themeConfig, userStats, unlockedBadges, activeNotification,
-    confettiActive, panicModeActive, selectedExamForPath, petState, focusSession, setFocusSession, setThemeConfig, signIn, logout, addSubject, deleteSubject, addTopic,
+    accessToken, subjects, tasks, exams, quests, themeConfig, userStats, unlockedBadges, activeNotification,
+    confettiActive, panicModeActive, selectedExamForPath, petState, focusSession, setFocusSession, setThemeConfig, addSubject, deleteSubject, addTopic,
     updateTopicMastery, deleteTopic, addTask, toggleTask, deleteTask, addExam, deleteExam, recalibrateTasks,
-    setTasks, addXP, completeFocusSession, closeNotification, buyShield, togglePremium, triggerConfetti, resetStreak, setPanicMode,
-    setSelectedExamForPath, updateUser, feedPet, petInteract, changePetSpecies, changePetSkin, purchaseSkin, setPetName, tickPet, petEvent, firePetEvent
+    setTasks, addXP, completeFocusSession, logSession, closeNotification, buyShield, togglePremium, triggerConfetti, resetStreak, setPanicMode,
+    setSelectedExamForPath, feedPet, petInteract, changePetSpecies, changePetSkin, purchaseSkin, setPetName, tickPet, petEvent, firePetEvent
   }), [
-    user, loading, accessToken, subjects, tasks, exams, quests, themeConfig, userStats, unlockedBadges, activeNotification,
+    accessToken, subjects, tasks, exams, quests, themeConfig, userStats, unlockedBadges, activeNotification,
     confettiActive, panicModeActive, selectedExamForPath, petState, petEvent, focusSession
   ]);
 

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { 
-  LogOut, CheckSquare, Target, BarChart3, CalendarDays, PawPrint, X
+  LogOut, CheckSquare, Target, BarChart3, CalendarDays, PawPrint, X, Maximize2, Minimize2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useStudy } from '../context/StudyContext';
+import { useAuth } from '../context/AuthContext';
 import { TodayTasks } from './dashboard/TodayTasks';
 import { UpcomingExams } from './dashboard/UpcomingExams';
 import { StudyTimer } from './dashboard/StudyTimer';
@@ -17,6 +18,7 @@ import { ZenHero } from './dashboard/ZenHero';
 import { DevMenu } from './dashboard/DevMenu';
 import PetEngine from './dashboard/PetEngine';
 import PetPanel from './dashboard/PetPanel';
+import AnalyticsDashboard from './analytics/AnalyticsDashboard';
 import { storage } from '../services/storage';
 
 type OverlayType = 'tasks' | 'quests' | 'progress' | 'exams' | null;
@@ -29,8 +31,9 @@ const OVERLAY_CONFIG: { key: OverlayType; icon: typeof CheckSquare; label: strin
 ];
 
 const Dashboard = () => {
+  const { user, signOut } = useAuth();
   const { 
-    user, logout, subjects, tasks, addTask, toggleTask, deleteTask, setTasks, 
+    subjects, tasks, addTask, toggleTask, deleteTask, setTasks, 
     userStats, exams, addExam, deleteExam, selectedExamForPath, setSelectedExamForPath,
     petState
   } = useStudy();
@@ -39,6 +42,7 @@ const Dashboard = () => {
   const [isAddingExam, setIsAddingExam] = useState(false);
   const [isReflecting, setIsReflecting] = useState(false);
   const [activeOverlay, setActiveOverlay] = useState<OverlayType>(null);
+  const [isFullScreen, setIsFullScreen] = useState(false);
   const [showPetPanel, setShowPetPanel] = useState(false);
   const [feedTrigger, setFeedTrigger] = useState(0);
   const [petVisible, setPetVisible] = useState(() => storage.getPetVisible() ?? true);
@@ -76,10 +80,14 @@ const Dashboard = () => {
           animate={{ y: 0 }}
           exit={{ y: '100%' }}
           transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-          className="absolute bottom-0 left-0 right-0 lg:left-20 max-h-[80vh] bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-t-3xl shadow-2xl overflow-y-auto"
+          className={`absolute bottom-0 left-0 right-0 lg:left-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl shadow-2xl overflow-y-auto transition-all ${
+            isFullScreen
+              ? 'inset-0 lg:inset-0 rounded-none max-h-[100vh]'
+              : 'max-h-[80vh] rounded-t-3xl'
+          }`}
         >
           {/* Handle */}
-          <div className="sticky top-0 z-10 bg-white/95 dark:bg-slate-900/95 rounded-t-3xl">
+          <div className={`sticky top-0 z-10 bg-white/95 dark:bg-slate-900/95 ${isFullScreen ? 'rounded-none' : 'rounded-t-3xl'}`}>
             <div className="flex items-center justify-between px-6 pt-4 pb-3">
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${OVERLAY_CONFIG.find(c => c.key === activeOverlay)?.iconColor} flex items-center justify-center`}>
@@ -87,9 +95,14 @@ const Dashboard = () => {
                 </div>
                 <h2 className="text-sm font-display font-semibold dark:text-white/90">{OVERLAY_CONFIG.find(c => c.key === activeOverlay)?.label}</h2>
               </div>
-              <button onClick={() => setActiveOverlay(null)} className="p-2 rounded-xl hover:bg-white/[0.08] text-white/40 hover:text-white/70 transition-all">
-                <X className="w-4 h-4" />
-              </button>
+              <div className="flex items-center gap-1">
+                <button onClick={() => setIsFullScreen(v => !v)} className="p-2 rounded-xl hover:bg-white/[0.08] text-white/40 hover:text-white/70 transition-all">
+                  {isFullScreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                </button>
+                <button onClick={() => { setActiveOverlay(null); setIsFullScreen(false); }} className="p-2 rounded-xl hover:bg-white/[0.08] text-white/40 hover:text-white/70 transition-all">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
             </div>
             <div className="mx-6 h-px bg-white/[0.06]" />
           </div>
@@ -113,13 +126,7 @@ const Dashboard = () => {
               </div>
             )}
             {activeOverlay === 'quests' && <DailyQuests />}
-            {activeOverlay === 'progress' && (
-              <ProgressTracker 
-                tasks={tasks} 
-                streak={userStats.currentStreak} 
-                totalFocusSeconds={userStats.totalFocusSeconds} 
-              />
-            )}
+            {activeOverlay === 'progress' && <AnalyticsDashboard />}
             {activeOverlay === 'exams' && (
               <UpcomingExams 
                 exams={exams} 
@@ -146,7 +153,7 @@ const Dashboard = () => {
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand to-violet-600 flex items-center justify-center text-white text-sm font-bold shadow-lg shadow-brand/20">
             {user?.displayName?.charAt(0) || 'S'}
           </div>
-          <button onClick={logout} className="p-2 rounded-xl text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition-all" title="Logout">
+          <button onClick={() => signOut()} className="p-2 rounded-xl text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition-all" title="Logout">
             <LogOut className="w-4 h-4" />
           </button>
         </div>
@@ -173,7 +180,7 @@ const Dashboard = () => {
             return (
               <button
                 key={item.key}
-                onClick={() => setActiveOverlay(item.key === activeOverlay ? null : item.key)}
+                onClick={() => { setActiveOverlay(item.key === activeOverlay ? null : item.key); setIsFullScreen(false); }}
                 className={`flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl transition-all ${
                   activeOverlay === item.key
                     ? 'bg-brand text-white shadow-lg'

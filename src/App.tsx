@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { 
-  Calendar, Clock, BookOpen, CheckCircle, Menu, X, ArrowRight, Zap, 
-  ChevronDown, Mail, Github, Twitter, Instagram, Moon, Sun, Trophy
+  Calendar, BookOpen, CheckCircle, Menu, X, ArrowRight, Zap, 
+  ChevronDown, Mail, Github, Twitter, Instagram, Moon, Sun
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { StudyProvider, useStudy } from './context/StudyContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import AuthModal from './components/auth/AuthModal';
 import Dashboard from './components/Dashboard';
 import { SubjectsView } from './components/subjects/SubjectsView';
 import { AchievementsView } from './components/achievements/AchievementsView';
@@ -19,8 +21,8 @@ import { NavRail } from './components/navigation/NavRail';
 
 // --- Landing Page Components ---
 
-const Navbar = ({ isDark, setIsDark }: { isDark: boolean, setIsDark: (val: boolean) => void }) => {
-  const { user, signIn } = useStudy();
+const Navbar = ({ isDark, setIsDark, onOpenAuth }: { isDark: boolean, setIsDark: (val: boolean) => void, onOpenAuth: () => void }) => {
+  const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -54,7 +56,7 @@ const Navbar = ({ isDark, setIsDark }: { isDark: boolean, setIsDark: (val: boole
             {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </button>
           <button 
-            onClick={signIn}
+            onClick={onOpenAuth}
             className="hidden md:block bg-brand hover:bg-brand-dark text-white px-7 py-3 rounded-xl font-semibold text-sm transition-all shadow-lg shadow-brand/20"
           >
             {user ? 'Go to App' : 'Get Started'}
@@ -82,7 +84,7 @@ const Navbar = ({ isDark, setIsDark }: { isDark: boolean, setIsDark: (val: boole
                 ))}
                 <hr className="border-slate-100 dark:border-slate-800" />
                 <button 
-                  onClick={() => { signIn(); setIsOpen(false); }}
+                  onClick={() => { onOpenAuth(); setIsOpen(false); }}
                   className="w-full bg-brand text-white py-4 rounded-2xl font-semibold text-sm"
                 >
                   Sign In
@@ -138,12 +140,11 @@ const FAQItem = ({ question, answer }: { question: string, answer: string }) => 
   );
 };
 
-const LandingPage = ({ isDark, setIsDark }: { isDark: boolean, setIsDark: (val: boolean) => void }) => {
-  const { signIn } = useStudy();
+const LandingPage = ({ isDark, setIsDark, onOpenAuth }: { isDark: boolean, setIsDark: (val: boolean) => void, onOpenAuth: () => void }) => {
   
   return (
     <div className="min-h-screen bg-white dark:bg-[#0a0c10]">
-      <Navbar isDark={isDark} setIsDark={setIsDark} />
+      <Navbar isDark={isDark} setIsDark={setIsDark} onOpenAuth={onOpenAuth} />
       
       {/* Hero Section */}
         <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
@@ -172,7 +173,7 @@ const LandingPage = ({ isDark, setIsDark }: { isDark: boolean, setIsDark: (val: 
               </p>
               <div className="flex flex-col sm:flex-row gap-4 md:gap-6">
                 <button 
-                  onClick={signIn}
+                  onClick={onOpenAuth}
                   className="bg-brand hover:bg-brand-dark text-white px-8 md:px-10 py-4 md:py-5 rounded-2xl text-base md:text-lg font-semibold transition-all shadow-2xl shadow-brand/20 flex items-center justify-center gap-3 group"
                 >
                   Build My Flow <ArrowRight className="w-5 h-5 md:w-6 md:h-6 group-hover:translate-x-1 transition-transform" />
@@ -330,7 +331,7 @@ const LandingPage = ({ isDark, setIsDark }: { isDark: boolean, setIsDark: (val: 
                   ))}
                 </ul>
                 <button 
-                  onClick={signIn}
+                  onClick={onOpenAuth}
                   className="w-full py-4 rounded-2xl border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-white font-semibold text-sm hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all"
                 >
                   Sign Up
@@ -354,7 +355,7 @@ const LandingPage = ({ isDark, setIsDark }: { isDark: boolean, setIsDark: (val: 
                   ))}
                 </ul>
                 <button 
-                  onClick={signIn}
+                  onClick={onOpenAuth}
                   className="w-full py-4 rounded-2xl bg-brand text-white font-semibold text-sm shadow-xl shadow-brand/30 hover:scale-[1.02] transition-transform"
                 >
                   Go Pro Now
@@ -402,7 +403,7 @@ const LandingPage = ({ isDark, setIsDark }: { isDark: boolean, setIsDark: (val: 
                 <span className="text-brand-light italic">No Excuses.</span>
               </h2>
               <button 
-                onClick={signIn}
+                  onClick={onOpenAuth}
                 className="bg-white text-slate-900 px-10 py-5 rounded-2xl font-semibold text-lg md:text-xl hover:scale-105 transition-all shadow-2xl"
               >
                 Join StudyFlow Today
@@ -436,12 +437,14 @@ const LandingPage = ({ isDark, setIsDark }: { isDark: boolean, setIsDark: (val: 
 };
 
 const AppContent = () => {
-  const { user, loading, themeConfig, userStats, activeNotification, confettiActive, closeNotification } = useStudy();
+  const { user, loading: authLoading } = useAuth();
+  const { themeConfig, userStats, activeNotification, confettiActive, closeNotification } = useStudy();
   const [activeView, setActiveView] = useState<'dashboard' | 'subjects' | 'achievements' | 'settings'>('dashboard');
   const [isDark, setIsDark] = useState(() => {
     const saved = storage.getTheme();
     return saved !== null ? saved : false;
   });
+  const [authModalOpen, setAuthModalOpen] = useState(false);
 
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [prevLevel, setPrevLevel] = useState(userStats ? userStats.level : 1);
@@ -462,7 +465,7 @@ const AppContent = () => {
     storage.saveTheme(isDark);
   }, [isDark]);
 
-  if (loading) {
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0a0c10]">
         <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
@@ -472,92 +475,96 @@ const AppContent = () => {
     );
   }
 
-  if (!user) {
-    return <LandingPage isDark={isDark} setIsDark={setIsDark} />;
-  }
-
   return (
-    <div 
-      className="min-h-screen flex flex-col lg:flex-row transition-colors duration-1000 relative overflow-hidden"
-    >
-      <WallpaperEngine />
-      
-      <NavRail activeView={activeView} onViewChange={setActiveView} />
-      
-      <main className="flex-1 lg:pl-24 pb-24 lg:pb-0 relative z-10">
-        <AnimatePresence mode="wait" initial={false}>
-          {activeView === 'dashboard' && (
-            <motion.div
-              key="dashboard"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Dashboard />
-            </motion.div>
-          )}
-          {activeView === 'subjects' && (
-            <motion.div
-              key="subjects"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              className="p-6 md:p-12"
-            >
-              <SubjectsView />
-            </motion.div>
-          )}
-          {activeView === 'achievements' && (
-            <motion.div
-              key="achievements"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              className="p-6 md:p-12"
-            >
-              <AchievementsView />
-            </motion.div>
-          )}
-          {activeView === 'settings' && (
-            <motion.div
-              key="settings"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              className="p-6 md:p-12"
-            >
-              <SettingsView />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </main>
+    <>
+      {!user ? (
+        <LandingPage isDark={isDark} setIsDark={setIsDark} onOpenAuth={() => setAuthModalOpen(true)} />
+      ) : (
+        <div className="min-h-screen flex flex-col lg:flex-row transition-colors duration-1000 relative overflow-hidden">
+          <WallpaperEngine />
+          
+          <NavRail activeView={activeView} onViewChange={setActiveView} />
+          
+          <main className="flex-1 lg:pl-24 pb-24 lg:pb-0 relative z-10">
+            <AnimatePresence mode="wait" initial={false}>
+              {activeView === 'dashboard' && (
+                <motion.div
+                  key="dashboard"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Dashboard />
+                </motion.div>
+              )}
+              {activeView === 'subjects' && (
+                <motion.div
+                  key="subjects"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="p-6 md:p-12"
+                >
+                  <SubjectsView />
+                </motion.div>
+              )}
+              {activeView === 'achievements' && (
+                <motion.div
+                  key="achievements"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="p-6 md:p-12"
+                >
+                  <AchievementsView />
+                </motion.div>
+              )}
+              {activeView === 'settings' && (
+                <motion.div
+                  key="settings"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="p-6 md:p-12"
+                >
+                  <SettingsView />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </main>
 
-      <AchievementNotification 
-        achievement={activeNotification} 
-        onClose={closeNotification} 
-      />
+          <AchievementNotification 
+            achievement={activeNotification} 
+            onClose={closeNotification} 
+          />
 
-      <Confetti active={confettiActive} />
+          <Confetti active={confettiActive} />
 
-      <LevelUpModal 
-        level={userStats.level} 
-        isOpen={showLevelUp} 
-        onClose={() => setShowLevelUp(false)} 
-      />
+          <LevelUpModal 
+            level={userStats.level} 
+            isOpen={showLevelUp} 
+            onClose={() => setShowLevelUp(false)} 
+          />
 
-      <PanicModeUI />
-    </div>
+          <PanicModeUI />
+        </div>
+      )}
+
+      <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
+    </>
   );
 };
 
 export default function App() {
   return (
-    <StudyProvider>
-      <AppContent />
-    </StudyProvider>
+    <AuthProvider>
+      <StudyProvider>
+        <AppContent />
+      </StudyProvider>
+    </AuthProvider>
   );
 }

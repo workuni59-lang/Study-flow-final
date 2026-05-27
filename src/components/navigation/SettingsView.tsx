@@ -26,27 +26,29 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useStudy } from '../../context/StudyContext';
+import { useAuth } from '../../context/AuthContext';
 import { DashboardCard } from '../dashboard/DashboardCard';
 import { storage } from '../../services/storage';
 
 export const SettingsView = () => {
+  const { user, updateProfile } = useAuth();
   const { 
-    user,
     userStats, 
     themeConfig, 
     setThemeConfig, 
     togglePremium,
     triggerConfetti,
-    updateUser
   } = useStudy();
 
   const [name, setName] = useState(user?.displayName || '');
   const [showSaved, setShowSaved] = useState(false);
 
-  const handleSaveProfile = () => {
-    updateUser({ displayName: name });
-    setShowSaved(true);
-    setTimeout(() => setShowSaved(false), 2000);
+  const handleSaveProfile = async () => {
+    const { error } = await updateProfile({ display_name: name });
+    if (!error) {
+      setShowSaved(true);
+      setTimeout(() => setShowSaved(false), 2000);
+    }
   };
 
   const handleClearData = () => {

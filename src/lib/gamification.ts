@@ -27,6 +27,16 @@ export interface Quest {
   completed: boolean;
 }
 
+export interface SessionRecord {
+  id: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  duration: number;
+  mode: 'focus' | 'shortBreak' | 'longBreak';
+  xpEarned: number;
+}
+
 export interface UserStats {
   xp: number;
   level: number;
@@ -36,6 +46,7 @@ export interface UserStats {
   totalFocusSeconds: number;
   totalTasksCompleted: number;
   dailyXPHistory: Record<string, number>;
+  sessionHistory: SessionRecord[];
   hasShield: boolean;
   isPremium: boolean;
 }

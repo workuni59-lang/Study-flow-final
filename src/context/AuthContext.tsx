@@ -1,0 +1,183 @@
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import type { User, AuthError } from '@supabase/supabase-js';
+import { supabase } from '../lib/supabase';
+
+export interface Profile {
+  id: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  is_premium: boolean;
+  premium_until: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AppUser {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+  photoURL: string | null;
+}
+
+function toAppUser(user: User): AppUser {
+  return {
+    uid: user.id,
+    email: user.email ?? null,
+    displayName:
+      user.user_metadata?.display_name ??
+      user.user_metadata?.full_name ??
+      user.email?.split('@')[0] ??
+      null,
+    photoURL: user.user_metadata?.avatar_url ?? null,
+  };
+}
+
+const DEMO_USER: AppUser = {
+  uid: 'demo-user-001',
+  email: 'demo@studyflow.com',
+  displayName: 'Demo Student',
+  photoURL: null,
+};
+
+interface AuthContextType {
+  user: AppUser | null;
+  profile: Profile | null;
+  loading: boolean;
+  signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
+  signUp: (email: string, password: string, displayName: string) => Promise<{ error: AuthError | null; user: User | null }>;
+  signInWithGoogle: () => Promise<void>;
+  signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
+  updateProfile: (data: Partial<Pick<Profile, 'display_name' | 'avatar_url'>>) => Promise<{ error: string | null }>;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+const isDemo = !supabase;
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<AppUser | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchProfile = useCallback(async (userId: string) => {
+    if (!supabase) return;
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+    if (error) {
+      if (error.code === 'PGRST116') return;
+      console.error('Failed to fetch profile:', error.message);
+      return;
+    }
+    setProfile(data as Profile);
+  }, []);
+
+  useEffect(() => {
+    if (isDemo) {
+      setLoading(false);
+      return;
+    }
+
+    supabase!.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        const appUser = toAppUser(session.user);
+        setUser(appUser);
+        fetchProfile(session.user.id);
+      }
+      setLoading(false);
+    });
+
+    const { data: { subscription } } = supabase!.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        const appUser = toAppUser(session.user);
+        setUser(appUser);
+        fetchProfile(session.user.id);
+      } else {
+        setUser(null);
+        setProfile(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [fetchProfile]);
+
+  const signIn = useCallback(async (email: string, password: string) => {
+    if (isDemo) {
+      setUser(DEMO_USER);
+      return { error: null };
+    }
+    const { error } = await supabase!.auth.signInWithPassword({ email, password });
+    return { error };
+  }, []);
+
+  const signUp = useCallback(async (email: string, password: string, displayName: string) => {
+    if (isDemo) {
+      setUser({ ...DEMO_USER, email, displayName });
+      return { error: null, user: null };
+    }
+    const { data, error } = await supabase!.auth.signUp({
+      email,
+      password,
+      options: { data: { display_name: displayName } },
+    });
+    return { error, user: data?.user ?? null };
+  }, []);
+
+  const signInWithGoogle = useCallback(async () => {
+    if (isDemo) {
+      setUser(DEMO_USER);
+      return;
+    }
+    const redirectTo = import.meta.env.VITE_APP_URL || 'http://localhost:5173';
+    await supabase!.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo },
+    });
+  }, []);
+
+  const signOut = useCallback(async () => {
+    if (!isDemo) {
+      await supabase!.auth.signOut();
+    }
+    setUser(null);
+    setProfile(null);
+  }, []);
+
+  const resetPassword = useCallback(async (email: string) => {
+    if (isDemo) return { error: null };
+    const redirectTo = `${import.meta.env.VITE_APP_URL || 'http://localhost:5173'}/reset-password`;
+    const { error } = await supabase!.auth.resetPasswordForEmail(email, { redirectTo });
+    return { error };
+  }, []);
+
+  const updateProfile = useCallback(async (data: Partial<Pick<Profile, 'display_name' | 'avatar_url'>>) => {
+    if (!user) return { error: 'Not authenticated' };
+    if (isDemo) {
+      return { error: null };
+    }
+    const { error } = await supabase!
+      .from('profiles')
+      .upsert({ id: user.uid, ...data, updated_at: new Date().toISOString() });
+    if (error) return { error: error.message };
+    setProfile(prev => prev ? { ...prev, ...data } : null);
+    return { error: null };
+  }, [user]);
+
+  return (
+    <AuthContext.Provider value={{
+      user, profile, loading,
+      signIn, signUp, signInWithGoogle, signOut, resetPassword, updateProfile,
+    }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used within an AuthProvider');
+  return ctx;
+}

@@ -43,7 +43,7 @@ const PRESETS: Preset[] = [
 interface StudyTimerProps { onTick?: () => void; compact?: boolean; }
 
 export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
-  const { themeConfig, setThemeConfig, completeFocusSession, userStats, triggerConfetti, setFocusSession } = useStudy();
+  const { themeConfig, setThemeConfig, completeFocusSession, logSession, userStats, triggerConfetti, setFocusSession } = useStudy();
   
   const [activePreset, setActivePreset] = useState<Preset>(PRESETS[0]);
   const [mode, setMode] = useState<TimerMode>('focus');
@@ -85,6 +85,7 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
   };
 
   const sessionElapsed = useRef(0);
+  const sessionStartTime = useRef<string | null>(null);
 
   // Initialize and Cleanup
   useEffect(() => {
@@ -97,6 +98,15 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
       }
     };
   }, []);
+
+  // Track session start for analytics
+  useEffect(() => {
+    if (isActive && mode === 'focus' && !sessionStartTime.current) {
+      sessionStartTime.current = new Date().toISOString();
+    } else if (!isActive) {
+      sessionStartTime.current = null;
+    }
+  }, [isActive, mode]);
 
   // Master Timer Sync
   useEffect(() => {
@@ -127,8 +137,23 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
     return () => clearInterval(interval);
   }, [isActive, timeLeft, mode, sessionsCompleted, activePreset.id]);
 
+  const logFocusSession = (duration: number) => {
+    if (!sessionStartTime.current || duration <= 0) return;
+    logSession({
+      id: `sess-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      date: new Date().toISOString().split('T')[0],
+      startTime: sessionStartTime.current,
+      endTime: new Date().toISOString(),
+      duration,
+      mode: 'focus',
+      xpEarned: Math.floor(duration / 60) * 10,
+    });
+    sessionStartTime.current = null;
+  };
+
   const handleTimerComplete = () => {
     setIsActive(false);
+    if (mode === 'focus') logFocusSession(activePreset.focus * 60);
     triggerConfetti();
     const alertAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
     alertAudio.volume = 0.3;
@@ -156,9 +181,13 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
       else currentAudio.current.pause();
     }
 
-    if (!nextState && mode === 'focus' && sessionElapsed.current > 0) {
-      completeFocusSession(sessionElapsed.current);
-      sessionElapsed.current = 0;
+    if (!nextState && mode === 'focus') {
+      if (sessionElapsed.current > 0) {
+        completeFocusSession(sessionElapsed.current);
+        sessionElapsed.current = 0;
+      }
+      const elapsed = (activePreset.focus * 60) - timeLeft;
+      logFocusSession(elapsed);
     }
   };
 

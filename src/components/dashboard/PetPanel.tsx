@@ -39,30 +39,31 @@ export default function PetPanel({ onClose, onFeed, petVisible, petSize, onToggl
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-        className="relative w-full sm:max-w-md bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden"
+        className="relative w-full sm:max-w-md bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-t-3xl sm:rounded-3xl shadow-2xl max-h-[85vh] flex flex-col"
       >
         {/* Handle */}
         <div className="sm:hidden flex justify-center pt-3 pb-1">
           <div className="w-10 h-1 rounded-full bg-white/20" />
         </div>
 
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-4 pb-3">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
-              <PawPrint className="w-4 h-4 text-white" />
+        {/* Header - sticky */}
+        <div className="flex-shrink-0">
+          <div className="flex items-center justify-between px-6 pt-4 pb-3">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
+                <PawPrint className="w-4 h-4 text-white" />
+              </div>
+              <h2 className="text-sm font-display font-semibold dark:text-white/90">{petState.name}</h2>
             </div>
-            <h2 className="text-sm font-display font-semibold dark:text-white/90">{petState.name}</h2>
+            <button onClick={onClose} className="p-2 rounded-xl hover:bg-white/[0.08] text-white/40 hover:text-white/70 transition-all">
+              <X className="w-4 h-4" />
+            </button>
           </div>
-          <button onClick={onClose} className="p-2 rounded-xl hover:bg-white/[0.08] text-white/40 hover:text-white/70 transition-all">
-            <X className="w-4 h-4" />
-          </button>
+          <div className="mx-6 h-px bg-white/[0.06]" />
         </div>
 
-        <div className="mx-6 h-px bg-white/[0.06]" />
-
-        {/* Pet Status */}
-        <div className="p-6 space-y-4">
+        {/* Scrollable content */}
+        <div className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-4">
           <div className="flex items-center gap-4 p-4 bg-white/[0.04] rounded-2xl border border-white/[0.06]">
             {/* Pet preview */}
             <div className="w-16 h-16 shrink-0 flex items-center justify-center">

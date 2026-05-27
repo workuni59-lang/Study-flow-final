@@ -197,6 +197,141 @@ export const WALLPAPERS: Wallpaper[] = [
 
 // ─── ACHIEVEMENTS ──────────────────────────────────────────────
 
+// ─── PET SYSTEM ──────────────────────────────────────────────────
+
+export type PetHealth = 'happy' | 'neutral' | 'weak' | 'dormant';
+
+export type PetEventType =
+  | 'task_done'
+  | 'streak_lost'
+  | 'exam_soon'
+  | 'focus_done'
+  | 'neglect'
+  | 'level_up'
+  | 'achievement_unlocked'
+  | 'streak_milestone'
+  | 'mistake'
+  | 'task_streak'
+  | 'consecutive_task';
+
+export interface ReactionEvent extends PetEvent {
+  metadata?: {
+    streakCount?: number;
+    taskDifficulty?: string;
+    achievementRarity?: string;
+    level?: number;
+    consecutiveCount?: number;
+  };
+}
+
+export interface PetEvent {
+  type: PetEventType;
+  id: number;
+}
+
+export interface PetState {
+  species: string;
+  name: string;
+  hunger: number;
+  health: PetHealth;
+  lastFedAt: string;
+  lastInteractedAt: string;
+  foodInventory: { foodId: string; quantity: number }[];
+  skin?: string;
+  unlockedSpecies: string[];
+  unlockedSkins: string[];
+  totalFed: number;
+}
+
+export interface PetFood {
+  id: string;
+  name: string;
+  icon: string;
+  hungerValue: number;
+  rarity: Rarity;
+  source: 'focus' | 'task' | 'mastery';
+  sourceAmount: number;
+}
+
+export interface PetSpecies {
+  id: string;
+  name: string;
+  description: string;
+  colors: { body: string; accent: string; eyes: string; glow: string };
+  idleAnim: 'float' | 'bounce' | 'sway';
+  isPremium: boolean;
+  unlockLevel: number;
+  scale: number;
+}
+
+export interface PetSkin {
+  id: string;
+  speciesId: string;
+  name: string;
+  description: string;
+  colors: { body: string; accent: string; eyes: string; glow: string };
+  isPremium: boolean;
+  price: number;
+  unlockLevel: number;
+  spriteUrl?: string;
+  rarity: Rarity;
+}
+
+export const PET_SKINS: PetSkin[] = [
+  // ── Pixie ──
+  { id: 'pixie_base', speciesId: 'pixie', name: 'Default', description: 'A gentle star spirit that drifts through focused minds.', colors: { body: '#a5b4fc', accent: '#6366f1', eyes: '#fff', glow: '#a5b4fc' }, isPremium: false, price: 0, unlockLevel: 1, rarity: 'Common' },
+  { id: 'pixie_crimson', speciesId: 'pixie', name: 'Crimson', description: 'Electric cyan — a cool, focused aura.', colors: { body: '#22d3ee', accent: '#06b6d4', eyes: '#fff', glow: '#22d3ee' }, isPremium: true, price: 500, unlockLevel: 1, rarity: 'Rare' },
+  { id: 'pixie_royal', speciesId: 'pixie', name: 'Royal', description: 'Regal purple — wisdom of a thousand study sessions.', colors: { body: '#a78bfa', accent: '#7c3aed', eyes: '#e9d5ff', glow: '#a78bfa' }, isPremium: true, price: 1000, unlockLevel: 1, rarity: 'Epic' },
+  { id: 'pixie_starlight', speciesId: 'pixie', name: 'Starlight', description: 'Golden warmth like the first star at dusk.', colors: { body: '#fde68a', accent: '#f59e0b', eyes: '#fff', glow: '#fde68a' }, isPremium: false, price: 0, unlockLevel: 3, rarity: 'Common' },
+  { id: 'pixie_cosmic', speciesId: 'pixie', name: 'Cosmic', description: 'Deep space nebula — infinite focus.', colors: { body: '#1e1b4b', accent: '#7c3aed', eyes: '#c4b5fd', glow: '#312e81' }, isPremium: true, price: 1200, unlockLevel: 1, rarity: 'Epic' },
+  // ── Ember ──
+  { id: 'ember_base', speciesId: 'ember', name: 'Default', description: 'The warm fire spirit.', colors: { body: '#fbbf24', accent: '#f97316', eyes: '#fff', glow: '#fbbf24' }, isPremium: false, price: 0, unlockLevel: 1, rarity: 'Common' },
+  { id: 'ember_cobalt', speciesId: 'ember', name: 'Cobalt', description: 'Cold blue flame.', colors: { body: '#38bdf8', accent: '#0284c7', eyes: '#fff', glow: '#38bdf8' }, isPremium: true, price: 600, unlockLevel: 1, rarity: 'Rare' },
+  { id: 'ember_verdant', speciesId: 'ember', name: 'Verdant', description: 'Mystical green fire.', colors: { body: '#4ade80', accent: '#16a34a', eyes: '#fff', glow: '#4ade80' }, isPremium: false, price: 0, unlockLevel: 5, rarity: 'Common' },
+  { id: 'ember_void', speciesId: 'ember', name: 'Void', description: 'Dark flame that consumes light.', colors: { body: '#a78bfa', accent: '#7c3aed', eyes: '#c4b5fd', glow: '#a78bfa' }, isPremium: true, price: 1200, unlockLevel: 1, rarity: 'Epic' },
+  // ── Lumina ──
+  { id: 'lumina_base', speciesId: 'lumina', name: 'Default', description: 'The crystal fox.', colors: { body: '#e879f9', accent: '#6366f1', eyes: '#fff', glow: '#e879f9' }, isPremium: false, price: 0, unlockLevel: 1, rarity: 'Common' },
+  { id: 'lumina_silver', speciesId: 'lumina', name: 'Silver', description: 'Lunar silver coat.', colors: { body: '#cbd5e1', accent: '#64748b', eyes: '#fff', glow: '#cbd5e1' }, isPremium: true, price: 800, unlockLevel: 1, rarity: 'Rare' },
+  { id: 'lumina_prismatic', speciesId: 'lumina', name: 'Prismatic', description: 'Shifts through all colors.', colors: { body: '#f472b6', accent: '#a855f7', eyes: '#fff', glow: '#e879f9' }, isPremium: true, price: 1500, unlockLevel: 1, rarity: 'Legendary' },
+  // ── Nimbus ──
+  { id: 'nimbus_base', speciesId: 'nimbus', name: 'Default', description: 'A fluffy cloud cat.', colors: { body: '#67e8f9', accent: '#06b6d4', eyes: '#fff', glow: '#67e8f9' }, isPremium: false, price: 0, unlockLevel: 1, rarity: 'Common' },
+  { id: 'nimbus_storm', speciesId: 'nimbus', name: 'Storm', description: 'Dark thundercloud.', colors: { body: '#64748b', accent: '#334155', eyes: '#fff', glow: '#64748b' }, isPremium: true, price: 800, unlockLevel: 1, rarity: 'Rare' },
+  { id: 'nimbus_sunset', speciesId: 'nimbus', name: 'Sunset', description: 'Golden hour glow.', colors: { body: '#fbbf24', accent: '#f97316', eyes: '#fff', glow: '#fbbf24' }, isPremium: false, price: 0, unlockLevel: 8, rarity: 'Common' },
+];
+
+export const PET_SPECIES: PetSpecies[] = [
+  { id: 'pixie', name: 'Pixie', description: 'A floating star spirit that glows brighter with every focus session.', colors: { body: '#a5b4fc', accent: '#6366f1', eyes: '#fff', glow: '#a5b4fc' }, idleAnim: 'float', isPremium: false, unlockLevel: 1, scale: 1 },
+  { id: 'ember', name: 'Ember', description: 'A warm fire spirit fueled by your focus sessions.', colors: { body: '#fbbf24', accent: '#f97316', eyes: '#fff', glow: '#fbbf24' }, idleAnim: 'bounce', isPremium: false, unlockLevel: 5, scale: 1 },
+  { id: 'lumina', name: 'Lumina', description: 'A crystal fox that radiates calm and wisdom.', colors: { body: '#e879f9', accent: '#6366f1', eyes: '#fff', glow: '#e879f9' }, idleAnim: 'sway', isPremium: true, unlockLevel: 1, scale: 1.2 },
+  { id: 'nimbus', name: 'Nimbus', description: 'A cloud cat that drifts through your study sessions.', colors: { body: '#67e8f9', accent: '#06b6d4', eyes: '#fff', glow: '#67e8f9' }, idleAnim: 'float', isPremium: true, unlockLevel: 1, scale: 1.1 },
+];
+
+export const PET_FOODS: PetFood[] = [
+  { id: 'star-snack', name: 'Star Snack', icon: 'Star', hungerValue: 15, rarity: 'Common', source: 'task', sourceAmount: 1 },
+  { id: 'focus-berry', name: 'Focus Berry', icon: 'Circle', hungerValue: 25, rarity: 'Common', source: 'focus', sourceAmount: 900 },
+  { id: 'mastery-meal', name: 'Mastery Meal', icon: 'Trophy', hungerValue: 40, rarity: 'Rare', source: 'mastery', sourceAmount: 1 },
+  { id: 'time-gem', name: 'Time Gem', icon: 'Gem', hungerValue: 60, rarity: 'Epic', source: 'focus', sourceAmount: 3600 },
+];
+
+export const PET_HUNGER_DECAY_PER_HOUR = 5;
+export const PET_WEAK_THRESHOLD = 20;
+export const PET_WEAK_DURATION_MS = 2 * 60 * 60 * 1000;
+export const PET_DORMANT_THRESHOLD = 0;
+export const PET_DORMANT_DURATION_MS = 4 * 60 * 60 * 1000;
+
+export const INITIAL_PET_STATE: PetState = {
+  species: 'pixie',
+  name: 'Pixie',
+  hunger: 80,
+  health: 'neutral',
+  lastFedAt: new Date().toISOString(),
+  lastInteractedAt: new Date().toISOString(),
+  foodInventory: [{ foodId: 'star-snack', quantity: 3 }],
+  unlockedSpecies: ['pixie'],
+  unlockedSkins: ['pixie_base'],
+  totalFed: 0,
+};
+
 export const ACHIEVEMENTS: Achievement[] = [
   { id: 'first-step', title: 'First Step', description: 'Complete your first study task.', icon: 'CheckCircle', rarity: 'Common', requirement: 1, type: 'tasks' },
   { id: 'task-master', title: 'Task Master', description: 'Complete 50 tasks.', icon: 'Zap', rarity: 'Rare', requirement: 50, type: 'tasks' },

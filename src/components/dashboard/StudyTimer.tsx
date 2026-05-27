@@ -3,7 +3,8 @@ import {
   Play, Pause, RotateCcw, Zap, Music, Maximize2, X, Volume2, 
   CloudRain, Coffee, Waves, Palette, VolumeX, Lock, Crown, Layout, Sparkles,
   Settings2, Timer, BedDouble, Rocket, Image as ImageIcon, Search, Check, Link,
-  Bird, Flame, CloudLightning, Coffee as CafeIcon, Youtube, Music2, Info, Headphones, Moon, Upload
+  Bird, Flame, CloudLightning, Coffee as CafeIcon, Youtube, Music2, Info, Headphones, Moon, Upload,
+  ChevronUp, ChevronDown
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { DashboardCard } from './DashboardCard';
@@ -39,7 +40,9 @@ const PRESETS: Preset[] = [
   { id: 'flow', name: 'Elite Flow', icon: Zap, focus: 90, short: 15, long: 30 },
 ];
 
-export const StudyTimer = ({ onTick }: { onTick?: () => void }) => {
+interface StudyTimerProps { onTick?: () => void; compact?: boolean; }
+
+export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
   const { themeConfig, setThemeConfig, completeFocusSession, userStats, triggerConfetti } = useStudy();
   
   const [activePreset, setActivePreset] = useState<Preset>(PRESETS[0]);
@@ -60,6 +63,7 @@ export const StudyTimer = ({ onTick }: { onTick?: () => void }) => {
   const [pickerTab, setPickerTab] = useState<'atm' | 'wall'>('atm');
   const [wallpaperCategory, setWallpaperCategory] = useState<string>('All');
   const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [showExpanded, setShowExpanded] = useState(false);
   const [sessionsCompleted, setSessionsCompleted] = useState(0);
   const [customUrl, setCustomUrl] = useState(themeConfig.customWallpaperUrl || '');
   const [urlApplied, setUrlApplied] = useState(false);
@@ -225,229 +229,347 @@ export const StudyTimer = ({ onTick }: { onTick?: () => void }) => {
 
   const currentAtmosphere = ATMOSPHERES.find(a => a.id === themeConfig.atmosphere) || ATMOSPHERES[0];
 
-  return (
-    <>
-      <DashboardCard className="bg-gradient-to-br from-slate-900 to-slate-950 dark:from-[#0c0e14] dark:to-[#080a10] text-white relative overflow-hidden border-none shadow-2xl shadow-black/20">
-        <div className={`absolute -top-32 -right-32 w-80 h-80 bg-gradient-to-br ${currentAtmosphere.color.replace('bg-', 'from-')}/15 to-transparent rounded-full blur-[100px] opacity-40`} />
-        
-        <div className="relative z-10 space-y-5">
-          {/* Minimal Header */}
-          <div className="flex items-center justify-between">
-            <button onClick={() => setShowPresetPicker(!showPresetPicker)} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.10] transition-colors">
-              <activePreset.icon className="w-3 h-3 text-brand-light" />
-              <span className="text-[9px] font-semibold uppercase tracking-wider text-white/60">{activePreset.name}</span>
-            </button>
-            <div className="flex items-center gap-1">
-              <button onClick={() => setShowThemePicker(!showThemePicker)} className={`p-2 rounded-xl transition-all ${showThemePicker ? 'bg-brand text-white shadow-lg' : 'text-white/40 hover:text-white/70 hover:bg-white/5'}`}>
-                <Palette className="w-4 h-4" />
-              </button>
-              <button onClick={() => setIsZenMode(true)} className="p-2 text-white/40 hover:text-white/70 hover:bg-white/5 rounded-xl transition-all">
-                <Maximize2 className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          {/* Mode Tabs */}
-          <div className="flex gap-1.5 bg-white/[0.04] p-1 rounded-xl">
-            {(['focus', 'shortBreak', 'longBreak'] as const).map(m => (
-              <button key={m} onClick={() => { setIsActive(false); setMode(m); const d = m === 'focus' ? activePreset.focus : m === 'shortBreak' ? activePreset.short : activePreset.long; setTimeLeft(d * 60); }} 
-                className={`flex-1 py-2 rounded-[10px] text-[9px] font-semibold uppercase tracking-wider transition-all ${mode === m ? 'bg-white/10 text-white shadow-sm' : 'text-white/30 hover:text-white/60'}`}>
-                {m === 'focus' ? 'Focus' : m === 'shortBreak' ? 'Break' : 'Long Break'}
-              </button>
-            ))}
-          </div>
-
-          {/* Timer Display */}
-          <div className="py-6 text-center">
-            <motion.div key={mode} initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-6xl md:text-7xl font-display font-light tracking-tighter tabular-nums text-white/90 select-none">
-              {formatTime(timeLeft)}
-            </motion.div>
-            <div className="flex items-center justify-center gap-2 mt-2">
-              <div className="flex gap-1">
-                {[...Array(4)].map((_, i) => (
-                  <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all ${i < (sessionsCompleted % 4) ? 'bg-brand-light' : 'bg-white/8'}`} />
-                ))}
+  const renderTimerControls = () => (
+    <div className="space-y-3">
+      <div className="flex gap-2.5">
+        <button onClick={toggleTimer} className={`flex-1 py-3.5 rounded-2xl font-semibold text-xs uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all ${isActive ? 'bg-amber-500/90 text-white shadow-xl shadow-amber-500/20' : 'bg-white text-slate-900 hover:bg-white/90 shadow-xl'}`}>
+          {isActive ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current translate-x-0.5" />}
+          {isActive ? 'Pause' : 'Start'}
+        </button>
+        <button onClick={() => { setIsActive(false); setTimeLeft(activePreset.focus * 60); }} className="px-4 py-3.5 bg-white/[0.06] hover:bg-white/[0.10] rounded-2xl transition-colors"><RotateCcw className="w-4 h-4 text-white/50" /></button>
+      </div>
+      {!compact && (
+        <>
+          {/* Ambience */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between px-1">
+              <div className="flex items-center gap-2">
+                <Headphones className="w-3 h-3 text-white/30" />
+                <span className="text-[8px] font-semibold uppercase tracking-wider text-white/30">Sound</span>
               </div>
-              <span className="text-[8px] font-medium uppercase tracking-wider text-white/30">Cycle {Math.floor(sessionsCompleted / 4) + 1}</span>
+              <div className="flex items-center gap-2">
+                <input type="range" min="0" max="1" step="0.01" value={masterVolume} onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
+                  className="w-16 h-1 bg-white/8 rounded-full appearance-none accent-brand cursor-pointer" />
+              </div>
+            </div>
+            <div className="grid grid-cols-4 gap-1.5">
+              {AMBIENCE_LIBRARY.slice(0, 6).map(track => (
+                <button key={track.id} onClick={() => handleTrackToggle(track.id)}
+                  className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl transition-all relative ${activeTrackId === track.id ? 'bg-brand/20 text-white' : 'bg-white/[0.04] text-white/40 hover:bg-white/[0.08]'}`}>
+                  <track.icon className={`w-3.5 h-3.5 ${activeTrackId === track.id ? 'animate-pulse' : ''}`} />
+                  <span className="text-[7px] font-semibold uppercase tracking-tight text-center line-clamp-1">{track.name}</span>
+                  {track.isPremium && !userStats.isPremium && <Crown className="absolute -top-1 -right-1 w-2 h-2 text-amber-500" />}
+                </button>
+              ))}
+              <button onClick={() => setShowMusicHub(!showMusicHub)}
+                className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl transition-all bg-white/[0.04] text-white/40 hover:bg-white/[0.08] ${showMusicHub ? 'ring-1 ring-brand/50' : ''}`}>
+                <Youtube className="w-3.5 h-3.5" />
+                <span className="text-[7px] font-semibold uppercase tracking-tight text-center">Stream</span>
+              </button>
             </div>
           </div>
-          
-          <AnimatePresence mode="wait">
-            {showThemePicker ? (
-              <motion.div key="theme" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-3 max-h-[340px] overflow-y-auto no-scrollbar">
-                  {/* Top tabs: Atmosphere / Gallery */}
-                  <div className="flex gap-3 p-1 bg-white/[0.04] rounded-xl sticky top-0 z-20">
-                    <button onClick={() => setPickerTab('atm')} className={`flex-1 py-1.5 rounded-lg text-[8px] font-semibold uppercase tracking-wider transition-all ${pickerTab === 'atm' ? 'bg-white/10 text-white' : 'text-white/40'}`}>Atmosphere</button>
-                    <button onClick={() => setPickerTab('wall')} className={`flex-1 py-1.5 rounded-lg text-[8px] font-semibold uppercase tracking-wider transition-all ${pickerTab === 'wall' ? 'bg-white/10 text-white' : 'text-white/40'}`}>Gallery</button>
-                  </div>
-                  
-                  {pickerTab === 'atm' ? (
-                    <div className="flex gap-2 flex-wrap justify-center pt-1">
-                      {ATMOSPHERES.map(atm => (
-                        <button key={atm.id} onClick={() => { if(atm.isPremium && !userStats.isPremium) setShowPremiumModal(true); else setThemeConfig({...themeConfig, atmosphere: atm.id}); }}
-                          className={`w-7 h-7 rounded-full ${atm.color} border-2 transition-all relative flex items-center justify-center ${themeConfig.atmosphere === atm.id ? 'border-white scale-110 shadow-xl' : 'border-transparent opacity-40 hover:opacity-80'}`}>
-                          {atm.isPremium && !userStats.isPremium ? <Crown className="w-2.5 h-2.5 text-white" /> : null}
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {/* Animated wallpapers */}
-                      <div className="grid grid-cols-2 gap-1.5">
-                        {WALLPAPERS.filter(w => w.type === 'animated').map(w => (
-                          <button key={w.id} onClick={() => { if(w.isPremium && !userStats.isPremium) setShowPremiumModal(true); else setThemeConfig({...themeConfig, wallpaper: w.id}); }}
-                            className={`px-3 py-2 rounded-xl text-[8px] font-semibold uppercase tracking-wider border transition-all ${themeConfig.wallpaper === w.id ? 'bg-brand border-brand text-white' : 'bg-white/[0.04] border-white/5 text-white/50 hover:text-white/70'}`}>
-                            {w.name}
-                          </button>
-                        ))}
-                      </div>
-
-                      {/* Category filter pills */}
-                      <div className="flex gap-1.5 flex-wrap">
-                        <button onClick={() => setWallpaperCategory('All')}
-                          className={`px-2.5 py-1 rounded-lg text-[7px] font-bold uppercase tracking-wider transition-all ${wallpaperCategory === 'All' ? 'bg-brand text-white' : 'bg-white/[0.04] text-white/40 hover:text-white/60'}`}>
-                          All
-                        </button>
-                        {IMAGE_CATEGORIES.map(cat => (
-                          <button key={cat} onClick={() => setWallpaperCategory(cat)}
-                            className={`px-2.5 py-1 rounded-lg text-[7px] font-bold uppercase tracking-wider transition-all ${wallpaperCategory === cat ? 'bg-brand text-white' : 'bg-white/[0.04] text-white/40 hover:text-white/60'}`}>
-                            {cat}
-                          </button>
-                        ))}
-                      </div>
-
-                      {/* Image grid */}
-                      <div className="grid grid-cols-3 gap-1.5">
-                        {WALLPAPERS.filter(w => {
-                          if (w.type !== 'image') return false;
-                          if (wallpaperCategory === 'All') return true;
-                          return w.category === wallpaperCategory;
-                        }).map(w => (
-                          <button key={w.id} onClick={() => { if(w.isPremium && !userStats.isPremium) setShowPremiumModal(true); else setThemeConfig({...themeConfig, wallpaper: w.id}); }}
-                            className={`aspect-square rounded-lg relative overflow-hidden transition-all group ${themeConfig.wallpaper === w.id ? 'ring-2 ring-brand' : 'opacity-60 hover:opacity-100'}`}>
-                            <img src={w.url} alt={w.name} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-                            {themeConfig.wallpaper === w.id && <div className="absolute inset-0 bg-brand/40 flex items-center justify-center"><Check className="w-3 h-3 text-white" /></div>}
-                            {!userStats.isPremium && w.isPremium && <div className="absolute top-1 right-1"><Crown className="w-2 h-2 text-white" /></div>}
-                            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <span className="text-[6px] font-bold text-white leading-none">{w.name}</span>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-
-                      {/* Custom URL + Upload */}
-                      <div className="space-y-2 pt-1">
-                         <span className="text-[8px] font-semibold uppercase tracking-wider text-white/40 block">Custom Wallpaper</span>
-                         {themeConfig.wallpaper === 'custom' && themeConfig.customWallpaperUrl && (
-                           <div className="aspect-video rounded-lg overflow-hidden relative">
-                             <img src={themeConfig.customWallpaperUrl} alt="Custom" className="w-full h-full object-cover" />
-                             <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                               <Check className="w-4 h-4 text-white" />
-                             </div>
-                           </div>
-                         )}
-                         <div className="flex gap-2">
-                            <input type="text" placeholder="Paste image URL..." value={customUrl} onChange={(e) => setCustomUrl(e.target.value)}
-                              className="flex-1 bg-white/[0.04] border border-white/5 rounded-xl p-2.5 text-[8px] font-medium focus:ring-1 ring-brand transition-all text-white/70 placeholder-white/20"
-                            />
-                            <button onClick={applyCustomUrl} className={`p-2.5 rounded-xl transition-colors ${urlApplied ? 'bg-emerald-500' : 'bg-brand hover:bg-brand-dark'}`} title="Apply URL">
-                              {urlApplied ? <Check className="w-3 h-3 text-white" /> : <Link className="w-3 h-3 text-white" />}
-                            </button>
-                         </div>
-                         <div className="flex gap-2">
-                            <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
-                            <button onClick={() => fileInputRef.current?.click()} className="flex-1 flex items-center justify-center gap-2 bg-white/[0.04] border border-white/5 rounded-xl p-2.5 text-[8px] font-medium hover:bg-white/[0.08] transition-all text-white/50 hover:text-white/70">
-                              <Upload className="w-3 h-3" /> Upload from device
-                            </button>
-                         </div>
-                      </div>
-                    </div>
-                  )}
-                  <button onClick={() => setShowThemePicker(false)} className="w-full py-2.5 bg-white/[0.06] hover:bg-white/[0.10] rounded-xl text-[9px] font-semibold uppercase tracking-wider text-white/60 transition-colors sticky bottom-0">Done</button>
-              </motion.div>
-            ) : showPresetPicker ? (
-              <motion.div key="presets" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-2">
-                 {PRESETS.map(p => (
-                   <button key={p.id} onClick={() => { setActivePreset(p); setIsActive(false); setMode('focus'); setTimeLeft(p.focus * 60); setShowPresetPicker(false); }}
-                     className={`w-full p-3 rounded-xl flex items-center justify-between transition-all ${activePreset.id === p.id ? 'bg-brand/20 text-white' : 'bg-white/[0.04] text-white/40 hover:bg-white/[0.08]'}`}>
-                     <div className="flex items-center gap-2.5"><p.icon className="w-3.5 h-3.5" /><span className="text-[9px] font-semibold uppercase tracking-wider">{p.name}</span></div>
-                     <span className="text-[9px] font-medium text-white/30">{p.focus}m / {p.short}m</span>
-                   </button>
-                 ))}
-              </motion.div>
-            ) : (
-              <motion.div key="controls" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
-                <div className="flex gap-2.5">
-                  <button onClick={toggleTimer} className={`flex-1 py-3.5 rounded-2xl font-semibold text-xs uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all ${isActive ? 'bg-amber-500/90 text-white shadow-xl shadow-amber-500/20' : 'bg-white text-slate-900 hover:bg-white/90 shadow-xl'}`}>
-                    {isActive ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current translate-x-0.5" />}
-                    {isActive ? 'Pause' : 'Start'}
-                  </button>
-                  <button onClick={() => { setIsActive(false); setTimeLeft(activePreset.focus * 60); }} className="px-4 py-3.5 bg-white/[0.06] hover:bg-white/[0.10] rounded-2xl transition-colors"><RotateCcw className="w-4 h-4 text-white/50" /></button>
+          <AnimatePresence>
+            {showMusicHub && (
+              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden space-y-3">
+                <div className="grid grid-cols-4 gap-1.5">
+                  {AMBIENCE_LIBRARY.slice(6).map(track => (
+                    <button key={track.id} onClick={() => handleTrackToggle(track.id)}
+                      className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl transition-all relative ${activeTrackId === track.id ? 'bg-brand/20 text-white' : 'bg-white/[0.04] text-white/40 hover:bg-white/[0.08]'}`}>
+                      <track.icon className={`w-3.5 h-3.5 ${activeTrackId === track.id ? 'animate-pulse' : ''}`} />
+                      <span className="text-[7px] font-semibold uppercase tracking-tight text-center line-clamp-1">{track.name}</span>
+                      {track.isPremium && !userStats.isPremium && <Crown className="absolute -top-1 -right-1 w-2 h-2 text-amber-500" />}
+                    </button>
+                  ))}
                 </div>
-
-                {/* Ambience */}
-                <div className="space-y-3">
-                   <div className="flex items-center justify-between px-1">
-                      <div className="flex items-center gap-2">
-                        <Headphones className="w-3 h-3 text-white/30" />
-                        <span className="text-[8px] font-semibold uppercase tracking-wider text-white/30">Sound</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                         <input 
-                            type="range" min="0" max="1" step="0.01" 
-                            value={masterVolume} 
-                            onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
-                            className="w-16 h-1 bg-white/8 rounded-full appearance-none accent-brand cursor-pointer" 
-                         />
-                      </div>
-                   </div>
-                   <div className="grid grid-cols-4 gap-1.5">
-                       {AMBIENCE_LIBRARY.slice(0, 6).map(track => (
-                         <button 
-                           key={track.id}
-                           onClick={() => handleTrackToggle(track.id)}
-                           className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl transition-all relative ${activeTrackId === track.id ? 'bg-brand/20 text-white' : 'bg-white/[0.04] text-white/40 hover:bg-white/[0.08]'}`}
-                         >
-                            <track.icon className={`w-3.5 h-3.5 ${activeTrackId === track.id ? 'animate-pulse' : ''}`} />
-                            <span className="text-[7px] font-semibold uppercase tracking-tight text-center line-clamp-1">{track.name}</span>
-                            {track.isPremium && !userStats.isPremium && <Crown className="absolute -top-1 -right-1 w-2 h-2 text-amber-500" />}
-                         </button>
-                       ))}
-                       <button 
-                         onClick={() => setShowMusicHub(!showMusicHub)}
-                         className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl transition-all bg-white/[0.04] text-white/40 hover:bg-white/[0.08] ${showMusicHub ? 'ring-1 ring-brand/50' : ''}`}
-                       >
-                          <Youtube className="w-3.5 h-3.5" />
-                          <span className="text-[7px] font-semibold uppercase tracking-tight text-center">Stream</span>
-                       </button>
-                    </div>
+                <div className="rounded-xl overflow-hidden bg-black/40 border border-white/5 aspect-video">
+                  <iframe width="100%" height="100%" src="https://www.youtube.com/embed/jfKfPfyJRdk?si=0mH_n87J2N3H2E-j&autoplay=0&controls=0" title="Lofi" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen></iframe>
                 </div>
-
-                <AnimatePresence>
-                  {showMusicHub && (
-                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden space-y-3">
-                       <div className="grid grid-cols-4 gap-1.5">
-                         {AMBIENCE_LIBRARY.slice(6).map(track => (
-                           <button
-                             key={track.id}
-                             onClick={() => handleTrackToggle(track.id)}
-                             className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl transition-all relative ${activeTrackId === track.id ? 'bg-brand/20 text-white' : 'bg-white/[0.04] text-white/40 hover:bg-white/[0.08]'}`}
-                           >
-                             <track.icon className={`w-3.5 h-3.5 ${activeTrackId === track.id ? 'animate-pulse' : ''}`} />
-                             <span className="text-[7px] font-semibold uppercase tracking-tight text-center line-clamp-1">{track.name}</span>
-                             {track.isPremium && !userStats.isPremium && <Crown className="absolute -top-1 -right-1 w-2 h-2 text-amber-500" />}
-                           </button>
-                         ))}
-                       </div>
-                       <div className="rounded-xl overflow-hidden bg-black/40 border border-white/5 aspect-video">
-                          <iframe width="100%" height="100%" src="https://www.youtube.com/embed/jfKfPfyJRdk?si=0mH_n87J2N3H2E-j&autoplay=0&controls=0" title="Lofi" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen></iframe>
-                       </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
               </motion.div>
             )}
           </AnimatePresence>
+        </>
+      )}
+    </div>
+  );
+
+  const renderAtmosphereTab = () => (
+    <motion.div key="atm" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.15 }} className="pt-1">
+      <div className="flex gap-2 flex-wrap justify-center">
+        {ATMOSPHERES.map(atm => (
+          <button key={atm.id} onClick={() => { if(atm.isPremium && !userStats.isPremium) setShowPremiumModal(true); else setThemeConfig({...themeConfig, atmosphere: atm.id}); }}
+            className={`w-7 h-7 rounded-full ${atm.color} border-2 transition-all relative flex items-center justify-center ${themeConfig.atmosphere === atm.id ? 'border-white scale-110 shadow-xl' : 'border-transparent opacity-40 hover:opacity-80'}`}>
+            {atm.isPremium && !userStats.isPremium ? <Crown className="w-2.5 h-2.5 text-white" /> : null}
+          </button>
+        ))}
+      </div>
+    </motion.div>
+  );
+
+  const renderGalleryTab = () => (
+    <motion.div key="wall" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.15 }} className="space-y-3 pt-1">
+      {/* Category filter pills — scrollable horizontal */}
+      <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+        <button onClick={() => setWallpaperCategory('All')}
+          className={`shrink-0 px-2.5 py-1 rounded-lg text-[7px] font-bold uppercase tracking-wider transition-all ${wallpaperCategory === 'All' ? 'bg-brand text-white' : 'bg-white/[0.04] text-white/40 hover:text-white/60'}`}>All</button>
+        {IMAGE_CATEGORIES.map(cat => (
+          <button key={cat} onClick={() => setWallpaperCategory(cat)}
+            className={`shrink-0 px-2.5 py-1 rounded-lg text-[7px] font-bold uppercase tracking-wider transition-all ${wallpaperCategory === cat ? 'bg-brand text-white' : 'bg-white/[0.04] text-white/40 hover:text-white/60'}`}>{cat}</button>
+        ))}
+      </div>
+
+      {/* Animated wallpapers row */}
+      <div className="grid grid-cols-2 gap-1.5">
+        {WALLPAPERS.filter(w => w.type === 'animated').map(w => (
+          <button key={w.id} onClick={() => { if(w.isPremium && !userStats.isPremium) setShowPremiumModal(true); else setThemeConfig({...themeConfig, wallpaper: w.id}); }}
+            className={`px-3 py-2 rounded-xl text-[7px] font-semibold uppercase tracking-wider border transition-all ${themeConfig.wallpaper === w.id ? 'bg-brand border-brand text-white' : 'bg-white/[0.04] border-white/5 text-white/50 hover:text-white/70'}`}>{w.name}</button>
+        ))}
+      </div>
+
+      {/* Image grid — 2 cols for larger thumbnails */}
+      <div className="grid grid-cols-2 gap-2">
+        {WALLPAPERS.filter(w => {
+          if (w.type !== 'image') return false;
+          if (wallpaperCategory === 'All') return true;
+          return w.category === wallpaperCategory;
+        }).map(w => (
+          <button key={w.id} onClick={() => { if(w.isPremium && !userStats.isPremium) setShowPremiumModal(true); else setThemeConfig({...themeConfig, wallpaper: w.id}); }}
+            className={`aspect-[4/3] rounded-xl relative overflow-hidden transition-all group ${themeConfig.wallpaper === w.id ? 'ring-2 ring-brand' : 'hover:ring-1 ring-white/20'}`}>
+            <img src={w.url} alt={w.name} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-2">
+              <span className="text-[9px] font-bold text-white leading-tight block truncate">{w.name}</span>
+            </div>
+            {themeConfig.wallpaper === w.id && <div className="absolute top-2 right-2 bg-brand rounded-full p-0.5"><Check className="w-3 h-3 text-white" /></div>}
+            {!userStats.isPremium && w.isPremium && <div className="absolute top-2 left-2"><Crown className="w-3 h-3 text-white" /></div>}
+          </button>
+        ))}
+      </div>
+
+      {/* Custom URL + Upload */}
+      <div className="space-y-2 pt-1">
+        <div className="flex gap-2">
+          <input type="text" placeholder="Paste image URL..." value={customUrl} onChange={(e) => setCustomUrl(e.target.value)}
+            className="flex-1 bg-white/[0.04] border border-white/5 rounded-xl p-2.5 text-[8px] font-medium focus:ring-1 ring-brand transition-all text-white/70 placeholder-white/20" />
+          <button onClick={applyCustomUrl} className={`p-2.5 rounded-xl transition-colors ${urlApplied ? 'bg-emerald-500' : 'bg-brand hover:bg-brand-dark'}`} title="Apply URL">
+            {urlApplied ? <Check className="w-3 h-3 text-white" /> : <Link className="w-3 h-3 text-white" />}
+          </button>
+        </div>
+        <div className="flex gap-2">
+          <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+          <button onClick={() => fileInputRef.current?.click()} className="flex-1 flex items-center justify-center gap-2 bg-white/[0.04] border border-white/5 rounded-xl p-2.5 text-[8px] font-medium hover:bg-white/[0.08] transition-all text-white/50 hover:text-white/70">
+            <Upload className="w-3 h-3" /> Upload from device
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
+
+  const renderThemePicker = () => (
+    <motion.div key="theme" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+      <div className="flex gap-3 p-1 bg-white/[0.04] rounded-xl">
+        <button onClick={() => setPickerTab('atm')} className={`flex-1 py-1.5 rounded-lg text-[8px] font-semibold uppercase tracking-wider transition-all ${pickerTab === 'atm' ? 'bg-white/10 text-white' : 'text-white/40'}`}>Atmosphere</button>
+        <button onClick={() => setPickerTab('wall')} className={`flex-1 py-1.5 rounded-lg text-[8px] font-semibold uppercase tracking-wider transition-all ${pickerTab === 'wall' ? 'bg-white/10 text-white' : 'text-white/40'}`}>Gallery</button>
+      </div>
+      <div className="max-h-[45vh] overflow-y-auto no-scrollbar mt-3">
+        <AnimatePresence mode="wait">
+          {pickerTab === 'atm' ? renderAtmosphereTab() : renderGalleryTab()}
+        </AnimatePresence>
+      </div>
+      <button onClick={() => { setShowThemePicker(false); setShowExpanded(false); }} className="w-full mt-3 py-2.5 bg-white/[0.06] hover:bg-white/[0.10] rounded-xl text-[9px] font-semibold uppercase tracking-wider text-white/60 transition-colors">Done</button>
+    </motion.div>
+  );
+
+  const renderPresetPicker = () => (
+    <motion.div key="presets" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-2">
+      {PRESETS.map(p => (
+        <button key={p.id} onClick={() => { setActivePreset(p); setIsActive(false); setMode('focus'); setTimeLeft(p.focus * 60); setShowPresetPicker(false); }}
+          className={`w-full p-3 rounded-xl flex items-center justify-between transition-all ${activePreset.id === p.id ? 'bg-brand/20 text-white' : 'bg-white/[0.04] text-white/40 hover:bg-white/[0.08]'}`}>
+          <div className="flex items-center gap-2.5"><p.icon className="w-3.5 h-3.5" /><span className="text-[9px] font-semibold uppercase tracking-wider">{p.name}</span></div>
+          <span className="text-[9px] font-medium text-white/30">{p.focus}m / {p.short}m</span>
+        </button>
+      ))}
+    </motion.div>
+  );
+
+  return (
+    <>
+      <DashboardCard className={`bg-gradient-to-br from-slate-900 to-slate-950 dark:from-[#0c0e14] dark:to-[#080a10] text-white relative border-none shadow-2xl shadow-black/20 ${compact ? 'p-0' : ''}`}>
+        <div className={`absolute -top-32 -right-32 w-80 h-80 bg-gradient-to-br ${currentAtmosphere.color.replace('bg-', 'from-')}/15 to-transparent rounded-full blur-[100px] opacity-40`} />
+        
+        <div className="relative z-10 space-y-3">
+          {/* Compact: timer + expand */}
+          {compact ? (
+            <>
+              <div className="flex items-center justify-between px-4 pt-4">
+                <button onClick={() => { setShowPresetPicker(!showPresetPicker); setShowThemePicker(false); }} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.10] transition-colors">
+                  <activePreset.icon className="w-3 h-3 text-brand-light" />
+                  <span className="text-[9px] font-semibold uppercase tracking-wider text-white/60">{activePreset.name}</span>
+                </button>
+                <div className="flex items-center gap-1">
+                  <button onClick={() => setIsZenMode(true)} className="p-2 text-white/40 hover:text-white/70 hover:bg-white/5 rounded-xl transition-all">
+                    <Maximize2 className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => setShowExpanded(!showExpanded)} className={`p-2 rounded-xl transition-all ${showExpanded ? 'bg-brand/20 text-white' : 'text-white/40 hover:text-white/70 hover:bg-white/5'}`}>
+                    {showExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="px-4 pb-4">
+                <div className="text-center">
+                  <motion.div key={mode} initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-5xl font-display font-light tracking-tighter tabular-nums text-white/90 select-none">
+                    {formatTime(timeLeft)}
+                  </motion.div>
+                  <div className="flex items-center justify-center gap-2 mt-1">
+                    <div className="flex gap-1">
+                      {[...Array(4)].map((_, i) => (
+                        <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all ${i < (sessionsCompleted % 4) ? 'bg-brand-light' : 'bg-white/8'}`} />
+                      ))}
+                    </div>
+                    <span className="text-[8px] font-medium uppercase tracking-wider text-white/30">Cycle {Math.floor(sessionsCompleted / 4) + 1}</span>
+                  </div>
+                </div>
+
+                <div className="mt-3 space-y-2">
+                  <AnimatePresence mode="wait">
+                    {showPresetPicker ? renderPresetPicker() : (
+                      <motion.div key="compact-controls" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                        {renderTimerControls()}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
+
+              {/* Expanded section: mode tabs + ambience + theme */}
+              <AnimatePresence>
+                {showExpanded && (
+                  <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="border-t border-white/[0.06] max-h-[55vh] overflow-hidden">
+                    <div className="p-4 space-y-3 h-full max-h-[53vh] overflow-y-auto no-scrollbar">
+                      {/* Mode Tabs */}
+                      <div className="flex gap-1.5 bg-white/[0.04] p-1 rounded-xl">
+                        {(['focus', 'shortBreak', 'longBreak'] as const).map(m => (
+                          <button key={m} onClick={() => { setIsActive(false); setMode(m); const d = m === 'focus' ? activePreset.focus : m === 'shortBreak' ? activePreset.short : activePreset.long; setTimeLeft(d * 60); }} 
+                            className={`flex-1 py-2 rounded-[10px] text-[9px] font-semibold uppercase tracking-wider transition-all ${mode === m ? 'bg-white/10 text-white shadow-sm' : 'text-white/30 hover:text-white/60'}`}>
+                            {m === 'focus' ? 'Focus' : m === 'shortBreak' ? 'Break' : 'Long Break'}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Ambience */}
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between px-1">
+                          <div className="flex items-center gap-2">
+                            <Headphones className="w-3 h-3 text-white/30" />
+                            <span className="text-[8px] font-semibold uppercase tracking-wider text-white/30">Sound</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <input type="range" min="0" max="1" step="0.01" value={masterVolume} onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
+                              className="w-16 h-1 bg-white/8 rounded-full appearance-none accent-brand cursor-pointer" />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-4 gap-1.5">
+                          {AMBIENCE_LIBRARY.slice(0, 6).map(track => (
+                            <button key={track.id} onClick={() => handleTrackToggle(track.id)}
+                              className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl transition-all relative ${activeTrackId === track.id ? 'bg-brand/20 text-white' : 'bg-white/[0.04] text-white/40 hover:bg-white/[0.08]'}`}>
+                              <track.icon className={`w-3.5 h-3.5 ${activeTrackId === track.id ? 'animate-pulse' : ''}`} />
+                              <span className="text-[7px] font-semibold uppercase tracking-tight text-center line-clamp-1">{track.name}</span>
+                              {track.isPremium && !userStats.isPremium && <Crown className="absolute -top-1 -right-1 w-2 h-2 text-amber-500" />}
+                            </button>
+                          ))}
+                          <button onClick={() => setShowMusicHub(!showMusicHub)}
+                            className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl transition-all bg-white/[0.04] text-white/40 hover:bg-white/[0.08] ${showMusicHub ? 'ring-1 ring-brand/50' : ''}`}>
+                            <Youtube className="w-3.5 h-3.5" />
+                            <span className="text-[7px] font-semibold uppercase tracking-tight text-center">Stream</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      <AnimatePresence>
+                        {showMusicHub && (
+                          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden space-y-3">
+                            <div className="grid grid-cols-4 gap-1.5">
+                              {AMBIENCE_LIBRARY.slice(6).map(track => (
+                                <button key={track.id} onClick={() => handleTrackToggle(track.id)}
+                                  className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl transition-all relative ${activeTrackId === track.id ? 'bg-brand/20 text-white' : 'bg-white/[0.04] text-white/40 hover:bg-white/[0.08]'}`}>
+                                  <track.icon className={`w-3.5 h-3.5 ${activeTrackId === track.id ? 'animate-pulse' : ''}`} />
+                                  <span className="text-[7px] font-semibold uppercase tracking-tight text-center line-clamp-1">{track.name}</span>
+                                  {track.isPremium && !userStats.isPremium && <Crown className="absolute -top-1 -right-1 w-2 h-2 text-amber-500" />}
+                                </button>
+                              ))}
+                            </div>
+                            <div className="rounded-xl overflow-hidden bg-black/40 border border-white/5">
+                              <iframe width="100%" height="200" src="https://www.youtube.com/embed/jfKfPfyJRdk?si=0mH_n87J2N3H2E-j&autoplay=0&controls=0" title="Lofi" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen className="w-full"></iframe>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
+                      {/* Theme Picker Toggle */}
+                      <button onClick={() => { setShowThemePicker(!showThemePicker); setShowPresetPicker(false); }} className={`w-full py-2.5 rounded-xl text-[9px] font-semibold uppercase tracking-wider transition-all ${showThemePicker ? 'bg-brand/20 text-white' : 'bg-white/[0.06] hover:bg-white/[0.10] text-white/60'}`}>
+                        <div className="flex items-center justify-center gap-2">
+                          <Palette className="w-3 h-3" />
+                          {showThemePicker ? 'Hide Theme Picker' : 'Theme & Wallpaper'}
+                        </div>
+                      </button>
+
+                      <AnimatePresence>
+                        {showThemePicker && renderThemePicker()}
+                      </AnimatePresence>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </>
+          ) : (
+            /* Full mode */
+            <>
+              <div className="flex items-center justify-between">
+                <button onClick={() => setShowPresetPicker(!showPresetPicker)} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.10] transition-colors">
+                  <activePreset.icon className="w-3 h-3 text-brand-light" />
+                  <span className="text-[9px] font-semibold uppercase tracking-wider text-white/60">{activePreset.name}</span>
+                </button>
+                <div className="flex items-center gap-1">
+                  <button onClick={() => setShowThemePicker(!showThemePicker)} className={`p-2 rounded-xl transition-all ${showThemePicker ? 'bg-brand text-white shadow-lg' : 'text-white/40 hover:text-white/70 hover:bg-white/5'}`}>
+                    <Palette className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => setIsZenMode(true)} className="p-2 text-white/40 hover:text-white/70 hover:bg-white/5 rounded-xl transition-all">
+                    <Maximize2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex gap-1.5 bg-white/[0.04] p-1 rounded-xl">
+                {(['focus', 'shortBreak', 'longBreak'] as const).map(m => (
+                  <button key={m} onClick={() => { setIsActive(false); setMode(m); const d = m === 'focus' ? activePreset.focus : m === 'shortBreak' ? activePreset.short : activePreset.long; setTimeLeft(d * 60); }} 
+                    className={`flex-1 py-2 rounded-[10px] text-[9px] font-semibold uppercase tracking-wider transition-all ${mode === m ? 'bg-white/10 text-white shadow-sm' : 'text-white/30 hover:text-white/60'}`}>
+                    {m === 'focus' ? 'Focus' : m === 'shortBreak' ? 'Break' : 'Long Break'}
+                  </button>
+                ))}
+              </div>
+
+              <div className="py-6 text-center">
+                <motion.div key={mode} initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-6xl md:text-7xl font-display font-light tracking-tighter tabular-nums text-white/90 select-none">
+                  {formatTime(timeLeft)}
+                </motion.div>
+                <div className="flex items-center justify-center gap-2 mt-2">
+                  <div className="flex gap-1">
+                    {[...Array(4)].map((_, i) => (
+                      <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all ${i < (sessionsCompleted % 4) ? 'bg-brand-light' : 'bg-white/8'}`} />
+                    ))}
+                  </div>
+                  <span className="text-[8px] font-medium uppercase tracking-wider text-white/30">Cycle {Math.floor(sessionsCompleted / 4) + 1}</span>
+                </div>
+              </div>
+              
+              <AnimatePresence mode="wait">
+                {showThemePicker ? renderThemePicker() : showPresetPicker ? renderPresetPicker() : (
+                  <motion.div key="controls" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
+                    {renderTimerControls()}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </>
+          )}
         </div>
       </DashboardCard>
       

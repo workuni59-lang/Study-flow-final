@@ -45,31 +45,31 @@ export const PathToMastery = ({ isOpen, onClose, subject, examTitle, daysLeft }:
             className="relative w-full max-w-2xl bg-white dark:bg-slate-950 rounded-[40px] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
           >
             {/* Header Area */}
-            <div className="p-8 md:p-12 bg-indigo-600 text-white relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-8 opacity-10">
-                <Trophy className="w-32 h-32 rotate-12" />
+            <div className="p-6 md:p-10 bg-indigo-600 text-white relative">
+              <div className="absolute top-0 right-0 p-6 opacity-10">
+                <Trophy className="w-24 h-24 rotate-12" />
               </div>
               
               <button 
                 onClick={onClose}
-                className="absolute top-8 right-8 p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-colors"
+                className="absolute top-6 right-6 p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-colors"
               >
-                <X className="w-6 h-6" />
+                <X className="w-5 h-5" />
               </button>
 
               <div className="relative z-10">
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-200 mb-4 block">Path to Mastery</span>
-                <h2 className="text-3xl md:text-5xl font-display font-black tracking-tighter mb-6 leading-none">
+                <span className="text-[9px] font-black uppercase tracking-[0.3em] text-indigo-200 mb-3 block">Path to Mastery</span>
+                <h2 className="text-2xl md:text-4xl font-display font-black tracking-tighter mb-4 leading-none">
                   {examTitle}
                 </h2>
                 
-                <div className="flex flex-wrap items-center gap-6">
-                  <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-xl backdrop-blur-sm">
-                    <Target className="w-4 h-4 text-indigo-200" />
-                    <span className="text-xs font-black uppercase tracking-widest">{progress}% Mastery</span>
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-xl backdrop-blur-sm">
+                    <Target className="w-3.5 h-3.5 text-indigo-200" />
+                    <span className="text-[10px] font-black uppercase tracking-widest">{progress}% Mastery</span>
                   </div>
-                  <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-xl backdrop-blur-sm">
-                    <span className="text-xs font-black uppercase tracking-widest">{daysLeft} Days to go</span>
+                  <div className="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-xl backdrop-blur-sm">
+                    <span className="text-[10px] font-black uppercase tracking-widest">{daysLeft} Days to go</span>
                   </div>
                 </div>
               </div>

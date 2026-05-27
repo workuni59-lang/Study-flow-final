@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { storage } from '../services/storage';
-import { UserStats, Badge, ACHIEVEMENTS, Achievement, Quest, calculateLevel, XP_PER_TASK, XP_PER_FOCUS_MINUTE, AtmosphereId, WallpaperId } from '../lib/gamification';
+import { UserStats, Badge, ACHIEVEMENTS, Achievement, Quest, calculateLevel, XP_PER_TASK, XP_PER_FOCUS_MINUTE, AtmosphereId, WallpaperId, PetState, PetFood, PET_FOODS, PET_SPECIES, PET_SKINS, INITIAL_PET_STATE, PET_HUNGER_DECAY_PER_HOUR, PET_WEAK_THRESHOLD, PET_WEAK_DURATION_MS, PET_DORMANT_DURATION_MS, PetHealth, PetEvent, PetEventType } from '../lib/gamification';
 
 interface MockUser {
   uid: string;
@@ -70,6 +70,7 @@ interface StudyContextType {
   confettiActive: boolean;
   panicModeActive: boolean;
   selectedExamForPath: Exam | null;
+  petState: PetState;
   setThemeConfig: (config: ThemeConfig) => void;
   updateUser: (data: Partial<MockUser>) => void;
   signIn: () => Promise<void>;
@@ -95,6 +96,15 @@ interface StudyContextType {
   resetStreak: () => void;
   setPanicMode: (active: boolean) => void;
   setSelectedExamForPath: (exam: Exam | null) => void;
+  feedPet: (foodId: string) => void;
+  petInteract: () => void;
+  changePetSpecies: (speciesId: string) => void;
+  changePetSkin: (skinId: string) => void;
+  purchaseSkin: (skinId: string) => boolean;
+  setPetName: (name: string) => void;
+  tickPet: () => void;
+  petEvent: PetEvent | null;
+  firePetEvent: (type: PetEventType) => void;
 }
 
 const StudyContext = createContext<StudyContextType | undefined>(undefined);
@@ -152,7 +162,17 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
 
   const [unlockedBadges, setUnlockedBadges] = useState<Badge[]>(() => storage.getUnlockedBadges() || []);
   const [quests, setQuests] = useState<Quest[]>(() => storage.getDailyQuests() || []);
-  
+  const [petState, setPetState] = useState<PetState>(() => {
+    const saved = storage.getPetState();
+    if (!saved) return INITIAL_PET_STATE;
+    return { ...INITIAL_PET_STATE, ...saved, foodInventory: saved.foodInventory || [], unlockedSpecies: saved.unlockedSpecies || ['pixie'], unlockedSkins: saved.unlockedSkins || ['pixie_base'] };
+  });
+  const [petEvent, setPetEvent] = useState<PetEvent | null>(null);
+  const petEventId = useRef(0);
+  const firePetEvent = useCallback((type: PetEventType) => {
+    petEventId.current++;
+    setPetEvent({ type, id: petEventId.current });
+  }, []);
   const [activeNotification, setActiveNotification] = useState<Achievement | null>(null);
   const [notificationQueue, setNotificationQueue] = useState<Achievement[]>([]);
   const [confettiActive, setConfettiActive] = useState(false);
@@ -187,6 +207,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => { storage.saveUserStats(userStats); }, [userStats]);
   useEffect(() => { storage.saveUnlockedBadges(unlockedBadges); }, [unlockedBadges]);
   useEffect(() => { storage.saveDailyQuests(quests); }, [quests]);
+  useEffect(() => { storage.savePetState(petState); }, [petState]);
 
   // Notification Queue Processor
   useEffect(() => {
@@ -221,7 +242,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     setTimeout(() => setConfettiActive(false), 500);
   };
 
-  const resetStreak = () => { setUserStats(prev => ({ ...prev, currentStreak: 0 })); };
+  const resetStreak = () => { setUserStats(prev => ({ ...prev, currentStreak: 0 })); firePetEvent('streak_lost'); };
 
   const setPanicMode = (active: boolean) => {
     setPanicModeActive(active);
@@ -290,6 +311,9 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     setUserStats(prev => {
       const newXP = prev.xp + amount;
       const newLevel = calculateLevel(newXP);
+      if (newLevel > prev.level) {
+        setTimeout(() => firePetEvent('level_up'), 50);
+      }
       const newHistory = { ...prev.dailyXPHistory };
       newHistory[today] = (newHistory[today] || 0) + amount;
       const nextStats = { ...prev, xp: newXP, level: newLevel, dailyXPHistory: newHistory };
@@ -345,7 +369,14 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
         newlyUnlocked.push(achievement);
       }
     });
-    if (newlyUnlocked.length > 0) setNotificationQueue(prev => [...prev, ...newlyUnlocked]);
+    if (newlyUnlocked.length > 0) {
+      setNotificationQueue(prev => [...prev, ...newlyUnlocked]);
+      const rarest = newlyUnlocked.reduce((a, b) => {
+        const rank = { Common: 0, Rare: 1, Epic: 2, Legendary: 3 };
+        return rank[b.rarity as keyof typeof rank] > rank[a.rarity as keyof typeof rank] ? b : a;
+      });
+      setTimeout(() => firePetEvent('achievement_unlocked'), 100);
+    }
   };
 
   const addTask = (title: string, category: string, priority: string, dueDate?: string) => {
@@ -354,21 +385,28 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   };
 
   const toggleTask = (id: string) => {
-    setTasks(prev => prev.map(t => {
-      if (t.id === id) {
-        if (!t.completed) {
-          addXP(XP_PER_TASK);
-          setUserStats(s => {
-            const next = { ...s, totalTasksCompleted: s.totalTasksCompleted + 1 };
-            checkAchievements(next);
-            return next;
-          });
-          updateQuestProgress('tasks', 1);
+    let wasCompleted = false;
+    setTasks(prev => {
+      const task = prev.find(t => t.id === id);
+      if (task && !task.completed) wasCompleted = true;
+      return prev.map(t => {
+        if (t.id === id) {
+          if (!t.completed) {
+            addXP(XP_PER_TASK);
+            earnFood('task', 1);
+            setUserStats(s => {
+              const next = { ...s, totalTasksCompleted: s.totalTasksCompleted + 1 };
+              checkAchievements(next);
+              return next;
+            });
+            updateQuestProgress('tasks', 1);
+          }
+          return { ...t, completed: !t.completed };
         }
-        return { ...t, completed: !t.completed };
-      }
-      return t;
-    }));
+        return t;
+      });
+    });
+    if (wasCompleted) firePetEvent('task_done');
   };
 
   const deleteTask = (id: string) => setTasks(prev => prev.filter(t => t.id !== id));
@@ -417,6 +455,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
         if (!wasGreen && mastery === 'Green') {
           updateQuestProgress('mastery', 1);
           addXP(100);
+          earnFood('mastery', 1);
           triggerConfetti(); 
         }
         return { ...s, topics: s.topics.map(t => t.id === topicId ? { ...t, mastery } : t) };
@@ -433,25 +472,140 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     const minutes = Math.floor(seconds / 60);
     addXP(minutes * XP_PER_FOCUS_MINUTE);
     updateQuestProgress('focus', seconds);
+    earnFood('focus', seconds);
     setUserStats(prev => {
       const next = { ...prev, totalFocusSeconds: prev.totalFocusSeconds + seconds };
       checkAchievements(next);
       return next;
     });
+    firePetEvent('focus_done');
   };
 
   const closeNotification = () => { setActiveNotification(null); };
 
+  // ─── Pet Actions ───────────────────────────────────────────────
+
+  const feedPet = (foodId: string) => {
+    setPetState(prev => {
+      const idx = prev.foodInventory.findIndex(f => f.foodId === foodId);
+      if (idx === -1 || prev.foodInventory[idx].quantity <= 0) return prev;
+      const food = PET_FOODS.find(f => f.id === foodId);
+      if (!food) return prev;
+      const newInventory = prev.foodInventory.map((f, i) => i === idx ? { ...f, quantity: f.quantity - 1 } : f).filter(f => f.quantity > 0);
+      const newHunger = Math.min(100, prev.hunger + food.hungerValue);
+      const newState: PetState = {
+        ...prev,
+        hunger: newHunger,
+        health: newHunger >= 50 ? 'happy' : newHunger > 0 ? 'neutral' : 'dormant',
+        lastFedAt: new Date().toISOString(),
+        foodInventory: newInventory,
+        totalFed: prev.totalFed + 1,
+      };
+      return newState;
+    });
+    triggerConfetti();
+  };
+
+  const petInteract = () => {
+    setPetState(prev => ({ ...prev, lastInteractedAt: new Date().toISOString(), health: prev.hunger > 0 ? 'happy' : prev.health }));
+  };
+
+  const changePetSpecies = (speciesId: string) => {
+    const species = PET_SPECIES.find(s => s.id === speciesId);
+    if (!species) return;
+    if (species.isPremium && !userStats.isPremium) return;
+    if (!petState.unlockedSpecies.includes(speciesId) && userStats.level < species.unlockLevel) return;
+    setPetState(prev => ({ ...prev, species: speciesId, name: species.name }));
+  };
+
+  const changePetSkin = (skinId: string) => {
+    const skin = PET_SKINS.find(s => s.id === skinId);
+    if (!skin) return;
+    if (!petState.unlockedSkins.includes(skinId)) return;
+    if (skin.speciesId !== petState.species) return;
+    setPetState(prev => ({ ...prev, skin: skinId }));
+  };
+
+  const purchaseSkin = (skinId: string) => {
+    const skin = PET_SKINS.find(s => s.id === skinId);
+    if (!skin || petState.unlockedSkins.includes(skinId)) return false;
+    if (userStats.level < skin.unlockLevel) return false;
+    if (skin.isPremium && !userStats.isPremium && skin.price > 0) return false;
+    if (userStats.xp < skin.price) return false;
+    setUserStats(prev => ({ ...prev, xp: prev.xp - skin.price }));
+    setPetState(prev => ({ ...prev, unlockedSkins: [...prev.unlockedSkins, skinId], skin: skinId }));
+    triggerConfetti();
+    firePetEvent('achievement_unlocked');
+    return true;
+  };
+
+  const setPetName = (name: string) => {
+    setPetState(prev => ({ ...prev, name }));
+  };
+
+  const tickPet = useCallback(() => {
+    setPetState(prev => {
+      const now = Date.now();
+      const lastFed = new Date(prev.lastFedAt).getTime();
+      const hoursSinceFed = (now - lastFed) / (1000 * 60 * 60);
+      const hungerDecay = Math.floor(hoursSinceFed * PET_HUNGER_DECAY_PER_HOUR);
+      if (hungerDecay <= 0) return prev;
+      const newHunger = Math.max(0, prev.hunger - hungerDecay);
+      let newHealth: PetHealth = prev.health;
+      const weakDuration = now - lastFed;
+      if (newHunger <= 0 && weakDuration >= PET_DORMANT_DURATION_MS) {
+        newHealth = 'dormant';
+      } else if (newHunger < PET_WEAK_THRESHOLD && weakDuration >= PET_WEAK_DURATION_MS) {
+        newHealth = 'weak';
+      } else if (newHunger >= 50) {
+        newHealth = 'happy';
+      } else if (newHunger > 0) {
+        newHealth = 'neutral';
+      }
+      return { ...prev, hunger: newHunger, health: newHealth, lastFedAt: new Date().toISOString() };
+    });
+  }, []);
+
+  // Tick pet hunger on mount and every 60s
+  useEffect(() => { tickPet(); }, []);
+  useEffect(() => {
+    const interval = setInterval(tickPet, 60000);
+    return () => clearInterval(interval);
+  }, [tickPet]);
+
+  // Unlock pet species on level up
+  useEffect(() => {
+    setPetState(prev => {
+      const newlyUnlocked = PET_SPECIES.filter(s => !s.isPremium && userStats.level >= s.unlockLevel && !prev.unlockedSpecies.includes(s.id));
+      if (newlyUnlocked.length === 0) return prev;
+      return { ...prev, unlockedSpecies: [...prev.unlockedSpecies, ...newlyUnlocked.map(s => s.id)] };
+    });
+  }, [userStats.level]);
+
+  // Earn food hooks
+  const earnFood = useCallback((source: 'focus' | 'task' | 'mastery', amount: number) => {
+    const matching = PET_FOODS.filter(f => f.source === source && amount >= f.sourceAmount);
+    if (matching.length === 0) return;
+    const food = matching[matching.length - 1];
+    setPetState(prev => {
+      const existing = prev.foodInventory.find(f => f.foodId === food.id);
+      if (existing) {
+        return { ...prev, foodInventory: prev.foodInventory.map(f => f.foodId === food.id ? { ...f, quantity: f.quantity + 1 } : f) };
+      }
+      return { ...prev, foodInventory: [...prev.foodInventory, { foodId: food.id, quantity: 1 }] };
+    });
+  }, []);
+
   // Optimization: Memoize the Context Value
   const contextValue = useMemo(() => ({
     user, loading, accessToken, subjects, tasks, exams, quests, themeConfig, userStats, unlockedBadges, activeNotification,
-    confettiActive, panicModeActive, selectedExamForPath, setThemeConfig, signIn, logout, addSubject, deleteSubject, addTopic,
+    confettiActive, panicModeActive, selectedExamForPath, petState, setThemeConfig, signIn, logout, addSubject, deleteSubject, addTopic,
     updateTopicMastery, deleteTopic, addTask, toggleTask, deleteTask, addExam, deleteExam, recalibrateTasks,
     setTasks, addXP, completeFocusSession, closeNotification, buyShield, togglePremium, triggerConfetti, resetStreak, setPanicMode,
-    setSelectedExamForPath, updateUser
+    setSelectedExamForPath, updateUser, feedPet, petInteract, changePetSpecies, changePetSkin, purchaseSkin, setPetName, tickPet, petEvent, firePetEvent
   }), [
     user, loading, accessToken, subjects, tasks, exams, quests, themeConfig, userStats, unlockedBadges, activeNotification,
-    confettiActive, panicModeActive, selectedExamForPath
+    confettiActive, panicModeActive, selectedExamForPath, petState, petEvent
   ]);
 
   return (

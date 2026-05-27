@@ -14,6 +14,10 @@ const STORAGE_KEYS = {
   USER_STATS: 'study_flow_user_stats',
   UNLOCKED_BADGES: 'study_flow_unlocked_badges',
   DAILY_QUESTS: 'study_flow_daily_quests',
+  PET_STATE: 'study_flow_pet_state',
+  PET_POSITION: 'study_flow_pet_position',
+  PET_VISIBLE: 'study_flow_pet_visible',
+  PET_SIZE: 'study_flow_pet_size',
 };
 
 const safeGet = (key: string) => {
@@ -72,6 +76,18 @@ export const storage = {
 
   saveTimerState: (seconds: number) => safeSet(STORAGE_KEYS.TIMER, seconds),
   getTimerState: (): number | null => safeGet(STORAGE_KEYS.TIMER),
+
+  // --- Pet ---
+  savePetState: (state: any) => safeSet(STORAGE_KEYS.PET_STATE, state),
+  getPetState: (): any | null => safeGet(STORAGE_KEYS.PET_STATE),
+  savePetPosition: (pos: { x: number; y: number }) => safeSet(STORAGE_KEYS.PET_POSITION, pos),
+  getPetPosition: (): { x: number; y: number } | null => safeGet(STORAGE_KEYS.PET_POSITION),
+
+  // --- Pet Settings ---
+  savePetVisible: (visible: boolean) => safeSet(STORAGE_KEYS.PET_VISIBLE, visible),
+  getPetVisible: (): boolean | null => safeGet(STORAGE_KEYS.PET_VISIBLE),
+  savePetSize: (size: number) => safeSet(STORAGE_KEYS.PET_SIZE, size),
+  getPetSize: (): number | null => safeGet(STORAGE_KEYS.PET_SIZE),
 
   // --- Generic ---
   clearAll: () => {

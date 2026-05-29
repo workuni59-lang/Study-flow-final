@@ -187,14 +187,16 @@ export default function PetPanel({ onClose, onFeed, petVisible, petSize, onToggl
                 {PET_SPECIES.map(s => {
                   const isUnlocked = petState.unlockedSpecies.includes(s.id) || (s.isPremium && userStats.isPremium);
                   const isActive = petState.species === s.id;
-                  const canUnlock = !isUnlocked && !s.isPremium && false;
+                  const isPremiumLocked = s.isPremium && !userStats.isPremium;
+                  const isGenuinelyLocked = !isUnlocked && !isPremiumLocked;
                   return (
                     <button
                       key={s.id}
-                      onClick={() => { if (s.isPremium && !userStats.isPremium) { setShowPremiumModal(true); return; } changePetSpecies(s.id); }}
-                      disabled={!isUnlocked || isActive}
+                      onClick={() => { if (isPremiumLocked) { setShowPremiumModal(true); return; } changePetSpecies(s.id); }}
+                      disabled={isActive}
                       className={`p-3 rounded-xl border text-left transition-all ${
                         isActive ? 'bg-brand/20 border-brand/50 ring-1 ring-brand/50' :
+                        isPremiumLocked ? 'bg-amber-500/5 border-amber-500/20 opacity-80 hover:bg-amber-500/10 cursor-pointer' :
                         isUnlocked ? 'bg-white/[0.04] border-white/5 hover:bg-white/[0.08]' :
                         'bg-white/[0.02] border-white/5 opacity-40 cursor-not-allowed'
                       }`}
@@ -211,11 +213,11 @@ export default function PetPanel({ onClose, onFeed, petVisible, petSize, onToggl
                       </div>
                       <p className="text-xs font-semibold text-white/90">{s.name}</p>
                       <p className="text-[8px] text-white/30 mt-0.5 leading-tight">{s.description}</p>
-                      {!isUnlocked && !s.isPremium && (
-                        <p className="text-[8px] text-brand-light mt-1">Unlocks at level {s.unlockLevel}</p>
+                      {isPremiumLocked && (
+                        <p className="text-[8px] text-amber-400 mt-1">Tap to unlock →</p>
                       )}
-                      {!isUnlocked && s.isPremium && (
-                        <p className="text-[8px] text-amber-400 mt-1">Premium species</p>
+                      {isGenuinelyLocked && (
+                        <p className="text-[8px] text-brand-light mt-1">Unlocks at level {s.unlockLevel}</p>
                       )}
                     </button>
                   );
@@ -226,25 +228,29 @@ export default function PetPanel({ onClose, onFeed, petVisible, petSize, onToggl
                 {PET_SKINS.filter(s => s.speciesId === petState.species).map(skin => {
                   const isUnlocked = petState.unlockedSkins.includes(skin.id);
                   const isActive = petState.skin === skin.id;
-                  const canAfford = userStats.xp >= skin.price;
-                  const meetsLevel = userStats.level >= skin.unlockLevel;
-                  const canUnlock = !isUnlocked && !skin.isPremium && meetsLevel && canAfford;
                   const isPremiumLocked = skin.isPremium && !userStats.isPremium;
+                  const meetsLevel = userStats.level >= skin.unlockLevel;
+                  const canAfford = userStats.xp >= skin.price;
+                  const canUnlock = !isUnlocked && !skin.isPremium && meetsLevel && canAfford;
+                  const canPremiumUnlock = !isUnlocked && skin.isPremium && userStats.isPremium;
+                  const isGenuinelyLocked = !isUnlocked && !isPremiumLocked && !canPremiumUnlock;
                   return (
                     <button
                       key={skin.id}
                       onClick={() => {
                         if (isPremiumLocked) { setShowPremiumModal(true); return; }
                         if (isUnlocked) { changePetSkin(skin.id); return; }
-                        if (canUnlock || (skin.isPremium && userStats.isPremium && canAfford && meetsLevel)) {
+                        if (canUnlock || canPremiumUnlock) {
                           purchaseSkin(skin.id);
                         }
                       }}
-                      disabled={isActive || (!isUnlocked && !canUnlock && !(skin.isPremium && userStats.isPremium))}
+                      disabled={isActive || isGenuinelyLocked}
                       className={`p-3 rounded-xl border text-left transition-all ${
                         isActive ? 'bg-brand/20 border-brand/50 ring-1 ring-brand/50' :
+                        isPremiumLocked ? 'bg-amber-500/5 border-amber-500/20 opacity-80 hover:bg-amber-500/10 cursor-pointer' :
+                        canPremiumUnlock ? 'bg-white/[0.04] border-white/5 hover:bg-white/[0.08]' :
                         isUnlocked ? 'bg-white/[0.04] border-white/5 hover:bg-white/[0.08]' :
-                        'bg-white/[0.02] border-white/5 opacity-50 cursor-not-allowed'
+                        'bg-white/[0.02] border-white/5 opacity-40 cursor-not-allowed'
                       }`}
                     >
                       <div className="flex items-start justify-between mb-2">
@@ -269,13 +275,15 @@ export default function PetPanel({ onClose, onFeed, petVisible, petSize, onToggl
                         ) : isUnlocked ? (
                           <span className="text-[7px] font-bold uppercase tracking-wider text-emerald-400">Owned</span>
                         ) : isPremiumLocked ? (
-                          <span className="text-[7px] font-bold uppercase tracking-wider text-amber-400">Premium</span>
+                          <span className="text-[7px] font-bold uppercase tracking-wider text-amber-400">Tap to unlock →</span>
+                        ) : canPremiumUnlock ? (
+                          <span className="text-[7px] font-bold uppercase tracking-wider text-brand-light">Claim</span>
                         ) : skin.price > 0 ? (
                           <span className={`text-[7px] font-bold uppercase tracking-wider ${canAfford ? 'text-white/60' : 'text-rose-400'}`}>{skin.price} XP</span>
                         ) : (
                           <span className="text-[7px] font-bold uppercase tracking-wider text-brand-light">Level {skin.unlockLevel}</span>
                         )}
-                        {!meetsLevel && !isUnlocked && (
+                        {!meetsLevel && !isUnlocked && !skin.isPremium && (
                           <span className="text-[7px] text-white/30">Lv.{skin.unlockLevel}</span>
                         )}
                       </div>

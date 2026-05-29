@@ -70,6 +70,8 @@ export default function ClockRenderer({ time, focusState }: ClockRendererProps) 
           ...shadowStyle,
           borderRadius: config.borderRadius,
           fontFamily: isAnalog ? undefined : config.fontFamily,
+          fontSize: isAnalog ? undefined : 'clamp(2.5rem, 8vw, 5.5rem)',
+          lineHeight: isAnalog ? undefined : 1,
         }}
         variants={floatHover}
         animate="animate"

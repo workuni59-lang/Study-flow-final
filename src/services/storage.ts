@@ -18,6 +18,8 @@ const STORAGE_KEYS = {
   PET_POSITION: 'study_flow_pet_position',
   PET_VISIBLE: 'study_flow_pet_visible',
   PET_SIZE: 'study_flow_pet_size',
+  SIDEBAR_COLLAPSED: 'study_flow_sidebar_collapsed',
+  NOTEPAD: 'study_flow_notepad',
 };
 
 const safeGet = (key: string) => {
@@ -88,6 +90,14 @@ export const storage = {
   getPetVisible: (): boolean | null => safeGet(STORAGE_KEYS.PET_VISIBLE),
   savePetSize: (size: number) => safeSet(STORAGE_KEYS.PET_SIZE, size),
   getPetSize: (): number | null => safeGet(STORAGE_KEYS.PET_SIZE),
+
+  // --- Sidebar ---
+  saveSidebarCollapsed: (collapsed: boolean) => safeSet(STORAGE_KEYS.SIDEBAR_COLLAPSED, collapsed),
+  getSidebarCollapsed: (): boolean | null => safeGet(STORAGE_KEYS.SIDEBAR_COLLAPSED),
+
+  // --- Notepad ---
+  saveNotepad: (content: string) => safeSet(STORAGE_KEYS.NOTEPAD, content),
+  getNotepad: (): string | null => safeGet(STORAGE_KEYS.NOTEPAD),
 
   // --- Generic ---
   clearAll: () => {

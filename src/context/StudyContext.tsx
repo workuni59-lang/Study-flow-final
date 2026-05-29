@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import confetti from 'canvas-confetti';
 import { storage } from '../services/storage';
 import { UserStats, Badge, ACHIEVEMENTS, Achievement, Quest, calculateLevel, XP_PER_TASK, XP_PER_FOCUS_MINUTE, AtmosphereId, WallpaperId, PetState, PetFood, PET_FOODS, PET_SPECIES, PET_SKINS, INITIAL_PET_STATE, PET_HUNGER_DECAY_PER_HOUR, PET_WEAK_THRESHOLD, PET_WEAK_DURATION_MS, PET_DORMANT_DURATION_MS, PetHealth, PetEvent, PetEventType } from '../lib/gamification';
 export interface FocusSessionState {
@@ -53,6 +54,7 @@ export interface ThemeConfig {
   showGreeting: boolean;
   showQuote: boolean;
   showClock: boolean;
+  scaleFactor: number; // 0.5-1.5
 }
 
 interface StudyContextType {
@@ -106,6 +108,11 @@ interface StudyContextType {
   syncPremiumStatus: (isPremium: boolean) => void;
   showPremiumModal: boolean;
   setShowPremiumModal: (show: boolean) => void;
+  activeTrackId: string | null;
+  masterVolume: number;
+  playAudio: (url: string, trackId: string) => void;
+  stopAudio: () => void;
+  setMasterVolume: (vol: number) => void;
 }
 
 const StudyContext = createContext<StudyContextType | undefined>(undefined);
@@ -132,7 +139,8 @@ const DEFAULT_THEME: ThemeConfig = {
   saturation: 100,
   showGreeting: true,
   showQuote: true,
-  showClock: true
+  showClock: true,
+  scaleFactor: 1
 };
 
 export function StudyProvider({ children }: { children: React.ReactNode }) {
@@ -173,6 +181,38 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   const [selectedExamForPath, setSelectedExamForPath] = useState<Exam | null>(null);
   const [focusSession, setFocusSession] = useState<FocusSessionState | null>(null);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [activeTrackId, setActiveTrackId] = useState<string | null>(null);
+  const [masterVolume, setMasterVolume] = useState(0.5);
+  const currentAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  const stopAudio = useCallback(() => {
+    if (currentAudioRef.current) {
+      currentAudioRef.current.pause();
+      currentAudioRef.current = null;
+    }
+    setActiveTrackId(null);
+  }, []);
+
+  const playAudio = useCallback((url: string, trackId: string) => {
+    if (activeTrackId === trackId) {
+      stopAudio();
+      return;
+    }
+    stopAudio();
+    const audio = new Audio(url);
+    audio.loop = true;
+    audio.volume = masterVolume;
+    currentAudioRef.current = audio;
+    audio.play().catch(() => {});
+    setActiveTrackId(trackId);
+  }, [activeTrackId, masterVolume, stopAudio]);
+
+  // Keep volume in sync
+  useEffect(() => {
+    if (currentAudioRef.current) {
+      currentAudioRef.current.volume = masterVolume;
+    }
+  }, [masterVolume]);
 
   // Synchronization Hooks
   useEffect(() => {
@@ -197,6 +237,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     storage.saveThemeConfig(themeConfig);
     document.documentElement.setAttribute('data-atmosphere', themeConfig.atmosphere);
     document.documentElement.setAttribute('data-wallpaper', themeConfig.wallpaper);
+    document.documentElement.style.setProperty('--scale-factor', String(themeConfig.scaleFactor));
   }, [themeConfig]);
   
   useEffect(() => { storage.saveUserStats(userStats); }, [userStats]);
@@ -373,15 +414,15 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     setTasks(prev => {
       const task = prev.find(t => t.id === id);
       if (task && !task.completed) wasCompleted = true;
-      return prev.map(t => {
+      const next = prev.map(t => {
         if (t.id === id) {
           if (!t.completed) {
             addXP(XP_PER_TASK);
             earnFood('task', 1);
             setUserStats(s => {
-              const next = { ...s, totalTasksCompleted: s.totalTasksCompleted + 1 };
-              checkAchievements(next);
-              return next;
+              const nextStats = { ...s, totalTasksCompleted: s.totalTasksCompleted + 1 };
+              checkAchievements(nextStats);
+              return nextStats;
             });
             updateQuestProgress('tasks', 1);
           }
@@ -389,6 +430,10 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
         }
         return t;
       });
+      if (next.length > 0 && next.every(t => t.completed)) {
+        setTimeout(() => confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }), 0);
+      }
+      return next;
     });
     if (wasCompleted) firePetEvent('task_done');
   };
@@ -505,6 +550,11 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     const species = PET_SPECIES.find(s => s.id === speciesId);
     if (!species) return;
     if (species.isPremium && !userStats.isPremium) return;
+    // Premium users can access any premium species regardless of level/unlock
+    if (species.isPremium && userStats.isPremium) {
+      setPetState(prev => ({ ...prev, species: speciesId, name: species.name }));
+      return;
+    }
     if (!petState.unlockedSpecies.includes(speciesId) && userStats.level < species.unlockLevel) return;
     setPetState(prev => ({ ...prev, species: speciesId, name: species.name }));
   };
@@ -512,7 +562,8 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   const changePetSkin = (skinId: string) => {
     const skin = PET_SKINS.find(s => s.id === skinId);
     if (!skin) return;
-    if (!petState.unlockedSkins.includes(skinId)) return;
+    // Premium users can equip premium skins even if not purchased
+    if (!petState.unlockedSkins.includes(skinId) && !(skin.isPremium && userStats.isPremium)) return;
     if (skin.speciesId !== petState.species) return;
     setPetState(prev => ({ ...prev, skin: skinId }));
   };
@@ -520,6 +571,13 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   const purchaseSkin = (skinId: string) => {
     const skin = PET_SKINS.find(s => s.id === skinId);
     if (!skin || petState.unlockedSkins.includes(skinId)) return false;
+    // Premium users bypass level & price checks for premium skins
+    if (skin.isPremium && userStats.isPremium) {
+      setPetState(prev => ({ ...prev, unlockedSkins: [...prev.unlockedSkins, skinId], skin: skinId }));
+      triggerConfetti();
+      firePetEvent('achievement_unlocked');
+      return true;
+    }
     if (userStats.level < skin.unlockLevel) return false;
     if (skin.isPremium && !userStats.isPremium && skin.price > 0) return false;
     if (userStats.xp < skin.price) return false;
@@ -594,10 +652,12 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     updateTopicMastery, deleteTopic, addTask, toggleTask, deleteTask, addExam, deleteExam, recalibrateTasks,
     setTasks, addXP, completeFocusSession, logSession, closeNotification, buyShield, togglePremium, syncPremiumStatus, triggerConfetti, resetStreak, setPanicMode,
     setSelectedExamForPath, feedPet, petInteract, changePetSpecies, changePetSkin, purchaseSkin, setPetName, tickPet, petEvent, firePetEvent,
-    showPremiumModal, setShowPremiumModal
+    showPremiumModal, setShowPremiumModal,
+    activeTrackId, masterVolume, playAudio, stopAudio, setMasterVolume
   }), [
     accessToken, subjects, tasks, exams, quests, themeConfig, userStats, unlockedBadges, activeNotification,
-    confettiActive, panicModeActive, selectedExamForPath, petState, petEvent, focusSession, showPremiumModal
+    confettiActive, panicModeActive, selectedExamForPath, petState, petEvent, focusSession, showPremiumModal,
+    activeTrackId, masterVolume, playAudio, stopAudio, setMasterVolume
   ]);
 
   return (

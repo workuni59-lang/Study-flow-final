@@ -175,12 +175,33 @@ export const WallpaperEngine = () => {
 
             {/* Zen Garden */}
             {themeConfig.wallpaper === 'zen' && (
-              <div className="absolute inset-0 overflow-hidden flex items-center justify-center">
-                 {[...Array(5)].map((_, i) => (
-                   <div key={i} className="absolute border border-indigo-500/10 rounded-full"
-                    style={{ width: `${(i + 1) * 300}px`, height: `${(i + 1) * 300}px`, animation: `zen-ripple ${10}s infinite ease-out`, animationDelay: `${i * 2}s` }}
-                   />
-                 ))}
+              <div className="absolute inset-0 overflow-hidden">
+                {/* Sand lines */}
+                <svg className="absolute inset-0 w-full h-full opacity-[0.12] dark:opacity-[0.2]" viewBox="0 0 100 100" preserveAspectRatio="none">
+                  {[...Array(20)].map((_, i) => (
+                    <line key={i} x1="0" y1={i * 5.3} x2="100" y2={i * 5.3 + 10} stroke="currentColor" strokeWidth="0.3" className="text-indigo-500" />
+                  ))}
+                  {[...Array(20)].map((_, i) => (
+                    <line key={i} x1={i * 5.3} y1="0" x2={i * 5.3 + 10} y2="100" stroke="currentColor" strokeWidth="0.2" className="text-indigo-400" />
+                  ))}
+                </svg>
+                {/* Zen stones */}
+                <div className="absolute top-1/3 left-1/3 w-12 h-12 rounded-full bg-slate-400/15 dark:bg-slate-300/10" />
+                <div className="absolute bottom-1/4 right-1/4 w-8 h-8 rounded-full bg-slate-400/10 dark:bg-slate-300/8" />
+                <div className="absolute top-1/4 right-1/3 w-6 h-6 rounded-full bg-slate-400/8 dark:bg-slate-300/6" />
+                {/* Rippling circles */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="absolute rounded-full bg-indigo-500/8 dark:bg-indigo-400/10 border border-indigo-500/25 dark:border-indigo-400/30"
+                      style={{
+                        width: `${(i + 1) * 280}px`,
+                        height: `${(i + 1) * 280}px`,
+                        animation: `zen-ripple ${12 + i * 2}s infinite ease-out`,
+                        animationDelay: `${i * 1.5}s`
+                      }}
+                    />
+                  ))}
+                </div>
               </div>
             )}
 
@@ -206,6 +227,27 @@ export const WallpaperEngine = () => {
               <motion.div style={{ x: dotsX, y: dotsY, backgroundImage: `radial-gradient(circle at center, #6366f1 2px, transparent 2px)`, backgroundSize: '56px 56px' }}
                 className="absolute inset-[-20%] opacity-[0.2] dark:opacity-[0.35]" 
               />
+            )}
+
+            {/* Clean Solid */}
+            {themeConfig.wallpaper === 'minimal' && (
+              <div className="absolute inset-0 overflow-hidden">
+                {/* Ambient gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-indigo-500/8 dark:to-indigo-400/15" />
+                {/* Subtle vignette */}
+                <div className="absolute inset-0 bg-radial-[circle_at_center] from-transparent via-transparent to-slate-950/30 dark:to-black/50" />
+                {/* Floating dust motes */}
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="absolute w-1 h-1 rounded-full bg-indigo-500/25 dark:bg-indigo-400/30"
+                    style={{
+                      left: `${15 + (i * 17) % 70}%`,
+                      top: `${10 + (i * 23) % 80}%`,
+                      animation: `twinkle-star-vibrant ${4 + i}s infinite ease-in-out`,
+                      animationDelay: `${i * 0.7}s`,
+                    }}
+                  />
+                ))}
+              </div>
             )}
           </div>
         )}

@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
-  Play, Pause, RotateCcw, Zap, Music, Maximize2, X, Volume2, 
-  CloudRain, Coffee, Waves, Palette, VolumeX, Lock, Crown, Layout, Sparkles,
+  Play, Pause, RotateCcw, Zap, Maximize2, X,
+  Palette, Crown, Layout,
   Settings2, Timer, BedDouble, Rocket, Image as ImageIcon, Search, Check, Link,
-  Bird, Flame, CloudLightning, Coffee as CafeIcon, Youtube, Music2, Info, Headphones, Moon, Upload,
-  ChevronUp, ChevronDown
+  Info, Upload
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { DashboardCard } from './DashboardCard';
@@ -15,21 +14,6 @@ import { ATMOSPHERES, WALLPAPERS, Wallpaper } from '../../lib/gamification';
 // Extract unique categories from wallpapers
 const IMAGE_CATEGORIES = [...new Set(WALLPAPERS.filter(w => w.type === 'image' && w.category).map(w => w.category!))];
 
-// 🎵 RELIABLE AUDIO ASSETS (Mixkit CDN — verified 200 OK, 1yr cache)
-const AMBIENCE_LIBRARY = [
-  { id: 'lofi', name: 'Focus Lofi', icon: Coffee, url: 'https://assets.mixkit.co/music/292/292.mp3', isPremium: false },
-  { id: 'rain', name: 'Soft Rain', icon: CloudRain, url: 'https://assets.mixkit.co/active_storage/sfx/2455/2455-preview.mp3', isPremium: false },
-  { id: 'white-noise', name: 'White Noise', icon: Waves, url: 'https://assets.mixkit.co/active_storage/sfx/2135/2135-preview.mp3', isPremium: true },
-  { id: 'meditation', name: 'Meditation', icon: Headphones, url: 'https://assets.mixkit.co/music/109/109.mp3', isPremium: true },
-  { id: 'birds', name: 'Morning Birds', icon: Bird, url: 'https://assets.mixkit.co/active_storage/sfx/2472/2472-preview.mp3', isPremium: true },
-  { id: 'fire', name: 'Fireplace', icon: Flame, url: 'https://assets.mixkit.co/active_storage/sfx/2456/2456-preview.mp3', isPremium: true },
-  { id: 'cafe', name: 'Paris Cafe', icon: CafeIcon, url: 'https://assets.mixkit.co/active_storage/sfx/444/444-preview.mp3', isPremium: true },
-  { id: 'storm', name: 'Thunderstorm', icon: CloudLightning, url: 'https://assets.mixkit.co/active_storage/sfx/2450/2450-preview.mp3', isPremium: true },
-  { id: 'deep-focus', name: 'Deep Focus', icon: Sparkles, url: 'https://assets.mixkit.co/music/27/27.mp3', isPremium: true },
-  { id: 'digital-dreams', name: 'Digital Dreams', icon: Music2, url: 'https://assets.mixkit.co/music/175/175.mp3', isPremium: true },
-  { id: 'night-walk', name: 'Night Walk', icon: Moon, url: 'https://assets.mixkit.co/music/135/135.mp3', isPremium: true },
-];
-
 type TimerMode = 'focus' | 'shortBreak' | 'longBreak';
 interface Preset { id: string; name: string; icon: any; focus: number; short: number; long: number; }
 
@@ -38,6 +22,14 @@ const PRESETS: Preset[] = [
   { id: 'deep', name: 'Deep Work', icon: Rocket, focus: 50, short: 10, long: 25 },
   { id: 'flow', name: 'Elite Flow', icon: Zap, focus: 90, short: 15, long: 30 },
 ];
+
+const TALLY_SETS: Record<string, string[]> = {
+  dots: ['○', '◔', '◐', '●'],
+  hearts: ['♡', '🩷', '💗', '❤️'],
+  stars: ['☆', '⭐', '🌟', '✨'],
+  flames: ['🔥', '🔥', '🔥', '🔥'],
+  snow: ['❄', '❄', '❄', '❄'],
+};
 
 interface StudyTimerProps { onTick?: () => void; compact?: boolean; }
 
@@ -49,22 +41,17 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
   const [timeLeft, setTimeLeft] = useState(PRESETS[0].focus * 60);
   const [isActive, setIsActive] = useState(false);
   const [isZenMode, setIsZenMode] = useState(false);
-  
-  // Audio Engine State (Solo Track)
-  const [activeTrackId, setActiveTrackId] = useState<string | null>(null);
-  const [masterVolume, setMasterVolume] = useState(0.5);
-  const currentAudio = useRef<HTMLAudioElement | null>(null);
-  
-  const [showAmbienceMixer, setShowAmbienceMixer] = useState(false);
-  const [showMusicHub, setShowMusicHub] = useState(false);
+    
+  // Theme Picker State
   const [showThemePicker, setShowThemePicker] = useState(false);
   const [showPresetPicker, setShowPresetPicker] = useState(false);
   const [pickerTab, setPickerTab] = useState<'atm' | 'wall'>('atm');
   const [wallpaperCategory, setWallpaperCategory] = useState<string>('All');
-  const [showExpanded, setShowExpanded] = useState(false);
+  const [wallpaperType, setWallpaperType] = useState<string>('All');
   const [sessionsCompleted, setSessionsCompleted] = useState(0);
   const [customUrl, setCustomUrl] = useState(themeConfig.customWallpaperUrl || '');
   const [urlApplied, setUrlApplied] = useState(false);
+  const [tallyStyle, setTallyStyle] = useState('dots');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,19 +69,43 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
     e.target.value = '';
   };
 
+  const totalTime = mode === 'focus' ? activePreset.focus * 60 : mode === 'shortBreak' ? activePreset.short * 60 : activePreset.long * 60;
+  const progress = totalTime > 0 ? (totalTime - timeLeft) / totalTime : 0;
+
   const sessionElapsed = useRef(0);
   const sessionStartTime = useRef<string | null>(null);
+  const wakeLockRef = useRef<any>(null);
 
-  // Initialize and Cleanup
+  const requestWakeLock = async () => {
+    try {
+      if ('wakeLock' in navigator) {
+        wakeLockRef.current = await (navigator as any).wakeLock.request('screen');
+      }
+    } catch {}
+  };
+
+  const releaseWakeLock = () => {
+    if (wakeLockRef.current) {
+      wakeLockRef.current.release().catch(() => {});
+      wakeLockRef.current = null;
+    }
+  };
+
+  // Release wake lock on visibility change
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible' && isActive) {
+        requestWakeLock();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [isActive]);
+
+  // Initialize
   useEffect(() => {
     const saved = storage.getTimerState();
     if (saved !== null) setTimeLeft(saved);
-    return () => {
-      if (currentAudio.current) {
-        currentAudio.current.pause();
-        currentAudio.current.src = "";
-      }
-    };
   }, []);
 
   // Track session start for analytics
@@ -126,8 +137,7 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
     }
     
     // Sync focus session state to context for clock integration
-    const totalForMode = mode === 'focus' ? activePreset.focus * 60 : mode === 'shortBreak' ? activePreset.short * 60 : activePreset.long * 60;
-    setFocusSession({ mode: isActive ? mode : 'idle', timeLeft, totalTime: totalForMode, isActive, sessionsCompleted });
+    setFocusSession({ mode: isActive ? mode : 'idle', timeLeft, totalTime, isActive, sessionsCompleted });
     
     if (timeLeft === 0) {
       handleTimerComplete();
@@ -151,6 +161,7 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
 
   const handleTimerComplete = () => {
     setIsActive(false);
+    releaseWakeLock();
     if (mode === 'focus') logFocusSession(activePreset.focus * 60);
     triggerConfetti();
     const alertAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
@@ -173,10 +184,10 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
     const nextState = !isActive;
     setIsActive(nextState);
     
-    // Sync active track with timer
-    if (currentAudio.current && activeTrackId) {
-      if (nextState) currentAudio.current.play().catch(e => console.warn("Audio blocked:", e));
-      else currentAudio.current.pause();
+    if (nextState) {
+      requestWakeLock();
+    } else {
+      releaseWakeLock();
     }
 
     if (!nextState && mode === 'focus') {
@@ -186,55 +197,6 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
       }
       const elapsed = (activePreset.focus * 60) - timeLeft;
       logFocusSession(elapsed);
-    }
-  };
-
-  // 🎵 NEW Solo Audio Engine Controller
-  const handleTrackToggle = (id: string) => {
-    const track = AMBIENCE_LIBRARY.find(t => t.id === id);
-    if (track?.isPremium && !userStats.isPremium) {
-      setShowPremiumModal(true);
-      return;
-    }
-
-    // 1. If clicking the already active track, stop it
-    if (activeTrackId === id) {
-      if (currentAudio.current) {
-        currentAudio.current.pause();
-        currentAudio.current.src = "";
-        currentAudio.current = null;
-      }
-      setActiveTrackId(null);
-      return;
-    }
-
-    // 2. Stop and clear any previous track
-    if (currentAudio.current) {
-      currentAudio.current.pause();
-      currentAudio.current.src = "";
-      currentAudio.current = null;
-    }
-
-    // 3. Create and play the new track
-    if (track) {
-      const audio = new Audio(track.url);
-      audio.loop = true;
-      audio.volume = masterVolume;
-      currentAudio.current = audio;
-      
-      // We attempt to play immediately. Browser may block if timer hasn't started.
-      audio.play().catch(e => {
-        console.warn("Autoplay block: Sound will start when you press 'Start Session'", e);
-      });
-      
-      setActiveTrackId(id);
-    }
-  };
-
-  const handleVolumeChange = (vol: number) => {
-    setMasterVolume(vol);
-    if (currentAudio.current) {
-      currentAudio.current.volume = vol;
     }
   };
 
@@ -262,6 +224,33 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
 
   const currentAtmosphere = ATMOSPHERES.find(a => a.id === themeConfig.atmosphere) || ATMOSPHERES[0];
 
+  const tallyEmojis = TALLY_SETS[tallyStyle] || TALLY_SETS.dots;
+  const completed = sessionsCompleted % 4;
+  const renderTallies = () => (
+    <div className="flex items-center gap-2">
+      <div className="flex">
+        {[...Array(4)].map((_, i) => (
+          <span key={i} className={`w-5 h-5 flex items-center justify-center text-[11px] transition-all ${i < completed ? 'opacity-100 scale-110' : 'opacity-20 scale-90'}`}>
+            {tallyEmojis[i]}
+          </span>
+        ))}
+      </div>
+      <span className="text-[8px] font-medium uppercase tracking-wider text-white/30">Cycle {Math.floor(sessionsCompleted / 4) + 1}</span>
+    </div>
+  );
+
+  const zenBg: Record<string, string> = {
+    indigo: 'bg-[#0a0c1a]',
+    rose: 'bg-[#1a0f0f]',
+    emerald: 'bg-[#0a1a0f]',
+    violet: 'bg-[#0f0a1a]',
+    amber: 'bg-[#1a140a]',
+    cyan: 'bg-[#0a141a]',
+    pink: 'bg-[#1a0a14]',
+    slate: 'bg-[#0a0c10]',
+    neon: 'bg-[#050010]',
+  };
+
   const renderTimerControls = () => (
     <div className="space-y-3">
       <div className="flex gap-2.5">
@@ -271,57 +260,6 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
         </button>
         <button onClick={() => { setIsActive(false); setTimeLeft(activePreset.focus * 60); }} className="px-4 py-3.5 bg-white/[0.06] hover:bg-white/[0.10] rounded-2xl transition-colors"><RotateCcw className="w-4 h-4 text-white/50" /></button>
       </div>
-      {!compact && (
-        <>
-          {/* Ambience */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between px-1">
-              <div className="flex items-center gap-2">
-                <Headphones className="w-3 h-3 text-white/30" />
-                <span className="text-[8px] font-semibold uppercase tracking-wider text-white/30">Sound</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <input type="range" min="0" max="1" step="0.01" value={masterVolume} onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
-                  className="w-16 h-1 bg-white/8 rounded-full appearance-none accent-brand cursor-pointer" />
-              </div>
-            </div>
-            <div className="grid grid-cols-4 gap-1.5">
-              {AMBIENCE_LIBRARY.slice(0, 6).map(track => (
-                <button key={track.id} onClick={() => handleTrackToggle(track.id)}
-                  className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl transition-all relative ${activeTrackId === track.id ? 'bg-brand/20 text-white' : 'bg-white/[0.04] text-white/40 hover:bg-white/[0.08]'}`}>
-                  <track.icon className={`w-3.5 h-3.5 ${activeTrackId === track.id ? 'animate-pulse' : ''}`} />
-                  <span className="text-[7px] font-semibold uppercase tracking-tight text-center line-clamp-1">{track.name}</span>
-                  {track.isPremium && !userStats.isPremium && <Crown className="absolute -top-1 -right-1 w-2 h-2 text-amber-500" />}
-                </button>
-              ))}
-              <button onClick={() => setShowMusicHub(!showMusicHub)}
-                className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl transition-all bg-white/[0.04] text-white/40 hover:bg-white/[0.08] ${showMusicHub ? 'ring-1 ring-brand/50' : ''}`}>
-                <Youtube className="w-3.5 h-3.5" />
-                <span className="text-[7px] font-semibold uppercase tracking-tight text-center">Stream</span>
-              </button>
-            </div>
-          </div>
-          <AnimatePresence>
-            {showMusicHub && (
-              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden space-y-3">
-                <div className="grid grid-cols-4 gap-1.5">
-                  {AMBIENCE_LIBRARY.slice(6).map(track => (
-                    <button key={track.id} onClick={() => handleTrackToggle(track.id)}
-                      className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl transition-all relative ${activeTrackId === track.id ? 'bg-brand/20 text-white' : 'bg-white/[0.04] text-white/40 hover:bg-white/[0.08]'}`}>
-                      <track.icon className={`w-3.5 h-3.5 ${activeTrackId === track.id ? 'animate-pulse' : ''}`} />
-                      <span className="text-[7px] font-semibold uppercase tracking-tight text-center line-clamp-1">{track.name}</span>
-                      {track.isPremium && !userStats.isPremium && <Crown className="absolute -top-1 -right-1 w-2 h-2 text-amber-500" />}
-                    </button>
-                  ))}
-                </div>
-                <div className="rounded-xl overflow-hidden bg-black/40 border border-white/5 aspect-video">
-                  <iframe width="100%" height="100%" src="https://www.youtube.com/embed/jfKfPfyJRdk?si=0mH_n87J2N3H2E-j&autoplay=0&controls=0" title="Lofi" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen></iframe>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </>
-      )}
     </div>
   );
 
@@ -340,7 +278,15 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
 
   const renderGalleryTab = () => (
     <motion.div key="wall" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.15 }} className="space-y-3 pt-1">
-      {/* Category filter pills — scrollable horizontal */}
+      {/* Type filter pills */}
+      <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+        {['All', 'Animated', 'Image'].map(t => (
+          <button key={t} onClick={() => setWallpaperType(t)}
+            className={`shrink-0 px-2.5 py-1 rounded-lg text-[7px] font-bold uppercase tracking-wider transition-all ${wallpaperType === t ? 'bg-brand text-white' : 'bg-white/[0.04] text-white/40 hover:text-white/60'}`}>{t}</button>
+        ))}
+      </div>
+
+      {/* Category filter pills */}
       <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
         <button onClick={() => setWallpaperCategory('All')}
           className={`shrink-0 px-2.5 py-1 rounded-lg text-[7px] font-bold uppercase tracking-wider transition-all ${wallpaperCategory === 'All' ? 'bg-brand text-white' : 'bg-white/[0.04] text-white/40 hover:text-white/60'}`}>All</button>
@@ -350,20 +296,12 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
         ))}
       </div>
 
-      {/* Animated wallpapers row */}
-      <div className="grid grid-cols-2 gap-1.5">
-        {WALLPAPERS.filter(w => w.type === 'animated').map(w => (
-          <button key={w.id} onClick={() => { if(w.isPremium && !userStats.isPremium) setShowPremiumModal(true); else setThemeConfig({...themeConfig, wallpaper: w.id}); }}
-            className={`px-3 py-2 rounded-xl text-[7px] font-semibold uppercase tracking-wider border transition-all ${themeConfig.wallpaper === w.id ? 'bg-brand border-brand text-white' : 'bg-white/[0.04] border-white/5 text-white/50 hover:text-white/70'}`}>{w.name}</button>
-        ))}
-      </div>
-
-      {/* Image grid — 2 cols for larger thumbnails */}
+      {/* Wallpaper grid */}
       <div className="grid grid-cols-2 gap-2">
         {WALLPAPERS.filter(w => {
-          if (w.type !== 'image') return false;
-          if (wallpaperCategory === 'All') return true;
-          return w.category === wallpaperCategory;
+          if (wallpaperType !== 'All' && w.type !== wallpaperType.toLowerCase()) return false;
+          if (wallpaperCategory !== 'All' && w.category !== wallpaperCategory) return false;
+          return true;
         }).map(w => (
           <button key={w.id} onClick={() => { if(w.isPremium && !userStats.isPremium) setShowPremiumModal(true); else setThemeConfig({...themeConfig, wallpaper: w.id}); }}
             className={`aspect-[4/3] rounded-xl relative overflow-hidden transition-all group ${themeConfig.wallpaper === w.id ? 'ring-2 ring-brand' : 'hover:ring-1 ring-white/20'}`}>
@@ -429,7 +367,7 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
         <div className={`absolute -top-32 -right-32 w-80 h-80 bg-gradient-to-br ${currentAtmosphere.color.replace('bg-', 'from-')}/15 to-transparent rounded-full blur-[100px] opacity-40`} />
         
         <div className="relative z-10 space-y-3">
-          {/* Compact: timer + expand */}
+          {/* Compact: timer + theme */}
           {compact ? (
             <>
               <div className="flex items-center justify-between px-4 pt-4">
@@ -438,120 +376,52 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
                   <span className="text-[9px] font-semibold uppercase tracking-wider text-white/60">{activePreset.name}</span>
                 </button>
                 <div className="flex items-center gap-1">
+                  <button onClick={() => setShowThemePicker(!showThemePicker)} className={`p-2 rounded-xl transition-all ${showThemePicker ? 'bg-brand/20 text-white' : 'text-white/40 hover:text-white/70 hover:bg-white/5'}`}>
+                    <Palette className="w-4 h-4" />
+                  </button>
                   <button onClick={() => setIsZenMode(true)} className="p-2 text-white/40 hover:text-white/70 hover:bg-white/5 rounded-xl transition-all">
                     <Maximize2 className="w-4 h-4" />
-                  </button>
-                  <button onClick={() => setShowExpanded(!showExpanded)} className={`p-2 rounded-xl transition-all ${showExpanded ? 'bg-brand/20 text-white' : 'text-white/40 hover:text-white/70 hover:bg-white/5'}`}>
-                    {showExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
 
               <div className="px-4 pb-4">
-                <div className="text-center">
-                  <motion.div key={mode} initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-5xl font-display font-light tracking-tighter tabular-nums text-white/90 select-none">
-                    {formatTime(timeLeft)}
-                  </motion.div>
-                  <div className="flex items-center justify-center gap-2 mt-1">
-                    <div className="flex gap-1">
-                      {[...Array(4)].map((_, i) => (
-                        <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all ${i < (sessionsCompleted % 4) ? 'bg-brand-light' : 'bg-white/8'}`} />
-                      ))}
-                    </div>
-                    <span className="text-[8px] font-medium uppercase tracking-wider text-white/30">Cycle {Math.floor(sessionsCompleted / 4) + 1}</span>
-                  </div>
-                </div>
-
                 <div className="mt-3 space-y-2">
                   <AnimatePresence mode="wait">
-                    {showPresetPicker ? renderPresetPicker() : (
+                    {showThemePicker ? (
+                      <motion.div key="compact-theme" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                        {renderThemePicker()}
+                      </motion.div>
+                    ) : showPresetPicker ? renderPresetPicker() : (
                       <motion.div key="compact-controls" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                        {/* Mode tabs above timer */}
+                        <div className="flex gap-1.5 bg-white/[0.04] p-1 rounded-xl mb-4">
+                          {(['focus', 'shortBreak', 'longBreak'] as const).map(m => (
+                            <button key={m} onClick={() => { setIsActive(false); setMode(m); const d = m === 'focus' ? activePreset.focus : m === 'shortBreak' ? activePreset.short : activePreset.long; setTimeLeft(d * 60); }} 
+                              className={`flex-1 py-2 rounded-[10px] text-[9px] font-semibold uppercase tracking-wider transition-all ${mode === m ? 'bg-white/10 text-white shadow-sm' : 'text-white/30 hover:text-white/60'}`}>
+                              {m === 'focus' ? 'Focus' : m === 'shortBreak' ? 'Break' : 'Long Break'}
+                            </button>
+                          ))}
+                        </div>
+                          <div className="text-center mb-4">
+                          <motion.div key={mode} initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-5xl font-display font-light tracking-tighter tabular-nums text-white/90 select-none"
+                            style={{ fontSize: 'calc(3rem * var(--scale-factor, 1))' }}>
+                            {formatTime(timeLeft)}
+                          </motion.div>
+                          {/* Progress bar */}
+                          <div className="w-full max-w-[200px] mx-auto h-[3px] bg-white/5 rounded-full overflow-hidden mt-2">
+                            <div className="h-full bg-gradient-to-r from-brand/60 to-brand-light rounded-full transition-all duration-1000 ease-linear" style={{ width: `${progress * 100}%` }} />
+                          </div>
+                          <div className="flex items-center justify-center gap-2 mt-2">
+                            {renderTallies()}
+                          </div>
+                        </div>
                         {renderTimerControls()}
                       </motion.div>
                     )}
                   </AnimatePresence>
                 </div>
               </div>
-
-              {/* Expanded section: mode tabs + ambience + theme */}
-              <AnimatePresence>
-                {showExpanded && (
-                  <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="border-t border-white/[0.06] max-h-[55vh] overflow-hidden">
-                    <div className="p-4 space-y-3 h-full max-h-[53vh] overflow-y-auto no-scrollbar">
-                      {/* Mode Tabs */}
-                      <div className="flex gap-1.5 bg-white/[0.04] p-1 rounded-xl">
-                        {(['focus', 'shortBreak', 'longBreak'] as const).map(m => (
-                          <button key={m} onClick={() => { setIsActive(false); setMode(m); const d = m === 'focus' ? activePreset.focus : m === 'shortBreak' ? activePreset.short : activePreset.long; setTimeLeft(d * 60); }} 
-                            className={`flex-1 py-2 rounded-[10px] text-[9px] font-semibold uppercase tracking-wider transition-all ${mode === m ? 'bg-white/10 text-white shadow-sm' : 'text-white/30 hover:text-white/60'}`}>
-                            {m === 'focus' ? 'Focus' : m === 'shortBreak' ? 'Break' : 'Long Break'}
-                          </button>
-                        ))}
-                      </div>
-
-                      {/* Ambience */}
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between px-1">
-                          <div className="flex items-center gap-2">
-                            <Headphones className="w-3 h-3 text-white/30" />
-                            <span className="text-[8px] font-semibold uppercase tracking-wider text-white/30">Sound</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <input type="range" min="0" max="1" step="0.01" value={masterVolume} onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
-                              className="w-16 h-1 bg-white/8 rounded-full appearance-none accent-brand cursor-pointer" />
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-4 gap-1.5">
-                          {AMBIENCE_LIBRARY.slice(0, 6).map(track => (
-                            <button key={track.id} onClick={() => handleTrackToggle(track.id)}
-                              className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl transition-all relative ${activeTrackId === track.id ? 'bg-brand/20 text-white' : 'bg-white/[0.04] text-white/40 hover:bg-white/[0.08]'}`}>
-                              <track.icon className={`w-3.5 h-3.5 ${activeTrackId === track.id ? 'animate-pulse' : ''}`} />
-                              <span className="text-[7px] font-semibold uppercase tracking-tight text-center line-clamp-1">{track.name}</span>
-                              {track.isPremium && !userStats.isPremium && <Crown className="absolute -top-1 -right-1 w-2 h-2 text-amber-500" />}
-                            </button>
-                          ))}
-                          <button onClick={() => setShowMusicHub(!showMusicHub)}
-                            className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl transition-all bg-white/[0.04] text-white/40 hover:bg-white/[0.08] ${showMusicHub ? 'ring-1 ring-brand/50' : ''}`}>
-                            <Youtube className="w-3.5 h-3.5" />
-                            <span className="text-[7px] font-semibold uppercase tracking-tight text-center">Stream</span>
-                          </button>
-                        </div>
-                      </div>
-
-                      <AnimatePresence>
-                        {showMusicHub && (
-                          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden space-y-3">
-                            <div className="grid grid-cols-4 gap-1.5">
-                              {AMBIENCE_LIBRARY.slice(6).map(track => (
-                                <button key={track.id} onClick={() => handleTrackToggle(track.id)}
-                                  className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl transition-all relative ${activeTrackId === track.id ? 'bg-brand/20 text-white' : 'bg-white/[0.04] text-white/40 hover:bg-white/[0.08]'}`}>
-                                  <track.icon className={`w-3.5 h-3.5 ${activeTrackId === track.id ? 'animate-pulse' : ''}`} />
-                                  <span className="text-[7px] font-semibold uppercase tracking-tight text-center line-clamp-1">{track.name}</span>
-                                  {track.isPremium && !userStats.isPremium && <Crown className="absolute -top-1 -right-1 w-2 h-2 text-amber-500" />}
-                                </button>
-                              ))}
-                            </div>
-                            <div className="rounded-xl overflow-hidden bg-black/40 border border-white/5">
-                              <iframe width="100%" height="200" src="https://www.youtube.com/embed/jfKfPfyJRdk?si=0mH_n87J2N3H2E-j&autoplay=0&controls=0" title="Lofi" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen className="w-full"></iframe>
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-
-                      {/* Theme Picker Toggle */}
-                      <button onClick={() => { setShowThemePicker(!showThemePicker); setShowPresetPicker(false); }} className={`w-full py-2.5 rounded-xl text-[9px] font-semibold uppercase tracking-wider transition-all ${showThemePicker ? 'bg-brand/20 text-white' : 'bg-white/[0.06] hover:bg-white/[0.10] text-white/60'}`}>
-                        <div className="flex items-center justify-center gap-2">
-                          <Palette className="w-3 h-3" />
-                          {showThemePicker ? 'Hide Theme Picker' : 'Theme & Wallpaper'}
-                        </div>
-                      </button>
-
-                      <AnimatePresence>
-                        {showThemePicker && renderThemePicker()}
-                      </AnimatePresence>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
             </>
           ) : (
             /* Full mode */
@@ -581,16 +451,16 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
               </div>
 
               <div className="py-6 text-center">
-                <motion.div key={mode} initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-6xl md:text-7xl font-display font-light tracking-tighter tabular-nums text-white/90 select-none">
+                <motion.div key={mode} initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-6xl md:text-7xl font-display font-light tracking-tighter tabular-nums text-white/90 select-none"
+                  style={{ fontSize: 'calc(3.75rem * var(--scale-factor, 1))' }}>
                   {formatTime(timeLeft)}
                 </motion.div>
+                {/* Progress bar */}
+                <div className="w-full max-w-[200px] mx-auto h-[3px] bg-white/5 rounded-full overflow-hidden mt-3">
+                  <div className="h-full bg-gradient-to-r from-brand/60 to-brand-light rounded-full transition-all duration-1000 ease-linear" style={{ width: `${progress * 100}%` }} />
+                </div>
                 <div className="flex items-center justify-center gap-2 mt-2">
-                  <div className="flex gap-1">
-                    {[...Array(4)].map((_, i) => (
-                      <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all ${i < (sessionsCompleted % 4) ? 'bg-brand-light' : 'bg-white/8'}`} />
-                    ))}
-                  </div>
-                  <span className="text-[8px] font-medium uppercase tracking-wider text-white/30">Cycle {Math.floor(sessionsCompleted / 4) + 1}</span>
+                  {renderTallies()}
                 </div>
               </div>
               
@@ -610,7 +480,7 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
       <AnimatePresence>
         {isZenMode && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className={`fixed inset-0 z-[100] flex flex-col items-center justify-center p-6 text-center transition-all duration-1000 ${mode === 'focus' ? 'bg-[#0a0c10]' : 'bg-[#0a0f10]'}`}
+            className={`fixed inset-0 z-[100] flex flex-col items-center justify-center p-6 text-center transition-colors duration-700 ${zenBg[themeConfig.atmosphere] || 'bg-[#0a0c10]'}`}
           >
             <button onClick={() => setIsZenMode(false)} className="absolute top-10 right-10 p-3 bg-white/5 text-white/40 hover:text-white rounded-xl z-50"><X className="w-6 h-6" /></button>
             <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="relative z-10 w-full flex flex-col items-center">

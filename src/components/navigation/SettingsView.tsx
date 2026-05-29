@@ -22,7 +22,8 @@ import {
   SlidersHorizontal,
   Save,
   CheckCircle2,
-  Timer
+  Timer,
+  LogOut
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useStudy } from '../../context/StudyContext';
@@ -31,7 +32,7 @@ import { DashboardCard } from '../dashboard/DashboardCard';
 import { storage } from '../../services/storage';
 
 export const SettingsView = () => {
-  const { user, updateProfile } = useAuth();
+  const { user, updateProfile, signOut } = useAuth();
   const { 
     userStats, 
     themeConfig, 
@@ -198,6 +199,15 @@ export const SettingsView = () => {
                       <Volume2 className="w-4 h-4 text-indigo-600" />
                    </div>
                 </div>
+               {/* Scale Slider */}
+               <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Scale</span>
+                     <span className="text-xs font-bold dark:text-white">{Math.round(themeConfig.scaleFactor * 100)}%</span>
+                  </div>
+                  <input type="range" min="0.5" max="1.5" step="0.05" value={themeConfig.scaleFactor} onChange={(e) => updateConfig('scaleFactor', parseFloat(e.target.value))}
+                    className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full appearance-none accent-indigo-600 cursor-pointer" />
+               </div>
              </div>
           </DashboardCard>
         </div>
@@ -269,7 +279,18 @@ export const SettingsView = () => {
               </div>
            </DashboardCard>
 
-           {/* Dangerous Area */}
+            {/* Sign Out */}
+            <DashboardCard>
+               <button
+                  onClick={() => signOut()}
+                  className="w-full flex items-center justify-center gap-3 py-4 text-rose-500 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-all"
+               >
+                  <LogOut className="w-4 h-4" />
+                  Sign Out
+               </button>
+            </DashboardCard>
+
+            {/* Dangerous Area */}
            <DashboardCard className="border-rose-500/20 bg-rose-50/5 dark:bg-rose-900/5">
               <div className="space-y-4">
                  <div className="flex items-center gap-3 text-rose-600">

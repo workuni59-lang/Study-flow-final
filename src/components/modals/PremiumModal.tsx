@@ -156,7 +156,6 @@ export const PremiumModal = () => {
                     {error}
                   </div>
                 )}
-                {/* Billing Toggle */}
                 <div className="flex bg-white/[0.04] rounded-xl p-0.5 border border-white/[0.06]">
                   <button
                     onClick={() => setBilling('monthly')}
@@ -198,13 +197,12 @@ export const PremiumModal = () => {
                     )}
                   </button>
                 )}
-                {error && (
-                  <button onClick={() => handleUpgrade(true)}
-                    className="text-[8px] text-center text-white/20 hover:text-white/40 underline underline-offset-2 transition-colors"
-                  >
-                    Dev: Activate without Polar
-                  </button>
-                )}
+                {/* Dev toggle (always visible for testing) */}
+                <button onClick={() => { togglePremium(); setShowPremiumModal(false); }}
+                  className="text-[8px] text-center text-white/20 hover:text-white/40 underline underline-offset-2 transition-colors"
+                >
+                  {userStats.isPremium ? 'Dev: Deactivate Premium' : 'Dev: Activate Premium'}
+                </button>
                 <p className="text-[8px] text-center text-white/30 font-bold uppercase tracking-widest">
                   {billing === 'monthly' ? '$9.99/MO' : '$69.99/YR'} • CANCEL ANYTIME • 7-DAY FREE TRIAL
                 </p>

@@ -103,6 +103,9 @@ interface StudyContextType {
   firePetEvent: (type: PetEventType) => void;
   focusSession: FocusSessionState | null;
   setFocusSession: (state: FocusSessionState | null) => void;
+  syncPremiumStatus: (isPremium: boolean) => void;
+  showPremiumModal: boolean;
+  setShowPremiumModal: (show: boolean) => void;
 }
 
 const StudyContext = createContext<StudyContextType | undefined>(undefined);
@@ -169,6 +172,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   const [panicModeActive, setPanicModeActive] = useState(false);
   const [selectedExamForPath, setSelectedExamForPath] = useState<Exam | null>(null);
   const [focusSession, setFocusSession] = useState<FocusSessionState | null>(null);
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
 
   // Synchronization Hooks
   useEffect(() => {
@@ -312,6 +316,13 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       };
     });
   };
+
+  const syncPremiumStatus = useCallback((isPremium: boolean) => {
+    setUserStats(prev => {
+      if (prev.isPremium === isPremium) return prev;
+      return { ...prev, isPremium, hasShield: isPremium ? true : prev.hasShield };
+    });
+  }, []);
 
   useEffect(() => {
     if (userStats.isPremium && !userStats.hasShield) {
@@ -542,7 +553,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       } else if (newHunger > 0) {
         newHealth = 'neutral';
       }
-      return { ...prev, hunger: newHunger, health: newHealth, lastFedAt: new Date().toISOString() };
+      return { ...prev, hunger: newHunger, health: newHealth };
     });
   }, []);
 
@@ -581,11 +592,12 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     accessToken, subjects, tasks, exams, quests, themeConfig, userStats, unlockedBadges, activeNotification,
     confettiActive, panicModeActive, selectedExamForPath, petState, focusSession, setFocusSession, setThemeConfig, addSubject, deleteSubject, addTopic,
     updateTopicMastery, deleteTopic, addTask, toggleTask, deleteTask, addExam, deleteExam, recalibrateTasks,
-    setTasks, addXP, completeFocusSession, logSession, closeNotification, buyShield, togglePremium, triggerConfetti, resetStreak, setPanicMode,
-    setSelectedExamForPath, feedPet, petInteract, changePetSpecies, changePetSkin, purchaseSkin, setPetName, tickPet, petEvent, firePetEvent
+    setTasks, addXP, completeFocusSession, logSession, closeNotification, buyShield, togglePremium, syncPremiumStatus, triggerConfetti, resetStreak, setPanicMode,
+    setSelectedExamForPath, feedPet, petInteract, changePetSpecies, changePetSkin, purchaseSkin, setPetName, tickPet, petEvent, firePetEvent,
+    showPremiumModal, setShowPremiumModal
   }), [
     accessToken, subjects, tasks, exams, quests, themeConfig, userStats, unlockedBadges, activeNotification,
-    confettiActive, panicModeActive, selectedExamForPath, petState, petEvent, focusSession
+    confettiActive, panicModeActive, selectedExamForPath, petState, petEvent, focusSession, showPremiumModal
   ]);
 
   return (

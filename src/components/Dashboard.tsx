@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { 
-  LogOut, CheckSquare, Target, BarChart3, CalendarDays, PawPrint, X, Maximize2, Minimize2
+  LogOut, CheckSquare, Target, CalendarDays, PawPrint, X, Maximize2, Minimize2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useStudy } from '../context/StudyContext';
@@ -18,15 +18,13 @@ import { ZenHero } from './dashboard/ZenHero';
 import { DevMenu } from './dashboard/DevMenu';
 import PetEngine from './dashboard/PetEngine';
 import PetPanel from './dashboard/PetPanel';
-import AnalyticsDashboard from './analytics/AnalyticsDashboard';
 import { storage } from '../services/storage';
 
-type OverlayType = 'tasks' | 'quests' | 'progress' | 'exams' | null;
+type OverlayType = 'tasks' | 'quests' | 'exams' | null;
 
 const OVERLAY_CONFIG: { key: OverlayType; icon: typeof CheckSquare; label: string; iconColor: string }[] = [
   { key: 'tasks', icon: CheckSquare, label: 'Tasks', iconColor: 'from-brand to-violet-600' },
   { key: 'quests', icon: Target, label: 'Quests', iconColor: 'from-emerald-500 to-teal-600' },
-  { key: 'progress', icon: BarChart3, label: 'Progress', iconColor: 'from-amber-500 to-orange-600' },
   { key: 'exams', icon: CalendarDays, label: 'Exams', iconColor: 'from-rose-500 to-pink-600' },
 ];
 
@@ -126,7 +124,6 @@ const Dashboard = () => {
               </div>
             )}
             {activeOverlay === 'quests' && <DailyQuests />}
-            {activeOverlay === 'progress' && <AnalyticsDashboard />}
             {activeOverlay === 'exams' && (
               <UpcomingExams 
                 exams={exams} 
@@ -161,50 +158,47 @@ const Dashboard = () => {
 
       {/* ZenHero - full viewport hero */}
       <div className="min-h-screen flex items-center justify-center">
-        <ZenHero />
-      </div>
-
-      {/* Floating StudyTimer - compact, bottom-right */}
-      <div className="fixed bottom-24 right-4 md:right-6 z-30 w-72 max-w-[calc(100vw-2rem)] max-h-[calc(100vh-6rem)] overflow-y-auto no-scrollbar">
-        <StudyTimer compact />
+        <ZenHero timerSlot={
+          <StudyTimer compact />
+        } />
       </div>
 
       {/* Pet Engine - draggable interactive companion */}
       {petVisible && <PetEngine onOpenPanel={() => setShowPetPanel(true)} feedTrigger={feedTrigger} overlayOpen={activeOverlay !== null} petSize={petSize} />}
 
       {/* Bottom Action Toolbar - centered dock */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-30">
-        <div className="flex items-center gap-1.5 px-3 py-2 bg-white/40 dark:bg-slate-900/40 backdrop-blur-2xl rounded-2xl border border-white/20 dark:border-white/[0.06] shadow-2xl shadow-black/10">
+      <div className="fixed bottom-20 lg:bottom-6 left-1/2 -translate-x-1/2 z-30">
+        <div className="flex items-center gap-1 px-2 lg:px-3 py-1.5 lg:py-2 bg-white/40 dark:bg-slate-900/40 backdrop-blur-2xl rounded-xl lg:rounded-2xl border border-white/20 dark:border-white/[0.06] shadow-2xl shadow-black/10">
           {OVERLAY_CONFIG.map(item => {
             const Icon = item.icon;
             return (
               <button
                 key={item.key}
                 onClick={() => { setActiveOverlay(item.key === activeOverlay ? null : item.key); setIsFullScreen(false); }}
-                className={`flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl transition-all ${
+                className={`flex flex-col items-center gap-0.5 px-2 lg:px-3 py-1.5 lg:py-2 rounded-lg lg:rounded-xl transition-all ${
                   activeOverlay === item.key
                     ? 'bg-brand text-white shadow-lg'
                     : 'text-white/50 hover:text-white/80 hover:bg-white/[0.08]'
                 }`}
               >
-                <Icon className="w-4 h-4" />
-                <span className="text-[7px] font-bold uppercase tracking-wider">{item.label}</span>
+                <Icon className="w-3.5 lg:w-4 h-3.5 lg:h-4" />
+                <span className="text-[6px] lg:text-[7px] font-bold uppercase tracking-wider">{item.label}</span>
               </button>
             );
           })}
-          <div className="w-px h-6 bg-white/[0.06]" />
+          <div className="w-px h-5 lg:h-6 bg-white/[0.06]" />
           <button
             onClick={() => setShowPetPanel(true)}
-            className={`flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl transition-all ${
+            className={`relative flex flex-col items-center gap-0.5 px-2 lg:px-3 py-1.5 lg:py-2 rounded-lg lg:rounded-xl transition-all ${
               showPetPanel
                 ? 'bg-purple-500/20 text-purple-300 shadow-lg'
                 : 'text-white/50 hover:text-white/80 hover:bg-white/[0.08]'
             }`}
           >
-            <PawPrint className="w-4 h-4" />
-            <span className="text-[7px] font-bold uppercase tracking-wider">Pet</span>
+            <PawPrint className="w-3.5 lg:w-4 h-3.5 lg:h-4" />
+            <span className="text-[6px] lg:text-[7px] font-bold uppercase tracking-wider">Pet</span>
             {/* Hunger indicator dot */}
-            <span className={`absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full border-2 border-slate-900 transition-colors ${
+            <span className={`absolute -top-0.5 -right-0.5 w-1.5 lg:w-2 h-1.5 lg:h-2 rounded-full border border-slate-900 transition-colors ${
               petState.health === 'dormant' ? 'bg-slate-500' :
               petState.health === 'weak' ? 'bg-rose-400' :
               petState.hunger > 50 ? 'bg-emerald-400' : 'bg-amber-400'

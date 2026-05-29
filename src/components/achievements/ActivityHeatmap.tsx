@@ -5,7 +5,7 @@ import { useStudy } from '../../context/StudyContext';
 import { DashboardCard } from '../dashboard/DashboardCard';
 
 export const ActivityHeatmap = () => {
-  const { userStats } = useStudy();
+  const { userStats, setShowPremiumModal } = useStudy();
 
   // Generate data for the last 12 months (approx 52 weeks)
   const heatmapData = useMemo(() => {
@@ -106,7 +106,7 @@ export const ActivityHeatmap = () => {
            </div>
            <h4 className="text-lg font-display font-black dark:text-white uppercase tracking-tight mb-2">Deep Insights Locked</h4>
            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-[200px] mb-6 font-medium">Upgrade to Elite Scholar to unlock your yearly momentum scan and focus heatmaps.</p>
-           <button className="px-6 py-3 bg-indigo-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-900 transition-all shadow-xl shadow-indigo-600/20">
+           <button onClick={() => setShowPremiumModal(true)} className="px-6 py-3 bg-indigo-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-900 transition-all shadow-xl shadow-indigo-600/20">
               View Plans
            </button>
         </div>

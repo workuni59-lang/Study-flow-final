@@ -116,13 +116,13 @@ export const WALLPAPERS: Wallpaper[] = [
   // ── ANIMATED / ABSTRACT (free) ──
   { id: 'none', name: 'Disabled', isPremium: false, type: 'animated', category: 'Abstract' },
   { id: 'minimal', name: 'Clean Solid', isPremium: false, type: 'animated', category: 'Abstract' },
-  { id: 'dots', name: 'Focus Dots', isPremium: false, type: 'animated', category: 'Abstract' },
+  { id: 'mesh', name: 'Animated Mesh', isPremium: false, type: 'animated', category: 'Abstract' },
+  { id: 'cyberpunk', name: 'Cyber Library', isPremium: false, type: 'animated', category: 'Abstract' },
 
   // ── ANIMATED / ABSTRACT (premium) ──
-  { id: 'mesh', name: 'Animated Mesh', isPremium: true, type: 'animated', category: 'Abstract' },
+  { id: 'dots', name: 'Focus Dots', isPremium: true, type: 'animated', category: 'Abstract' },
   { id: 'aurora', name: 'Arctic Aurora', isPremium: true, type: 'animated', category: 'Abstract' },
   { id: 'stardust', name: 'Deep Space', isPremium: true, type: 'animated', category: 'Abstract' },
-  { id: 'cyberpunk', name: 'Cyber Library', isPremium: true, type: 'animated', category: 'Abstract' },
   { id: 'zen', name: 'Zen Garden', isPremium: true, type: 'animated', category: 'Abstract' },
 
   // ── FORESTS & TREES ──
@@ -131,7 +131,7 @@ export const WALLPAPERS: Wallpaper[] = [
   { id: 'bamboo-grove', name: 'Bamboo Grove', isPremium: true, type: 'image', category: 'Forests', url: 'https://images.unsplash.com/photo-1545239705-1564e58b9e4a?auto=format&fit=crop&w=2000&q=80' },
   { id: 'autumn-woods', name: 'Autumn Woods', isPremium: true, type: 'image', category: 'Forests', url: 'https://images.unsplash.com/photo-1451976426598-a7593bd6d0b2?auto=format&fit=crop&w=2000&q=80' },
   { id: 'rainforest', name: 'Rainforest Canopy', isPremium: true, type: 'image', category: 'Forests', url: 'https://images.unsplash.com/photo-1440342359743-84fcb8c21f21?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'pine-trail', name: 'Pine Trail', isPremium: false, type: 'image', category: 'Forests', url: 'https://images.unsplash.com/photo-1476231682828-37e571bc172f?auto=format&fit=crop&w=2000&q=80' },
+  { id: 'pine-trail', name: 'Pine Trail', isPremium: true, type: 'image', category: 'Forests', url: 'https://images.unsplash.com/photo-1476231682828-37e571bc172f?auto=format&fit=crop&w=2000&q=80' },
 
   // ── MOUNTAINS & LANDSCAPES ──
   { id: 'mountain', name: 'Silent Peak', isPremium: true, type: 'image', category: 'Mountains', url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=2000&q=80' },
@@ -146,7 +146,7 @@ export const WALLPAPERS: Wallpaper[] = [
   { id: 'coastal-sunrise', name: 'Coastal Sunrise', isPremium: true, type: 'image', category: 'Water', url: 'https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?auto=format&fit=crop&w=2000&q=80' },
   { id: 'tropical-beach', name: 'Tropical Beach', isPremium: true, type: 'image', category: 'Water', url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2000&q=80' },
   { id: 'waterfall', name: 'Hidden Waterfall', isPremium: true, type: 'image', category: 'Water', url: 'https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'river-valley', name: 'River Valley', isPremium: false, type: 'image', category: 'Water', url: 'https://images.unsplash.com/photo-1433086966358-54859d0ed716?auto=format&fit=crop&w=2000&q=80' },
+  { id: 'river-valley', name: 'River Valley', isPremium: true, type: 'image', category: 'Water', url: 'https://images.unsplash.com/photo-1433086966358-54859d0ed716?auto=format&fit=crop&w=2000&q=80' },
   { id: 'ice-cave', name: 'Ice Cave', isPremium: true, type: 'image', category: 'Water', url: 'https://images.unsplash.com/photo-1483347756197-71ef80e95f73?auto=format&fit=crop&w=2000&q=80' },
 
   // ── SKY & WEATHER ──
@@ -160,7 +160,7 @@ export const WALLPAPERS: Wallpaper[] = [
   { id: 'tokyo', name: 'Tokyo Midnight', isPremium: true, type: 'image', category: 'Urban', url: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=2000&q=80' },
   { id: 'rainy-street', name: 'Rainy Seattle', isPremium: true, type: 'image', category: 'Urban', url: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=2000&q=80' },
   { id: 'city-sunset', name: 'City Sunset', isPremium: true, type: 'image', category: 'Urban', url: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'night-city', name: 'Night City', isPremium: false, type: 'image', category: 'Urban', url: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=2000&q=80' },
+  { id: 'night-city', name: 'Night City', isPremium: true, type: 'image', category: 'Urban', url: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=2000&q=80' },
   { id: 'bridge-lights', name: 'Bridge Lights', isPremium: true, type: 'image', category: 'Urban', url: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=2000&q=80' },
   { id: 'alley-rain', name: 'Alley in Rain', isPremium: true, type: 'image', category: 'Urban', url: 'https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=2000&q=80' },
   { id: 'rooftop-night', name: 'Rooftop Night', isPremium: true, type: 'image', category: 'Urban', url: 'https://images.unsplash.com/photo-1518391846015-55a9cc003b25?auto=format&fit=crop&w=2000&q=80' },
@@ -169,7 +169,7 @@ export const WALLPAPERS: Wallpaper[] = [
   { id: 'cafe', name: 'Rainy Cafe', isPremium: true, type: 'image', category: 'Cozy', url: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=2000&q=80' },
   { id: 'library', name: 'Old Library', isPremium: true, type: 'image', category: 'Cozy', url: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=2000&q=80' },
   { id: 'cozy-room', name: 'Cozy Room', isPremium: true, type: 'image', category: 'Cozy', url: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'window-rain', name: 'Rainy Window', isPremium: false, type: 'image', category: 'Cozy', url: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=2000&q=80' },
+  { id: 'window-rain', name: 'Rainy Window', isPremium: true, type: 'image', category: 'Cozy', url: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=2000&q=80' },
   { id: 'bookshelf', name: 'Bookshelf', isPremium: true, type: 'image', category: 'Cozy', url: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=2000&q=80' },
   { id: 'candlelight', name: 'Candlelight', isPremium: true, type: 'image', category: 'Cozy', url: 'https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=2000&q=80' },
 
@@ -186,21 +186,21 @@ export const WALLPAPERS: Wallpaper[] = [
   { id: 'owl-night', name: 'Owl at Night', isPremium: true, type: 'image', category: 'Animals', url: 'https://images.unsplash.com/photo-1543549790-8b5f4a028cfb?auto=format&fit=crop&w=2000&q=80' },
   { id: 'deer-forest', name: 'Deer in Forest', isPremium: true, type: 'image', category: 'Animals', url: 'https://images.unsplash.com/photo-1484406566174-9da000fda645?auto=format&fit=crop&w=2000&q=80' },
   { id: 'whale-ocean', name: 'Whale Ocean', isPremium: true, type: 'image', category: 'Animals', url: 'https://images.unsplash.com/photo-1568430462989-44163eb1752f?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'butterfly-field', name: 'Butterfly Field', isPremium: false, type: 'image', category: 'Animals', url: 'https://images.unsplash.com/photo-1452570053594-1b985d6ea890?auto=format&fit=crop&w=2000&q=80' },
+  { id: 'butterfly-field', name: 'Butterfly Field', isPremium: true, type: 'image', category: 'Animals', url: 'https://images.unsplash.com/photo-1452570053594-1b985d6ea890?auto=format&fit=crop&w=2000&q=80' },
 
   // ── MINIMAL & AESTHETIC ──
   { id: 'white-minimal', name: 'White Minimal', isPremium: false, type: 'image', category: 'Minimal', url: 'https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'paper-texture', name: 'Paper Texture', isPremium: false, type: 'image', category: 'Minimal', url: 'https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=2000&q=80' },
+  { id: 'paper-texture', name: 'Paper Texture', isPremium: true, type: 'image', category: 'Minimal', url: 'https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=2000&q=80' },
   { id: 'marble', name: 'Marble Surface', isPremium: true, type: 'image', category: 'Minimal', url: 'https://images.unsplash.com/photo-1561214078-f3247647fc5e?auto=format&fit=crop&w=2000&q=80' },
   { id: 'gradient-dusk', name: 'Gradient Dusk', isPremium: true, type: 'image', category: 'Minimal', url: 'https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'linen-texture', name: 'Linen Texture', isPremium: false, type: 'image', category: 'Minimal', url: 'https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?auto=format&fit=crop&w=2000&q=80' },
+  { id: 'linen-texture', name: 'Linen Texture', isPremium: true, type: 'image', category: 'Minimal', url: 'https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?auto=format&fit=crop&w=2000&q=80' },
 
   // ── FLOWERS & PLANTS ──
   { id: 'lavender-fields', name: 'Lavender Fields', isPremium: true, type: 'image', category: 'Flowers', url: 'https://images.unsplash.com/photo-1499002238440-d264edd596ec?auto=format&fit=crop&w=2000&q=80' },
   { id: 'cherry-blossom', name: 'Cherry Blossom', isPremium: true, type: 'image', category: 'Flowers', url: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?auto=format&fit=crop&w=2000&q=80' },
   { id: 'sunflower-field', name: 'Sunflower Field', isPremium: true, type: 'image', category: 'Flowers', url: 'https://images.unsplash.com/photo-1597848212624-a19eb35e2651?auto=format&fit=crop&w=2000&q=80' },
   { id: 'rose-garden', name: 'Rose Garden', isPremium: true, type: 'image', category: 'Flowers', url: 'https://images.unsplash.com/photo-1455659817273-f96807779a8a?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'tulip-field', name: 'Tulip Field', isPremium: false, type: 'image', category: 'Flowers', url: 'https://images.unsplash.com/photo-1520763185298-1b434c919102?auto=format&fit=crop&w=2000&q=80' },
+  { id: 'tulip-field', name: 'Tulip Field', isPremium: true, type: 'image', category: 'Flowers', url: 'https://images.unsplash.com/photo-1520763185298-1b434c919102?auto=format&fit=crop&w=2000&q=80' },
 
   // ── SPECIAL ──
   { id: 'custom', name: 'Custom URL', isPremium: true, type: 'custom', category: 'Special' },
@@ -293,26 +293,26 @@ export const PET_SKINS: PetSkin[] = [
   { id: 'pixie_base', speciesId: 'pixie', name: 'Default', description: 'A gentle star spirit that drifts through focused minds.', colors: { body: '#a5b4fc', accent: '#6366f1', eyes: '#fff', glow: '#a5b4fc' }, isPremium: false, price: 0, unlockLevel: 1, rarity: 'Common' },
   { id: 'pixie_crimson', speciesId: 'pixie', name: 'Crimson', description: 'Electric cyan — a cool, focused aura.', colors: { body: '#22d3ee', accent: '#06b6d4', eyes: '#fff', glow: '#22d3ee' }, isPremium: true, price: 500, unlockLevel: 1, rarity: 'Rare' },
   { id: 'pixie_royal', speciesId: 'pixie', name: 'Royal', description: 'Regal purple — wisdom of a thousand study sessions.', colors: { body: '#a78bfa', accent: '#7c3aed', eyes: '#e9d5ff', glow: '#a78bfa' }, isPremium: true, price: 1000, unlockLevel: 1, rarity: 'Epic' },
-  { id: 'pixie_starlight', speciesId: 'pixie', name: 'Starlight', description: 'Golden warmth like the first star at dusk.', colors: { body: '#fde68a', accent: '#f59e0b', eyes: '#fff', glow: '#fde68a' }, isPremium: false, price: 0, unlockLevel: 3, rarity: 'Common' },
+  { id: 'pixie_starlight', speciesId: 'pixie', name: 'Starlight', description: 'Golden warmth like the first star at dusk.', colors: { body: '#fde68a', accent: '#f59e0b', eyes: '#fff', glow: '#fde68a' }, isPremium: true, price: 0, unlockLevel: 3, rarity: 'Common' },
   { id: 'pixie_cosmic', speciesId: 'pixie', name: 'Cosmic', description: 'Deep space nebula — infinite focus.', colors: { body: '#1e1b4b', accent: '#7c3aed', eyes: '#c4b5fd', glow: '#312e81' }, isPremium: true, price: 1200, unlockLevel: 1, rarity: 'Epic' },
   // ── Ember ──
-  { id: 'ember_base', speciesId: 'ember', name: 'Default', description: 'The warm fire spirit.', colors: { body: '#fbbf24', accent: '#f97316', eyes: '#fff', glow: '#fbbf24' }, isPremium: false, price: 0, unlockLevel: 1, rarity: 'Common' },
+  { id: 'ember_base', speciesId: 'ember', name: 'Default', description: 'The warm fire spirit.', colors: { body: '#fbbf24', accent: '#f97316', eyes: '#fff', glow: '#fbbf24' }, isPremium: true, price: 0, unlockLevel: 1, rarity: 'Common' },
   { id: 'ember_cobalt', speciesId: 'ember', name: 'Cobalt', description: 'Cold blue flame.', colors: { body: '#38bdf8', accent: '#0284c7', eyes: '#fff', glow: '#38bdf8' }, isPremium: true, price: 600, unlockLevel: 1, rarity: 'Rare' },
-  { id: 'ember_verdant', speciesId: 'ember', name: 'Verdant', description: 'Mystical green fire.', colors: { body: '#4ade80', accent: '#16a34a', eyes: '#fff', glow: '#4ade80' }, isPremium: false, price: 0, unlockLevel: 5, rarity: 'Common' },
+  { id: 'ember_verdant', speciesId: 'ember', name: 'Verdant', description: 'Mystical green fire.', colors: { body: '#4ade80', accent: '#16a34a', eyes: '#fff', glow: '#4ade80' }, isPremium: true, price: 0, unlockLevel: 5, rarity: 'Common' },
   { id: 'ember_void', speciesId: 'ember', name: 'Void', description: 'Dark flame that consumes light.', colors: { body: '#a78bfa', accent: '#7c3aed', eyes: '#c4b5fd', glow: '#a78bfa' }, isPremium: true, price: 1200, unlockLevel: 1, rarity: 'Epic' },
   // ── Lumina ──
-  { id: 'lumina_base', speciesId: 'lumina', name: 'Default', description: 'The crystal fox.', colors: { body: '#e879f9', accent: '#6366f1', eyes: '#fff', glow: '#e879f9' }, isPremium: false, price: 0, unlockLevel: 1, rarity: 'Common' },
+  { id: 'lumina_base', speciesId: 'lumina', name: 'Default', description: 'The crystal fox.', colors: { body: '#e879f9', accent: '#6366f1', eyes: '#fff', glow: '#e879f9' }, isPremium: true, price: 0, unlockLevel: 1, rarity: 'Common' },
   { id: 'lumina_silver', speciesId: 'lumina', name: 'Silver', description: 'Lunar silver coat.', colors: { body: '#cbd5e1', accent: '#64748b', eyes: '#fff', glow: '#cbd5e1' }, isPremium: true, price: 800, unlockLevel: 1, rarity: 'Rare' },
   { id: 'lumina_prismatic', speciesId: 'lumina', name: 'Prismatic', description: 'Shifts through all colors.', colors: { body: '#f472b6', accent: '#a855f7', eyes: '#fff', glow: '#e879f9' }, isPremium: true, price: 1500, unlockLevel: 1, rarity: 'Legendary' },
   // ── Nimbus ──
-  { id: 'nimbus_base', speciesId: 'nimbus', name: 'Default', description: 'A fluffy cloud cat.', colors: { body: '#67e8f9', accent: '#06b6d4', eyes: '#fff', glow: '#67e8f9' }, isPremium: false, price: 0, unlockLevel: 1, rarity: 'Common' },
+  { id: 'nimbus_base', speciesId: 'nimbus', name: 'Default', description: 'A fluffy cloud cat.', colors: { body: '#67e8f9', accent: '#06b6d4', eyes: '#fff', glow: '#67e8f9' }, isPremium: true, price: 0, unlockLevel: 1, rarity: 'Common' },
   { id: 'nimbus_storm', speciesId: 'nimbus', name: 'Storm', description: 'Dark thundercloud.', colors: { body: '#64748b', accent: '#334155', eyes: '#fff', glow: '#64748b' }, isPremium: true, price: 800, unlockLevel: 1, rarity: 'Rare' },
-  { id: 'nimbus_sunset', speciesId: 'nimbus', name: 'Sunset', description: 'Golden hour glow.', colors: { body: '#fbbf24', accent: '#f97316', eyes: '#fff', glow: '#fbbf24' }, isPremium: false, price: 0, unlockLevel: 8, rarity: 'Common' },
+  { id: 'nimbus_sunset', speciesId: 'nimbus', name: 'Sunset', description: 'Golden hour glow.', colors: { body: '#fbbf24', accent: '#f97316', eyes: '#fff', glow: '#fbbf24' }, isPremium: true, price: 0, unlockLevel: 8, rarity: 'Common' },
 ];
 
 export const PET_SPECIES: PetSpecies[] = [
   { id: 'pixie', name: 'Pixie', description: 'A floating star spirit that glows brighter with every focus session.', colors: { body: '#a5b4fc', accent: '#6366f1', eyes: '#fff', glow: '#a5b4fc' }, idleAnim: 'float', isPremium: false, unlockLevel: 1, scale: 1 },
-  { id: 'ember', name: 'Ember', description: 'A warm fire spirit fueled by your focus sessions.', colors: { body: '#fbbf24', accent: '#f97316', eyes: '#fff', glow: '#fbbf24' }, idleAnim: 'bounce', isPremium: false, unlockLevel: 5, scale: 1 },
+  { id: 'ember', name: 'Ember', description: 'A warm fire spirit fueled by your focus sessions.', colors: { body: '#fbbf24', accent: '#f97316', eyes: '#fff', glow: '#fbbf24' }, idleAnim: 'bounce', isPremium: true, unlockLevel: 1, scale: 1 },
   { id: 'lumina', name: 'Lumina', description: 'A crystal fox that radiates calm and wisdom.', colors: { body: '#e879f9', accent: '#6366f1', eyes: '#fff', glow: '#e879f9' }, idleAnim: 'sway', isPremium: true, unlockLevel: 1, scale: 1.2 },
   { id: 'nimbus', name: 'Nimbus', description: 'A cloud cat that drifts through your study sessions.', colors: { body: '#67e8f9', accent: '#06b6d4', eyes: '#fff', glow: '#67e8f9' }, idleAnim: 'float', isPremium: true, unlockLevel: 1, scale: 1.1 },
 ];

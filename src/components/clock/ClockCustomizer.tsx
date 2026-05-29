@@ -1,8 +1,9 @@
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Settings2, Save, Sparkles, ChevronDown, ChevronUp, Sun, Moon } from 'lucide-react';
+import { X, Settings2, Save, Sparkles, ChevronDown, ChevronUp, Sun, Moon, Lock, Crown } from 'lucide-react';
 import type { ClockConfig, ClockVariant, HandStyle, TickStyle, FaceTexture, ThemePreset } from './types';
 import { getDefaultConfig, CLOCK_PRESETS, saveCustomPresets, getVariantType } from './ThemeEngine';
+import { useStudy } from '../../context/StudyContext';
 import DigitalClock from './DigitalClock';
 import AnalogClock from './AnalogClock';
 
@@ -27,6 +28,27 @@ const FONT_OPTIONS = [
   { id: 'monospace', label: 'Mono' },
   { id: "'Georgia', serif", label: 'Serif' },
 ];
+
+const FREE_DIGITAL_VARIANTS: Set<string> = new Set(['digital-minimal', 'digital-glass', 'digital-lofi']);
+const FREE_ANALOG_VARIANTS: Set<string> = new Set(['analog-minimal']);
+const PREMIUM_SECTIONS: Set<string> = new Set(['digital', 'analog', 'presets']);
+
+function PremiumLockSection({ onUpgrade }: { onUpgrade: () => void }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-8 text-center gap-3">
+      <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
+        <Crown className="w-5 h-5 text-amber-400" />
+      </div>
+      <p className="text-xs font-semibold text-white/70">Premium Feature</p>
+      <p className="text-[9px] text-white/30 max-w-[200px]">Upgrade to Elite Scholar to unlock this customization.</p>
+      <button onClick={onUpgrade}
+        className="mt-1 px-4 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all border border-amber-500/20"
+      >
+        <Crown className="w-3 h-3 inline mr-1" />Upgrade
+      </button>
+    </div>
+  );
+}
 
 function Slider({ label, value, min, max, step, onChange, unit }: {
   label: string; value: number; min: number; max: number; step?: number; onChange: (v: number) => void; unit?: string;
@@ -177,11 +199,34 @@ function MiniAnalogPreview({ variant, accentColor, hour }: { variant: ClockVaria
 }
 
 export default function ClockCustomizer({ isOpen, onClose, config, onChange, currentPresetId, onPresetChange }: ClockCustomizerProps) {
+  const { userStats, setShowPremiumModal } = useStudy();
+  const isPremium = userStats.isPremium;
   const [section, setSection] = useState<'variants' | 'general' | 'digital' | 'analog' | 'presets'>('variants');
   const [saveName, setSaveName] = useState('');
   const [saved, setSaved] = useState(false);
   const isAnalog = getVariantType(config.variant) === 'analog';
   const previewHour = 10;
+
+  const isVariantLocked = (variantId: string) => {
+    if (isPremium) return false;
+    const isDigital = variantId.startsWith('digital-');
+    return isDigital ? !FREE_DIGITAL_VARIANTS.has(variantId) : !FREE_ANALOG_VARIANTS.has(variantId);
+  };
+
+  const isSectionLocked = (sectionId: string) => {
+    if (isPremium) return false;
+    return PREMIUM_SECTIONS.has(sectionId);
+  };
+
+  const handleVariantClick = (variantId: ClockVariant) => {
+    if (isVariantLocked(variantId)) { setShowPremiumModal(true); return; }
+    update({ variant: variantId });
+  };
+
+  const handleSectionClick = (sectionId: 'variants' | 'general' | 'digital' | 'analog' | 'presets') => {
+    if (isSectionLocked(sectionId)) return;
+    setSection(sectionId);
+  };
 
   const update = useCallback((partial: Partial<ClockConfig>) => {
     onChange({ ...config, ...partial });
@@ -245,13 +290,16 @@ export default function ClockCustomizer({ isOpen, onClose, config, onChange, cur
                 { id: 'general' as const, label: 'Style' },
                 { id: isAnalog ? 'analog' as const : 'digital' as const, label: isAnalog ? 'Hands' : 'Format' },
                 { id: 'presets' as const, label: 'Presets' },
-              ].map(s => (
-                <button key={s.id} onClick={() => setSection(s.id)}
-                  className={`px-2.5 py-1.5 rounded-lg text-[7px] font-bold uppercase tracking-wider transition-all ${
-                    section === s.id ? 'bg-brand text-white shadow-sm' : 'text-white/40 hover:text-white/60'
+              ].map(s => {
+                const locked = isSectionLocked(s.id);
+                return (
+                <button key={s.id} onClick={() => handleSectionClick(s.id)}
+                  className={`px-2.5 py-1.5 rounded-lg text-[7px] font-bold uppercase tracking-wider transition-all flex items-center gap-1 ${
+                    section === s.id ? 'bg-brand text-white shadow-sm' : locked ? 'text-white/20 cursor-not-allowed' : 'text-white/40 hover:text-white/60'
                   }`}
-                >{s.label}</button>
-              ))}
+                >{s.label}{locked && <Lock className="w-2.5 h-2.5" />}</button>
+                );
+              })}
             </div>
 
             {/* Content */}
@@ -263,12 +311,14 @@ export default function ClockCustomizer({ isOpen, onClose, config, onChange, cur
                   <div className="grid grid-cols-4 gap-2 mb-4">
                     {DIGITAL_VARIANTS.map(v => {
                       const active = config.variant === v.id;
+                      const locked = isVariantLocked(v.id);
                       return (
-                        <button key={v.id} onClick={() => update({ variant: v.id })}
-                          className={`rounded-xl overflow-hidden transition-all border ${
-                            active ? 'ring-2 ring-brand border-brand/50 bg-brand/10' : 'border-white/5 bg-white/[0.03] hover:bg-white/[0.06]'
-                          }`}
+                        <button key={v.id} onClick={() => handleVariantClick(v.id)}
+                          className={`rounded-xl overflow-hidden transition-all border relative ${
+                            active ? 'ring-2 ring-brand border-brand/50 bg-brand/10' : locked ? 'border-white/5 bg-white/[0.02] opacity-40' : 'border-white/5 bg-white/[0.03] hover:bg-white/[0.06]'
+                          } ${locked ? 'cursor-not-allowed' : ''}`}
                         >
+                          {locked && <div className="absolute inset-0 flex items-center justify-center z-10"><Lock className="w-3 h-3 text-white/40" /></div>}
                           <div className="h-12 flex items-center justify-center p-1" style={{
                             background: active ? `linear-gradient(180deg, ${config.accentColor}11, transparent)` : undefined,
                           }}>
@@ -288,12 +338,14 @@ export default function ClockCustomizer({ isOpen, onClose, config, onChange, cur
                   <div className="grid grid-cols-4 gap-2">
                     {ANALOG_VARIANTS.map(v => {
                       const active = config.variant === v.id;
+                      const locked = isVariantLocked(v.id);
                       return (
-                        <button key={v.id} onClick={() => update({ variant: v.id })}
-                          className={`rounded-xl overflow-hidden transition-all border ${
-                            active ? 'ring-2 ring-brand border-brand/50 bg-brand/10' : 'border-white/5 bg-white/[0.03] hover:bg-white/[0.06]'
-                          }`}
+                        <button key={v.id} onClick={() => handleVariantClick(v.id)}
+                          className={`rounded-xl overflow-hidden transition-all border relative ${
+                            active ? 'ring-2 ring-brand border-brand/50 bg-brand/10' : locked ? 'border-white/5 bg-white/[0.02] opacity-40' : 'border-white/5 bg-white/[0.03] hover:bg-white/[0.06]'
+                          } ${locked ? 'cursor-not-allowed' : ''}`}
                         >
+                          {locked && <div className="absolute inset-0 flex items-center justify-center z-10"><Lock className="w-3 h-3 text-white/40" /></div>}
                           <div className="h-12 flex items-center justify-center p-1">
                             <MiniAnalogPreview variant={v.id} accentColor={config.accentColor} hour={previewHour} />
                           </div>
@@ -325,26 +377,31 @@ export default function ClockCustomizer({ isOpen, onClose, config, onChange, cur
 
               {/* ── DIGITAL SECTION ── */}
               {section === 'digital' && !isAnalog && (
+                isSectionLocked('digital') ? <PremiumLockSection onUpgrade={() => setShowPremiumModal(true)} /> : (
                 <div className="space-y-3">
                   <OptGroup label="Font" value={config.fontFamily} options={FONT_OPTIONS} onChange={v => update({ fontFamily: v })} />
                   <Toggle label="12h / 24h" value={config.hour12} onToggle={() => update({ hour12: !config.hour12 })} onLabel="12h" offLabel="24h" />
                   <Toggle label="Seconds" value={config.showSeconds} onToggle={() => update({ showSeconds: !config.showSeconds })} />
                   <Toggle label="Neon Glow" value={config.glowEffect} onToggle={() => update({ glowEffect: !config.glowEffect })} />
                 </div>
+                )
               )}
 
               {/* ── ANALOG SECTION ── */}
               {section === 'analog' && isAnalog && (
+                isSectionLocked('analog') ? <PremiumLockSection onUpgrade={() => setShowPremiumModal(true)} /> : (
                 <div className="space-y-3">
                   <OptGroup label="Hand Style" value={config.handStyle} options={HAND_OPTIONS} onChange={v => update({ handStyle: v })} />
                   <OptGroup label="Tick Marks" value={config.tickStyle} options={TICK_OPTIONS} onChange={v => update({ tickStyle: v })} />
                   <OptGroup label="Face" value={config.faceTexture} options={FACE_OPTIONS} onChange={v => update({ faceTexture: v })} />
                   <Toggle label="Smooth Sweep" value={config.smoothSweep} onToggle={() => update({ smoothSweep: !config.smoothSweep })} />
                 </div>
+                )
               )}
 
               {/* ── PRESETS SECTION ── */}
               {section === 'presets' && (
+                isSectionLocked('presets') ? <PremiumLockSection onUpgrade={() => setShowPremiumModal(true)} /> : (
                 <div className="space-y-3">
                   <p className="text-[8px] font-medium text-white/30">Select a preset to instantly transform your clock</p>
                   <div className="grid grid-cols-2 gap-2">
@@ -380,6 +437,7 @@ export default function ClockCustomizer({ isOpen, onClose, config, onChange, cur
                     >{saved ? 'Saved!' : <Save className="w-3 h-3" />}</button>
                   </div>
                 </div>
+                )
               )}
             </div>
           </motion.div>

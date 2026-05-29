@@ -53,7 +53,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const isDemo = !supabase;
+const isDemo = !supabase || window.location.search.includes('demo=1');
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
@@ -131,7 +131,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(DEMO_USER);
       return;
     }
-    const redirectTo = import.meta.env.VITE_APP_URL || 'http://localhost:5173';
+    const redirectTo = window.location.origin;
     await supabase!.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo },
@@ -148,7 +148,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const resetPassword = useCallback(async (email: string) => {
     if (isDemo) return { error: null };
-    const redirectTo = `${import.meta.env.VITE_APP_URL || 'http://localhost:5173'}/reset-password`;
+    const redirectTo = `${window.location.origin}/reset-password`;
     const { error } = await supabase!.auth.resetPasswordForEmail(email, { redirectTo });
     return { error };
   }, []);

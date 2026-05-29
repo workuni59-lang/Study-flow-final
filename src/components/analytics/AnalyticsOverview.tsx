@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
 import { motion } from 'motion/react';
-import { Clock, CheckCheck, Flame, Sparkles, TrendingUp } from 'lucide-react';
+import { Clock, CheckCheck, Flame, Sparkles, TrendingUp, Crown, Lock } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import type { UserStats } from '../../lib/gamification';
+import { useStudy } from '../../context/StudyContext';
 
 interface Props { userStats: UserStats; }
 
@@ -13,6 +14,8 @@ function formatTime(seconds: number) {
 }
 
 export default function AnalyticsOverview({ userStats }: Props) {
+  const { setShowPremiumModal } = useStudy();
+  const isPremium = userStats.isPremium;
   const weekData = useMemo(() => {
     const days: { name: string; xp: number; focus: number }[] = [];
     for (let i = 6; i >= 0; i--) {
@@ -62,30 +65,46 @@ export default function AnalyticsOverview({ userStats }: Props) {
         ))}
       </div>
 
-      <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/[0.06]">
-        <div className="flex items-center gap-2 mb-3">
-          <TrendingUp className="w-3.5 h-3.5 text-brand-light" />
-          <span className="text-[9px] font-bold text-white/40 uppercase tracking-wider">Weekly XP</span>
+      <div className="relative p-4 rounded-2xl bg-white/[0.04] border border-white/[0.06] overflow-hidden">
+        <div className={`${!isPremium ? 'blur-sm select-none pointer-events-none' : ''}`}>
+          <div className="flex items-center gap-2 mb-3">
+            <TrendingUp className="w-3.5 h-3.5 text-brand-light" />
+            <span className="text-[9px] font-bold text-white/40 uppercase tracking-wider">Weekly XP</span>
+          </div>
+          <div className="h-32">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={weekData} margin={{ top: 4, right: 0, bottom: 0, left: -20 }}>
+                <defs>
+                  <linearGradient id="xpGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#a5b4fc" stopOpacity={0.35} />
+                    <stop offset="100%" stopColor="#a5b4fc" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 8, fill: '#ffffff50' }} dy={4} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 8, fill: '#ffffff30' }} dx={-2} allowDecimals={false} />
+                <Tooltip
+                  contentStyle={{ background: '#1e1e2e', border: '1px solid #ffffff15', borderRadius: 8, fontSize: 11, color: '#fff' }}
+                  formatter={(v: number) => [`${v} XP`, '']}
+                />
+                <Area type="monotone" dataKey="xp" stroke="#a5b4fc" strokeWidth={1.5} fill="url(#xpGrad)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </div>
-        <div className="h-32">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={weekData} margin={{ top: 4, right: 0, bottom: 0, left: -20 }}>
-              <defs>
-                <linearGradient id="xpGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#a5b4fc" stopOpacity={0.35} />
-                  <stop offset="100%" stopColor="#a5b4fc" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 8, fill: '#ffffff50' }} dy={4} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 8, fill: '#ffffff30' }} dx={-2} allowDecimals={false} />
-              <Tooltip
-                contentStyle={{ background: '#1e1e2e', border: '1px solid #ffffff15', borderRadius: 8, fontSize: 11, color: '#fff' }}
-                formatter={(v: number) => [`${v} XP`, '']}
-              />
-              <Area type="monotone" dataKey="xp" stroke="#a5b4fc" strokeWidth={1.5} fill="url(#xpGrad)" />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
+        {!isPremium && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
+              <Lock className="w-4 h-4 text-amber-400" />
+            </div>
+            <p className="text-xs font-semibold text-white/70">Weekly XP Chart</p>
+            <p className="text-[9px] text-white/30 text-center max-w-[180px]">Upgrade to Elite Scholar to track your weekly XP growth.</p>
+            <button onClick={() => setShowPremiumModal(true)}
+              className="mt-1 px-4 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all border border-amber-500/20"
+            >
+              <Crown className="w-3 h-3 inline-block mr-1" />Unlock
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/[0.06]">

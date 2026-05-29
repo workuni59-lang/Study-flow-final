@@ -14,7 +14,7 @@ export default function PetPanel({ onClose, onFeed, petVisible, petSize, onToggl
   onToggleVisible: (v: boolean) => void;
   onChangeSize: (s: number) => void;
 }) {
-  const { petState, feedPet, changePetSpecies, changePetSkin, purchaseSkin, userStats } = useStudy();
+  const { petState, feedPet, changePetSpecies, changePetSkin, purchaseSkin, userStats, setShowPremiumModal } = useStudy();
   const [tab, setTab] = useState<'feed' | 'species' | 'skins'>('feed');
 
   const species = PET_SPECIES.find(s => s.id === petState.species) || PET_SPECIES[0];
@@ -172,7 +172,7 @@ export default function PetPanel({ onClose, onFeed, petVisible, petSize, onToggl
                         </div>
                         <button
                           onClick={() => { feedPet(item.foodId); onFeed?.(); }}
-                          disabled={petState.health === 'dormant' || petState.hunger >= 100}
+                          disabled={petState.hunger >= 100}
                           className="px-3 py-1.5 rounded-lg bg-brand/20 hover:bg-brand/30 text-brand-light text-[9px] font-bold uppercase tracking-wider transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                         >
                           Feed
@@ -191,7 +191,7 @@ export default function PetPanel({ onClose, onFeed, petVisible, petSize, onToggl
                   return (
                     <button
                       key={s.id}
-                      onClick={() => changePetSpecies(s.id)}
+                      onClick={() => { if (s.isPremium && !userStats.isPremium) { setShowPremiumModal(true); return; } changePetSpecies(s.id); }}
                       disabled={!isUnlocked || isActive}
                       className={`p-3 rounded-xl border text-left transition-all ${
                         isActive ? 'bg-brand/20 border-brand/50 ring-1 ring-brand/50' :
@@ -234,12 +234,13 @@ export default function PetPanel({ onClose, onFeed, petVisible, petSize, onToggl
                     <button
                       key={skin.id}
                       onClick={() => {
+                        if (isPremiumLocked) { setShowPremiumModal(true); return; }
                         if (isUnlocked) { changePetSkin(skin.id); return; }
                         if (canUnlock || (skin.isPremium && userStats.isPremium && canAfford && meetsLevel)) {
                           purchaseSkin(skin.id);
                         }
                       }}
-                      disabled={isActive || (isPremiumLocked && !isUnlocked) || (!canUnlock && !isUnlocked && !(skin.isPremium && userStats.isPremium))}
+                      disabled={isActive || (!isUnlocked && !canUnlock && !(skin.isPremium && userStats.isPremium))}
                       className={`p-3 rounded-xl border text-left transition-all ${
                         isActive ? 'bg-brand/20 border-brand/50 ring-1 ring-brand/50' :
                         isUnlocked ? 'bg-white/[0.04] border-white/5 hover:bg-white/[0.08]' :

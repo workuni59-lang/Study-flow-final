@@ -1,11 +1,11 @@
 import React from 'react';
-import { LayoutDashboard, BookOpen, Settings, Zap, Trophy, Crown } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Settings, Zap, Trophy, Crown, BarChart3 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useStudy } from '../../context/StudyContext';
 
 interface NavRailProps {
-  activeView: 'dashboard' | 'subjects' | 'achievements' | 'settings';
-  onViewChange: (view: 'dashboard' | 'subjects' | 'achievements' | 'settings') => void;
+  activeView: 'dashboard' | 'subjects' | 'achievements' | 'analytics' | 'settings';
+  onViewChange: (view: 'dashboard' | 'subjects' | 'achievements' | 'analytics' | 'settings') => void;
 }
 
 export const NavRail = ({ activeView, onViewChange }: NavRailProps) => {
@@ -13,6 +13,7 @@ export const NavRail = ({ activeView, onViewChange }: NavRailProps) => {
   const navItems = [
     { id: 'dashboard', label: 'Home', icon: LayoutDashboard },
     { id: 'subjects', label: 'Subjects', icon: BookOpen },
+    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'achievements', label: 'Progress', icon: Trophy },
   ] as const;
 

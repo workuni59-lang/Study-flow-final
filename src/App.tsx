@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { 
   Calendar, BookOpen, CheckCircle, Menu, X, ArrowRight, Zap, 
   ChevronDown, Mail, Github, Twitter, Instagram, Moon, Sun
@@ -8,16 +8,19 @@ import { StudyProvider, useStudy } from './context/StudyContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import AuthModal from './components/auth/AuthModal';
 import Dashboard from './components/Dashboard';
-import { SubjectsView } from './components/subjects/SubjectsView';
-import { AchievementsView } from './components/achievements/AchievementsView';
-import { SettingsView } from './components/navigation/SettingsView';
 import { AchievementNotification } from './components/notifications/AchievementNotification';
 import { Confetti } from './components/notifications/Confetti';
 import { LevelUpModal } from './components/modals/LevelUpModal';
+import { PremiumModal } from './components/modals/PremiumModal';
 import { PanicModeUI } from './components/dashboard/PanicModeUI';
 import { WallpaperEngine } from './components/navigation/WallpaperEngine';
 import { storage } from './services/storage';
 import { NavRail } from './components/navigation/NavRail';
+
+const AnalyticsDashboardLazy = lazy(() => import('./components/analytics/AnalyticsDashboard'));
+const SubjectsViewLazy = lazy(() => import('./components/subjects/SubjectsView').then(m => ({ default: m.SubjectsView })));
+const AchievementsViewLazy = lazy(() => import('./components/achievements/AchievementsView').then(m => ({ default: m.AchievementsView })));
+const SettingsViewLazy = lazy(() => import('./components/navigation/SettingsView').then(m => ({ default: m.SettingsView })));
 
 // --- Landing Page Components ---
 
@@ -436,10 +439,16 @@ const LandingPage = ({ isDark, setIsDark, onOpenAuth }: { isDark: boolean, setIs
   );
 };
 
+const SimpleSpinner = () => (
+  <div className="flex items-center justify-center py-20">
+    <div className="w-6 h-6 border-2 border-brand/30 border-t-brand rounded-full animate-spin" />
+  </div>
+);
+
 const AppContent = () => {
-  const { user, loading: authLoading } = useAuth();
-  const { themeConfig, userStats, activeNotification, confettiActive, closeNotification } = useStudy();
-  const [activeView, setActiveView] = useState<'dashboard' | 'subjects' | 'achievements' | 'settings'>('dashboard');
+  const { user, profile, loading: authLoading } = useAuth();
+  const { themeConfig, userStats, activeNotification, confettiActive, closeNotification, syncPremiumStatus } = useStudy();
+  const [activeView, setActiveView] = useState<'dashboard' | 'subjects' | 'achievements' | 'analytics' | 'settings'>('dashboard');
   const [isDark, setIsDark] = useState(() => {
     const saved = storage.getTheme();
     return saved !== null ? saved : false;
@@ -464,6 +473,31 @@ const AppContent = () => {
     }
     storage.saveTheme(isDark);
   }, [isDark]);
+
+  // Sync server-side premium status into StudyContext
+  useEffect(() => {
+    if (profile) {
+      syncPremiumStatus(profile.is_premium);
+    }
+  }, [profile, syncPremiumStatus]);
+
+  // Handle upgrade success redirect
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('upgrade') === 'success') {
+      window.history.replaceState({}, '', window.location.pathname);
+      window.location.reload();
+    }
+  }, []);
+
+  // Preload lazy chunks after critical paint
+  useEffect(() => {
+    const t = setTimeout(() => {
+      import('./components/analytics/AnalyticsDashboard');
+      import('./components/subjects/SubjectsView');
+    }, 2000);
+    return () => clearTimeout(t);
+  }, []);
 
   if (authLoading) {
     return (
@@ -507,7 +541,23 @@ const AppContent = () => {
                   transition={{ duration: 0.3 }}
                   className="p-6 md:p-12"
                 >
-                  <SubjectsView />
+                  <Suspense fallback={<SimpleSpinner />}>
+                    <SubjectsViewLazy />
+                  </Suspense>
+                </motion.div>
+              )}
+              {activeView === 'analytics' && (
+                <motion.div
+                  key="analytics"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="p-6 md:p-12"
+                >
+                  <Suspense fallback={<SimpleSpinner />}>
+                    <AnalyticsDashboardLazy />
+                  </Suspense>
                 </motion.div>
               )}
               {activeView === 'achievements' && (
@@ -519,7 +569,9 @@ const AppContent = () => {
                   transition={{ duration: 0.3 }}
                   className="p-6 md:p-12"
                 >
-                  <AchievementsView />
+                  <Suspense fallback={<SimpleSpinner />}>
+                    <AchievementsViewLazy />
+                  </Suspense>
                 </motion.div>
               )}
               {activeView === 'settings' && (
@@ -531,7 +583,9 @@ const AppContent = () => {
                   transition={{ duration: 0.3 }}
                   className="p-6 md:p-12"
                 >
-                  <SettingsView />
+                  <Suspense fallback={<SimpleSpinner />}>
+                    <SettingsViewLazy />
+                  </Suspense>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -555,6 +609,7 @@ const AppContent = () => {
       )}
 
       <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
+      <PremiumModal />
     </>
   );
 };

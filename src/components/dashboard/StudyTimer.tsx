@@ -14,14 +14,13 @@ import { ATMOSPHERES, WALLPAPERS, Wallpaper } from '../../lib/gamification';
 
 // Extract unique categories from wallpapers
 const IMAGE_CATEGORIES = [...new Set(WALLPAPERS.filter(w => w.type === 'image' && w.category).map(w => w.category!))];
-import { PremiumModal } from '../modals/PremiumModal';
 
 // 🎵 RELIABLE AUDIO ASSETS (Mixkit CDN — verified 200 OK, 1yr cache)
 const AMBIENCE_LIBRARY = [
   { id: 'lofi', name: 'Focus Lofi', icon: Coffee, url: 'https://assets.mixkit.co/music/292/292.mp3', isPremium: false },
   { id: 'rain', name: 'Soft Rain', icon: CloudRain, url: 'https://assets.mixkit.co/active_storage/sfx/2455/2455-preview.mp3', isPremium: false },
-  { id: 'white-noise', name: 'White Noise', icon: Waves, url: 'https://assets.mixkit.co/active_storage/sfx/2135/2135-preview.mp3', isPremium: false },
-  { id: 'meditation', name: 'Meditation', icon: Headphones, url: 'https://assets.mixkit.co/music/109/109.mp3', isPremium: false },
+  { id: 'white-noise', name: 'White Noise', icon: Waves, url: 'https://assets.mixkit.co/active_storage/sfx/2135/2135-preview.mp3', isPremium: true },
+  { id: 'meditation', name: 'Meditation', icon: Headphones, url: 'https://assets.mixkit.co/music/109/109.mp3', isPremium: true },
   { id: 'birds', name: 'Morning Birds', icon: Bird, url: 'https://assets.mixkit.co/active_storage/sfx/2472/2472-preview.mp3', isPremium: true },
   { id: 'fire', name: 'Fireplace', icon: Flame, url: 'https://assets.mixkit.co/active_storage/sfx/2456/2456-preview.mp3', isPremium: true },
   { id: 'cafe', name: 'Paris Cafe', icon: CafeIcon, url: 'https://assets.mixkit.co/active_storage/sfx/444/444-preview.mp3', isPremium: true },
@@ -43,7 +42,7 @@ const PRESETS: Preset[] = [
 interface StudyTimerProps { onTick?: () => void; compact?: boolean; }
 
 export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
-  const { themeConfig, setThemeConfig, completeFocusSession, logSession, userStats, triggerConfetti, setFocusSession } = useStudy();
+  const { themeConfig, setThemeConfig, completeFocusSession, logSession, userStats, triggerConfetti, setFocusSession, setShowPremiumModal } = useStudy();
   
   const [activePreset, setActivePreset] = useState<Preset>(PRESETS[0]);
   const [mode, setMode] = useState<TimerMode>('focus');
@@ -62,7 +61,6 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
   const [showPresetPicker, setShowPresetPicker] = useState(false);
   const [pickerTab, setPickerTab] = useState<'atm' | 'wall'>('atm');
   const [wallpaperCategory, setWallpaperCategory] = useState<string>('All');
-  const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [showExpanded, setShowExpanded] = useState(false);
   const [sessionsCompleted, setSessionsCompleted] = useState(0);
   const [customUrl, setCustomUrl] = useState(themeConfig.customWallpaperUrl || '');
@@ -633,7 +631,6 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
           </motion.div>
         )}
       </AnimatePresence>
-      <PremiumModal isOpen={showPremiumModal} onClose={() => setShowPremiumModal(false)} />
     </>
   );
 };

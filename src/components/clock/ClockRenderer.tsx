@@ -74,9 +74,6 @@ export default function ClockRenderer({ time, focusState }: ClockRendererProps) 
         variants={floatHover}
         animate="animate"
       >
-        {/* Focus sync ring */}
-        <FocusSyncLayer focusState={focusState} accentColor={config.accentColor} glowIntensity={config.glowIntensity} />
-
         {/* Clock face */}
         <motion.div
           className="relative"
@@ -84,6 +81,8 @@ export default function ClockRenderer({ time, focusState }: ClockRendererProps) 
           variants={isInFocus ? focusPulse : undefined}
           animate={isInFocus ? 'animate' : undefined}
         >
+          {/* Focus sync ring — only for analog clocks, inside the scaled container */}
+          {isAnalog && <FocusSyncLayer focusState={focusState} accentColor={config.accentColor} glowIntensity={config.glowIntensity} />}
           <AnimatePresence mode="wait">
             <motion.div
               key={config.variant}

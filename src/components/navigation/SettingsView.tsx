@@ -36,7 +36,7 @@ export const SettingsView = () => {
     userStats, 
     themeConfig, 
     setThemeConfig, 
-    togglePremium,
+    setShowPremiumModal,
     triggerConfetti,
   } = useStudy();
 
@@ -261,7 +261,7 @@ export const SettingsView = () => {
                     )}
                  </div>
                  <button 
-                    onClick={togglePremium}
+                    onClick={() => userStats.isPremium ? setShowPremiumModal(true) : setShowPremiumModal(true)}
                     className={`w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${userStats.isPremium ? 'bg-white/10 hover:bg-white/20 text-white' : 'bg-indigo-600 text-white shadow-xl shadow-indigo-600/20 hover:bg-slate-900'}`}
                  >
                     {userStats.isPremium ? 'Manage Subscription' : 'Upgrade to Pro'}

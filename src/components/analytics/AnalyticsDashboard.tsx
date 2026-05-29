@@ -21,7 +21,7 @@ const TABS: { id: Tab; icon: typeof BarChart3; label: string }[] = [
 const PREMIUM_TABS: Tab[] = ['heatmap', 'subjects'];
 
 export default function AnalyticsDashboard() {
-  const { userStats, subjects } = useStudy();
+  const { userStats, subjects, setShowPremiumModal } = useStudy();
   const isPremium = userStats.isPremium;
   const [activeTab, setActiveTab] = useState<Tab>('overview');
 
@@ -43,7 +43,7 @@ export default function AnalyticsDashboard() {
           <p className="text-[10px] text-white/40 max-w-[200px] leading-relaxed mb-4">
             Unlock detailed heatmaps and subject analytics with Premium.
           </p>
-          <button className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 text-white text-[9px] font-bold uppercase tracking-wider shadow-lg shadow-amber-500/20">
+          <button onClick={() => setShowPremiumModal(true)} className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 text-white text-[9px] font-bold uppercase tracking-wider shadow-lg shadow-amber-500/20">
             Upgrade to Premium
           </button>
         </div>

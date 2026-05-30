@@ -1,9 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import confetti from 'canvas-confetti';
+import { audioController, type AudioState } from '../services/AudioController';
+import { AUDIO_ASSETS } from '../lib/audioRegistry';
 import { storage } from '../services/storage';
 import { UserStats, Badge, ACHIEVEMENTS, Achievement, Quest, calculateLevel, XP_PER_TASK, XP_PER_FOCUS_MINUTE, AtmosphereId, WallpaperId, PetState, PetFood, PET_FOODS, PET_SPECIES, PET_SKINS, INITIAL_PET_STATE, PET_HUNGER_DECAY_PER_HOUR, PET_WEAK_THRESHOLD, PET_WEAK_DURATION_MS, PET_DORMANT_DURATION_MS, PetHealth, PetEvent, PetEventType } from '../lib/gamification';
 export interface FocusSessionState {
-  mode: 'focus' | 'shortBreak' | 'longBreak' | 'idle';
+  mode: 'focus' | 'shortBreak' | 'longBreak' | 'idle' | 'taskETA';
   timeLeft: number;
   totalTime: number;
   isActive: boolean;
@@ -32,6 +34,7 @@ export interface Task {
   category: string;
   priority?: string;
   dueDate?: string;
+  estimatedMinutes?: number;
 }
 
 export interface Exam {
@@ -55,6 +58,7 @@ export interface ThemeConfig {
   showQuote: boolean;
   showClock: boolean;
   scaleFactor: number; // 0.5-1.5
+  clearMode: boolean;
 }
 
 interface StudyContextType {
@@ -77,7 +81,7 @@ interface StudyContextType {
   addTopic: (subjectId: string, title: string) => void;
   updateTopicMastery: (subjectId: string, topicId: string, mastery: MasteryLevel) => void;
   deleteTopic: (subjectId: string, topicId: string) => void;
-  addTask: (title: string, category: string, priority: string, dueDate?: string) => void;
+  addTask: (title: string, category: string, priority: string, dueDate?: string, estimatedMinutes?: number) => void;
   toggleTask: (id: string) => void;
   deleteTask: (id: string) => void;
   addExam: (subject: string, type: string, date: string, subjectId?: string) => void;
@@ -108,10 +112,13 @@ interface StudyContextType {
   syncPremiumStatus: (isPremium: boolean) => void;
   showPremiumModal: boolean;
   setShowPremiumModal: (show: boolean) => void;
-  activeTrackId: string | null;
+  activeTracks: Record<string, { volume: number }>;
   masterVolume: number;
-  playAudio: (url: string, trackId: string) => void;
-  stopAudio: () => void;
+  selectedTaskId: string | null;
+  setSelectedTaskId: (id: string | null) => void;
+  toggleTrack: (id: string, url: string, baseVolume?: number) => void;
+  setTrackVolume: (id: string, vol: number) => void;
+  stopAllTracks: () => void;
   setMasterVolume: (vol: number) => void;
 }
 
@@ -140,7 +147,8 @@ const DEFAULT_THEME: ThemeConfig = {
   showGreeting: true,
   showQuote: true,
   showClock: true,
-  scaleFactor: 1
+  scaleFactor: 1,
+  clearMode: false
 };
 
 export function StudyProvider({ children }: { children: React.ReactNode }) {
@@ -181,38 +189,51 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   const [selectedExamForPath, setSelectedExamForPath] = useState<Exam | null>(null);
   const [focusSession, setFocusSession] = useState<FocusSessionState | null>(null);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
-  const [activeTrackId, setActiveTrackId] = useState<string | null>(null);
-  const [masterVolume, setMasterVolume] = useState(0.5);
-  const currentAudioRef = useRef<HTMLAudioElement | null>(null);
+  const [activeTracks, setActiveTracks] = useState<Record<string, { volume: number, isLoading: boolean, isError: boolean }>>({});
+  const [masterVolume, setMasterVolumeVal] = useState(0.5);
 
-  const stopAudio = useCallback(() => {
-    if (currentAudioRef.current) {
-      currentAudioRef.current.pause();
-      currentAudioRef.current = null;
-    }
-    setActiveTrackId(null);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+
+  const syncAudioState = useCallback(() => {
+    const states = audioController.getStates();
+    const nextState: Record<string, { volume: number, isLoading: boolean, isError: boolean }> = {};
+    states.forEach(s => {
+      if (s.isPlaying || s.isLoading || s.isError) {
+        nextState[s.id] = { volume: s.volume, isLoading: s.isLoading, isError: s.isError };
+      }
+    });
+    setActiveTracks(nextState);
   }, []);
 
-  const playAudio = useCallback((url: string, trackId: string) => {
-    if (activeTrackId === trackId) {
-      stopAudio();
-      return;
-    }
-    stopAudio();
-    const audio = new Audio(url);
-    audio.loop = true;
-    audio.volume = masterVolume;
-    currentAudioRef.current = audio;
-    audio.play().catch(() => {});
-    setActiveTrackId(trackId);
-  }, [activeTrackId, masterVolume, stopAudio]);
+  const stopAllTracks = useCallback(() => {
+    audioController.stopAll();
+    syncAudioState();
+  }, [syncAudioState]);
 
-  // Keep volume in sync
+  const setTrackVolume = useCallback((id: string, vol: number) => {
+    audioController.setVolume(id, vol);
+    syncAudioState();
+  }, [syncAudioState]);
+
+  const toggleTrack = useCallback((id: string) => {
+    audioController.toggle(id);
+    syncAudioState();
+  }, [syncAudioState]);
+
+  const setMasterVolume = useCallback((vol: number) => {
+    setMasterVolumeVal(vol);
+    audioController.setMasterVolume(vol);
+    syncAudioState();
+  }, [syncAudioState]);
+
+  // Connect Controller to React
   useEffect(() => {
-    if (currentAudioRef.current) {
-      currentAudioRef.current.volume = masterVolume;
-    }
-  }, [masterVolume]);
+    audioController.setNotifyCallback(syncAudioState);
+    audioController.preload();
+    audioController.setMasterVolume(masterVolume);
+    syncAudioState();
+    return () => audioController.setNotifyCallback(null);
+  }, []);
 
   // Synchronization Hooks
   useEffect(() => {
@@ -237,6 +258,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     storage.saveThemeConfig(themeConfig);
     document.documentElement.setAttribute('data-atmosphere', themeConfig.atmosphere);
     document.documentElement.setAttribute('data-wallpaper', themeConfig.wallpaper);
+    document.documentElement.setAttribute('data-clear-mode', String(themeConfig.clearMode));
     document.documentElement.style.setProperty('--scale-factor', String(themeConfig.scaleFactor));
   }, [themeConfig]);
   
@@ -404,8 +426,8 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const addTask = (title: string, category: string, priority: string, dueDate?: string) => {
-    const newTask: Task = { id: Date.now().toString() + Math.random().toString(36).substr(2, 9), title, category, priority, completed: false, dueDate };
+  const addTask = (title: string, category: string, priority: string, dueDate?: string, estimatedMinutes?: number) => {
+    const newTask: Task = { id: Date.now().toString() + Math.random().toString(36).substr(2, 9), title, category, priority, completed: false, dueDate, estimatedMinutes };
     setTasks(prev => [newTask, ...prev]);
   };
 
@@ -653,11 +675,13 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     setTasks, addXP, completeFocusSession, logSession, closeNotification, buyShield, togglePremium, syncPremiumStatus, triggerConfetti, resetStreak, setPanicMode,
     setSelectedExamForPath, feedPet, petInteract, changePetSpecies, changePetSkin, purchaseSkin, setPetName, tickPet, petEvent, firePetEvent,
     showPremiumModal, setShowPremiumModal,
-    activeTrackId, masterVolume, playAudio, stopAudio, setMasterVolume
+    activeTracks, masterVolume, toggleTrack, setTrackVolume, stopAllTracks, setMasterVolume,
+    selectedTaskId, setSelectedTaskId
   }), [
     accessToken, subjects, tasks, exams, quests, themeConfig, userStats, unlockedBadges, activeNotification,
     confettiActive, panicModeActive, selectedExamForPath, petState, petEvent, focusSession, showPremiumModal,
-    activeTrackId, masterVolume, playAudio, stopAudio, setMasterVolume
+    activeTracks, masterVolume, toggleTrack, setTrackVolume, stopAllTracks, setMasterVolume,
+    selectedTaskId
   ]);
 
   return (

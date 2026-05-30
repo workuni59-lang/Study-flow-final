@@ -14,7 +14,7 @@ import { ATMOSPHERES, WALLPAPERS, Wallpaper } from '../../lib/gamification';
 // Extract unique categories from wallpapers
 const IMAGE_CATEGORIES = [...new Set(WALLPAPERS.filter(w => w.type === 'image' && w.category).map(w => w.category!))];
 
-type TimerMode = 'focus' | 'shortBreak' | 'longBreak';
+type TimerMode = 'focus' | 'shortBreak' | 'longBreak' | 'taskETA';
 interface Preset { id: string; name: string; icon: any; focus: number; short: number; long: number; }
 
 const PRESETS: Preset[] = [
@@ -34,7 +34,11 @@ const TALLY_SETS: Record<string, string[]> = {
 interface StudyTimerProps { onTick?: () => void; compact?: boolean; }
 
 export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
-  const { themeConfig, setThemeConfig, completeFocusSession, logSession, userStats, triggerConfetti, setFocusSession, setShowPremiumModal } = useStudy();
+  const { 
+    themeConfig, setThemeConfig, completeFocusSession, logSession, 
+    userStats, triggerConfetti, setFocusSession, setShowPremiumModal,
+    tasks, selectedTaskId, setSelectedTaskId
+  } = useStudy();
   
   const [activePreset, setActivePreset] = useState<Preset>(PRESETS[0]);
   const [mode, setMode] = useState<TimerMode>('focus');
@@ -48,6 +52,8 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
   const [pickerTab, setPickerTab] = useState<'atm' | 'wall'>('atm');
   const [wallpaperCategory, setWallpaperCategory] = useState<string>('All');
   const [wallpaperType, setWallpaperType] = useState<string>('All');
+  const [wallpaperBrightness, setWallpaperBrightness] = useState<string>('All');
+  const [wallpaperEnvironment, setWallpaperEnvironment] = useState<string>('All');
   const [sessionsCompleted, setSessionsCompleted] = useState(0);
   const [customUrl, setCustomUrl] = useState(themeConfig.customWallpaperUrl || '');
   const [urlApplied, setUrlApplied] = useState(false);
@@ -69,7 +75,16 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
     e.target.value = '';
   };
 
-  const totalTime = mode === 'focus' ? activePreset.focus * 60 : mode === 'shortBreak' ? activePreset.short * 60 : activePreset.long * 60;
+  const selectedTask = tasks.find(t => t.id === selectedTaskId);
+  const taskTime = selectedTask?.estimatedMinutes ?? 25;
+  const totalTime = mode === 'focus' 
+    ? activePreset.focus * 60 
+    : mode === 'shortBreak' 
+    ? activePreset.short * 60 
+    : mode === 'longBreak'
+    ? activePreset.long * 60
+    : taskTime * 60;
+
   const progress = totalTime > 0 ? (totalTime - timeLeft) / totalTime : 0;
 
   const sessionElapsed = useRef(0);
@@ -162,13 +177,13 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
   const handleTimerComplete = () => {
     setIsActive(false);
     releaseWakeLock();
-    if (mode === 'focus') logFocusSession(activePreset.focus * 60);
+    if (mode === 'focus' || mode === 'taskETA') logFocusSession(totalTime);
     triggerConfetti();
     const alertAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
     alertAudio.volume = 0.3;
     alertAudio.play().catch(() => {});
 
-    if (mode === 'focus') {
+    if (mode === 'focus' || mode === 'taskETA') {
       const newTotal = sessionsCompleted + 1;
       setSessionsCompleted(newTotal);
       const d = newTotal % 4 === 0 ? activePreset.long : activePreset.short;
@@ -190,12 +205,12 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
       releaseWakeLock();
     }
 
-    if (!nextState && mode === 'focus') {
+    if (!nextState && (mode === 'focus' || mode === 'taskETA')) {
       if (sessionElapsed.current > 0) {
         completeFocusSession(sessionElapsed.current);
         sessionElapsed.current = 0;
       }
-      const elapsed = (activePreset.focus * 60) - timeLeft;
+      const elapsed = totalTime - timeLeft;
       logFocusSession(elapsed);
     }
   };
@@ -286,6 +301,22 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
         ))}
       </div>
 
+      {/* Brightness filter pills */}
+      <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+        {['All', 'Light', 'Dark', 'Vibrant'].map(b => (
+          <button key={b} onClick={() => setWallpaperBrightness(b)}
+            className={`shrink-0 px-2.5 py-1 rounded-lg text-[7px] font-bold uppercase tracking-wider transition-all ${wallpaperBrightness === b ? 'bg-brand text-white' : 'bg-white/[0.04] text-white/40 hover:text-white/60'}`}>{b}</button>
+        ))}
+      </div>
+
+      {/* Environment filter pills */}
+      <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+        {['All', 'Nature', 'Urban', 'Abstract', 'Interior', 'Scenic'].map(e => (
+          <button key={e} onClick={() => setWallpaperEnvironment(e)}
+            className={`shrink-0 px-2.5 py-1 rounded-lg text-[7px] font-bold uppercase tracking-wider transition-all ${wallpaperEnvironment === e ? 'bg-brand text-white' : 'bg-white/[0.04] text-white/40 hover:text-white/60'}`}>{e}</button>
+        ))}
+      </div>
+
       {/* Category filter pills */}
       <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
         <button onClick={() => setWallpaperCategory('All')}
@@ -301,6 +332,8 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
         {WALLPAPERS.filter(w => {
           if (wallpaperType !== 'All' && w.type !== wallpaperType.toLowerCase()) return false;
           if (wallpaperCategory !== 'All' && w.category !== wallpaperCategory) return false;
+          if (wallpaperBrightness !== 'All' && w.brightness !== wallpaperBrightness.toLowerCase()) return false;
+          if (wallpaperEnvironment !== 'All' && w.environment !== wallpaperEnvironment.toLowerCase()) return false;
           return true;
         }).map(w => (
           <button key={w.id} onClick={() => { if(w.isPremium && !userStats.isPremium) setShowPremiumModal(true); else setThemeConfig({...themeConfig, wallpaper: w.id}); }}
@@ -395,15 +428,47 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
                     ) : showPresetPicker ? renderPresetPicker() : (
                       <motion.div key="compact-controls" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                         {/* Mode tabs above timer */}
-                        <div className="flex gap-1.5 bg-white/[0.04] p-1 rounded-xl mb-4">
-                          {(['focus', 'shortBreak', 'longBreak'] as const).map(m => (
-                            <button key={m} onClick={() => { setIsActive(false); setMode(m); const d = m === 'focus' ? activePreset.focus : m === 'shortBreak' ? activePreset.short : activePreset.long; setTimeLeft(d * 60); }} 
-                              className={`flex-1 py-2 rounded-[10px] text-[9px] font-semibold uppercase tracking-wider transition-all ${mode === m ? 'bg-white/10 text-white shadow-sm' : 'text-white/30 hover:text-white/60'}`}>
-                              {m === 'focus' ? 'Focus' : m === 'shortBreak' ? 'Break' : 'Long Break'}
+                        <div className="flex gap-1.5 bg-white/[0.04] p-1 rounded-xl mb-4 overflow-x-auto no-scrollbar">
+                          {(['focus', 'shortBreak', 'longBreak', 'taskETA'] as const).map(m => (
+                            <button key={m} onClick={() => { 
+                              setIsActive(false); 
+                              setMode(m); 
+                              const d = m === 'taskETA' ? (tasks.find(t => t.id === selectedTaskId)?.estimatedMinutes ?? 25) : m === 'focus' ? activePreset.focus : m === 'shortBreak' ? activePreset.short : activePreset.long; 
+                              setTimeLeft(d * 60); 
+                            }} 
+                              className={`shrink-0 px-3 py-2 rounded-[10px] text-[9px] font-semibold uppercase tracking-wider transition-all ${mode === m ? 'bg-white/10 text-white shadow-sm' : 'text-white/30 hover:text-white/60'}`}>
+                              {m === 'focus' ? 'Focus' : m === 'shortBreak' ? 'Break' : m === 'longBreak' ? 'Long Break' : 'Task ETA'}
                             </button>
                           ))}
                         </div>
-                          <div className="text-center mb-4">
+
+                        {/* Task Selector for Task ETA Mode */}
+                        {mode === 'taskETA' && (
+                          <div className="mb-4">
+                            <select 
+                              value={selectedTaskId || ''} 
+                              onChange={(e) => {
+                                const id = e.target.value;
+                                setSelectedTaskId(id);
+                                const task = tasks.find(t => t.id === id);
+                                if (task) {
+                                  setTimeLeft((task.estimatedMinutes || 25) * 60);
+                                  setIsActive(false);
+                                }
+                              }}
+                              className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-[10px] font-bold text-white focus:outline-none appearance-none cursor-pointer"
+                            >
+                              <option value="" className="bg-slate-900">Select a task...</option>
+                              {tasks.filter(t => !t.completed).map(t => (
+                                <option key={t.id} value={t.id} className="bg-slate-900">
+                                  {t.title} ({t.estimatedMinutes || 25}m)
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        )}
+
+                        <div className="text-center mb-4">
                           <motion.div key={mode} initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-5xl font-display font-light tracking-tighter tabular-nums text-white/90 select-none"
                             style={{ fontSize: 'calc(3rem * var(--scale-factor, 1))' }}>
                             {formatTime(timeLeft)}
@@ -441,14 +506,45 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
                 </div>
               </div>
 
-              <div className="flex gap-1.5 bg-white/[0.04] p-1 rounded-xl">
-                {(['focus', 'shortBreak', 'longBreak'] as const).map(m => (
-                  <button key={m} onClick={() => { setIsActive(false); setMode(m); const d = m === 'focus' ? activePreset.focus : m === 'shortBreak' ? activePreset.short : activePreset.long; setTimeLeft(d * 60); }} 
-                    className={`flex-1 py-2 rounded-[10px] text-[9px] font-semibold uppercase tracking-wider transition-all ${mode === m ? 'bg-white/10 text-white shadow-sm' : 'text-white/30 hover:text-white/60'}`}>
-                    {m === 'focus' ? 'Focus' : m === 'shortBreak' ? 'Break' : 'Long Break'}
+              <div className="flex gap-1.5 bg-white/[0.04] p-1 rounded-xl overflow-x-auto no-scrollbar">
+                {(['focus', 'shortBreak', 'longBreak', 'taskETA'] as const).map(m => (
+                  <button key={m} onClick={() => { 
+                    setIsActive(false); 
+                    setMode(m); 
+                    const d = m === 'taskETA' ? (tasks.find(t => t.id === selectedTaskId)?.estimatedMinutes ?? 25) : m === 'focus' ? activePreset.focus : m === 'shortBreak' ? activePreset.short : activePreset.long; 
+                    setTimeLeft(d * 60); 
+                  }} 
+                    className={`shrink-0 px-4 py-2 rounded-[10px] text-[9px] font-semibold uppercase tracking-wider transition-all ${mode === m ? 'bg-white/10 text-white shadow-sm' : 'text-white/30 hover:text-white/60'}`}>
+                    {m === 'focus' ? 'Focus' : m === 'shortBreak' ? 'Break' : m === 'longBreak' ? 'Long Break' : 'Task ETA'}
                   </button>
                 ))}
               </div>
+
+              {/* Task Selector for Task ETA Mode */}
+              {mode === 'taskETA' && (
+                <div className="mt-4 px-1">
+                  <select 
+                    value={selectedTaskId || ''} 
+                    onChange={(e) => {
+                      const id = e.target.value;
+                      setSelectedTaskId(id);
+                      const task = tasks.find(t => t.id === id);
+                      if (task) {
+                        setTimeLeft((task.estimatedMinutes || 25) * 60);
+                        setIsActive(false);
+                      }
+                    }}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-[10px] font-bold text-white focus:outline-none appearance-none cursor-pointer"
+                  >
+                    <option value="" className="bg-slate-900">Select a task...</option>
+                    {tasks.filter(t => !t.completed).map(t => (
+                      <option key={t.id} value={t.id} className="bg-slate-900">
+                        {t.title} ({t.estimatedMinutes || 25}m)
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div className="py-6 text-center">
                 <motion.div key={mode} initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-6xl md:text-7xl font-display font-light tracking-tighter tabular-nums text-white/90 select-none"
@@ -485,9 +581,14 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
             <button onClick={() => setIsZenMode(false)} className="absolute top-10 right-10 p-3 bg-white/5 text-white/40 hover:text-white rounded-xl z-50"><X className="w-6 h-6" /></button>
             <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="relative z-10 w-full flex flex-col items-center">
               <div className="mb-6 flex flex-col items-center gap-3">
-                <span className={`px-4 py-1.5 rounded-full text-[9px] font-semibold uppercase tracking-wider border ${mode === 'focus' ? 'bg-brand/10 border-brand/20 text-brand-light' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'}`}>
-                  {mode === 'focus' ? 'Deep Focus' : mode === 'shortBreak' ? 'Recharge' : 'Restoration'}
+                <span className={`px-4 py-1.5 rounded-full text-[9px] font-semibold uppercase tracking-wider border ${
+                  mode === 'focus' || mode === 'taskETA' ? 'bg-brand/10 border-brand/20 text-brand-light' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                }`}>
+                  {mode === 'focus' ? 'Deep Focus' : mode === 'taskETA' ? 'Task Session' : mode === 'shortBreak' ? 'Recharge' : 'Restoration'}
                 </span>
+                {mode === 'taskETA' && selectedTask && (
+                  <span className="text-white/60 text-sm font-medium tracking-wide italic">"{selectedTask.title}"</span>
+                )}
               </div>
               <div className="text-[15vw] md:text-[12vw] font-display font-thin tracking-tighter text-white tabular-nums leading-[1] select-none opacity-90 mb-10">{formatTime(timeLeft)}</div>
               <div className="flex justify-center items-center gap-8">

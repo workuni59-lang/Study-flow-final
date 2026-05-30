@@ -13,7 +13,7 @@ export const FocusView = ({ onTasksOpen, onMusicOpen, onNotepadOpen }: FocusView
     <StudyTimer compact />
 
     {/* Panel triggers */}
-    <div className="mt-6 flex gap-3">
+    <div className="dashboard-stats mt-6 flex gap-3">
       <button onClick={onTasksOpen}
         className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-sm font-medium active:scale-95 transition-transform"
       >
@@ -37,7 +37,7 @@ export const FocusView = ({ onTasksOpen, onMusicOpen, onNotepadOpen }: FocusView
       </div>
 
       {/* Deadlines */}
-      <div className="mt-6 w-full max-w-sm">
+      <div className="dashboard-stats mt-6 w-full max-w-sm">
         <DeadlinesSection />
       </div>
 

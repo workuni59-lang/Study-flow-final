@@ -47,7 +47,7 @@ export const DesktopSidebar = ({ mode, onModeChange, activeSection, onNavigate, 
       {open && (
         <>
           <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40" onClick={onClose} />
-          <aside className="fixed top-0 left-0 bottom-0 w-72 bg-white dark:bg-[#0a0c10] shadow-2xl z-50 transform transition-transform duration-300 ease-out border-r border-slate-100 dark:border-slate-800">
+          <aside className="sidebar fixed top-0 left-0 bottom-0 w-72 bg-white dark:bg-[#0a0c10] shadow-2xl z-50 transform transition-transform duration-300 ease-out border-r border-slate-100 dark:border-slate-800">
       <div className="flex flex-col h-full">
         {/* Brand */}
         <div className="px-5 pt-6 pb-4 border-b border-slate-100 dark:border-slate-800">

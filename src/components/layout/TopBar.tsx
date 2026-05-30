@@ -10,7 +10,7 @@ interface TopBarProps {
 export const TopBar = ({ mode, onModeChange, onMenuOpen, onSettingsOpen }: TopBarProps) => (
   <>
     {/* Hamburger + Settings */}
-    <div className="fixed top-4 left-4 z-30 flex items-center gap-2">
+    <div className="top-bar fixed top-4 left-4 z-30 flex items-center gap-2">
       <button onClick={onMenuOpen}
         className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-white/40 dark:hover:bg-white/10 transition-colors"
       >
@@ -28,7 +28,7 @@ export const TopBar = ({ mode, onModeChange, onMenuOpen, onSettingsOpen }: TopBa
     </div>
 
     {/* Mode toggle pill */}
-    <div className="fixed top-5 left-1/2 -translate-x-1/2 z-30 flex gap-0.5 p-0.5 rounded-[10px] bg-white/30 dark:bg-[#0a0c10]/40 backdrop-blur-xl border border-white/20 dark:border-white/[0.06] shadow-sm">
+    <div className="top-bar fixed top-5 left-1/2 -translate-x-1/2 z-30 flex gap-0.5 p-0.5 rounded-[10px] bg-white/30 dark:bg-[#0a0c10]/40 backdrop-blur-xl border border-white/20 dark:border-white/[0.06] shadow-sm">
       <button onClick={() => onModeChange('home')}
         className={`px-2.5 py-1 rounded-[7px] text-[9px] font-semibold uppercase tracking-wider transition-all ${
           mode === 'home'

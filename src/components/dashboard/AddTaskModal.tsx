@@ -5,21 +5,23 @@ import { X } from 'lucide-react';
 interface AddTaskModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (title: string, category: string, priority: string) => void;
+  onAdd: (title: string, category: string, priority: string, dueDate?: string, estimatedMinutes?: number) => void;
 }
 
 export const AddTaskModal = ({ isOpen, onClose, onAdd }: AddTaskModalProps) => {
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('General Study');
   const [priority, setPriority] = useState('High Yield');
+  const [duration, setDuration] = useState<number>(25);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
-    onAdd(title, category, priority);
+    onAdd(title, category, priority, undefined, duration);
     setTitle('');
     setCategory('General Study');
     setPriority('High Yield');
+    setDuration(25);
     onClose();
   };
 
@@ -78,7 +80,7 @@ export const AddTaskModal = ({ isOpen, onClose, onAdd }: AddTaskModalProps) => {
 
               <div className="space-y-2">
                 <label className="editorial-label !text-indigo-600">Priority</label>
-                <div className="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-4">
                   {[
                     { id: 'High Yield', label: 'High Yield', sub: 'Urgent' },
                     { id: 'Deep Review', label: 'Deep Review', sub: 'Intensive' }
@@ -98,7 +100,27 @@ export const AddTaskModal = ({ isOpen, onClose, onAdd }: AddTaskModalProps) => {
                     </button>
                   ))}
                 </div>
-              </div>
+                </div>
+
+                <div className="space-y-2">
+                <label className="editorial-label !text-indigo-600">Estimated Duration</label>
+                <div className="grid grid-cols-4 gap-2">
+                  {[15, 25, 50, 90].map((mins) => (
+                    <button
+                      key={mins}
+                      type="button"
+                      onClick={() => setDuration(mins)}
+                      className={`py-3 rounded-xl border-2 font-bold transition-all ${
+                        duration === mins 
+                          ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400' 
+                          : 'border-slate-100 dark:border-slate-800 text-slate-400'
+                      }`}
+                    >
+                      {mins}m
+                    </button>
+                  ))}
+                </div>
+                </div>
 
               <button 
                 type="submit"

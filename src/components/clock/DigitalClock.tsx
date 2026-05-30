@@ -308,12 +308,18 @@ export default function DigitalClock(props: DigitalClockProps) {
     : hours.toString().padStart(2, '0');
   const renderer = RENDERERS[config.variant] || Minimal;
   const inner = renderer({ ...props, padHours });
-  if (config.borderRadius > 0) {
-    return (
-      <div style={{ borderRadius: config.borderRadius, overflow: 'hidden', display: 'inline-block' }}>
-        {inner}
-      </div>
-    );
-  }
-  return inner;
+  
+  return (
+    <div 
+      style={{ 
+        transform: 'scale(var(--scale-factor, 1))',
+        transformOrigin: 'center center',
+        display: 'inline-block',
+        borderRadius: config.borderRadius > 0 ? config.borderRadius : undefined,
+        overflow: config.borderRadius > 0 ? 'hidden' : undefined
+      }}
+    >
+      {inner}
+    </div>
+  );
 }

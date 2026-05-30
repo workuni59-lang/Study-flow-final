@@ -21,7 +21,7 @@ const TabButton = ({ active, onClick, icon: Icon, label }: { active?: boolean; o
 );
 
 export const BottomBar = ({ mode, onModeChange, onTasksOpen, onStatsOpen, onNotepadOpen }: BottomBarProps) => (
-  <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+  <nav className="bottom-bar lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
     <div className="flex items-center justify-around h-14 px-2">
       <TabButton active={mode === 'home'} onClick={() => onModeChange('home')} icon={LayoutDashboard} label="Home" />
       <TabButton active={mode === 'focus'} onClick={() => onModeChange('focus')} icon={Target} label="Focus" />

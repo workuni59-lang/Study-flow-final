@@ -414,7 +414,7 @@ export default function PetEngine({ onOpenPanel, feedTrigger = 0, overlayOpen = 
 
   return (
     <motion.div
-      className="fixed select-none"
+      className="pet-panel fixed select-none"
       style={{ top: 0, left: 0, x: springX, y: springY, width: petSize, height: petSize, zIndex: overlayOpen ? 60 : 40 }}
       drag
       dragMomentum={false}

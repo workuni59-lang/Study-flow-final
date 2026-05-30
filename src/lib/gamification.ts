@@ -94,6 +94,8 @@ export interface Wallpaper {
   type: 'animated' | 'image' | 'custom';
   url?: string;
   category?: string;
+  brightness?: 'light' | 'dark' | 'vibrant';
+  environment?: 'nature' | 'urban' | 'abstract' | 'interior' | 'scenic';
 }
 
 // ─── ATMOSPHERES ────────────────────────────────────────────────
@@ -114,96 +116,96 @@ export const ATMOSPHERES: Atmosphere[] = [
 
 export const WALLPAPERS: Wallpaper[] = [
   // ── ANIMATED / ABSTRACT (free) ──
-  { id: 'none', name: 'Disabled', isPremium: false, type: 'animated', category: 'Abstract' },
-  { id: 'minimal', name: 'Clean Solid', isPremium: false, type: 'animated', category: 'Abstract' },
-  { id: 'mesh', name: 'Animated Mesh', isPremium: false, type: 'animated', category: 'Abstract' },
-  { id: 'cyberpunk', name: 'Cyber Library', isPremium: false, type: 'animated', category: 'Abstract' },
+  { id: 'none', name: 'Disabled', isPremium: false, type: 'animated', category: 'Abstract', brightness: 'dark', environment: 'abstract' },
+  { id: 'minimal', name: 'Clean Solid', isPremium: false, type: 'animated', category: 'Abstract', brightness: 'dark', environment: 'abstract' },
+  { id: 'mesh', name: 'Animated Mesh', isPremium: false, type: 'animated', category: 'Abstract', brightness: 'dark', environment: 'abstract' },
+  { id: 'cyberpunk', name: 'Cyber Library', isPremium: false, type: 'animated', category: 'Abstract', brightness: 'dark', environment: 'abstract' },
 
   // ── ANIMATED / ABSTRACT (premium) ──
-  { id: 'dots', name: 'Focus Dots', isPremium: true, type: 'animated', category: 'Abstract' },
-  { id: 'aurora', name: 'Arctic Aurora', isPremium: true, type: 'animated', category: 'Abstract' },
-  { id: 'stardust', name: 'Deep Space', isPremium: true, type: 'animated', category: 'Abstract' },
-  { id: 'zen', name: 'Zen Garden', isPremium: true, type: 'animated', category: 'Abstract' },
+  { id: 'dots', name: 'Focus Dots', isPremium: true, type: 'animated', category: 'Abstract', brightness: 'dark', environment: 'abstract' },
+  { id: 'aurora', name: 'Arctic Aurora', isPremium: true, type: 'animated', category: 'Abstract', brightness: 'dark', environment: 'abstract' },
+  { id: 'stardust', name: 'Deep Space', isPremium: true, type: 'animated', category: 'Abstract', brightness: 'dark', environment: 'abstract' },
+  { id: 'zen', name: 'Zen Garden', isPremium: true, type: 'animated', category: 'Abstract', brightness: 'vibrant', environment: 'abstract' },
 
   // ── FORESTS & TREES ──
-  { id: 'forest', name: 'Emerald Forest', isPremium: true, type: 'image', category: 'Forests', url: 'https://images.unsplash.com/photo-1511497584788-876760111969?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'misty-forest', name: 'Misty Forest', isPremium: false, type: 'image', category: 'Forests', url: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'bamboo-grove', name: 'Bamboo Grove', isPremium: true, type: 'image', category: 'Forests', url: 'https://images.unsplash.com/photo-1545239705-1564e58b9e4a?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'autumn-woods', name: 'Autumn Woods', isPremium: true, type: 'image', category: 'Forests', url: 'https://images.unsplash.com/photo-1451976426598-a7593bd6d0b2?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'rainforest', name: 'Rainforest Canopy', isPremium: true, type: 'image', category: 'Forests', url: 'https://images.unsplash.com/photo-1440342359743-84fcb8c21f21?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'pine-trail', name: 'Pine Trail', isPremium: true, type: 'image', category: 'Forests', url: 'https://images.unsplash.com/photo-1476231682828-37e571bc172f?auto=format&fit=crop&w=2000&q=80' },
+  { id: 'forest', name: 'Emerald Forest', isPremium: true, type: 'image', category: 'Forests', url: 'https://images.unsplash.com/photo-1511497584788-876760111969?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
+  { id: 'misty-forest', name: 'Misty Forest', isPremium: false, type: 'image', category: 'Forests', url: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=2000&q=80', brightness: 'dark', environment: 'nature' },
+  { id: 'bamboo-grove', name: 'Bamboo Grove', isPremium: true, type: 'image', category: 'Forests', url: 'https://images.unsplash.com/photo-1545239705-1564e58b9e4a?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
+  { id: 'autumn-woods', name: 'Autumn Woods', isPremium: true, type: 'image', category: 'Forests', url: 'https://images.unsplash.com/photo-1451976426598-a7593bd6d0b2?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
+  { id: 'rainforest', name: 'Rainforest Canopy', isPremium: true, type: 'image', category: 'Forests', url: 'https://images.unsplash.com/photo-1440342359743-84fcb8c21f21?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
+  { id: 'pine-trail', name: 'Pine Trail', isPremium: true, type: 'image', category: 'Forests', url: 'https://images.unsplash.com/photo-1476231682828-37e571bc172f?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
 
   // ── MOUNTAINS & LANDSCAPES ──
-  { id: 'mountain', name: 'Silent Peak', isPremium: true, type: 'image', category: 'Mountains', url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'mountain-lake', name: 'Mountain Lake', isPremium: true, type: 'image', category: 'Mountains', url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'volcanic-peak', name: 'Volcanic Peak', isPremium: true, type: 'image', category: 'Mountains', url: 'https://images.unsplash.com/photo-1462332420958-a05d1e002413?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'rolling-hills', name: 'Rolling Hills', isPremium: false, type: 'image', category: 'Mountains', url: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'canyon', name: 'Grand Canyon', isPremium: true, type: 'image', category: 'Mountains', url: 'https://images.unsplash.com/photo-1474044159687-1ee9f3a51722?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'cliff-sunset', name: 'Cliff Sunset', isPremium: true, type: 'image', category: 'Mountains', url: 'https://images.unsplash.com/photo-1509316785289-025f5b846b35?auto=format&fit=crop&w=2000&q=80' },
+  { id: 'mountain', name: 'Silent Peak', isPremium: true, type: 'image', category: 'Mountains', url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
+  { id: 'mountain-lake', name: 'Mountain Lake', isPremium: true, type: 'image', category: 'Mountains', url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=2000&q=80', brightness: 'light', environment: 'nature' },
+  { id: 'volcanic-peak', name: 'Volcanic Peak', isPremium: true, type: 'image', category: 'Mountains', url: 'https://images.unsplash.com/photo-1462332420958-a05d1e002413?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
+  { id: 'rolling-hills', name: 'Rolling Hills', isPremium: false, type: 'image', category: 'Mountains', url: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
+  { id: 'canyon', name: 'Grand Canyon', isPremium: true, type: 'image', category: 'Mountains', url: 'https://images.unsplash.com/photo-1474044159687-1ee9f3a51722?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
+  { id: 'cliff-sunset', name: 'Cliff Sunset', isPremium: true, type: 'image', category: 'Mountains', url: 'https://images.unsplash.com/photo-1509316785289-025f5b846b35?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
 
   // ── WATER & OCEAN ──
-  { id: 'ocean', name: 'Deep Blue', isPremium: true, type: 'image', category: 'Water', url: 'https://images.unsplash.com/photo-1505118380757-91f5f5632de0?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'coastal-sunrise', name: 'Coastal Sunrise', isPremium: true, type: 'image', category: 'Water', url: 'https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'tropical-beach', name: 'Tropical Beach', isPremium: true, type: 'image', category: 'Water', url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'waterfall', name: 'Hidden Waterfall', isPremium: true, type: 'image', category: 'Water', url: 'https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'river-valley', name: 'River Valley', isPremium: true, type: 'image', category: 'Water', url: 'https://images.unsplash.com/photo-1433086966358-54859d0ed716?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'ice-cave', name: 'Ice Cave', isPremium: true, type: 'image', category: 'Water', url: 'https://images.unsplash.com/photo-1483347756197-71ef80e95f73?auto=format&fit=crop&w=2000&q=80' },
+  { id: 'ocean', name: 'Deep Blue', isPremium: true, type: 'image', category: 'Water', url: 'https://images.unsplash.com/photo-1505118380757-91f5f5632de0?auto=format&fit=crop&w=2000&q=80', brightness: 'dark', environment: 'nature' },
+  { id: 'coastal-sunrise', name: 'Coastal Sunrise', isPremium: true, type: 'image', category: 'Water', url: 'https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?auto=format&fit=crop&w=2000&q=80', brightness: 'light', environment: 'nature' },
+  { id: 'tropical-beach', name: 'Tropical Beach', isPremium: true, type: 'image', category: 'Water', url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2000&q=80', brightness: 'light', environment: 'nature' },
+  { id: 'waterfall', name: 'Hidden Waterfall', isPremium: true, type: 'image', category: 'Water', url: 'https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
+  { id: 'river-valley', name: 'River Valley', isPremium: true, type: 'image', category: 'Water', url: 'https://images.unsplash.com/photo-1433086966358-54859d0ed716?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
+  { id: 'ice-cave', name: 'Ice Cave', isPremium: true, type: 'image', category: 'Water', url: 'https://images.unsplash.com/photo-1483347756197-71ef80e95f73?auto=format&fit=crop&w=2000&q=80', brightness: 'dark', environment: 'nature' },
 
   // ── SKY & WEATHER ──
-  { id: 'desert', name: 'Golden Sands', isPremium: true, type: 'image', category: 'Sky & Weather', url: 'https://images.unsplash.com/photo-1473580044384-7ba9967e16a0?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'northern-lights', name: 'Northern Lights', isPremium: true, type: 'image', category: 'Sky & Weather', url: 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'stormy-sky', name: 'Stormy Sky', isPremium: true, type: 'image', category: 'Sky & Weather', url: 'https://images.unsplash.com/photo-1527482797697-8795b05a13fe?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'golden-sunset', name: 'Golden Sunset', isPremium: false, type: 'image', category: 'Sky & Weather', url: 'https://images.unsplash.com/photo-1495344517868-8ebaf0a2044a?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'clouds-above', name: 'Above the Clouds', isPremium: true, type: 'image', category: 'Sky & Weather', url: 'https://images.unsplash.com/photo-1534088568595-a066f410bcda?auto=format&fit=crop&w=2000&q=80' },
+  { id: 'desert', name: 'Golden Sands', isPremium: true, type: 'image', category: 'Sky & Weather', url: 'https://images.unsplash.com/photo-1473580044384-7ba9967e16a0?auto=format&fit=crop&w=2000&q=80', brightness: 'light', environment: 'nature' },
+  { id: 'northern-lights', name: 'Northern Lights', isPremium: true, type: 'image', category: 'Sky & Weather', url: 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
+  { id: 'stormy-sky', name: 'Stormy Sky', isPremium: true, type: 'image', category: 'Sky & Weather', url: 'https://images.unsplash.com/photo-1527482797697-8795b05a13fe?auto=format&fit=crop&w=2000&q=80', brightness: 'dark', environment: 'nature' },
+  { id: 'golden-sunset', name: 'Golden Sunset', isPremium: false, type: 'image', category: 'Sky & Weather', url: 'https://images.unsplash.com/photo-1495344517868-8ebaf0a2044a?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
+  { id: 'clouds-above', name: 'Above the Clouds', isPremium: true, type: 'image', category: 'Sky & Weather', url: 'https://images.unsplash.com/photo-1534088568595-a066f410bcda?auto=format&fit=crop&w=2000&q=80', brightness: 'light', environment: 'nature' },
 
   // ── URBAN & ARCHITECTURE ──
-  { id: 'tokyo', name: 'Tokyo Midnight', isPremium: true, type: 'image', category: 'Urban', url: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'rainy-street', name: 'Rainy Seattle', isPremium: true, type: 'image', category: 'Urban', url: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'city-sunset', name: 'City Sunset', isPremium: true, type: 'image', category: 'Urban', url: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'night-city', name: 'Night City', isPremium: true, type: 'image', category: 'Urban', url: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'bridge-lights', name: 'Bridge Lights', isPremium: true, type: 'image', category: 'Urban', url: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'alley-rain', name: 'Alley in Rain', isPremium: true, type: 'image', category: 'Urban', url: 'https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'rooftop-night', name: 'Rooftop Night', isPremium: true, type: 'image', category: 'Urban', url: 'https://images.unsplash.com/photo-1518391846015-55a9cc003b25?auto=format&fit=crop&w=2000&q=80' },
+  { id: 'tokyo', name: 'Tokyo Midnight', isPremium: true, type: 'image', category: 'Urban', url: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'urban' },
+  { id: 'rainy-street', name: 'Rainy Seattle', isPremium: true, type: 'image', category: 'Urban', url: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=2000&q=80', brightness: 'dark', environment: 'urban' },
+  { id: 'city-sunset', name: 'City Sunset', isPremium: true, type: 'image', category: 'Urban', url: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'urban' },
+  { id: 'night-city', name: 'Night City', isPremium: true, type: 'image', category: 'Urban', url: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=2000&q=80', brightness: 'dark', environment: 'urban' },
+  { id: 'bridge-lights', name: 'Bridge Lights', isPremium: true, type: 'image', category: 'Urban', url: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'urban' },
+  { id: 'alley-rain', name: 'Alley in Rain', isPremium: true, type: 'image', category: 'Urban', url: 'https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=2000&q=80', brightness: 'dark', environment: 'urban' },
+  { id: 'rooftop-night', name: 'Rooftop Night', isPremium: true, type: 'image', category: 'Urban', url: 'https://images.unsplash.com/photo-1518391846015-55a9cc003b25?auto=format&fit=crop&w=2000&q=80', brightness: 'dark', environment: 'urban' },
 
   // ── COZY & INTERIOR ──
-  { id: 'cafe', name: 'Rainy Cafe', isPremium: true, type: 'image', category: 'Cozy', url: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'library', name: 'Old Library', isPremium: true, type: 'image', category: 'Cozy', url: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'cozy-room', name: 'Cozy Room', isPremium: true, type: 'image', category: 'Cozy', url: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'window-rain', name: 'Rainy Window', isPremium: true, type: 'image', category: 'Cozy', url: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'bookshelf', name: 'Bookshelf', isPremium: true, type: 'image', category: 'Cozy', url: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'candlelight', name: 'Candlelight', isPremium: true, type: 'image', category: 'Cozy', url: 'https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=2000&q=80' },
+  { id: 'cafe', name: 'Rainy Cafe', isPremium: true, type: 'image', category: 'Cozy', url: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=2000&q=80', brightness: 'light', environment: 'interior' },
+  { id: 'library', name: 'Old Library', isPremium: true, type: 'image', category: 'Cozy', url: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=2000&q=80', brightness: 'dark', environment: 'interior' },
+  { id: 'cozy-room', name: 'Cozy Room', isPremium: true, type: 'image', category: 'Cozy', url: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=2000&q=80', brightness: 'light', environment: 'interior' },
+  { id: 'window-rain', name: 'Rainy Window', isPremium: true, type: 'image', category: 'Cozy', url: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=2000&q=80', brightness: 'dark', environment: 'interior' },
+  { id: 'bookshelf', name: 'Bookshelf', isPremium: true, type: 'image', category: 'Cozy', url: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=2000&q=80', brightness: 'dark', environment: 'interior' },
+  { id: 'candlelight', name: 'Candlelight', isPremium: true, type: 'image', category: 'Cozy', url: 'https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=2000&q=80', brightness: 'dark', environment: 'interior' },
 
   // ── SPACE & COSMIC ──
-  { id: 'space-station', name: 'Orbit View', isPremium: true, type: 'image', category: 'Space', url: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'cosmic', name: 'Cosmic Horizon', isPremium: true, type: 'image', category: 'Space', url: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'starry-peaks', name: 'Starry Peaks', isPremium: true, type: 'image', category: 'Space', url: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'nebula', name: 'Nebula', isPremium: true, type: 'image', category: 'Space', url: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'deep-space', name: 'Deep Space', isPremium: true, type: 'image', category: 'Space', url: 'https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'planet-glow', name: 'Planet Glow', isPremium: true, type: 'image', category: 'Space', url: 'https://images.unsplash.com/photo-1614732414444-096e5f1122d5?auto=format&fit=crop&w=2000&q=80' },
+  { id: 'space-station', name: 'Orbit View', isPremium: true, type: 'image', category: 'Space', url: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=2000&q=80', brightness: 'light', environment: 'urban' },
+  { id: 'cosmic', name: 'Cosmic Horizon', isPremium: true, type: 'image', category: 'Space', url: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=2000&q=80', brightness: 'dark', environment: 'nature' },
+  { id: 'starry-peaks', name: 'Starry Peaks', isPremium: true, type: 'image', category: 'Space', url: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
+  { id: 'nebula', name: 'Nebula', isPremium: true, type: 'image', category: 'Space', url: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
+  { id: 'deep-space', name: 'Deep Space', isPremium: true, type: 'image', category: 'Space', url: 'https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?auto=format&fit=crop&w=2000&q=80', brightness: 'dark', environment: 'nature' },
+  { id: 'planet-glow', name: 'Planet Glow', isPremium: true, type: 'image', category: 'Space', url: 'https://images.unsplash.com/photo-1614732414444-096e5f1122d5?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
 
   // ── ANIMALS ──
-  { id: 'wolf-mountain', name: 'Wolf on Mountain', isPremium: true, type: 'image', category: 'Animals', url: 'https://images.unsplash.com/photo-1518459031867-a89b944bffe4?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'owl-night', name: 'Owl at Night', isPremium: true, type: 'image', category: 'Animals', url: 'https://images.unsplash.com/photo-1543549790-8b5f4a028cfb?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'deer-forest', name: 'Deer in Forest', isPremium: true, type: 'image', category: 'Animals', url: 'https://images.unsplash.com/photo-1484406566174-9da000fda645?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'whale-ocean', name: 'Whale Ocean', isPremium: true, type: 'image', category: 'Animals', url: 'https://images.unsplash.com/photo-1568430462989-44163eb1752f?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'butterfly-field', name: 'Butterfly Field', isPremium: true, type: 'image', category: 'Animals', url: 'https://images.unsplash.com/photo-1452570053594-1b985d6ea890?auto=format&fit=crop&w=2000&q=80' },
+  { id: 'wolf-mountain', name: 'Wolf on Mountain', isPremium: true, type: 'image', category: 'Animals', url: 'https://images.unsplash.com/photo-1518459031867-a89b944bffe4?auto=format&fit=crop&w=2000&q=80', brightness: 'dark', environment: 'nature' },
+  { id: 'owl-night', name: 'Owl at Night', isPremium: true, type: 'image', category: 'Animals', url: 'https://images.unsplash.com/photo-1543549790-8b5f4a028cfb?auto=format&fit=crop&w=2000&q=80', brightness: 'dark', environment: 'nature' },
+  { id: 'deer-forest', name: 'Deer in Forest', isPremium: true, type: 'image', category: 'Animals', url: 'https://images.unsplash.com/photo-1484406566174-9da000fda645?auto=format&fit=crop&w=2000&q=80', brightness: 'dark', environment: 'nature' },
+  { id: 'whale-ocean', name: 'Whale Ocean', isPremium: true, type: 'image', category: 'Animals', url: 'https://images.unsplash.com/photo-1568430462989-44163eb1752f?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
+  { id: 'butterfly-field', name: 'Butterfly Field', isPremium: true, type: 'image', category: 'Animals', url: 'https://images.unsplash.com/photo-1452570053594-1b985d6ea890?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
 
   // ── MINIMAL & AESTHETIC ──
-  { id: 'white-minimal', name: 'White Minimal', isPremium: false, type: 'image', category: 'Minimal', url: 'https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'paper-texture', name: 'Paper Texture', isPremium: true, type: 'image', category: 'Minimal', url: 'https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'marble', name: 'Marble Surface', isPremium: true, type: 'image', category: 'Minimal', url: 'https://images.unsplash.com/photo-1561214078-f3247647fc5e?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'gradient-dusk', name: 'Gradient Dusk', isPremium: true, type: 'image', category: 'Minimal', url: 'https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'linen-texture', name: 'Linen Texture', isPremium: true, type: 'image', category: 'Minimal', url: 'https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?auto=format&fit=crop&w=2000&q=80' },
+  { id: 'white-minimal', name: 'White Minimal', isPremium: false, type: 'image', category: 'Minimal', url: 'https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?auto=format&fit=crop&w=2000&q=80', brightness: 'light', environment: 'interior' },
+  { id: 'paper-texture', name: 'Paper Texture', isPremium: true, type: 'image', category: 'Minimal', url: 'https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=2000&q=80', brightness: 'light', environment: 'interior' },
+  { id: 'marble', name: 'Marble Surface', isPremium: true, type: 'image', category: 'Minimal', url: 'https://images.unsplash.com/photo-1561214078-f3247647fc5e?auto=format&fit=crop&w=2000&q=80', brightness: 'light', environment: 'interior' },
+  { id: 'gradient-dusk', name: 'Gradient Dusk', isPremium: true, type: 'image', category: 'Minimal', url: 'https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'abstract' },
+  { id: 'linen-texture', name: 'Linen Texture', isPremium: true, type: 'image', category: 'Minimal', url: 'https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?auto=format&fit=crop&w=2000&q=80', brightness: 'light', environment: 'interior' },
 
   // ── FLOWERS & PLANTS ──
-  { id: 'lavender-fields', name: 'Lavender Fields', isPremium: true, type: 'image', category: 'Flowers', url: 'https://images.unsplash.com/photo-1499002238440-d264edd596ec?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'cherry-blossom', name: 'Cherry Blossom', isPremium: true, type: 'image', category: 'Flowers', url: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'sunflower-field', name: 'Sunflower Field', isPremium: true, type: 'image', category: 'Flowers', url: 'https://images.unsplash.com/photo-1597848212624-a19eb35e2651?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'rose-garden', name: 'Rose Garden', isPremium: true, type: 'image', category: 'Flowers', url: 'https://images.unsplash.com/photo-1455659817273-f96807779a8a?auto=format&fit=crop&w=2000&q=80' },
-  { id: 'tulip-field', name: 'Tulip Field', isPremium: true, type: 'image', category: 'Flowers', url: 'https://images.unsplash.com/photo-1520763185298-1b434c919102?auto=format&fit=crop&w=2000&q=80' },
+  { id: 'lavender-fields', name: 'Lavender Fields', isPremium: true, type: 'image', category: 'Flowers', url: 'https://images.unsplash.com/photo-1499002238440-d264edd596ec?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
+  { id: 'cherry-blossom', name: 'Cherry Blossom', isPremium: true, type: 'image', category: 'Flowers', url: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
+  { id: 'sunflower-field', name: 'Sunflower Field', isPremium: true, type: 'image', category: 'Flowers', url: 'https://images.unsplash.com/photo-1597848212624-a19eb35e2651?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
+  { id: 'rose-garden', name: 'Rose Garden', isPremium: true, type: 'image', category: 'Flowers', url: 'https://images.unsplash.com/photo-1455659817273-f96807779a8a?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
+  { id: 'tulip-field', name: 'Tulip Field', isPremium: true, type: 'image', category: 'Flowers', url: 'https://images.unsplash.com/photo-1520763185298-1b434c919102?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
 
   // ── SPECIAL ──
-  { id: 'custom', name: 'Custom URL', isPremium: true, type: 'custom', category: 'Special' },
+  { id: 'custom', name: 'Custom URL', isPremium: true, type: 'custom', category: 'Special', brightness: 'dark', environment: 'abstract' },
 ];
 
 // ─── ACHIEVEMENTS ──────────────────────────────────────────────

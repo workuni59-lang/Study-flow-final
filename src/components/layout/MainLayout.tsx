@@ -85,7 +85,7 @@ export const MainLayout = () => {
         {/* Full-view pages (analytics, subjects, achievements, settings) */}
         {isFullView ? (
           <div className="min-h-screen">
-            <header className="sticky top-0 z-30 bg-white/70 dark:bg-[#0a0c10]/70 backdrop-blur-2xl border-b border-slate-100 dark:border-slate-800">
+            <header className="top-bar sticky top-0 z-30 bg-white/70 dark:bg-[#0a0c10]/70 backdrop-blur-2xl border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-3 h-14 px-4">
                 <button onClick={() => setSection('dashboard')}
                   className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
@@ -95,7 +95,7 @@ export const MainLayout = () => {
                 <span className="text-sm font-semibold dark:text-white capitalize">{section}</span>
               </div>
             </header>
-            <main className="p-4 md:p-8 pb-24 lg:pb-8">
+            <main className="main-layout-content p-4 md:p-8 pb-24 lg:pb-8">
               <Suspense fallback={<SimpleSpinner />}>
                 {section === 'analytics' && <AnalyticsDashboardLazy />}
                 {section === 'subjects' && <SubjectsViewLazy />}
@@ -115,7 +115,7 @@ export const MainLayout = () => {
           />
 
           {/* Main content */}
-          <main>
+          <main className="main-layout-content">
             {mode === 'home' && <HomeView onNotepadOpen={() => setPanelOpen('notepad')} />}
             {mode === 'focus' && (
               <FocusView

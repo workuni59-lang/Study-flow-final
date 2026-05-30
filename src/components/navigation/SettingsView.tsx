@@ -169,6 +169,13 @@ export const SettingsView = () => {
                    <MessageSquare className="w-5 h-5" />
                    <span className="text-[9px] font-black uppercase tracking-widest text-center">Daily Quote</span>
                 </button>
+                <button 
+                   onClick={() => updateConfig('clearMode', !themeConfig.clearMode)}
+                  className={`p-4 rounded-[24px] border-2 transition-all flex flex-col items-center gap-3 ${themeConfig.clearMode ? 'border-indigo-600 bg-indigo-50/50 dark:bg-indigo-900/20' : 'border-slate-100 dark:border-slate-800 text-slate-400'}`}
+                >
+                   <Sparkles className="w-5 h-5" />
+                   <span className="text-[9px] font-black uppercase tracking-widest text-center">Clear Mode</span>
+                </button>
              </div>
           </DashboardCard>
 

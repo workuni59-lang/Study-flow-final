@@ -70,21 +70,21 @@ export const HomeView = ({ onNotepadOpen }: { onNotepadOpen?: () => void }) => {
       )}
 
       {/* Stats row */}
-      <div className="w-full max-w-xs grid grid-cols-3 gap-2.5">
+      <div className="dashboard-stats w-full max-w-xs grid grid-cols-3 gap-2.5">
         <StatCard icon={Clock} value={formatTime(userStats.totalFocusSeconds)} label="Focus" color="text-brand" />
         <StatCard icon={Flame} value={String(userStats.currentStreak)} label="Streak" color="text-amber-500" />
         <StatCard icon={Zap} value={String(userStats.totalXP)} label="XP" color="text-purple-500" />
       </div>
 
       {/* Deadlines */}
-      <div className="mt-5">
+      <div className="dashboard-stats mt-5">
         <DeadlinesSection />
       </div>
 
       {/* Notepad quick-access */}
       {onNotepadOpen && (
         <button onClick={onNotepadOpen}
-          className="mt-6 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/40 dark:bg-slate-900/40 backdrop-blur-md border border-white/20 dark:border-white/[0.06] text-slate-500 dark:text-slate-400 text-xs font-medium hover:bg-white/60 dark:hover:bg-slate-900/60 transition-all active:scale-95"
+          className="dashboard-stats mt-6 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/40 dark:bg-slate-900/40 backdrop-blur-md border border-white/20 dark:border-white/[0.06] text-slate-500 dark:text-slate-400 text-xs font-medium hover:bg-white/60 dark:hover:bg-slate-900/60 transition-all active:scale-95"
         >
           <PenSquare className="w-3.5 h-3.5" />
           Quick Note

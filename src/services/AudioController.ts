@@ -1,5 +1,5 @@
 import { Howl } from 'howler';
-import { AUDIO_ASSETS, SoundAsset } from '../lib/audioRegistry';
+import { AUDIO_ASSETS } from '../lib/audioRegistry';
 
 const MAX_ACTIVE_SOUNDS = 5;
 
@@ -99,10 +99,6 @@ class AudioController {
       }
     }, 650);
 
-    const origPlay = howl.play.bind(howl);
-    const origStop = this.stop.bind(this);
-    const origId = id;
-
     const guard = () => {
       clearTimeout(pauseTimer);
     };
@@ -168,13 +164,10 @@ class AudioController {
     const asset = AUDIO_ASSETS.find(a => a.id === id);
     if (!asset) return null;
 
-    const srcs = [asset.url];
-    if (asset.fallbackUrl) srcs.push(asset.fallbackUrl);
-
     const howl = new Howl({
-      src: srcs,
+      src: [asset.url],
       loop: true,
-      html5: asset.layer === 'music' || srcs[0].startsWith('https://raw.githubusercontent'),
+      html5: true,
       preload: true,
       volume: 0,
       onload: () => {

@@ -20,6 +20,11 @@ const STORAGE_KEYS = {
   PET_SIZE: 'study_flow_pet_size',
   SIDEBAR_COLLAPSED: 'study_flow_sidebar_collapsed',
   NOTEPAD: 'study_flow_notepad',
+  MASTER_VOLUME: 'study_flow_master_volume',
+  ACTIVE_TRACKS: 'study_flow_active_tracks',
+  TRACK_VOLUMES: 'study_flow_track_volumes',
+  ALERT_SOUND: 'study_flow_alert_sound',
+  ALERT_VOLUME: 'study_flow_alert_volume',
 };
 
 const safeGet = (key: string) => {
@@ -98,6 +103,22 @@ export const storage = {
   // --- Notepad ---
   saveNotepad: (content: string) => safeSet(STORAGE_KEYS.NOTEPAD, content),
   getNotepad: (): string | null => safeGet(STORAGE_KEYS.NOTEPAD),
+
+  // --- Audio ---
+  saveMasterVolume: (vol: number) => safeSet(STORAGE_KEYS.MASTER_VOLUME, vol),
+  getMasterVolume: (): number | null => safeGet(STORAGE_KEYS.MASTER_VOLUME),
+
+  saveActiveTracks: (ids: string[]) => safeSet(STORAGE_KEYS.ACTIVE_TRACKS, ids),
+  getActiveTracks: (): string[] | null => safeGet(STORAGE_KEYS.ACTIVE_TRACKS),
+
+  saveTrackVolumes: (volumes: Record<string, number>) => safeSet(STORAGE_KEYS.TRACK_VOLUMES, volumes),
+  getTrackVolumes: (): Record<string, number> | null => safeGet(STORAGE_KEYS.TRACK_VOLUMES),
+
+  saveAlertSound: (id: string) => safeSet(STORAGE_KEYS.ALERT_SOUND, id),
+  getAlertSound: (): string | null => safeGet(STORAGE_KEYS.ALERT_SOUND),
+
+  saveAlertVolume: (vol: number) => safeSet(STORAGE_KEYS.ALERT_VOLUME, vol),
+  getAlertVolume: (): number | null => safeGet(STORAGE_KEYS.ALERT_VOLUME),
 
   // --- Generic ---
   clearAll: () => {

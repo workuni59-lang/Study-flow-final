@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import confetti from 'canvas-confetti';
-import { audioController, type AudioState } from '../services/AudioController';
-import { AUDIO_ASSETS } from '../lib/audioRegistry';
+import { audioController } from '../services/AudioController';
 import { storage } from '../services/storage';
 import { UserStats, Badge, ACHIEVEMENTS, Achievement, Quest, calculateLevel, XP_PER_TASK, XP_PER_FOCUS_MINUTE, AtmosphereId, WallpaperId, PetState, PetFood, PET_FOODS, PET_SPECIES, PET_SKINS, INITIAL_PET_STATE, PET_HUNGER_DECAY_PER_HOUR, PET_WEAK_THRESHOLD, PET_WEAK_DURATION_MS, PET_DORMANT_DURATION_MS, PetHealth, PetEvent, PetEventType } from '../lib/gamification';
 export interface FocusSessionState {
@@ -112,11 +111,11 @@ interface StudyContextType {
   syncPremiumStatus: (isPremium: boolean) => void;
   showPremiumModal: boolean;
   setShowPremiumModal: (show: boolean) => void;
-  activeTracks: Record<string, { volume: number }>;
+  activeTracks: Record<string, { volume: number; isLoading?: boolean; isError?: boolean }>;
   masterVolume: number;
   selectedTaskId: string | null;
   setSelectedTaskId: (id: string | null) => void;
-  toggleTrack: (id: string, url: string, baseVolume?: number) => void;
+  toggleTrack: (id: string) => void;
   setTrackVolume: (id: string, vol: number) => void;
   stopAllTracks: () => void;
   setMasterVolume: (vol: number) => void;
@@ -190,7 +189,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   const [focusSession, setFocusSession] = useState<FocusSessionState | null>(null);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [activeTracks, setActiveTracks] = useState<Record<string, { volume: number, isLoading: boolean, isError: boolean }>>({});
-  const [masterVolume, setMasterVolumeVal] = useState(0.5);
+  const [masterVolume, setMasterVolumeVal] = useState(() => storage.getMasterVolume() ?? 0.5);
 
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
@@ -229,11 +228,37 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   // Connect Controller to React
   useEffect(() => {
     audioController.setNotifyCallback(syncAudioState);
-    audioController.preload();
     audioController.setMasterVolume(masterVolume);
+
+    const savedTracks = storage.getActiveTracks();
+    const savedVolumes = storage.getTrackVolumes() ?? {};
+    if (savedTracks && savedTracks.length > 0) {
+      audioController.setActiveIds(savedTracks);
+      savedTracks.forEach(id => {
+        audioController.restoreVolume(id, savedVolumes[id] ?? 0.5);
+      });
+    }
+
+    audioController.preload();
     syncAudioState();
     return () => audioController.setNotifyCallback(null);
   }, []);
+
+  // Persist master volume
+  useEffect(() => {
+    storage.saveMasterVolume(masterVolume);
+  }, [masterVolume]);
+
+  // Persist active track IDs and volumes when changed
+  useEffect(() => {
+    const ids = Object.keys(activeTracks);
+    storage.saveActiveTracks(ids);
+    const volumes: Record<string, number> = {};
+    for (const [id, s] of Object.entries(activeTracks)) {
+      volumes[id] = (s as { volume: number }).volume;
+    }
+    storage.saveTrackVolumes(volumes);
+  }, [activeTracks]);
 
   // Synchronization Hooks
   useEffect(() => {

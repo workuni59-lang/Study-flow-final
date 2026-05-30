@@ -10,6 +10,7 @@ import { DashboardCard } from './DashboardCard';
 import { storage } from '../../services/storage';
 import { useStudy } from '../../context/StudyContext';
 import { ATMOSPHERES, WALLPAPERS, Wallpaper } from '../../lib/gamification';
+import { ALERT_SOUNDS, playAlertSound } from '../../lib/alertSounds';
 
 // Extract unique categories from wallpapers
 const IMAGE_CATEGORIES = [...new Set(WALLPAPERS.filter(w => w.type === 'image' && w.category).map(w => w.category!))];
@@ -179,9 +180,9 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
     releaseWakeLock();
     if (mode === 'focus' || mode === 'taskETA') logFocusSession(totalTime);
     triggerConfetti();
-    const alertAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-    alertAudio.volume = 0.3;
-    alertAudio.play().catch(() => {});
+    const alertId = (() => { try { return JSON.parse(localStorage.getItem('study_flow_alert_sound') || '"sparkle"'); } catch { return 'sparkle'; } })();
+    const alertVol = (() => { try { return JSON.parse(localStorage.getItem('study_flow_alert_volume') || '0.75'); } catch { return 0.75; } })();
+    playAlertSound(alertId, alertVol);
 
     if (mode === 'focus' || mode === 'taskETA') {
       const newTotal = sessionsCompleted + 1;

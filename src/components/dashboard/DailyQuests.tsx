@@ -38,10 +38,10 @@ export const DailyQuests = () => {
           return (
             <div 
               key={quest.id}
-              className={`p-4 rounded-2xl border transition-all flex flex-col backdrop-blur-xl shadow-lg ${
+              className={`p-4 rounded-2xl border transition-all flex flex-col shadow-lg ${
                 quest.completed 
-                  ? 'bg-emerald-50/50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800/40' 
-                  : 'bg-white/40 dark:bg-slate-900/40 border-white/20 dark:border-white/[0.06]'
+                  ? 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-100 dark:border-emerald-800/40' 
+                  : 'bg-white dark:bg-[#141622] border-slate-100 dark:border-slate-800/50'
               }`}
             >
               <div className="flex items-start justify-between mb-3">

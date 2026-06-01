@@ -1,4 +1,5 @@
-import { useMemo, useState, useCallback, useEffect } from 'react';
+import { useMemo, useState, useCallback, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Clock } from 'lucide-react';
 import type { ClockConfig, ClockFocusState } from './types';
@@ -19,6 +20,20 @@ export default function ClockRenderer({ time, focusState }: ClockRendererProps) 
   const [config, setConfig] = useState<ClockConfig>(() => loadClockConfig() || getDefaultConfig());
   const [showCustomizer, setShowCustomizer] = useState(false);
   const [currentPresetId, setCurrentPresetId] = useState<string | undefined>();
+  const frozenTimeRef = useRef(time);
+  const prevFrozenRef = useRef(false);
+
+  // Freeze time display while customizer panel is open
+  if (showCustomizer) {
+    if (!prevFrozenRef.current) {
+      frozenTimeRef.current = time;
+    }
+    prevFrozenRef.current = true;
+  } else {
+    prevFrozenRef.current = false;
+    frozenTimeRef.current = time;
+  }
+  const displayTime = frozenTimeRef.current;
 
   useEffect(() => {
     saveClockConfig(config);
@@ -34,9 +49,9 @@ export default function ClockRenderer({ time, focusState }: ClockRendererProps) 
 
   const isAnalog = getVariantType(config.variant) === 'analog';
 
-  const hours = time.getHours();
-  const minutes = time.getMinutes();
-  const seconds = time.getSeconds();
+  const hours = displayTime.getHours();
+  const minutes = displayTime.getMinutes();
+  const seconds = displayTime.getSeconds();
   const ampm = hours >= 12 ? 'PM' : 'AM';
 
   const formattedTime = useMemo(() => {
@@ -72,6 +87,7 @@ export default function ClockRenderer({ time, focusState }: ClockRendererProps) 
           fontFamily: isAnalog ? undefined : config.fontFamily,
           fontSize: isAnalog ? undefined : 'clamp(2.5rem, 8vw, 5.5rem)',
           lineHeight: isAnalog ? undefined : 1,
+          whiteSpace: isAnalog ? undefined : 'nowrap',
         }}
         variants={floatHover}
         animate="animate"
@@ -126,15 +142,18 @@ export default function ClockRenderer({ time, focusState }: ClockRendererProps) 
         </motion.button>
       </motion.div>
 
-      {/* Customizer panel */}
-      <ClockCustomizer
-        isOpen={showCustomizer}
-        onClose={() => setShowCustomizer(false)}
-        config={config}
-        onChange={handleConfigChange}
-        currentPresetId={currentPresetId}
-        onPresetChange={handlePresetChange}
-      />
+      {/* Customizer panel (portal to body to escape backdrop-filter containing block) */}
+      {createPortal(
+        <ClockCustomizer
+          isOpen={showCustomizer}
+          onClose={() => setShowCustomizer(false)}
+          config={config}
+          onChange={handleConfigChange}
+          currentPresetId={currentPresetId}
+          onPresetChange={handlePresetChange}
+        />,
+        document.body
+      )}
     </>
   );
 }

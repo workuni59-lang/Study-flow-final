@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { 
   Settings, 
   Eye, 
@@ -23,9 +23,9 @@ import {
   Save,
   CheckCircle2,
   Timer,
-  LogOut
+  LogOut,
+  Lock
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
 import { useStudy } from '../../context/StudyContext';
 import { useAuth } from '../../context/AuthContext';
 import { DashboardCard } from '../dashboard/DashboardCard';

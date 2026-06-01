@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import {
   Calendar, BookOpen, CheckCircle, Menu, X, ArrowRight, Zap,
-  ChevronDown, Mail, Github, Twitter, Instagram, Moon, Sun
+  ChevronDown, Mail, Github, Twitter, Instagram
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../../context/AuthContext';
 
-const Navbar = ({ isDark, setIsDark, onOpenAuth }: { isDark: boolean, setIsDark: (val: boolean) => void, onOpenAuth: () => void }) => {
+const Navbar = ({ onOpenAuth }: { onOpenAuth: () => void }) => {
   const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -21,9 +21,7 @@ const Navbar = ({ isDark, setIsDark, onOpenAuth }: { isDark: boolean, setIsDark:
     <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${scrolled ? 'py-4 bg-white/70 dark:bg-[#0a0c10]/70 backdrop-blur-2xl border-b border-slate-100/50 dark:border-slate-800/30' : 'py-6'}`}>
       <div className="container mx-auto px-6 md:px-12 flex justify-between items-center">
         <div className="flex items-center gap-2 md:gap-3 group cursor-pointer">
-          <div className="w-9 h-9 md:w-11 md:h-11 bg-brand rounded-xl md:rounded-2xl flex items-center justify-center text-white shadow-lg shadow-brand/20 group-hover:scale-110 transition-transform">
-            <Zap className="w-5 h-5 md:w-6 md:h-6 fill-current" />
-          </div>
+          <img src="/logo.png" alt="StudyFlow" className="w-9 h-9 md:w-11 md:h-11 object-contain transition-transform group-hover:scale-110" />
           <span className="text-lg md:text-xl font-display font-bold tracking-tight dark:text-white">StudyFlow</span>
         </div>
         <div className="hidden lg:flex items-center gap-10">
@@ -32,11 +30,6 @@ const Navbar = ({ isDark, setIsDark, onOpenAuth }: { isDark: boolean, setIsDark:
           ))}
         </div>
         <div className="flex items-center gap-4 md:gap-6">
-          <button onClick={() => setIsDark(!isDark)}
-            className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 hover:text-brand transition-colors"
-          >
-            {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-          </button>
           <button onClick={onOpenAuth}
             className="hidden md:block bg-brand hover:bg-brand-dark text-white px-7 py-3 rounded-xl font-semibold text-sm transition-all shadow-lg shadow-brand/20"
           >
@@ -117,10 +110,10 @@ const FAQItem = ({ question, answer }: { question: string, answer: string }) => 
   );
 };
 
-const LandingPage = ({ isDark, setIsDark, onOpenAuth }: { isDark: boolean, setIsDark: (val: boolean) => void, onOpenAuth: () => void }) => {
+const LandingPage = ({ onOpenAuth }: { onOpenAuth: () => void }) => {
   return (
     <div className="min-h-screen bg-white dark:bg-[#0a0c10]">
-      <Navbar isDark={isDark} setIsDark={setIsDark} onOpenAuth={onOpenAuth} />
+      <Navbar onOpenAuth={onOpenAuth} />
       <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
         <div className="absolute top-0 right-0 w-full md:w-1/2 h-full bg-brand/5 dark:bg-brand/5 -skew-x-12 translate-x-32 z-0" />
         <div className="container mx-auto px-6 md:px-12 relative z-10">
@@ -293,7 +286,7 @@ const LandingPage = ({ isDark, setIsDark, onOpenAuth }: { isDark: boolean, setIs
         <div className="container mx-auto px-6 md:px-12">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 bg-brand rounded-xl flex items-center justify-center text-white"><Zap className="w-5 h-5 fill-current" /></div>
+              <img src="/logo.png" alt="StudyFlow" className="w-8 h-8 object-contain" />
               <span className="text-lg font-display font-bold tracking-tight dark:text-white">StudyFlow</span>
             </div>
             <p className="text-slate-400 text-sm">&copy; 2024 StudyFlow AI. All rights reserved.</p>

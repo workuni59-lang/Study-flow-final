@@ -12,7 +12,14 @@ export default defineConfig((): UserConfig => {
       },
     },
     build: {
-      rollupOptions: {},
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            vendor: ['react', 'react-dom', 'motion'],
+            icons: ['lucide-react'],
+          },
+        },
+      },
     },
     server: {
       host: true,

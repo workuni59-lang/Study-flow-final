@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, memo } from 'react';
 import { motion, useMotionValue, useSpring } from 'motion/react';
 import { PawPrint } from 'lucide-react';
 import { PET_SPECIES } from '../../lib/gamification';
@@ -14,6 +14,7 @@ import {
   REACTION_ANIMATIONS,
   IDLE_VARIANTS,
 } from '../../lib/petAnimations';
+import { useReduceMotion } from '../../hooks/useReduceMotion';
 
 type PetSpeciesColors = { body: string; accent: string; eyes: string; glow: string };
 
@@ -330,8 +331,9 @@ interface PetEngineProps {
   petSize?: number;
 }
 
-export default function PetEngine({ onOpenPanel, feedTrigger = 0, overlayOpen = false, petSize = 180 }: PetEngineProps) {
+const PetEngine = memo(function PetEngine({ onOpenPanel, feedTrigger = 0, overlayOpen = false, petSize = 180 }: PetEngineProps) {
   const { petState, petInteract, petEvent } = useStudy();
+  const reduceMotion = useReduceMotion();
   const species = PET_SPECIES.find(s => s.id === petState.species) || PET_SPECIES[0];
   const isDormant = petState.health === 'dormant';
 
@@ -345,6 +347,7 @@ export default function PetEngine({ onOpenPanel, feedTrigger = 0, overlayOpen = 
   const recentlyDragged = useRef(false);
   const reactionKeyRef = useRef(0);
   const prevReacting = useRef(false);
+  const petRef = useRef<HTMLDivElement>(null);
 
   /* ── Reaction system ──────────────────────────────────────── */
   const {
@@ -388,14 +391,26 @@ export default function PetEngine({ onOpenPanel, feedTrigger = 0, overlayOpen = 
     const newY = y.get();
     setIsDragging(false);
     storage.savePetPosition({ x: newX, y: newY });
-    setTimeout(() => { recentlyDragged.current = false; }, 300);
+    setTimeout(() => { recentlyDragged.current = false; }, 500);
   }, [x, y]);
 
-  const handleTap = () => {
-    if (isDormant || recentlyDragged.current || isReacting) return;
-    petInteract();
-    onOpenPanel();
-  };
+  // Native capture-phase listener — fires before motion's target-phase drag handler
+  useEffect(() => {
+    const el = petRef.current;
+    if (!el) return;
+    let startX = 0, startY = 0;
+    const onDown = (e: PointerEvent) => { startX = e.clientX; startY = e.clientY; };
+    const onUp = (e: PointerEvent) => {
+      if (isDormant || isReacting) return;
+      if (Math.abs(e.clientX - startX) < 8 && Math.abs(e.clientY - startY) < 8) {
+        petInteract();
+        onOpenPanel();
+      }
+    };
+    el.addEventListener('pointerdown', onDown, { capture: true });
+    el.addEventListener('pointerup', onUp, { capture: true });
+    return () => { el.removeEventListener('pointerdown', onDown, { capture: true }); el.removeEventListener('pointerup', onUp, { capture: true }); };
+  }, [isDormant, isReacting, petInteract, onOpenPanel]);
 
   const handleDoubleClick = () => {
     if (isDormant) return;
@@ -414,19 +429,19 @@ export default function PetEngine({ onOpenPanel, feedTrigger = 0, overlayOpen = 
 
   return (
     <motion.div
+      ref={petRef}
       className="pet-panel fixed select-none"
-      style={{ top: 0, left: 0, x: springX, y: springY, width: petSize, height: petSize, zIndex: overlayOpen ? 60 : 40 }}
+      style={{ top: 0, left: 0, x: springX, y: springY, width: petSize, height: petSize, zIndex: overlayOpen ? 60 : 40, willChange: 'transform' }}
       drag
       dragMomentum={false}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       whileTap={{ cursor: 'grabbing' }}
-      onTap={handleTap}
       onDoubleClick={handleDoubleClick}
     >
       <GlowAura isDormant={isDormant} health={petState.health} />
 
-      <AmbientSparkles isDormant={isDormant} />
+      {!reduceMotion && <AmbientSparkles isDormant={isDormant} />}
 
       {/* Shadow */}
       <motion.div
@@ -469,7 +484,7 @@ export default function PetEngine({ onOpenPanel, feedTrigger = 0, overlayOpen = 
         {/* Text popup */}
         <TextPopup text={textPopup?.text ?? ''} emoji={textPopup?.emoji} visible={!!textPopup} />
 
-        {isDormant && !isReacting && <SleepZzz />}
+        {isDormant && !isReacting && !reduceMotion && <SleepZzz />}
 
         {/* Health bar */}
         <motion.div
@@ -480,12 +495,8 @@ export default function PetEngine({ onOpenPanel, feedTrigger = 0, overlayOpen = 
               petState.hunger > 50 ? 'rgba(52,211,153,0.15)' : 'rgba(251,191,36,0.15)',
           }}
         >
-          <motion.span
+          <span
             className="w-1.5 h-1.5 rounded-full"
-            animate={{
-              scale: petState.hunger > 50 ? [1, 1.3, 1] : 1,
-            }}
-            transition={{ duration: 2, repeat: Infinity }}
             style={{
               background: isDormant ? '#94a3b8' :
                 petState.health === 'weak' ? '#fb7185' :
@@ -517,4 +528,7 @@ export default function PetEngine({ onOpenPanel, feedTrigger = 0, overlayOpen = 
       </motion.div>
     </motion.div>
   );
-}
+});
+
+export default PetEngine;
+

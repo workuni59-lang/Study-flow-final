@@ -1,16 +1,14 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   Play, Pause, RotateCcw, Zap, Maximize2, X,
-  Palette, Crown, Layout,
-  Settings2, Timer, BedDouble, Rocket, Image as ImageIcon, Search, Check, Link,
-  Info, Upload
+  Palette, Crown, Timer, Rocket, Check, Upload
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { DashboardCard } from './DashboardCard';
 import { storage } from '../../services/storage';
-import { useStudy } from '../../context/StudyContext';
-import { ATMOSPHERES, WALLPAPERS, Wallpaper } from '../../lib/gamification';
-import { ALERT_SOUNDS, playAlertSound } from '../../lib/alertSounds';
+import { useStudy, useFocus } from '../../context/StudyContext';
+import { ATMOSPHERES, WALLPAPERS } from '../../lib/gamification';
+import { playAlertSound } from '../../lib/alertSounds';
 
 // Extract unique categories from wallpapers
 const IMAGE_CATEGORIES = [...new Set(WALLPAPERS.filter(w => w.type === 'image' && w.category).map(w => w.category!))];
@@ -37,9 +35,10 @@ interface StudyTimerProps { onTick?: () => void; compact?: boolean; }
 export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
   const { 
     themeConfig, setThemeConfig, completeFocusSession, logSession, 
-    userStats, triggerConfetti, setFocusSession, setShowPremiumModal,
+    userStats, triggerConfetti, setShowPremiumModal,
     tasks, selectedTaskId, setSelectedTaskId
   } = useStudy();
+  const { setFocusSession } = useFocus();
   
   const [activePreset, setActivePreset] = useState<Preset>(PRESETS[0]);
   const [mode, setMode] = useState<TimerMode>('focus');
@@ -56,20 +55,22 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
   const [wallpaperBrightness, setWallpaperBrightness] = useState<string>('All');
   const [wallpaperEnvironment, setWallpaperEnvironment] = useState<string>('All');
   const [sessionsCompleted, setSessionsCompleted] = useState(0);
-  const [customUrl, setCustomUrl] = useState(themeConfig.customWallpaperUrl || '');
-  const [urlApplied, setUrlApplied] = useState(false);
+  const [timerBgColor, setTimerBgColor] = useState(() => localStorage.getItem('sf_timer_bg_color') || '');
+  const [showTimerColorPicker, setShowTimerColorPicker] = useState(false);
+  const [customImgError, setCustomImgError] = useState(false);
   const [tallyStyle, setTallyStyle] = useState('dots');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!userStats.isPremium) { setShowPremiumModal(true); return; }
     if (!file.type.startsWith('image/')) return;
+    setCustomImgError(false);
     const reader = new FileReader();
     reader.onload = (ev) => {
       const dataUrl = ev.target?.result as string;
-      setCustomUrl(dataUrl);
       setThemeConfig({ ...themeConfig, wallpaper: 'custom', customWallpaperUrl: dataUrl });
     };
     reader.readAsDataURL(file);
@@ -91,6 +92,19 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
   const sessionElapsed = useRef(0);
   const sessionStartTime = useRef<string | null>(null);
   const wakeLockRef = useRef<any>(null);
+  const timerBaseRef = useRef<{ startTimeLeft: number; startTimestamp: number } | null>(null);
+  const localSaveCounterRef = useRef(0);
+  const modeRef = useRef(mode);
+  modeRef.current = mode;
+  const onTickRef = useRef(onTick);
+  onTickRef.current = onTick;
+  const lastRenderRef = useRef(0);
+  const isMobileRef = useRef(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+  useEffect(() => {
+    const handler = () => { isMobileRef.current = window.innerWidth < 768; };
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
 
   const requestWakeLock = async () => {
     try {
@@ -133,33 +147,48 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
     }
   }, [isActive, mode]);
 
-  // Master Timer Sync
+  // Master Timer Sync (drift-corrected via Date.now() base ref)
   useEffect(() => {
-    let interval: number | undefined;
-    if (isActive && timeLeft > 0) {
-      interval = window.setInterval(() => {
-        const nextTime = timeLeft - 1;
-        setTimeLeft(nextTime);
+    if (!isActive || timeLeft <= 0) return;
+    timerBaseRef.current = { startTimeLeft: timeLeft, startTimestamp: Date.now() };
+    localSaveCounterRef.current = 0;
+
+    const interval = window.setInterval(() => {
+      if (!timerBaseRef.current) return;
+      const { startTimeLeft, startTimestamp } = timerBaseRef.current;
+      const elapsed = Math.floor((Date.now() - startTimestamp) / 1000);
+      const nextTime = Math.max(0, startTimeLeft - elapsed);
+      setTimeLeft(nextTime);
+
+      localSaveCounterRef.current++;
+      if (nextTime <= 0 || localSaveCounterRef.current % 5 === 1) {
         storage.saveTimerState(nextTime);
-        if (mode === 'focus') {
-          sessionElapsed.current += 1;
-          if (sessionElapsed.current >= 60) {
-            completeFocusSession(60);
-            sessionElapsed.current = 0;
-          }
+      }
+
+      if (modeRef.current === 'focus') {
+        sessionElapsed.current += 1;
+        if (sessionElapsed.current >= 60) {
+          completeFocusSession(60);
+          sessionElapsed.current = 0;
         }
-        if (onTick) onTick();
-      }, 1000);
+      }
+      if (onTickRef.current) onTickRef.current();
+    }, 1000);
+
+    return () => { clearInterval(interval); };
+  }, [isActive]);
+
+  // Sync focus session and handle completion (separate from timer interval to avoid re-creation)
+  useEffect(() => {
+    if (isMobileRef.current && isActive && timeLeft > 0) {
+      if (Date.now() - lastRenderRef.current < 950) return;
+      lastRenderRef.current = Date.now();
     }
-    
-    // Sync focus session state to context for clock integration
     setFocusSession({ mode: isActive ? mode : 'idle', timeLeft, totalTime, isActive, sessionsCompleted });
-    
-    if (timeLeft === 0) {
+    if (timeLeft <= 0 && isActive) {
       handleTimerComplete();
     }
-    return () => clearInterval(interval);
-  }, [isActive, timeLeft, mode, sessionsCompleted, activePreset.id]);
+  }, [timeLeft, isActive, mode, totalTime, sessionsCompleted, activePreset.id]);
 
   const logFocusSession = (duration: number) => {
     if (!sessionStartTime.current || duration <= 0) return;
@@ -229,15 +258,6 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
     else setThemeConfig({ ...themeConfig, wallpaper: id });
   };
 
-  const applyCustomUrl = () => {
-    if (!userStats.isPremium) { setShowPremiumModal(true); return; }
-    if (customUrl.trim()) {
-      setThemeConfig({ ...themeConfig, wallpaper: 'custom', customWallpaperUrl: customUrl.trim() });
-      setUrlApplied(true);
-      setTimeout(() => setUrlApplied(false), 2000);
-    }
-  };
-
   const currentAtmosphere = ATMOSPHERES.find(a => a.id === themeConfig.atmosphere) || ATMOSPHERES[0];
 
   const tallyEmojis = TALLY_SETS[tallyStyle] || TALLY_SETS.dots;
@@ -256,15 +276,15 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
   );
 
   const zenBg: Record<string, string> = {
-    indigo: 'bg-[#0a0c1a]',
-    rose: 'bg-[#1a0f0f]',
-    emerald: 'bg-[#0a1a0f]',
-    violet: 'bg-[#0f0a1a]',
-    amber: 'bg-[#1a140a]',
-    cyan: 'bg-[#0a141a]',
-    pink: 'bg-[#1a0a14]',
-    slate: 'bg-[#0a0c10]',
-    neon: 'bg-[#050010]',
+    indigo: '#0a0c1a',
+    rose: '#1a0f0f',
+    emerald: '#0a1a0f',
+    violet: '#0f0a1a',
+    amber: '#1a140a',
+    cyan: '#0a141a',
+    pink: '#1a0a14',
+    slate: '#0a0c10',
+    neon: '#050010',
   };
 
   const renderTimerControls = () => (
@@ -328,9 +348,31 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
         ))}
       </div>
 
-      {/* Wallpaper grid */}
+      {/* Animated wallpapers — simple name tags */}
+      <div className="flex flex-wrap gap-1.5 mb-3">
+        {WALLPAPERS.filter(w => !w.url).filter(w => {
+          if (wallpaperType !== 'All' && w.type !== wallpaperType.toLowerCase()) return false;
+          if (wallpaperCategory !== 'All' && w.category !== wallpaperCategory) return false;
+          if (wallpaperBrightness !== 'All' && w.brightness !== wallpaperBrightness.toLowerCase()) return false;
+          if (wallpaperEnvironment !== 'All' && w.environment !== wallpaperEnvironment.toLowerCase()) return false;
+          return true;
+        }).map(w => (
+          <button key={w.id} onClick={() => { if(w.isPremium && !userStats.isPremium) setShowPremiumModal(true); else setThemeConfig({...themeConfig, wallpaper: w.id}); }}
+            className={`px-2.5 py-1 rounded-lg text-[8px] font-bold tracking-wider transition-all ${
+              themeConfig.wallpaper === w.id
+                ? 'bg-brand text-white'
+                : 'bg-white/[0.04] text-white/40 hover:text-white/60 hover:bg-white/[0.08]'
+            }`}
+          >
+            {w.name}
+            {!userStats.isPremium && w.isPremium && <Crown className="w-2.5 h-2.5 inline ml-1 -mt-0.5" />}
+          </button>
+        ))}
+      </div>
+
+      {/* Image wallpaper grid */}
       <div className="grid grid-cols-2 gap-2">
-        {WALLPAPERS.filter(w => {
+        {WALLPAPERS.filter(w => w.url).filter(w => {
           if (wallpaperType !== 'All' && w.type !== wallpaperType.toLowerCase()) return false;
           if (wallpaperCategory !== 'All' && w.category !== wallpaperCategory) return false;
           if (wallpaperBrightness !== 'All' && w.brightness !== wallpaperBrightness.toLowerCase()) return false;
@@ -347,23 +389,34 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
             {!userStats.isPremium && w.isPremium && <div className="absolute top-2 left-2"><Crown className="w-3 h-3 text-white" /></div>}
           </button>
         ))}
+
+        {/* Custom wallpaper tile */}
+        <button onClick={() => { if(!userStats.isPremium) setShowPremiumModal(true); else setThemeConfig({...themeConfig, wallpaper: 'custom'}); }}
+          className={`aspect-[4/3] rounded-xl relative overflow-hidden transition-all group ${themeConfig.wallpaper === 'custom' ? 'ring-2 ring-brand' : 'hover:ring-1 ring-white/20'}`}>
+          {themeConfig.customWallpaperUrl && !customImgError ? (
+            <img src={themeConfig.customWallpaperUrl} alt="Custom" className="absolute inset-0 w-full h-full object-cover" loading="lazy" onError={() => setCustomImgError(true)} />
+          ) : themeConfig.customWallpaperUrl && customImgError ? (
+            <div className="absolute inset-0 flex items-center justify-center bg-white/[0.03] p-2">
+              <span className="text-[6px] font-mono text-white/30 break-all text-center leading-tight">{themeConfig.customWallpaperUrl}</span>
+            </div>
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center bg-white/[0.03] border-2 border-dashed border-white/10">
+              <span className="text-[8px] font-bold text-white/30 uppercase tracking-widest">Custom</span>
+            </div>
+          )}
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-2">
+            <span className="text-[9px] font-bold text-white leading-tight block truncate">Custom</span>
+          </div>
+          {themeConfig.wallpaper === 'custom' && <div className="absolute top-2 right-2 bg-brand rounded-full p-0.5"><Check className="w-3 h-3 text-white" /></div>}
+        </button>
       </div>
 
-      {/* Custom URL + Upload */}
-      <div className="space-y-2 pt-1">
-        <div className="flex gap-2">
-          <input type="text" placeholder="Paste image URL..." value={customUrl} onChange={(e) => setCustomUrl(e.target.value)}
-            className="flex-1 bg-white/[0.04] border border-white/5 rounded-xl p-2.5 text-[8px] font-medium focus:ring-1 ring-brand transition-all text-white/70 placeholder-white/20" />
-          <button onClick={applyCustomUrl} className={`p-2.5 rounded-xl transition-colors ${urlApplied ? 'bg-emerald-500' : 'bg-brand hover:bg-brand-dark'}`} title="Apply URL">
-            {urlApplied ? <Check className="w-3 h-3 text-white" /> : <Link className="w-3 h-3 text-white" />}
-          </button>
-        </div>
-        <div className="flex gap-2">
-          <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
-          <button onClick={() => fileInputRef.current?.click()} className="flex-1 flex items-center justify-center gap-2 bg-white/[0.04] border border-white/5 rounded-xl p-2.5 text-[8px] font-medium hover:bg-white/[0.08] transition-all text-white/50 hover:text-white/70">
-            <Upload className="w-3 h-3" /> Upload from device
-          </button>
-        </div>
+      {/* Custom background upload */}
+      <div className="pt-1">
+        <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+        <button onClick={() => fileInputRef.current?.click()} className="w-full flex items-center justify-center gap-2 bg-white/[0.04] border-2 border-dashed border-white/10 rounded-xl p-3 text-[9px] font-semibold hover:bg-white/[0.08] hover:border-white/20 transition-all text-white/50 hover:text-white/70 uppercase tracking-wider">
+          <Upload className="w-3 h-3" /> Upload Image
+        </button>
       </div>
     </motion.div>
   );
@@ -372,14 +425,12 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
     <motion.div key="theme" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
       <div className="flex gap-3 p-1 bg-white/[0.04] rounded-xl">
         <button onClick={() => setPickerTab('atm')} className={`flex-1 py-1.5 rounded-lg text-[8px] font-semibold uppercase tracking-wider transition-all ${pickerTab === 'atm' ? 'bg-white/10 text-white' : 'text-white/40'}`}>Atmosphere</button>
-        <button onClick={() => setPickerTab('wall')} className={`flex-1 py-1.5 rounded-lg text-[8px] font-semibold uppercase tracking-wider transition-all ${pickerTab === 'wall' ? 'bg-white/10 text-white' : 'text-white/40'}`}>Gallery</button>
+        {!isMobile && <button onClick={() => setPickerTab('wall')} className={`flex-1 py-1.5 rounded-lg text-[8px] font-semibold uppercase tracking-wider transition-all ${pickerTab === 'wall' ? 'bg-white/10 text-white' : 'text-white/40'}`}>Gallery</button>}
       </div>
       <div className="max-h-[45vh] overflow-y-auto no-scrollbar mt-3">
-        <AnimatePresence mode="wait">
-          {pickerTab === 'atm' ? renderAtmosphereTab() : renderGalleryTab()}
-        </AnimatePresence>
+        {pickerTab === 'atm' ? renderAtmosphereTab() : !isMobile && renderGalleryTab()}
       </div>
-      <button onClick={() => { setShowThemePicker(false); setShowExpanded(false); }} className="w-full mt-3 py-2.5 bg-white/[0.06] hover:bg-white/[0.10] rounded-xl text-[9px] font-semibold uppercase tracking-wider text-white/60 transition-colors">Done</button>
+      <button onClick={() => setShowThemePicker(false)} className="w-full mt-3 py-2.5 bg-white/[0.06] hover:bg-white/[0.10] rounded-xl text-[9px] font-semibold uppercase tracking-wider text-white/60 transition-colors">Done</button>
     </motion.div>
   );
 
@@ -476,7 +527,7 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
                           </motion.div>
                           {/* Progress bar */}
                           <div className="w-full max-w-[200px] mx-auto h-[3px] bg-white/5 rounded-full overflow-hidden mt-2">
-                            <div className="h-full bg-gradient-to-r from-brand/60 to-brand-light rounded-full transition-all duration-1000 ease-linear" style={{ width: `${progress * 100}%` }} />
+                            <div className="h-full bg-gradient-to-r from-brand/60 to-brand-light rounded-full transition-transform duration-1000 ease-linear" style={{ transform: `scaleX(${progress})`, transformOrigin: 'left' }} />
                           </div>
                           <div className="flex items-center justify-center gap-2 mt-2">
                             {renderTallies()}
@@ -554,7 +605,7 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
                 </motion.div>
                 {/* Progress bar */}
                 <div className="w-full max-w-[200px] mx-auto h-[3px] bg-white/5 rounded-full overflow-hidden mt-3">
-                  <div className="h-full bg-gradient-to-r from-brand/60 to-brand-light rounded-full transition-all duration-1000 ease-linear" style={{ width: `${progress * 100}%` }} />
+                  <div className="h-full bg-gradient-to-r from-brand/60 to-brand-light rounded-full transition-transform duration-1000 ease-linear" style={{ transform: `scaleX(${progress})`, transformOrigin: 'left' }} />
                 </div>
                 <div className="flex items-center justify-center gap-2 mt-2">
                   {renderTallies()}
@@ -577,7 +628,8 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
       <AnimatePresence>
         {isZenMode && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className={`fixed inset-0 z-[100] flex flex-col items-center justify-center p-6 text-center transition-colors duration-700 ${zenBg[themeConfig.atmosphere] || 'bg-[#0a0c10]'}`}
+            className="fixed inset-0 z-[100] flex flex-col items-center justify-center p-6 text-center transition-colors duration-700"
+            style={{ backgroundColor: timerBgColor || zenBg[themeConfig.atmosphere] || '#0a0c10' }}
           >
             <button onClick={() => setIsZenMode(false)} className="absolute top-10 right-10 p-3 bg-white/5 text-white/40 hover:text-white rounded-xl z-50"><X className="w-6 h-6" /></button>
             <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="relative z-10 w-full flex flex-col items-center">
@@ -597,7 +649,48 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
                 <button onClick={toggleTimer} className={`w-28 h-28 rounded-full flex items-center justify-center transition-all shadow-2xl ${isActive ? 'bg-amber-500 text-white' : 'bg-white text-slate-950 scale-105'}`}>
                   {isActive ? <Pause className="w-10 h-10 fill-current" /> : <Play className="w-10 h-10 fill-current translate-x-1" />}
                 </button>
-                <button onClick={() => setShowPresetPicker(true)} className="p-5 bg-white/5 rounded-full text-white/40"><Settings2 className="w-6 h-6" /></button>
+                <button onClick={() => setShowTimerColorPicker(v => !v)} className="p-5 bg-white/5 rounded-full text-white/40 relative"><Palette className="w-6 h-6" /></button>
+                {showTimerColorPicker && (
+                  <div className="absolute bottom-24 left-1/2 -translate-x-1/2 p-4 rounded-2xl bg-[#141622] border border-slate-800/50 shadow-2xl z-50" style={{ width: '220px' }}>
+                    <p className="text-[9px] font-bold uppercase tracking-wider text-white/40 mb-3 text-center">Background Color</p>
+                    <div className="grid grid-cols-5 gap-2">
+                      {([
+
+                        ['indigo', '#0a0c1a'],
+                        ['slate', '#0a0c10'],
+                        ['emerald', '#0a1a0f'],
+                        ['rose', '#1a0f0f'],
+                        ['amber', '#1a140a'],
+                        ['violet', '#0f0a1a'],
+                        ['cyan', '#0a141a'],
+                        ['pink', '#1a0a14'],
+                        ['neon', '#050010'],
+
+                      ] as const).map(([name, hex]) => (
+                        <button key={name}
+                          onClick={() => {
+                            setTimerBgColor(hex);
+                            localStorage.setItem('sf_timer_bg_color', hex);
+                            setShowTimerColorPicker(false);
+                          }}
+                          className="w-8 h-8 rounded-xl border border-white/10 hover:scale-110 transition-transform"
+                          style={{ backgroundColor: hex }}
+                          title={name}
+                        />
+                      ))}
+                      <button
+                        onClick={() => {
+                          setTimerBgColor('');
+                          localStorage.removeItem('sf_timer_bg_color');
+                          setShowTimerColorPicker(false);
+                        }}
+                        className="col-span-5 mt-1 py-1.5 rounded-xl bg-white/5 text-[8px] font-bold text-white/40 hover:text-white/70 uppercase tracking-wider transition-colors"
+                      >
+                        Reset to default
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </motion.div>
           </motion.div>

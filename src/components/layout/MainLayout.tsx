@@ -1,4 +1,5 @@
 import { useState, lazy, Suspense } from 'react';
+import { X } from 'lucide-react';
 import { useStudy } from '../../context/StudyContext';
 import { useAuth } from '../../context/AuthContext';
 import { TopBar, type Mode } from './TopBar';
@@ -9,7 +10,7 @@ import { MenuDrawer, type Section } from './MenuDrawer';
 import { DesktopSidebar } from './DesktopSidebar';
 import { SidePanel } from '../panels/SidePanel';
 import { TasksPanel } from '../panels/TasksPanel';
-import { AmbiencePanel } from '../panels/AmbiencePanel';
+import { AmbiencePanel, type CuratedPlaylist } from '../panels/AmbiencePanel';
 import { NotepadPanel } from '../panels/NotepadPanel';
 import { PremiumModal } from '../modals/PremiumModal';
 import { AchievementNotification } from '../notifications/AchievementNotification';
@@ -26,6 +27,8 @@ const AnalyticsDashboardLazy = lazy(() => import('../analytics/AnalyticsDashboar
 const SubjectsViewLazy = lazy(() => import('../subjects/SubjectsView').then(m => ({ default: m.SubjectsView })));
 const AchievementsViewLazy = lazy(() => import('../achievements/AchievementsView').then(m => ({ default: m.AchievementsView })));
 const SettingsViewLazy = lazy(() => import('../navigation/SettingsView').then(m => ({ default: m.SettingsView })));
+const QuestsViewLazy = lazy(() => import('../quests/QuestsView').then(m => ({ default: m.QuestsView })));
+const ProgressionViewLazy = lazy(() => import('../progression/ProgressionView').then(m => ({ default: m.ProgressionView })));
 
 const SimpleSpinner = () => (
   <div className="flex items-center justify-center min-h-[60vh]">
@@ -42,6 +45,7 @@ export const MainLayout = () => {
   const [panelOpen, setPanelOpen] = useState<'tasks' | 'ambience' | 'notepad' | null>(null);
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [prevLevel, setPrevLevel] = useState(userStats.level);
+  const [ambienceUrl, setAmbienceUrl] = useState<CuratedPlaylist | null>(null);
   const [showPetPanel, setShowPetPanel] = useState(false);
   const [feedTrigger, setFeedTrigger] = useState(0);
   const [petVisible, setPetVisible] = useState(() => storage.getPetVisible() ?? true);
@@ -61,10 +65,11 @@ export const MainLayout = () => {
   }, []);
 
   const isFullView = section !== 'dashboard';
+  const skipWallpaper = typeof navigator !== 'undefined' && navigator.hardwareConcurrency <= 4;
 
   return (
-    <div className="min-h-screen relative transition-colors duration-1000">
-      <WallpaperEngine />
+    <div className="min-h-screen relative transition-colors duration-1000" style={{ backgroundColor: section === 'dashboard' ? 'transparent' : '#0f0f1a' }}>
+      {!skipWallpaper && <WallpaperEngine visible={section === 'dashboard'} />}
 
       {/* Desktop sidebar (slide-in overlay on lg+) */}
       <DesktopSidebar
@@ -97,7 +102,9 @@ export const MainLayout = () => {
             </header>
             <main className="main-layout-content p-4 md:p-8 pb-24 lg:pb-8">
               <Suspense fallback={<SimpleSpinner />}>
+                {section === 'progression' && <ProgressionViewLazy />}
                 {section === 'analytics' && <AnalyticsDashboardLazy />}
+                {section === 'quests' && <QuestsViewLazy />}
                 {section === 'subjects' && <SubjectsViewLazy />}
                 {section === 'achievements' && <AchievementsViewLazy />}
                 {section === 'settings' && <SettingsViewLazy />}
@@ -111,17 +118,17 @@ export const MainLayout = () => {
             mode={mode}
             onModeChange={setMode}
             onMenuOpen={() => setMenuOpen(v => !v)}
-            onSettingsOpen={() => setSection('settings')}
           />
 
           {/* Main content */}
           <main className="main-layout-content">
-            {mode === 'home' && <HomeView onNotepadOpen={() => setPanelOpen('notepad')} />}
+            {mode === 'home' && <HomeView onNotepadOpen={() => setPanelOpen('notepad')} onQuestsOpen={() => setSection('quests')} onMusicOpen={() => setPanelOpen('ambience')} onProgressionOpen={() => setSection('progression')} menuOpen={menuOpen} />}
             {mode === 'focus' && (
               <FocusView
                 onTasksOpen={() => setPanelOpen('tasks')}
                 onMusicOpen={() => setPanelOpen('ambience')}
                 onNotepadOpen={() => setPanelOpen('notepad')}
+                onQuestsOpen={() => setSection('quests')}
               />
             )}
           </main>
@@ -133,6 +140,7 @@ export const MainLayout = () => {
             onTasksOpen={() => setPanelOpen('tasks')}
             onStatsOpen={() => setSection('analytics')}
             onNotepadOpen={() => setPanelOpen('notepad')}
+            onQuestsOpen={() => setSection('quests')}
           />
 
           {/* Pet */}
@@ -162,8 +170,33 @@ export const MainLayout = () => {
       </SidePanel>
 
       <SidePanel open={panelOpen === 'ambience'} onClose={() => setPanelOpen(null)} title="Ambience">
-        <AmbiencePanel />
+        <AmbiencePanel ambienceUrl={ambienceUrl} onAmbienceUrlChange={setAmbienceUrl} />
       </SidePanel>
+
+      {/* Persistent ambience iframe — rendered outside SidePanel so it survives panel close */}
+      {ambienceUrl && (
+        <div className="fixed bottom-4 right-4 z-50 w-80 rounded-xl overflow-hidden shadow-2xl border border-white/10 bg-black/80 backdrop-blur-lg">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-white/[0.06] border-b border-white/[0.06]">
+            <span className="text-sm">{ambienceUrl.emoji}</span>
+            <span className="flex-1 text-[10px] font-bold truncate text-white/80">{ambienceUrl.name}</span>
+            <span className="text-[7px] font-bold uppercase tracking-wider text-white/40">{ambienceUrl.service}</span>
+            <button onClick={() => setAmbienceUrl(null)}
+              className="p-0.5 rounded hover:bg-white/10 text-white/40 transition-colors">
+              <X className="w-3 h-3" />
+            </button>
+          </div>
+          <iframe
+            src={ambienceUrl.embedUrl}
+            width="100%"
+            height={ambienceUrl.service?.toLowerCase() === 'youtube' ? '232' : '152'}
+            frameBorder="0"
+            allow="encrypted-media; autoplay; clipboard-write; fullscreen; picture-in-picture"
+            allowFullScreen
+            className="w-full"
+            title={ambienceUrl.name}
+          />
+        </div>
+      )}
 
       <SidePanel open={panelOpen === 'notepad'} onClose={() => setPanelOpen(null)} title="Notepad">
         <NotepadPanel />

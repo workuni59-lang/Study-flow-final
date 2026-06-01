@@ -2,16 +2,18 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { motion, useSpring, useMotionValue, useTransform, AnimatePresence } from 'motion/react';
 import { useStudy } from '../../context/StudyContext';
 import { WALLPAPERS } from '../../lib/gamification';
+import { useReduceMotion } from '../../hooks/useReduceMotion';
 
-export const WallpaperEngine = () => {
+export const WallpaperEngine = ({ visible = true }: { visible?: boolean }) => {
   const { themeConfig } = useStudy();
+  const reduceMotion = useReduceMotion();
 
-  // Mouse Tracking for Interactive Parallax
+  // Mouse Tracking for Interactive Parallax (disabled when reduceMotion is active)
   const mouseX = useMotionValue(0.5);
   const mouseY = useMotionValue(0.5);
 
-  const springX = useSpring(mouseX, { damping: 25, stiffness: 150 });
-  const springY = useSpring(mouseY, { damping: 25, stiffness: 150 });
+  const springX = useSpring(mouseX, { damping: reduceMotion ? 0 : 25, stiffness: reduceMotion ? 99999 : 150 });
+  const springY = useSpring(mouseY, { damping: reduceMotion ? 0 : 25, stiffness: reduceMotion ? 99999 : 150 });
 
   // Transforms
   const meshX1 = useTransform(springX, [0, 1], [-100, 100]);
@@ -35,13 +37,14 @@ export const WallpaperEngine = () => {
   const imageY = useTransform(springY, [0, 1], ["-2%", "2%"]);
 
   useEffect(() => {
+    if (reduceMotion) return;
     const handleMouseMove = (e: MouseEvent) => {
       mouseX.set(e.clientX / window.innerWidth);
       mouseY.set(e.clientY / window.innerHeight);
     };
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, [mouseX, mouseY]);
+  }, [mouseX, mouseY, reduceMotion]);
 
   const baseBackgrounds: Record<string, string> = {
     indigo: 'bg-[#f8fafc] dark:bg-slate-950',
@@ -78,29 +81,31 @@ export const WallpaperEngine = () => {
     const finalUrl = themeConfig.wallpaper === 'custom' ? themeConfig.customWallpaperUrl : currentWallpaper.url;
 
     return (
-      <div className={`fixed inset-0 pointer-events-none -z-20 transition-colors duration-1000 ${baseClass}`}>
-        <style>
-          {`
-            @keyframes aurora-wave-fast {
-              0%, 100% { transform: skewX(-20deg) translateX(-10%); opacity: 0.4; }
-              50% { transform: skewX(-15deg) translateX(10%); opacity: 0.8; }
-            }
-            @keyframes twinkle-star-vibrant {
-              0%, 100% { opacity: 0.3; transform: scale(1); }
-              50% { opacity: 1; transform: scale(1.8); }
-            }
-            @keyframes neon-rain {
-              0% { transform: translateY(-100vh); opacity: 0; }
-              50% { opacity: 1; }
-              100% { transform: translateY(100vh); opacity: 0; }
-            }
-            @keyframes zen-ripple {
-              0% { transform: scale(0.8); opacity: 0; }
-              50% { opacity: 0.5; }
-              100% { transform: scale(1.5); opacity: 0; }
-            }
-          `}
-        </style>
+      <div className={`fixed inset-0 pointer-events-none -z-20 transition-colors duration-1000 ${baseClass}`} style={{ opacity: visible ? 1 : 0, transition: 'opacity 0.3s ease' }}>
+        {!reduceMotion && (
+          <style>
+            {`
+              @keyframes aurora-wave-fast {
+                0%, 100% { transform: skewX(-20deg) translateX(-10%); opacity: 0.4; }
+                50% { transform: skewX(-15deg) translateX(10%); opacity: 0.8; }
+              }
+              @keyframes twinkle-star-vibrant {
+                0%, 100% { opacity: 0.3; transform: scale(1); }
+                50% { opacity: 1; transform: scale(1.8); }
+              }
+              @keyframes neon-rain {
+                0% { transform: translateY(-100vh); opacity: 0; }
+                50% { opacity: 1; }
+                100% { transform: translateY(100vh); opacity: 0; }
+              }
+              @keyframes zen-ripple {
+                0% { transform: scale(0.8); opacity: 0; }
+                50% { opacity: 0.5; }
+                100% { transform: scale(1.5); opacity: 0; }
+              }
+            `}
+          </style>
+        )}
 
         {isEnabled && (
           <div className="absolute inset-0 overflow-hidden" style={{ filter: filterStyle, willChange: 'filter' }}>
@@ -132,7 +137,7 @@ export const WallpaperEngine = () => {
             </AnimatePresence>
 
             {/* Dynamic Focus Lens */}
-            {currentWallpaper.type === 'animated' && (
+            {!reduceMotion && currentWallpaper.type === 'animated' && (
               <motion.div 
                 style={{ left: lensX, top: lensY, willChange: "transform" }}
                 className={`absolute w-[40vw] h-[40vw] rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2 opacity-30 ${currentGlow}`}
@@ -140,16 +145,16 @@ export const WallpaperEngine = () => {
             )}
 
             {/* Animated Mesh */}
-            {themeConfig.wallpaper === 'mesh' && (
+            {!reduceMotion && themeConfig.wallpaper === 'mesh' && (
               <div className="absolute inset-0 overflow-hidden opacity-80">
-                <motion.div style={{ x: meshX1, y: meshY1 }} className="absolute top-[-20%] left-[-20%] w-[80%] h-[80%] rounded-full blur-[140px] bg-indigo-500/40 animate-pulse" />
+                <motion.div style={{ x: meshX1, y: meshY1 }} className="absolute top-[-20%] left-[-20%] w-[80%] h-[80%] rounded-full blur-[140px] bg-indigo-500/40" />
                 <motion.div style={{ x: meshX2, y: meshY2 }} className="absolute bottom-[-10%] right-[-10%] w-[90%] h-[90%] rounded-full blur-[160px] bg-violet-600/30" />
                 <motion.div style={{ x: meshX3, y: meshY3 }} className="absolute top-[10%] right-[5%] w-[50%] h-[50%] rounded-full blur-[120px] bg-cyan-400/20" />
               </div>
             )}
 
             {/* Arctic Aurora */}
-            {themeConfig.wallpaper === 'aurora' && (
+            {!reduceMotion && themeConfig.wallpaper === 'aurora' && (
               <div className="absolute inset-0 overflow-hidden">
                 <motion.div style={{ x: auroraX }} className="absolute inset-x-[-20%] inset-y-0 flex justify-around opacity-60 blur-[80px]">
                     {[...Array(4)].map((_, i) => (
@@ -162,21 +167,20 @@ export const WallpaperEngine = () => {
             )}
 
             {/* Cyber Library */}
-            {themeConfig.wallpaper === 'cyberpunk' && (
+            {!reduceMotion && themeConfig.wallpaper === 'cyberpunk' && (
               <div className="absolute inset-0 overflow-hidden">
                 <div className="absolute inset-0 opacity-[0.05] dark:opacity-[0.1]" style={{ backgroundImage: 'linear-gradient(#f0f 1px, transparent 1px), linear-gradient(90deg, #f0f 1px, transparent 1px)', backgroundSize: '100px 100px' }} />
                 {[...Array(12)].map((_, i) => (
                   <div key={i} className="absolute w-[1px] h-32 bg-gradient-to-b from-fuchsia-500 to-transparent"
-                    style={{ left: `${(i * 8.3) + 2}%`, animation: `neon-rain ${2 + (i % 3)}s infinite linear`, animationDelay: `${i * 0.4}s` }}
+                    style={{ left: `${(i * 8.3) + 2}%` }}
                   />
                 ))}
               </div>
             )}
 
             {/* Zen Garden */}
-            {themeConfig.wallpaper === 'zen' && (
+            {!reduceMotion && themeConfig.wallpaper === 'zen' && (
               <div className="absolute inset-0 overflow-hidden">
-                {/* Sand lines */}
                 <svg className="absolute inset-0 w-full h-full opacity-[0.12] dark:opacity-[0.2]" viewBox="0 0 100 100" preserveAspectRatio="none">
                   {[...Array(20)].map((_, i) => (
                     <line key={i} x1="0" y1={i * 5.3} x2="100" y2={i * 5.3 + 10} stroke="currentColor" strokeWidth="0.3" className="text-indigo-500" />
@@ -185,19 +189,15 @@ export const WallpaperEngine = () => {
                     <line key={i} x1={i * 5.3} y1="0" x2={i * 5.3 + 10} y2="100" stroke="currentColor" strokeWidth="0.2" className="text-indigo-400" />
                   ))}
                 </svg>
-                {/* Zen stones */}
                 <div className="absolute top-1/3 left-1/3 w-12 h-12 rounded-full bg-slate-400/15 dark:bg-slate-300/10" />
                 <div className="absolute bottom-1/4 right-1/4 w-8 h-8 rounded-full bg-slate-400/10 dark:bg-slate-300/8" />
                 <div className="absolute top-1/4 right-1/3 w-6 h-6 rounded-full bg-slate-400/8 dark:bg-slate-300/6" />
-                {/* Rippling circles */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   {[...Array(5)].map((_, i) => (
                     <div key={i} className="absolute rounded-full bg-indigo-500/8 dark:bg-indigo-400/10 border border-indigo-500/25 dark:border-indigo-400/30"
                       style={{
                         width: `${(i + 1) * 280}px`,
                         height: `${(i + 1) * 280}px`,
-                        animation: `zen-ripple ${12 + i * 2}s infinite ease-out`,
-                        animationDelay: `${i * 1.5}s`
                       }}
                     />
                   ))}
@@ -206,15 +206,13 @@ export const WallpaperEngine = () => {
             )}
 
             {/* Deep Space */}
-            {themeConfig.wallpaper === 'stardust' && (
+            {!reduceMotion && themeConfig.wallpaper === 'stardust' && (
               <motion.div style={{ x: starX, y: starY }} className="absolute inset-[-10%]">
                 {[...Array(40)].map((_, i) => (
                   <div key={i} className="absolute w-1.5 h-1.5 bg-white rounded-full"
                     style={{ 
                       left: (Math.abs(Math.sin(i * 1337)) * 100) + "%", 
                       top: (Math.abs(Math.cos(i * 7331)) * 100) + "%",
-                      animation: `twinkle-star-vibrant ${2 + (i % 4)}s infinite ease-in-out`,
-                      animationDelay: `${i * 0.1}s`,
                       boxShadow: '0 0 10px rgba(255,255,255,0.5)'
                     }}
                   />
@@ -223,30 +221,17 @@ export const WallpaperEngine = () => {
             )}
 
             {/* Focus Dots */}
-            {themeConfig.wallpaper === 'dots' && (
+            {!reduceMotion && themeConfig.wallpaper === 'dots' && (
               <motion.div style={{ x: dotsX, y: dotsY, backgroundImage: `radial-gradient(circle at center, #6366f1 2px, transparent 2px)`, backgroundSize: '56px 56px' }}
                 className="absolute inset-[-20%] opacity-[0.2] dark:opacity-[0.35]" 
               />
             )}
 
             {/* Clean Solid */}
-            {themeConfig.wallpaper === 'minimal' && (
+            {!reduceMotion && themeConfig.wallpaper === 'minimal' && (
               <div className="absolute inset-0 overflow-hidden">
-                {/* Ambient gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-indigo-500/8 dark:to-indigo-400/15" />
-                {/* Subtle vignette */}
                 <div className="absolute inset-0 bg-radial-[circle_at_center] from-transparent via-transparent to-slate-950/30 dark:to-black/50" />
-                {/* Floating dust motes */}
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} className="absolute w-1 h-1 rounded-full bg-indigo-500/25 dark:bg-indigo-400/30"
-                    style={{
-                      left: `${15 + (i * 17) % 70}%`,
-                      top: `${10 + (i * 23) % 80}%`,
-                      animation: `twinkle-star-vibrant ${4 + i}s infinite ease-in-out`,
-                      animationDelay: `${i * 0.7}s`,
-                    }}
-                  />
-                ))}
               </div>
             )}
           </div>

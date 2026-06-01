@@ -104,3 +104,13 @@
 [data-clear-mode="true"] .main-layout-content {
   @apply pt-0 transition-all duration-700;
 }
+
+/* Mobile: eliminate tap delay */
+button, [role="button"], a, input, select, textarea {
+  touch-action: manipulation;
+}
+
+/* iOS momentum scroll for scrollable containers */
+.no-scrollbar, .overflow-y-auto, .overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+}

@@ -1,11 +1,16 @@
 import { useState, useEffect } from 'react';
-import { Clock, Zap, Flame, Sparkles, PenSquare } from 'lucide-react';
-import { useStudy } from '../../context/StudyContext';
+import { Clock, Zap, Flame, PenSquare, Target, Music, ArrowUpRight } from 'lucide-react';
+import { useStudy, useFocus } from '../../context/StudyContext';
 import { useAuth } from '../../context/AuthContext';
+import { PROGRESSION_BADGES } from '../../lib/progression';
+import { BadgeSvg, type BadgeTier } from '../progression/BadgeSvg';
 import { getDailyQuote } from '../../lib/quotes';
 import { getGreeting } from '../../lib/greetings';
 import ClockRenderer from '../clock/ClockRenderer';
-import { DeadlinesSection } from '../dashboard/DeadlinesSection';
+
+const BADGE_TIER: Record<string, BadgeTier> = {
+  bronze: 'bronze', silver: 'silver', gold: 'gold', platinum: 'platinum', diamond: 'diamond', legend: 'legend',
+};
 
 const formatTime = (s: number) => {
   const h = Math.floor(s / 3600);
@@ -14,9 +19,33 @@ const formatTime = (s: number) => {
   return `${h}h ${m}m`;
 };
 
-export const HomeView = ({ onNotepadOpen }: { onNotepadOpen?: () => void }) => {
+const T_S = '0 1px 3px rgba(0,0,0,0.5)';
+
+const ICON_BTN = {
+  width: '40px',
+  height: '40px',
+  borderRadius: '50%',
+  backgroundColor: 'rgba(0,0,0,0.45)',
+  backdropFilter: 'blur(8px)',
+  border: '1px solid rgba(255,255,255,0.15)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  color: 'rgba(255,255,255,0.85)',
+  cursor: 'pointer',
+  transition: 'transform 0.15s',
+} as const;
+
+export const HomeView = ({ onNotepadOpen, onQuestsOpen, onMusicOpen, onProgressionOpen, menuOpen }: {
+  onNotepadOpen?: () => void;
+  onQuestsOpen?: () => void;
+  onMusicOpen?: () => void;
+  onProgressionOpen?: () => void;
+  menuOpen?: boolean;
+}) => {
   const { user } = useAuth();
-  const { userStats, themeConfig, focusSession } = useStudy();
+  const { focusSession } = useFocus();
+  const { userStats, themeConfig, progression } = useStudy();
   const [time, setTime] = useState(new Date());
   const [quote] = useState(getDailyQuote());
 
@@ -26,92 +55,166 @@ export const HomeView = ({ onNotepadOpen }: { onNotepadOpen?: () => void }) => {
     }, []);
 
   return (
-    <div className="relative flex flex-col items-center px-4 pt-12 pb-28 lg:pb-8 text-center min-h-screen overflow-hidden">
-      {/* Ambient gradient background */}
+    <div style={{ height: '100vh', overflow: 'hidden', position: 'relative' }}>
+      <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', paddingTop: '60px', paddingLeft: '16px', paddingRight: '16px' }}>
+      {/* Badge — top-right corner */}
+      {(() => {
+        const hb = PROGRESSION_BADGES.filter(b => progression.level >= b.levelRequired).pop();
+        const t = hb ? (BADGE_TIER[hb.id] ?? 'bronze') : 'bronze';
+        return (
+          <div
+            onClick={onProgressionOpen}
+            style={{
+              position: 'absolute', top: '72px', right: '16px', zIndex: 20,
+              cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
+              padding: '5px 10px 5px 6px', borderRadius: '10px',
+              background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(8px)',
+              border: '1px solid rgba(255,255,255,0.08)',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,0,0,0.5)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0,0,0,0.35)'; }}
+          >
+            <BadgeSvg tier={t} size={24} unlocked={true} />
+            <span style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(255,255,255,0.85)', textShadow: T_S }}>
+              Lv.{progression.level}
+            </span>
+            <ArrowUpRight style={{ width: '10px', height: '10px', color: 'rgba(255,255,255,0.3)' }} />
+          </div>
+        );
+      })()}
+
+      {/* Ambient gradient */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-brand/5 rounded-full blur-[120px] animate-pulse" />
         <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-violet-500/5 rounded-full blur-[120px] animate-pulse" style={{ animationDuration: '4s' }} />
       </div>
 
-      {/* Clock (respects user's digital/analog variant preference) */}
-      {themeConfig.showClock !== false && (
-        <div className="mb-2">
-          <ClockRenderer time={time} focusState={focusSession} />
+      {/* ── Central content ── */}
+      <div style={{
+        position: 'relative', zIndex: 10,
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+        padding: '20px 32px 16px', borderRadius: '24px',
+        background: 'rgba(0,0,0,0.2)', backdropFilter: 'blur(6px)',
+        border: '1px solid rgba(255,255,255,0.05)',
+        maxWidth: '420px', width: '100%',
+      }}>
+        {/* Greeting */}
+        {themeConfig.showGreeting !== false && (
+          <h2 style={{
+            fontSize: '14px', fontWeight: 500, color: 'rgba(255,255,255,0.7)',
+            textShadow: T_S, marginBottom: '2px',
+          }}>
+            {getGreeting(user?.displayName?.split(' ')[0])}
+          </h2>
+        )}
+
+        {/* Clock */}
+        {themeConfig.showClock !== false && (
+          <div style={{ marginBottom: '4px', filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))' }}>
+            <ClockRenderer time={time} focusState={focusSession} />
+          </div>
+        )}
+
+        {/* Focus time label */}
+        <span style={{
+          fontSize: '11px', color: 'rgba(255,255,255,0.5)',
+          textShadow: T_S, marginBottom: '8px',
+        }}>
+          {userStats.totalFocusSeconds > 0
+            ? `${formatTime(userStats.totalFocusSeconds)} focused today`
+            : 'Ready for a focused session?'}
+        </span>
+
+        {/* Stats row */}
+        <div style={{
+          display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px',
+          width: '100%', maxWidth: '320px',
+        }}>
+          <StatCard icon={Clock} value={formatTime(userStats.totalFocusSeconds)} label="Focus" color="#818cf8" />
+          <StatCard icon={Flame} value={String(userStats.currentStreak ?? 0)} label="Streak" color="#f59e0b" />
+          <StatCard icon={Zap} value={String(userStats.totalXP ?? 0)} label="XP" color="#a78bfa" />
         </div>
-      )}
 
-      {/* Greeting */}
-      {themeConfig.showGreeting !== false && (
-        <h2 className="text-lg md:text-xl font-display font-medium dark:text-white/70 mb-1">
-          {getGreeting(user?.displayName?.split(' ')[0])}
-        </h2>
-      )}
-
-      {/* Daily goal prompt */}
-      <p className="text-xs text-slate-400 dark:text-slate-500 mb-6">
-        {userStats.totalFocusSeconds > 0
-          ? `${formatTime(userStats.totalFocusSeconds)} focused today`
-          : 'Ready for a focused session?'}
-      </p>
-
-      {/* Quote */}
-      {themeConfig.showQuote !== false && (
-        <div className="max-w-md mb-8 w-full">
-          <div className="relative bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl rounded-2xl p-5 border border-white/20 dark:border-white/[0.06] shadow-sm">
-            <Sparkles className="absolute -top-2 -right-2 w-4 h-4 text-brand/40" />
-            <p className="text-sm text-slate-600 dark:text-slate-300 font-light leading-relaxed italic">
+        {/* Quote */}
+        {themeConfig.showQuote !== false && (
+          <div style={{
+            marginTop: '8px', width: '100%', maxWidth: '320px',
+            padding: '6px 12px', borderRadius: '10px',
+            background: 'rgba(255,255,255,0.04)',
+          }}>
+            <p style={{
+              fontSize: '10px', color: 'rgba(255,255,255,0.45)',
+              fontStyle: 'italic', textShadow: T_S,
+              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+            }}>
               &ldquo;{quote.text}&rdquo;
             </p>
-            <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500 mt-2.5">
-              &mdash; {quote.author}
-            </p>
           </div>
-        </div>
-      )}
-
-      {/* Stats row */}
-      <div className="dashboard-stats w-full max-w-xs grid grid-cols-3 gap-2.5">
-        <StatCard icon={Clock} value={formatTime(userStats.totalFocusSeconds)} label="Focus" color="text-brand" />
-        <StatCard icon={Flame} value={String(userStats.currentStreak)} label="Streak" color="text-amber-500" />
-        <StatCard icon={Zap} value={String(userStats.totalXP)} label="XP" color="text-purple-500" />
+        )}
       </div>
 
-      {/* Deadlines */}
-      <div className="dashboard-stats mt-5">
-        <DeadlinesSection />
+      {/* ── Bottom-left icon cluster ── */}
+      {!menuOpen && (
+        <div style={{
+          position: 'fixed', bottom: '24px', left: '24px',
+          display: 'flex', flexDirection: 'row', gap: '12px', zIndex: 50,
+        }}>
+          {onNotepadOpen && (
+            <button
+              onClick={onNotepadOpen}
+              style={ICON_BTN}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.1)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+            >
+              <PenSquare size={18} />
+            </button>
+          )}
+          {onQuestsOpen && (
+            <button
+              onClick={onQuestsOpen}
+              style={ICON_BTN}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.1)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+            >
+              <Target size={18} />
+            </button>
+          )}
+          {onMusicOpen && (
+            <button
+              onClick={onMusicOpen}
+              style={ICON_BTN}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.1)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+            >
+              <Music size={18} />
+            </button>
+          )}
+        </div>
+      )}
       </div>
 
-      {/* Notepad quick-access */}
-      {onNotepadOpen && (
-        <button onClick={onNotepadOpen}
-          className="dashboard-stats mt-6 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/40 dark:bg-slate-900/40 backdrop-blur-md border border-white/20 dark:border-white/[0.06] text-slate-500 dark:text-slate-400 text-xs font-medium hover:bg-white/60 dark:hover:bg-slate-900/60 transition-all active:scale-95"
-        >
-          <PenSquare className="w-3.5 h-3.5" />
-          Quick Note
-        </button>
-      )}
-
-      {/* Decorative bottom gradient */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white/40 dark:from-[#0a0c10]/40 to-transparent pointer-events-none" />
-
-      {/* Brand watermark */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 opacity-20 pointer-events-none">
-        <div className="w-4 h-4 rounded bg-gradient-to-br from-brand to-violet-600 flex items-center justify-center text-white">
-          <Zap className="w-2.5 h-2.5 fill-current" />
+      {/* Watermark */}
+      <div style={{
+        position: 'fixed', bottom: '32px', left: '50%', transform: 'translateX(-50%)',
+        display: 'flex', alignItems: 'center', gap: '6px', opacity: 0.12, pointerEvents: 'none', zIndex: 10,
+      }}>
+        <div style={{ width: '12px', height: '12px', borderRadius: '4px', background: 'linear-gradient(135deg, #818cf8, #7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+          <Zap size={8} strokeWidth={2} />
         </div>
-        <span className="text-[9px] font-bold dark:text-white tracking-tight">StudyFlow</span>
+        <span style={{ fontSize: '9px', fontWeight: 700, color: '#fff', textShadow: T_S }}>StudyFlow</span>
       </div>
     </div>
   );
 };
 
 const StatCard = ({ icon: Icon, value, label, color }: { icon: typeof Clock; value: string; label: string; color: string }) => (
-  <div className="relative bg-white/50 dark:bg-slate-900/50 backdrop-blur-md rounded-xl p-3 text-center border border-white/20 dark:border-white/[0.04] shadow-sm overflow-hidden">
-    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white/5 dark:to-white/[0.02]" />
-    <div className="relative z-10">
-      <Icon className={`w-4 h-4 ${color} mx-auto mb-1`} />
-      <p className="text-base font-display font-semibold dark:text-white">{value}</p>
-      <p className="text-[8px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">{label}</p>
-    </div>
+  <div style={{
+    borderRadius: '12px', padding: '6px 4px', textAlign: 'center',
+    background: 'rgba(0,0,0,0.15)', backdropFilter: 'blur(4px)',
+    border: '1px solid rgba(255,255,255,0.04)',
+  }}>
+    <Icon size={14} style={{ color, margin: '0 auto 2px', display: 'block' }} />
+    <p style={{ fontSize: '14px', fontWeight: 700, color: 'rgba(255,255,255,0.9)', textShadow: T_S, lineHeight: 1.2 }}>{value}</p>
+    <p style={{ fontSize: '7px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)', textShadow: T_S }}>{label}</p>
   </div>
 );

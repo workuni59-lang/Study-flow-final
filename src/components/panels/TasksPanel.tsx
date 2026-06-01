@@ -3,14 +3,17 @@ import { useAuth } from '../../context/AuthContext';
 import { useStudy } from '../../context/StudyContext';
 import { storage } from '../../services/storage';
 
+const DURATIONS = [15, 25, 50, 90];
+
 export const TasksPanel = () => {
   const { tasks, addTask, toggleTask, deleteTask } = useStudy();
   const [input, setInput] = useState('');
+  const [duration, setDuration] = useState<number>(25);
 
   const handleAdd = () => {
     const text = input.trim();
     if (!text) return;
-    addTask(text);
+    addTask(text, 'General Study', 'High Yield', undefined, duration);
     setInput('');
   };
 
@@ -29,6 +32,23 @@ export const TasksPanel = () => {
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14" /></svg>
         </button>
+      </div>
+
+      <div className="flex gap-1.5">
+        {DURATIONS.map(mins => (
+          <button
+            key={mins}
+            type="button"
+            onClick={() => setDuration(mins)}
+            className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all border ${
+              duration === mins
+                ? 'bg-brand/10 text-brand border-brand/30'
+                : 'bg-slate-50 dark:bg-slate-800/50 text-slate-400 dark:text-slate-500 border-transparent hover:border-slate-200 dark:hover:border-slate-700'
+            }`}
+          >
+            {mins}m
+          </button>
+        ))}
       </div>
 
       <div className="space-y-1">

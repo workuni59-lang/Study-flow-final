@@ -39,9 +39,7 @@ export default function AuthModal({ isOpen, onClose }: Props) {
           >
             <div className="flex items-center justify-between px-6 pt-4 pb-3">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand to-violet-600 flex items-center justify-center">
-                  <LogIn className="w-4 h-4 text-white" />
-                </div>
+                <img src="/logo.png" alt="StudyFlow" className="w-8 h-8 object-contain" />
                 <h2 className="text-sm font-display font-semibold dark:text-white/90">
                   {view === 'login' ? 'Welcome Back' : view === 'signup' ? 'Create Account' : 'Reset Password'}
                 </h2>

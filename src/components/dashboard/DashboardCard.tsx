@@ -12,14 +12,13 @@ export const DashboardCard = ({ children, className = '' }: DashboardCardProps) 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className={`
-        backdrop-blur-2xl 
-        bg-white/50 
-        dark:bg-slate-900/40 
+        bg-white 
+        dark:bg-[#141622]
         rounded-3xl 
         p-6 md:p-8 
         border 
-        border-white/20 
-        dark:border-white/[0.06] 
+        border-slate-100 
+        dark:border-slate-800/50
         shadow-lg shadow-black/[0.03] dark:shadow-black/[0.2]
         ${className}
       `}

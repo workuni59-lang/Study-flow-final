@@ -90,12 +90,15 @@ export const SubjectsView = () => {
         </AnimatePresence>
 
         {subjects.length === 0 && (
-          <div className="col-span-full py-20 text-center bg-white dark:bg-slate-900 rounded-[40px] border-2 border-dashed border-slate-100 dark:border-slate-800">
-            <BookOpen className="w-16 h-16 text-slate-200 mx-auto mb-6" />
-            <p className="text-xl text-slate-400 font-medium mb-8">No subjects yet. Start your journey by adding one.</p>
+          <div className="col-span-full py-20 text-center bg-white dark:bg-slate-900 rounded-[40px] border-2 border-dashed border-slate-100 dark:border-slate-800 relative overflow-hidden">
+            <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none">
+              <img src="/logo.png" alt="" className="w-64 h-64 object-contain grayscale" />
+            </div>
+            <BookOpen className="w-16 h-16 text-slate-200 mx-auto mb-6 relative z-10" />
+            <p className="text-xl text-slate-400 font-medium mb-8 relative z-10">No subjects yet. Start your journey by adding one.</p>
             <button 
                onClick={() => setIsAddingSubject(true)}
-               className="px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-slate-900 transition-all"
+               className="px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-slate-900 transition-all relative z-10"
             >
               Add Your First Subject
             </button>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Apple, Sparkles, Crown, Star, Circle, Trophy, Gem, PawPrint } from 'lucide-react';
 import { useStudy } from '../../context/StudyContext';
@@ -6,7 +6,7 @@ import { PET_SPECIES, PET_FOODS, PET_SKINS } from '../../lib/gamification';
 import PetSprite from '../ui/PetSprite';
 import { PET_ANIMATIONS } from '../../config/pets';
 
-export default function PetPanel({ onClose, onFeed, petVisible, petSize, onToggleVisible, onChangeSize }: {
+const PetPanel = memo(function PetPanel({ onClose, onFeed, petVisible, petSize, onToggleVisible, onChangeSize }: {
   onClose: () => void;
   onFeed?: () => void;
   petVisible: boolean;
@@ -297,4 +297,6 @@ export default function PetPanel({ onClose, onFeed, petVisible, petSize, onToggl
       </motion.div>
     </motion.div>
   );
-}
+});
+
+export default PetPanel;

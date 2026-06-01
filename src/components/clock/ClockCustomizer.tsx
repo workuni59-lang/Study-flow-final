@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Settings2, Save, Sparkles, ChevronDown, ChevronUp, Sun, Moon, Lock, Crown } from 'lucide-react';
 import type { ClockConfig, ClockVariant, HandStyle, TickStyle, FaceTexture, ThemePreset } from './types';
@@ -6,6 +6,16 @@ import { getDefaultConfig, CLOCK_PRESETS, saveCustomPresets, getVariantType } fr
 import { useStudy } from '../../context/StudyContext';
 import DigitalClock from './DigitalClock';
 import AnalogClock from './AnalogClock';
+
+function useDebounce<T extends (...args: any[]) => void>(fn: T, delay: number): T {
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  return useCallback((...args: any[]) => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => fn(...args), delay);
+  }, [fn, delay]) as unknown as T;
+}
+
+const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
 interface ClockCustomizerProps {
   isOpen: boolean;
@@ -228,10 +238,17 @@ export default function ClockCustomizer({ isOpen, onClose, config, onChange, cur
     setSection(sectionId);
   };
 
+  const debouncedOnChange = useDebounce(onChange, isMobile ? 150 : 0);
+
   const update = useCallback((partial: Partial<ClockConfig>) => {
-    onChange({ ...config, ...partial });
+    const next = { ...config, ...partial };
+    if (isMobile) {
+      debouncedOnChange(next);
+    } else {
+      onChange(next);
+    }
     onPresetChange(undefined);
-  }, [config, onChange, onPresetChange]);
+  }, [config, debouncedOnChange, onChange, onPresetChange]);
 
   const handleSavePreset = () => {
     if (!saveName.trim()) return;

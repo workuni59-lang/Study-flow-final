@@ -64,6 +64,13 @@ export const TodayTasks = ({ tasks, onToggle, onDelete, onAddTask, onReorder }: 
           <p className="text-slate-400 dark:text-slate-500 text-xs font-medium tracking-wide">Step by step toward mastery.</p>
         </div>
         <div className="flex gap-2">
+          <button
+            onClick={onAddTask}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl font-semibold text-[9px] uppercase tracking-wider border border-slate-100 dark:border-slate-800 bg-white/40 dark:bg-slate-900/30 text-slate-500 dark:text-slate-400 hover:border-brand/20 transition-all"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            Add Task
+          </button>
           {overdueTasks.length > 0 && (
             <button 
               onClick={handleRecalibrate}
@@ -167,12 +174,15 @@ export const TodayTasks = ({ tasks, onToggle, onDelete, onAddTask, onReorder }: 
                 ))}
               </Reorder.Group>
             ) : (
-              <div className="py-12 flex flex-col items-center justify-center text-center">
-                <div className="w-14 h-14 bg-white/40 dark:bg-slate-900/40 rounded-2xl flex items-center justify-center text-slate-300 dark:text-slate-600 mb-3">
+              <div className="py-12 flex flex-col items-center justify-center text-center relative overflow-hidden">
+                <div className="absolute inset-0 flex items-center justify-center opacity-[0.02] pointer-events-none">
+                  <img src="/logo.png" alt="" className="w-32 h-32 object-contain grayscale" />
+                </div>
+                <div className="w-14 h-14 bg-white/40 dark:bg-slate-900/40 rounded-2xl flex items-center justify-center text-slate-300 dark:text-slate-600 mb-3 relative z-10">
                   <Calendar className="w-6 h-6" />
                 </div>
-                <h3 className="font-medium dark:text-white/70 text-base">Clear skies today.</h3>
-                <p className="text-slate-400 text-xs max-w-[200px] mt-1">Add a task to start your flow.</p>
+                <h3 className="font-medium dark:text-white/70 text-base relative z-10">Clear skies today.</h3>
+                <p className="text-slate-400 text-xs max-w-[200px] mt-1 relative z-10">Add a task to start your flow.</p>
               </div>
             )}
           </div>

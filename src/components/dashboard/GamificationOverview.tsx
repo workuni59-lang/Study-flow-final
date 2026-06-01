@@ -1,29 +1,30 @@
 import React from 'react';
-import { Flame, Trophy, Star, Shield, ShieldCheck, Zap } from 'lucide-react';
+import { Flame, Shield, ShieldCheck, Zap, ArrowRight } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useStudy } from '../../context/StudyContext';
-import { getProgressToNextLevel } from '../../lib/gamification';
 
 export const GamificationOverview = () => {
-  const { userStats, buyShield } = useStudy();
-  const { level, percentage, currentXP, requiredXP } = getProgressToNextLevel(userStats.xp);
+  const { userStats, progression, buyShield } = useStudy();
+  const { rank, nextRank, level, currentXp, xpForNext, percentage, totalXp } = progression;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
       {/* Level & XP Card */}
       <div className="bg-white dark:bg-slate-900 rounded-[32px] p-8 border border-slate-100 dark:border-slate-800 shadow-sm col-span-2 relative overflow-hidden group">
-        <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform">
-          <Star className="w-32 h-32 text-indigo-600 fill-current" />
+        <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-110 transition-transform text-8xl select-none">
+          {rank.icon}
         </div>
         
         <div className="relative z-10">
           <div className="flex justify-between items-end mb-6">
             <div>
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-600 dark:text-indigo-400 mb-2 block">Current Rank</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-600 dark:text-indigo-400 mb-2 block">
+                {rank.icon} {rank.title}
+              </span>
               <h2 className="text-4xl font-display font-black dark:text-white leading-none">Level {level}</h2>
             </div>
             <div className="text-right">
-              <span className="text-xs font-bold text-slate-400 block mb-1">{currentXP} / {requiredXP} XP</span>
+              <span className="text-xs font-bold text-slate-400 block mb-1">{currentXp} / {xpForNext} XP</span>
             </div>
           </div>
 
@@ -38,13 +39,27 @@ export const GamificationOverview = () => {
           
           <div className="flex justify-between items-center">
             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-              {Math.floor(requiredXP - currentXP)} XP until Level {level + 1}
+              {nextRank ? (
+                <span>{xpForNext - currentXp} XP to {nextRank.icon} {nextRank.title}</span>
+              ) : (
+                <span>Max level reached</span>
+              )}
             </p>
             <div className="flex items-center gap-2">
                <Zap className="w-3 h-3 text-amber-500 fill-current" />
-               <span className="text-xs font-black dark:text-white">{userStats.xp} Total XP</span>
+               <span className="text-xs font-black dark:text-white">{totalXp} Total XP</span>
             </div>
           </div>
+
+          {nextRank && (
+            <div className="mt-4 flex items-center gap-3 px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
+              <span className="text-sm">{rank.icon}</span>
+              <ArrowRight className="w-3 h-3 text-slate-400" />
+              <span className="text-sm dark:text-white/60">{nextRank.icon} {nextRank.title}</span>
+              <div className="flex-1" />
+              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Next Rank</span>
+            </div>
+          )}
         </div>
       </div>
 

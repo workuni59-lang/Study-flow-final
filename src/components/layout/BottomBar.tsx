@@ -7,6 +7,7 @@ interface BottomBarProps {
   onTasksOpen: () => void;
   onStatsOpen: () => void;
   onNotepadOpen?: () => void;
+  onQuestsOpen?: () => void;
 }
 
 const TabButton = ({ active, onClick, icon: Icon, label }: { active?: boolean; onClick: () => void; icon: typeof LayoutDashboard; label: string }) => (
@@ -20,7 +21,7 @@ const TabButton = ({ active, onClick, icon: Icon, label }: { active?: boolean; o
   </button>
 );
 
-export const BottomBar = ({ mode, onModeChange, onTasksOpen, onStatsOpen, onNotepadOpen }: BottomBarProps) => (
+export const BottomBar = ({ mode, onModeChange, onTasksOpen, onStatsOpen, onNotepadOpen, onQuestsOpen }: BottomBarProps) => (
   <nav className="bottom-bar lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
     <div className="flex items-center justify-around h-14 px-2">
       <TabButton active={mode === 'home'} onClick={() => onModeChange('home')} icon={LayoutDashboard} label="Home" />
@@ -31,6 +32,7 @@ export const BottomBar = ({ mode, onModeChange, onTasksOpen, onStatsOpen, onNote
         </div>
       </div>
       <TabButton onClick={onTasksOpen} icon={CheckSquare} label="Tasks" />
+      {onQuestsOpen && <TabButton onClick={onQuestsOpen} icon={Target} label="Quests" />}
       {onNotepadOpen && <TabButton onClick={onNotepadOpen} icon={PenSquare} label="Notes" />}
       <TabButton onClick={onStatsOpen} icon={BarChart3} label="Stats" />
     </div>

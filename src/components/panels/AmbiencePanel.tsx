@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, type Dispatch, type SetStateAction } from 'react';
 import {
   Volume2, Youtube, Music2, Headphones, Crown, Sparkles, X, Loader2, AlertCircle,
   Play, Pause, Trash2, Heart, ChevronDown, ExternalLink, Radio
@@ -16,7 +16,7 @@ interface FavoriteEntry {
   uri: string;
 }
 
-interface CuratedPlaylist {
+export interface CuratedPlaylist {
   name: string;
   emoji: string;
   embedUrl: string;
@@ -30,7 +30,11 @@ const CURATED_PLAYLISTS: CuratedPlaylist[] = [
   { name: 'Relaxing Piano', emoji: '🎹', embedUrl: 'https://open.spotify.com/embed/playlist/1IE734A2agfLVvkOcL02Al', service: 'Spotify' },
   { name: 'Video Game Music', emoji: '👾', embedUrl: 'https://open.spotify.com/embed/playlist/022leh1qff2ArTYAAocO9i', service: 'Spotify' },
   { name: 'Jazzhop', emoji: '🎷', embedUrl: 'https://open.spotify.com/embed/playlist/2kzTQa3FcDDlJhhITcIBpX', service: 'Spotify' },
-  { name: 'Lofi Girl', emoji: '🎧', embedUrl: 'https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=0&controls=1', service: 'YouTube' },
+  { name: 'Lofi Girl', emoji: '🎧', embedUrl: 'https://www.youtube.com/embed/qGohtGC5Rtk?autoplay=0&controls=1&playsinline=1', service: 'YouTube' },
+  { name: 'Alpha Waves', emoji: '💆', embedUrl: 'https://www.youtube.com/embed/WPni755-Krg?autoplay=0&controls=1&playsinline=1', service: 'YouTube' },
+  { name: 'Beta Waves', emoji: '👨‍💻', embedUrl: 'https://www.youtube.com/embed/YWIhyOWxKPw?autoplay=0&controls=1&playsinline=1', service: 'YouTube' },
+  { name: 'Gamma Waves', emoji: '🙇', embedUrl: 'https://www.youtube.com/embed/lkkGlVWvkLk?autoplay=0&controls=1&playsinline=1', service: 'YouTube' },
+  { name: 'Theta Waves', emoji: '🧘', embedUrl: 'https://www.youtube.com/embed/dxGU80Ny0JQ?autoplay=0&controls=1&playsinline=1', service: 'YouTube' },
 ];
 
 const loadFavorites = (): FavoriteEntry[] => {
@@ -44,7 +48,38 @@ const saveFavorites = (favorites: FavoriteEntry[]) => {
   localStorage.setItem('study_flow_audio_favorites', JSON.stringify(favorites));
 };
 
-export const AmbiencePanel = () => {
+const convertToEmbedUrl = (url: string, service: string): string => {
+  try {
+    if (service === 'spotify') {
+      // Already an embed URL
+      if (url.includes('/embed/')) return url;
+      // Convert spotify.com/playlist/XXX → spotify.com/embed/playlist/XXX
+      const match = url.match(/open\.spotify\.com\/(playlist|track|album|episode)\/([a-zA-Z0-9]+)/);
+      if (match) return `https://open.spotify.com/embed/${match[1]}/${match[2]}`;
+    }
+    if (service === 'youtube') {
+      // Already an embed URL
+      if (url.includes('/embed/')) return url;
+      // Convert youtube.com/watch?v=XXX → youtube.com/embed/XXX
+      const watchMatch = url.match(/(?:youtube\.com|youtu\.be)[\/\w]*(?:\?v=|\/)([a-zA-Z0-9_-]{11})/);
+      if (watchMatch) return `https://www.youtube.com/embed/${watchMatch[1]}?autoplay=0&controls=1`;
+    }
+    if (service === 'apple-music') {
+      // Convert music.apple.com → embed.music.apple.com
+      const match = url.match(/https?:\/\/music\.apple\.com\/(.+)/);
+      if (match) return `https://embed.music.apple.com/${match[1]}`;
+      if (url.includes('embed.music.apple.com')) return url;
+    }
+  } catch {}
+  return url;
+};
+
+interface AmbiencePanelProps {
+  ambienceUrl: CuratedPlaylist | null;
+  onAmbienceUrlChange: Dispatch<SetStateAction<CuratedPlaylist | null>>;
+}
+
+export const AmbiencePanel = ({ ambienceUrl, onAmbienceUrlChange }: AmbiencePanelProps) => {
   const {
     userStats, setShowPremiumModal, activeTracks, masterVolume,
     toggleTrack, setTrackVolume, stopAllTracks, setMasterVolume
@@ -55,7 +90,6 @@ export const AmbiencePanel = () => {
   const [favorites, setFavorites] = useState<FavoriteEntry[]>(loadFavorites);
   const [customUrl, setCustomUrl] = useState('');
   const [customService, setCustomService] = useState<'spotify' | 'youtube' | 'apple-music'>('spotify');
-  const [activePlaylist, setActivePlaylist] = useState<CuratedPlaylist | null>(null);
   const [alertSound, setAlertSound] = useState(() => storage.getAlertSound() || 'sparkle');
   const [alertVolume, setAlertVolume] = useState(() => storage.getAlertVolume() ?? 0.75);
 
@@ -98,10 +132,11 @@ export const AmbiencePanel = () => {
 
   const addCustomUrl = () => {
     if (!customUrl.trim()) return;
+    const embedUrl = convertToEmbedUrl(customUrl.trim(), customService);
     setFavorites(prev => [...prev, {
-      name: customUrl.split('/').pop() || 'Custom',
+      name: customUrl.trim().split('/').pop() || 'Custom',
       type: customService,
-      uri: customUrl
+      uri: embedUrl
     }]);
     setCustomUrl('');
   };
@@ -277,7 +312,7 @@ export const AmbiencePanel = () => {
                 </button>
               ) : (
                 <button onClick={() => {
-                  setActivePlaylist({ name: fav.name, emoji: '🎵', embedUrl: fav.uri, service: fav.type });
+                  onAmbienceUrlChange({ name: fav.name, emoji: '🎵', embedUrl: fav.uri, service: fav.type });
                   setActiveTab('playlists');
                 }}
                   className="p-1 rounded-lg hover:bg-white/10 text-slate-400 transition-colors">
@@ -302,33 +337,11 @@ export const AmbiencePanel = () => {
         Curated playlists. Click to play in-app.
       </p>
 
-      {/* Active embedded player */}
-      {activePlaylist && (
-        <div className="rounded-[20px] overflow-hidden bg-black/5 dark:bg-white/5 border border-slate-200 dark:border-white/[0.05]">
-          <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-white/[0.03] border-b border-slate-200 dark:border-white/[0.05]">
-            <span className="text-base">{activePlaylist.emoji}</span>
-            <span className="flex-1 text-[10px] font-bold truncate dark:text-white/80">{activePlaylist.name}</span>
-            <span className="text-[8px] font-bold uppercase tracking-wider text-slate-400">{activePlaylist.service}</span>
-            <button onClick={() => setActivePlaylist(null)}
-              className="p-0.5 rounded hover:bg-slate-200 dark:hover:bg-white/10 text-slate-400 transition-colors">
-              <X className="w-3 h-3" />
-            </button>
-          </div>
-          <iframe
-            src={activePlaylist.embedUrl}
-            width="100%" height="160" frameBorder="0"
-            allow="encrypted-media; autoplay; clipboard-write"
-            className="w-full"
-            title={activePlaylist.name}
-          />
-        </div>
-      )}
-
       <div className="grid grid-cols-2 gap-2">
         {CURATED_PLAYLISTS.map(pl => (
-          <button key={pl.embedUrl} onClick={() => setActivePlaylist(pl)}
+          <button key={pl.embedUrl} onClick={() => onAmbienceUrlChange(pl)}
             className={`flex items-center gap-3 p-3 rounded-[20px] transition-all group text-left ${
-              activePlaylist?.embedUrl === pl.embedUrl
+              ambienceUrl?.embedUrl === pl.embedUrl
                 ? 'bg-brand/10 ring-2 ring-brand/20'
                 : 'bg-slate-50 dark:bg-white/[0.03] border border-transparent hover:border-slate-200 dark:hover:border-white/10'
             }`}>
@@ -355,7 +368,7 @@ export const AmbiencePanel = () => {
           { id: 'music' as TabId, label: 'My Music', icon: Music2 },
           { id: 'playlists' as TabId, label: 'Playlists', icon: Radio },
         ].map(tab => (
-          <button key={tab.id} onClick={() => { setActiveTab(tab.id); if (tab.id !== 'playlists') setActivePlaylist(null); }}
+          <button key={tab.id} onClick={() => setActiveTab(tab.id)}
             className={`flex items-center gap-1.5 flex-1 px-3 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${
               activeTab === tab.id
                 ? 'bg-white dark:bg-white/10 text-brand shadow-sm'

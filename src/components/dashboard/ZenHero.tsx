@@ -1,7 +1,7 @@
 import React, { useState, useEffect, type ReactNode } from 'react';
 import { motion } from 'motion/react';
 import { Crown } from 'lucide-react';
-import { useStudy } from '../../context/StudyContext';
+import { useStudy, useFocus } from '../../context/StudyContext';
 import { useAuth } from '../../context/AuthContext';
 import { getDailyQuote } from '../../lib/quotes';
 import ClockRenderer from '../clock/ClockRenderer';
@@ -12,7 +12,8 @@ interface ZenHeroProps {
 
 export const ZenHero = ({ timerSlot }: ZenHeroProps) => {
   const { user } = useAuth();
-  const { userStats, themeConfig, focusSession } = useStudy();
+  const { focusSession } = useFocus();
+  const { userStats, themeConfig } = useStudy();
   const [time, setTime] = useState(new Date());
   const [quote] = useState(getDailyQuote());
   const [clockReady, setClockReady] = useState(false);

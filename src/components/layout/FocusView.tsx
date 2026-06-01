@@ -1,4 +1,4 @@
-import { CheckSquare, Headphones, PenSquare, Zap } from 'lucide-react';
+import { CheckSquare, Headphones, PenSquare, Zap, Target } from 'lucide-react';
 import { StudyTimer } from '../dashboard/StudyTimer';
 import { DeadlinesSection } from '../dashboard/DeadlinesSection';
 
@@ -6,9 +6,10 @@ interface FocusViewProps {
   onTasksOpen: () => void;
   onMusicOpen?: () => void;
   onNotepadOpen?: () => void;
+  onQuestsOpen?: () => void;
 }
 
-export const FocusView = ({ onTasksOpen, onMusicOpen, onNotepadOpen }: FocusViewProps) => (
+export const FocusView = ({ onTasksOpen, onMusicOpen, onNotepadOpen, onQuestsOpen }: FocusViewProps) => (
   <div className="flex flex-col items-center px-4 pt-4 pb-28 lg:pb-8 text-center min-h-screen">
     <StudyTimer compact />
 
@@ -34,6 +35,14 @@ export const FocusView = ({ onTasksOpen, onMusicOpen, onNotepadOpen }: FocusView
           Notes
         </button>
       )}
+      {onQuestsOpen && (
+        <button onClick={onQuestsOpen}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-sm font-medium active:scale-95 transition-transform"
+        >
+          <Target className="w-4 h-4" />
+          Quests
+        </button>
+      )}
       </div>
 
       {/* Deadlines */}
@@ -43,9 +52,7 @@ export const FocusView = ({ onTasksOpen, onMusicOpen, onNotepadOpen }: FocusView
 
       {/* Brand watermark */}
       <div className="fixed bottom-20 lg:bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 opacity-15 pointer-events-none">
-        <div className="w-4 h-4 rounded bg-gradient-to-br from-brand to-violet-600 flex items-center justify-center text-white">
-          <Zap className="w-2.5 h-2.5 fill-current" />
-        </div>
+        <img src="/logo.png" alt="" className="w-4 h-4 object-contain grayscale" />
         <span className="text-[9px] font-bold dark:text-white tracking-tight">StudyFlow</span>
       </div>
     </div>

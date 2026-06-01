@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>StudyFlow – Focus Timer & Study Dashboard</title>
+    <link rel="icon" type="image/png" href="/logo.png" />
     <style>
     #loading-splash {
       position: fixed; inset: 0; z-index: 9999;
@@ -35,10 +36,16 @@
 </head>
   <body>
 <div id="loading-splash">
-  <div class="spinner"></div>
+  <img src="/logo.png" alt="StudyFlow" style="width: 48px; height: 48px; margin-bottom: 20px; animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;">
   <div class="brand">StudyFlow</div>
   <div class="tagline">Loading your focus session...</div>
 </div>
+<style>
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: .7; transform: scale(0.95); }
+}
+</style>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

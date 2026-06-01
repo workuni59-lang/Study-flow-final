@@ -254,6 +254,9 @@ export interface PetState {
   unlockedSpecies: string[];
   unlockedSkins: string[];
   totalFed: number;
+  mood: PetMood;
+  moodLastUpdated: string;
+  lastLevelUpAt: number;
 }
 
 export interface PetFood {
@@ -343,6 +346,9 @@ export const INITIAL_PET_STATE: PetState = {
   unlockedSpecies: ['pixie'],
   unlockedSkins: ['pixie_base'],
   totalFed: 0,
+  mood: 'neutral',
+  moodLastUpdated: new Date().toISOString(),
+  lastLevelUpAt: 0,
 };
 
 export const ACHIEVEMENTS: Achievement[] = [
@@ -399,3 +405,213 @@ export const getProgressToNextLevel = (xp: number) => {
   }
   return { level, currentXP: currentLevelXP, requiredXP: requiredForNext, percentage: (currentLevelXP / requiredForNext) * 100 };
 };
+
+// ─── FORMALIZED XP & LEVELING ────────────────────────────────────
+
+export const XP_TASK_BASE = 20;
+export const XP_FOCUS_SESSION = 15;
+export const XP_STREAK_BONUS_PER_DAY = 10;
+export const MAX_LEVEL = 50;
+
+export const xpForNextLevel = (level: number): number => {
+  if (level >= MAX_LEVEL) return Infinity;
+  return level * level * 100;
+};
+
+export const calculateFormalLevel = (totalXpEarned: number): number => {
+  let level = 1;
+  let remaining = totalXpEarned;
+  while (level < MAX_LEVEL) {
+    const needed = xpForNextLevel(level);
+    if (remaining < needed) break;
+    remaining -= needed;
+    level++;
+  }
+  return level;
+};
+
+export const getFormalProgress = (totalXpEarned: number) => {
+  let level = 1;
+  let remaining = totalXpEarned;
+  while (level < MAX_LEVEL) {
+    const needed = xpForNextLevel(level);
+    if (remaining < needed) break;
+    remaining -= needed;
+    level++;
+  }
+  const required = xpForNextLevel(level);
+  return {
+    level,
+    currentXP: remaining,
+    requiredXP: required === Infinity ? 0 : required,
+    percentage: required === Infinity ? 100 : (remaining / required) * 100,
+  };
+};
+
+export const priorityMultiplier = (priority?: string): number => {
+  if (priority === 'High Yield') return 1.5;
+  if (priority === 'Deep Review') return 2.0;
+  return 1.0;
+};
+
+export const estimatedMinutesMultiplier = (mins?: number): number => {
+  if (!mins || mins <= 25) return 1.0;
+  if (mins <= 50) return 1.5;
+  return 2.0;
+};
+
+// ─── GOLD SYSTEM ─────────────────────────────────────────────────
+
+export const GOLD_TASK_BASE = 5;
+export const GOLD_LEVEL_UP_MULTIPLIER = 10;
+export const GOLD_QUEST_DAILY = 25;
+export const GOLD_QUEST_WEEKLY = 50;
+export const GOLD_QUEST_MILESTONE = 100;
+
+export const goldForTask = (priority?: string): number => {
+  return Math.round(GOLD_TASK_BASE * priorityMultiplier(priority));
+};
+
+export const goldForLevelUp = (newLevel: number): number => {
+  return GOLD_LEVEL_UP_MULTIPLIER * newLevel;
+};
+
+// ─── PET MOOD & ANIMATION ────────────────────────────────────────
+
+export type PetMood = 'happy' | 'neutral' | 'tired' | 'excited';
+export type PetAnimation = 'idle' | 'bounce' | 'spin' | 'droop';
+
+export const getPetMood = (
+  sessionsToday: number,
+  lastLevelUp: number,
+  _tiredAt?: string | null,
+): PetMood => {
+  const now = Date.now();
+  const excitedWindow = 60_000;
+  if (lastLevelUp && (now - lastLevelUp) < excitedWindow) return 'excited';
+  if (sessionsToday >= 3) return 'happy';
+  if (sessionsToday >= 1) return 'neutral';
+  return 'tired';
+};
+
+export const getPetAnimation = (mood: PetMood): PetAnimation => {
+  switch (mood) {
+    case 'happy': return 'bounce';
+    case 'excited': return 'spin';
+    case 'tired': return 'droop';
+    default: return 'idle';
+  }
+};
+
+// ─── TIERED QUEST SYSTEM ─────────────────────────────────────────
+
+export interface GameQuest {
+  id: string;
+  title: string;
+  description: string;
+  tier: 'daily' | 'weekly' | 'milestone';
+  metric: 'tasks_completed' | 'sessions_completed' | 'streak_days' | 'xp_earned';
+  goal: number;
+  reward: { xp: number; gold: number };
+}
+
+export const SEED_QUESTS: GameQuest[] = [
+  // Daily
+  { id: 'daily-1', title: 'Morning Momentum', description: 'Complete 3 tasks today.', tier: 'daily', metric: 'tasks_completed', goal: 3, reward: { xp: 40, gold: 25 } },
+  { id: 'daily-2', title: 'Focus Flow', description: 'Complete 2 focus sessions today.', tier: 'daily', metric: 'sessions_completed', goal: 2, reward: { xp: 30, gold: 25 } },
+  { id: 'daily-3', title: 'Streak Keeper', description: 'Log in today to keep your streak alive.', tier: 'daily', metric: 'streak_days', goal: 1, reward: { xp: 20, gold: 15 } },
+  // Weekly
+  { id: 'weekly-1', title: 'Weekly Warrior', description: 'Complete 20 tasks this week.', tier: 'weekly', metric: 'tasks_completed', goal: 20, reward: { xp: 150, gold: 50 } },
+  { id: 'weekly-2', title: 'Deep Focus', description: 'Complete 10 focus sessions this week.', tier: 'weekly', metric: 'sessions_completed', goal: 10, reward: { xp: 200, gold: 50 } },
+  // Milestone
+  { id: 'mile-1', title: 'Century Mark', description: 'Complete 100 tasks total.', tier: 'milestone', metric: 'tasks_completed', goal: 100, reward: { xp: 500, gold: 100 } },
+  { id: 'mile-2', title: 'Marathon Mind', description: 'Accumulate 50 focus sessions total.', tier: 'milestone', metric: 'sessions_completed', goal: 50, reward: { xp: 1000, gold: 100 } },
+  { id: 'mile-3', title: 'Streak Legend', description: 'Reach a 30-day streak.', tier: 'milestone', metric: 'streak_days', goal: 30, reward: { xp: 2000, gold: 100 } },
+  { id: 'mile-4', title: 'XP Hunter', description: 'Earn 10,000 total XP.', tier: 'milestone', metric: 'xp_earned', goal: 10000, reward: { xp: 1500, gold: 100 } },
+  { id: 'mile-5', title: 'Unstoppable', description: 'Complete all milestone quests.', tier: 'milestone', metric: 'tasks_completed', goal: 500, reward: { xp: 5000, gold: 100 } },
+];
+
+export const getQuestsByTier = (tier: GameQuest['tier']) =>
+  SEED_QUESTS.filter(q => q.tier === tier);
+
+export const shouldResetQuests = (tier: GameQuest['tier'], lastResetDate: string | null): boolean => {
+  if (!lastResetDate) return true;
+  const last = new Date(lastResetDate);
+  const now = new Date();
+  if (tier === 'daily') {
+    return last.toDateString() !== now.toDateString();
+  }
+  if (tier === 'weekly') {
+    const dayOfWeek = now.getDay();
+    const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    const thisMonday = new Date(now);
+    thisMonday.setDate(now.getDate() - daysSinceMonday);
+    thisMonday.setHours(0, 0, 0, 0);
+    return last < thisMonday;
+  }
+  return false;
+};
+
+// ─── SHOP ────────────────────────────────────────────────────────
+
+export interface ShopItem {
+  id: string;
+  name: string;
+  type: 'theme' | 'pet_skin' | 'badge_frame';
+  cost: number;
+  unlocked: boolean;
+}
+
+export const SHOP_ITEMS: ShopItem[] = [
+  { id: 'theme-neon', name: 'Neon Atmosphere', type: 'theme', cost: 200, unlocked: false },
+  { id: 'theme-rose', name: 'Sunset Peach Atmosphere', type: 'theme', cost: 150, unlocked: false },
+  { id: 'theme-amber', name: 'Focus Gold Atmosphere', type: 'theme', cost: 150, unlocked: false },
+  { id: 'theme-cyan', name: 'Glacier Atmosphere', type: 'theme', cost: 250, unlocked: false },
+  { id: 'skin-crimson', name: 'Crimson Pixie Skin', type: 'pet_skin', cost: 300, unlocked: false },
+  { id: 'skin-cobalt', name: 'Cobalt Ember Skin', type: 'pet_skin', cost: 350, unlocked: false },
+  { id: 'skin-silver', name: 'Silver Lumina Skin', type: 'pet_skin', cost: 400, unlocked: false },
+  { id: 'frame-royal', name: 'Royal Badge Frame', type: 'badge_frame', cost: 500, unlocked: false },
+  { id: 'frame-cosmic', name: 'Cosmic Badge Frame', type: 'badge_frame', cost: 750, unlocked: false },
+];
+
+// ─── HP / STAKES SYSTEM ──────────────────────────────────────────
+
+export const MAX_HP = 100;
+export const HP_DECAY_PER_MISSED_DAY = 10;
+export const HP_REGEN_PER_SESSION = 5;
+
+export interface HpState {
+  current: number;
+  max: number;
+  lastDecayDate: string | null;
+}
+
+export const INITIAL_HP: HpState = {
+  current: 100,
+  max: MAX_HP,
+  lastDecayDate: null,
+};
+
+export const checkDailyHp = (
+  hp: HpState,
+  tasksDueYesterday: number,
+  tasksCompletedYesterday: number,
+  lastActiveDate: string | null,
+): HpState => {
+  const today = new Date().toISOString().split('T')[0];
+  if (!lastActiveDate || lastActiveDate === today) return hp;
+  const lastDate = new Date(lastActiveDate);
+  const now = new Date();
+  const diffDays = Math.floor((now.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
+  if (diffDays < 1) return hp;
+  let newHp = hp.current;
+  if (tasksDueYesterday > 0 && tasksCompletedYesterday === 0 && hp.lastDecayDate !== today) {
+    newHp = Math.max(0, newHp - HP_DECAY_PER_MISSED_DAY);
+  }
+  return { ...hp, current: newHp, lastDecayDate: today };
+};
+
+export const regenHp = (hp: HpState): HpState => ({
+  ...hp,
+  current: Math.min(hp.max, hp.current + HP_REGEN_PER_SESSION),
+});

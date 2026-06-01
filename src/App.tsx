@@ -1,8 +1,9 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
-import { StudyProvider, useStudy } from './context/StudyContext';
+import { MotionConfig } from 'motion/react';
+import { StudyProvider, FocusProvider, useStudy } from './context/StudyContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import AuthModal from './components/auth/AuthModal';
-import { storage } from './services/storage';
+import { useReduceMotion } from './hooks/useReduceMotion';
 
 const LandingPage = lazy(() => import('./components/landing/LandingPage'));
 const MainLayout = lazy(() => import('./components/layout/MainLayout').then(m => ({ default: m.MainLayout })));
@@ -29,20 +30,13 @@ const AppContent = () => {
   const { user, profile, loading: authLoading } = useAuth();
   const { syncPremiumStatus } = useStudy();
   const isMobile = useIsMobile();
-  const [isDark, setIsDark] = useState(() => {
-    const saved = storage.getTheme();
-    return saved !== null ? saved : false;
-  });
+  const reduceMotion = useReduceMotion();
   const [authModalOpen, setAuthModalOpen] = useState(false);
 
+  // Always apply dark mode (theming handled by atmospheres + wallpapers)
   useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    storage.saveTheme(isDark);
-  }, [isDark]);
+    document.documentElement.classList.add('dark');
+  }, []);
 
   useEffect(() => {
     if (profile) {
@@ -61,10 +55,10 @@ const AppContent = () => {
   if (authLoading) return <MobileSpinner />;
 
   return (
-    <>
+    <MotionConfig reducedMotion={reduceMotion ? 'always' : 'never'}>
       {!user ? (
         <Suspense fallback={<MobileSpinner />}>
-          <LandingPage isDark={isDark} setIsDark={setIsDark} onOpenAuth={() => setAuthModalOpen(true)} />
+          <LandingPage onOpenAuth={() => setAuthModalOpen(true)} />
         </Suspense>
       ) : isMobile ? (
         <Suspense fallback={<MobileSpinner />}>
@@ -76,7 +70,7 @@ const AppContent = () => {
         </Suspense>
       )}
       <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
-    </>
+    </MotionConfig>
   );
 };
 
@@ -84,7 +78,9 @@ export default function App() {
   return (
     <AuthProvider>
       <StudyProvider>
-        <AppContent />
+        <FocusProvider>
+          <AppContent />
+        </FocusProvider>
       </StudyProvider>
     </AuthProvider>
   );

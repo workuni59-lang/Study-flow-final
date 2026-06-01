@@ -25,7 +25,7 @@ function AnimatedDigit({ value, intensity, variant = 'default' }: { value: strin
     exit: { y: -yOffset, opacity: 0, scale: scaleAmt, filter: `blur(${blurAmt}px)` },
   };
   return (
-    <span className="relative inline-block tabular-nums">
+    <span className="relative inline-block tabular-nums" style={{ whiteSpace: 'nowrap' }}>
       <AnimatePresence mode="popLayout">
         <motion.span
           key={value}
@@ -316,7 +316,8 @@ export default function DigitalClock(props: DigitalClockProps) {
         transformOrigin: 'center center',
         display: 'inline-block',
         borderRadius: config.borderRadius > 0 ? config.borderRadius : undefined,
-        overflow: config.borderRadius > 0 ? 'hidden' : undefined
+        overflow: config.borderRadius > 0 ? 'hidden' : undefined,
+        whiteSpace: 'nowrap',
       }}
     >
       {inner}

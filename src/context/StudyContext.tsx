@@ -2,13 +2,34 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import confetti from 'canvas-confetti';
 import { audioController } from '../services/AudioController';
 import { storage } from '../services/storage';
-import { UserStats, Badge, ACHIEVEMENTS, Achievement, Quest, calculateLevel, XP_PER_TASK, XP_PER_FOCUS_MINUTE, AtmosphereId, WallpaperId, PetState, PetFood, PET_FOODS, PET_SPECIES, PET_SKINS, INITIAL_PET_STATE, PET_HUNGER_DECAY_PER_HOUR, PET_WEAK_THRESHOLD, PET_WEAK_DURATION_MS, PET_DORMANT_DURATION_MS, PetHealth, PetEvent, PetEventType } from '../lib/gamification';
+import { UserStats, Badge, ACHIEVEMENTS, Achievement, Quest, calculateLevel, XP_PER_TASK, XP_PER_FOCUS_MINUTE, AtmosphereId, WallpaperId, PetState, PetFood, PET_FOODS, PET_SPECIES, PET_SKINS, INITIAL_PET_STATE, PET_HUNGER_DECAY_PER_HOUR, PET_WEAK_THRESHOLD, PET_WEAK_DURATION_MS, PET_DORMANT_DURATION_MS, PetHealth, PetEvent, PetEventType, PetMood, PetAnimation, getPetMood, getPetAnimation, GameQuest, SEED_QUESTS, calculateFormalLevel, goldForTask, goldForLevelUp, MAX_HP, HP_REGEN_PER_SESSION, INITIAL_HP, HpState, checkDailyHp as checkHpFn, regenHp, shouldResetQuests, ShopItem, SHOP_ITEMS, XP_TASK_BASE, XP_FOCUS_SESSION, XP_STREAK_BONUS_PER_DAY } from '../lib/gamification';
+import { getProgress, getRankForLevel, getNextRank, getBadgesForLevel, getNewlyUnlockedBadges, getRewardsBetweenLevels, type ProgressionState, type ProgressionBadge } from '../lib/progression';
 export interface FocusSessionState {
   mode: 'focus' | 'shortBreak' | 'longBreak' | 'idle' | 'taskETA';
   timeLeft: number;
   totalTime: number;
   isActive: boolean;
   sessionsCompleted: number;
+}
+
+// Separate high-frequency context to prevent mass re-renders on every timer tick
+interface FocusContextType {
+  focusSession: FocusSessionState | null;
+  setFocusSession: (state: FocusSessionState | null) => void;
+}
+
+const FocusContext = createContext<FocusContextType | undefined>(undefined);
+
+export function FocusProvider({ children }: { children: React.ReactNode }) {
+  const [focusSession, setFocusSession] = useState<FocusSessionState | null>(null);
+  const value = useMemo(() => ({ focusSession, setFocusSession }), [focusSession]);
+  return <FocusContext.Provider value={value}>{children}</FocusContext.Provider>;
+}
+
+export function useFocus() {
+  const ctx = useContext(FocusContext);
+  if (!ctx) throw new Error('useFocus must be used within a FocusProvider');
+  return ctx;
 }
 
 export type MasteryLevel = 'Red' | 'Amber' | 'Green';
@@ -106,8 +127,6 @@ interface StudyContextType {
   tickPet: () => void;
   petEvent: PetEvent | null;
   firePetEvent: (type: PetEventType) => void;
-  focusSession: FocusSessionState | null;
-  setFocusSession: (state: FocusSessionState | null) => void;
   syncPremiumStatus: (isPremium: boolean) => void;
   showPremiumModal: boolean;
   setShowPremiumModal: (show: boolean) => void;
@@ -119,6 +138,30 @@ interface StudyContextType {
   setTrackVolume: (id: string, vol: number) => void;
   stopAllTracks: () => void;
   setMasterVolume: (vol: number) => void;
+  // Gamification v2
+  gameGold: number;
+  gameXp: number;
+  gameLevel: number;
+  gameHp: HpState;
+  gameQuestProgress: Record<string, number>;
+  shopItems: { id: string; unlocked: boolean }[];
+  petMood: PetMood;
+  petAnimation: PetAnimation;
+  sessionsToday: number;
+  levelUpEvent: number | null;
+  questCompleteEvent: string | null;
+  playerDownEvent: boolean;
+  awardGold: (amount: number) => void;
+  awardXp: (amount: number) => void;
+  purchaseItem: (itemId: string) => boolean;
+  checkDailyHp: () => void;
+  dismissLevelUp: () => void;
+  dismissQuestComplete: () => void;
+  dismissPlayerDown: () => void;
+  updateGameQuestProgress: (metric: GameQuest['metric'], amount: number) => void;
+  // Progression system
+  progression: ProgressionState;
+  progressionBadges: ProgressionBadge[];
 }
 
 const StudyContext = createContext<StudyContextType | undefined>(undefined);
@@ -186,12 +229,36 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   const [confettiActive, setConfettiActive] = useState(false);
   const [panicModeActive, setPanicModeActive] = useState(false);
   const [selectedExamForPath, setSelectedExamForPath] = useState<Exam | null>(null);
-  const [focusSession, setFocusSession] = useState<FocusSessionState | null>(null);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [activeTracks, setActiveTracks] = useState<Record<string, { volume: number, isLoading: boolean, isError: boolean }>>({});
   const [masterVolume, setMasterVolumeVal] = useState(() => storage.getMasterVolume() ?? 0.5);
 
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+
+  // Gamification v2
+  const [gameGold, setGameGold] = useState(() => storage.getGold());
+  const [gameXp, setGameXp] = useState(() => storage.getTotalXp());
+  const [gameHp, setGameHp] = useState<HpState>(() => storage.getHp() ?? INITIAL_HP);
+  const [gameQuestProgress, setGameQuestProgress] = useState<Record<string, number>>(() => storage.getQuestProgress());
+  const [questResets, setQuestResets] = useState<Record<string, string>>(() => storage.getQuestResets());
+  const [shopItems, setShopItems] = useState<{ id: string; unlocked: boolean }[]>(() => storage.getShopItems());
+  const [sessionsToday, setSessionsToday] = useState(() => storage.getSessionsToday());
+  const [sessionsDate, setSessionsDate] = useState(() => storage.getSessionsDate());
+
+  const [levelUpEvent, setLevelUpEvent] = useState<number | null>(null);
+  const [questCompleteEvent, setQuestCompleteEvent] = useState<string | null>(null);
+  const [playerDownEvent, setPlayerDownEvent] = useState(false);
+
+  const gameLevel = useMemo(() => calculateFormalLevel(gameXp), [gameXp]);
+  const petMood: PetMood = useMemo(() => getPetMood(sessionsToday, petState.lastLevelUpAt), [sessionsToday, petState.lastLevelUpAt]);
+  const petAnimation: PetAnimation = useMemo(() => getPetAnimation(petMood), [petMood]);
+  const progression = useMemo<ProgressionState>(() => {
+    const { level, currentXp, xpForNext, percentage } = getProgress(gameXp);
+    const rank = getRankForLevel(level);
+    const nextRank = getNextRank(level);
+    return { level, totalXp: gameXp, currentXp, xpForNext, percentage, rank, nextRank };
+  }, [gameXp]);
+  const progressionBadges = useMemo(() => getBadgesForLevel(progression.level), [progression.level]);
 
   const syncAudioState = useCallback(() => {
     const states = audioController.getStates();
@@ -292,6 +359,16 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => { storage.saveDailyQuests(quests); }, [quests]);
   useEffect(() => { storage.savePetState(petState); }, [petState]);
 
+  // Persist gamification v2 state
+  useEffect(() => { storage.saveGold(gameGold); }, [gameGold]);
+  useEffect(() => { storage.saveTotalXp(gameXp); }, [gameXp]);
+  useEffect(() => { storage.saveHp(gameHp); }, [gameHp]);
+  useEffect(() => { storage.saveQuestProgress(gameQuestProgress); }, [gameQuestProgress]);
+  useEffect(() => { storage.saveQuestResets(questResets); }, [questResets]);
+  useEffect(() => { storage.saveShopItems(shopItems); }, [shopItems]);
+  useEffect(() => { storage.saveSessionsToday(sessionsToday); }, [sessionsToday]);
+  useEffect(() => { storage.saveSessionsDate(sessionsDate); }, [sessionsDate]);
+
   // Notification Queue Processor
   useEffect(() => {
     if (!activeNotification && notificationQueue.length > 0) {
@@ -353,6 +430,8 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       const diffDays = Math.floor((todayDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
       if (diffDays === 1) {
         newStreak += 1;
+        awardXp(XP_STREAK_BONUS_PER_DAY);
+        awardGold(2);
       } else if (diffDays > 1) {
         if (userStats.hasShield) {
           shieldConsumed = true;
@@ -465,6 +544,8 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
         if (t.id === id) {
           if (!t.completed) {
             addXP(XP_PER_TASK);
+            awardXp(XP_TASK_BASE);
+            awardGold(goldForTask(t.priority));
             earnFood('task', 1);
             setUserStats(s => {
               const nextStats = { ...s, totalTasksCompleted: s.totalTasksCompleted + 1 };
@@ -472,6 +553,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
               return nextStats;
             });
             updateQuestProgress('tasks', 1);
+            updateGameQuestProgress('tasks_completed', 1);
           }
           return { ...t, completed: !t.completed };
         }
@@ -547,8 +629,12 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   const completeFocusSession = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     addXP(minutes * XP_PER_FOCUS_MINUTE);
+    awardXp(XP_FOCUS_SESSION);
     updateQuestProgress('focus', seconds);
+    updateGameQuestProgress('sessions_completed', 1);
     earnFood('focus', seconds);
+    setGameHp(prev => regenHp(prev));
+    countSessionForPet();
     setUserStats(prev => {
       const next = { ...prev, totalFocusSeconds: prev.totalFocusSeconds + seconds };
       checkAchievements(next);
@@ -565,6 +651,101 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   };
 
   const closeNotification = () => { setActiveNotification(null); };
+
+  // ─── Gamification v2 ────────────────────────────────────────────
+
+  const awardGold = useCallback((amount: number) => {
+    setGameGold(prev => prev + amount);
+  }, []);
+
+  const awardXp = useCallback((amount: number) => {
+    setGameXp(prev => {
+      const newTotal = prev + amount;
+      const newLevel = calculateFormalLevel(newTotal);
+      const oldLevel = calculateFormalLevel(prev);
+      if (newLevel > oldLevel) {
+        const goldReward = goldForLevelUp(newLevel);
+        setGameGold(g => g + goldReward);
+        setLevelUpEvent(newLevel);
+        setPetState(p => ({ ...p, lastLevelUpAt: Date.now() }));
+        setTimeout(() => firePetEvent('level_up'), 50);
+      }
+      return newTotal;
+    });
+  }, []);
+
+  const dismissLevelUp = useCallback(() => setLevelUpEvent(null), []);
+  const dismissQuestComplete = useCallback(() => setQuestCompleteEvent(null), []);
+  const dismissPlayerDown = useCallback(() => setPlayerDownEvent(false), []);
+
+  const purchaseItem = useCallback((itemId: string): boolean => {
+    const shopDef = SHOP_ITEMS.find(i => i.id === itemId);
+    if (!shopDef) return false;
+    const existing = shopItems.find(i => i.id === itemId);
+    if (existing?.unlocked) return false;
+    if (gameGold < shopDef.cost) return false;
+    setGameGold(prev => prev - shopDef.cost);
+    setShopItems(prev => {
+      const filtered = prev.filter(i => i.id !== itemId);
+      return [...filtered, { id: itemId, unlocked: true }];
+    });
+    return true;
+  }, [gameGold, shopItems]);
+
+  const checkDailyHp = useCallback(() => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+    const tasksDueYesterday = tasks.filter(t => t.dueDate === yesterdayStr).length;
+    const tasksCompletedYesterday = tasks.filter(t => t.dueDate === yesterdayStr && t.completed).length;
+    setGameHp(prev => {
+      const updated = checkHpFn(prev, tasksDueYesterday, tasksCompletedYesterday, userStats.lastActiveDate);
+      if (updated.current <= 0 && prev.current > 0) {
+        setPlayerDownEvent(true);
+      }
+      return updated;
+    });
+  }, [tasks, userStats.lastActiveDate]);
+
+  const updateGameQuestProgress = useCallback((metric: GameQuest['metric'], amount: number) => {
+    const today = new Date().toISOString();
+    setQuestResets(prev => {
+      const next = { ...prev };
+      SEED_QUESTS.forEach(q => {
+        if (q.metric === metric && shouldResetQuests(q.tier, prev[q.id] ?? null)) {
+          next[q.id] = today;
+          setGameQuestProgress(p => ({ ...p, [q.id]: 0 }));
+        }
+      });
+      return next;
+    });
+    setGameQuestProgress(prev => {
+      const next = { ...prev };
+      SEED_QUESTS.forEach(q => {
+        if (q.metric !== metric) return;
+        const current = next[q.id] ?? 0;
+        const newProgress = current + amount;
+        const capped = Math.min(newProgress, q.goal);
+        next[q.id] = capped;
+        if (current < q.goal && capped >= q.goal) {
+          const tierGold = q.tier === 'milestone' ? 100 : q.tier === 'weekly' ? 50 : 25;
+          awardGold(tierGold);
+          setQuestCompleteEvent(q.id);
+        }
+      });
+      return next;
+    });
+  }, [awardGold]);
+
+  const countSessionForPet = useCallback(() => {
+    const today = new Date().toISOString().split('T')[0];
+    if (sessionsDate !== today) {
+      setSessionsToday(1);
+      setSessionsDate(today);
+    } else {
+      setSessionsToday(prev => prev + 1);
+    }
+  }, [sessionsDate]);
 
   // ─── Pet Actions ───────────────────────────────────────────────
 
@@ -695,18 +876,32 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   // Optimization: Memoize the Context Value
   const contextValue = useMemo(() => ({
     accessToken, subjects, tasks, exams, quests, themeConfig, userStats, unlockedBadges, activeNotification,
-    confettiActive, panicModeActive, selectedExamForPath, petState, focusSession, setFocusSession, setThemeConfig, addSubject, deleteSubject, addTopic,
+    confettiActive, panicModeActive, selectedExamForPath, petState, setThemeConfig, addSubject, deleteSubject, addTopic,
     updateTopicMastery, deleteTopic, addTask, toggleTask, deleteTask, addExam, deleteExam, recalibrateTasks,
     setTasks, addXP, completeFocusSession, logSession, closeNotification, buyShield, togglePremium, syncPremiumStatus, triggerConfetti, resetStreak, setPanicMode,
     setSelectedExamForPath, feedPet, petInteract, changePetSpecies, changePetSkin, purchaseSkin, setPetName, tickPet, petEvent, firePetEvent,
     showPremiumModal, setShowPremiumModal,
     activeTracks, masterVolume, toggleTrack, setTrackVolume, stopAllTracks, setMasterVolume,
-    selectedTaskId, setSelectedTaskId
+    selectedTaskId, setSelectedTaskId,
+    // Gamification v2
+    gameGold, gameXp, gameLevel, gameHp, gameQuestProgress, shopItems, petMood, petAnimation, sessionsToday,
+    levelUpEvent, questCompleteEvent, playerDownEvent,
+    awardGold, awardXp, purchaseItem, checkDailyHp, dismissLevelUp, dismissQuestComplete, dismissPlayerDown,
+    updateGameQuestProgress,
+    // Progression
+    progression, progressionBadges,
   }), [
     accessToken, subjects, tasks, exams, quests, themeConfig, userStats, unlockedBadges, activeNotification,
-    confettiActive, panicModeActive, selectedExamForPath, petState, petEvent, focusSession, showPremiumModal,
+    confettiActive, panicModeActive, selectedExamForPath, petState, petEvent, showPremiumModal,
     activeTracks, masterVolume, toggleTrack, setTrackVolume, stopAllTracks, setMasterVolume,
-    selectedTaskId
+    selectedTaskId,
+    // Gamification v2 deps
+    gameGold, gameXp, gameLevel, gameHp, gameQuestProgress, shopItems, petMood, petAnimation, sessionsToday,
+    levelUpEvent, questCompleteEvent, playerDownEvent,
+    awardGold, awardXp, purchaseItem, checkDailyHp, dismissLevelUp, dismissQuestComplete, dismissPlayerDown,
+    updateGameQuestProgress,
+    // Progression deps
+    progression, progressionBadges,
   ]);
 
   return (

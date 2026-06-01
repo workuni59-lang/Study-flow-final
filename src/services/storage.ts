@@ -25,6 +25,15 @@ const STORAGE_KEYS = {
   TRACK_VOLUMES: 'study_flow_track_volumes',
   ALERT_SOUND: 'study_flow_alert_sound',
   ALERT_VOLUME: 'study_flow_alert_volume',
+  // Gamification v2 (sf_game_ prefix)
+  GAME_GOLD: 'sf_game_gold',
+  GAME_TOTAL_XP: 'sf_game_total_xp',
+  GAME_HP: 'sf_game_hp',
+  GAME_QUEST_PROGRESS: 'sf_game_quest_progress',
+  GAME_QUEST_RESETS: 'sf_game_quest_resets',
+  GAME_SHOP: 'sf_game_shop',
+  GAME_SESSIONS_TODAY: 'sf_game_sessions_today',
+  GAME_SESSIONS_DATE: 'sf_game_sessions_date',
 };
 
 const safeGet = (key: string) => {
@@ -119,6 +128,37 @@ export const storage = {
 
   saveAlertVolume: (vol: number) => safeSet(STORAGE_KEYS.ALERT_VOLUME, vol),
   getAlertVolume: (): number | null => safeGet(STORAGE_KEYS.ALERT_VOLUME),
+
+  // --- Gamification v2 (sf_game_ prefix) ---
+  getGold: (): number => safeGet(STORAGE_KEYS.GAME_GOLD) ?? 0,
+  saveGold: (gold: number) => safeSet(STORAGE_KEYS.GAME_GOLD, gold),
+
+  getTotalXp: (): number => safeGet(STORAGE_KEYS.GAME_TOTAL_XP) ?? 0,
+  saveTotalXp: (xp: number) => safeSet(STORAGE_KEYS.GAME_TOTAL_XP, xp),
+
+  getHp: (): { current: number; max: number; lastDecayDate: string | null } | null =>
+    safeGet(STORAGE_KEYS.GAME_HP),
+  saveHp: (hp: { current: number; max: number; lastDecayDate: string | null }) =>
+    safeSet(STORAGE_KEYS.GAME_HP, hp),
+
+  getQuestProgress: (): Record<string, number> => safeGet(STORAGE_KEYS.GAME_QUEST_PROGRESS) ?? {},
+  saveQuestProgress: (progress: Record<string, number>) =>
+    safeSet(STORAGE_KEYS.GAME_QUEST_PROGRESS, progress),
+
+  getQuestResets: (): Record<string, string> => safeGet(STORAGE_KEYS.GAME_QUEST_RESETS) ?? {},
+  saveQuestResets: (resets: Record<string, string>) =>
+    safeSet(STORAGE_KEYS.GAME_QUEST_RESETS, resets),
+
+  getShopItems: (): { id: string; unlocked: boolean }[] =>
+    safeGet(STORAGE_KEYS.GAME_SHOP) ?? [],
+  saveShopItems: (items: { id: string; unlocked: boolean }[]) =>
+    safeSet(STORAGE_KEYS.GAME_SHOP, items),
+
+  getSessionsToday: (): number => safeGet(STORAGE_KEYS.GAME_SESSIONS_TODAY) ?? 0,
+  saveSessionsToday: (count: number) => safeSet(STORAGE_KEYS.GAME_SESSIONS_TODAY, count),
+
+  getSessionsDate: (): string | null => safeGet(STORAGE_KEYS.GAME_SESSIONS_DATE),
+  saveSessionsDate: (date: string) => safeSet(STORAGE_KEYS.GAME_SESSIONS_DATE, date),
 
   // --- Generic ---
   clearAll: () => {

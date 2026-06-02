@@ -22,6 +22,7 @@ import PetEngine from '../dashboard/PetEngine';
 import PetPanel from '../dashboard/PetPanel';
 import { storage } from '../../services/storage';
 import { useEffect } from 'react';
+import { ENABLE_PETS } from '../../config/features';
 
 const AnalyticsDashboardLazy = lazy(() => import('../analytics/AnalyticsDashboard'));
 const SubjectsViewLazy = lazy(() => import('../subjects/SubjectsView').then(m => ({ default: m.SubjectsView })));
@@ -144,7 +145,7 @@ export const MainLayout = () => {
           />
 
           {/* Pet */}
-          {petVisible && (
+          {ENABLE_PETS && petVisible && (
             <PetEngine
               onOpenPanel={() => setShowPetPanel(true)}
               feedTrigger={feedTrigger}
@@ -203,7 +204,7 @@ export const MainLayout = () => {
       </SidePanel>
 
       {/* Pet panel */}
-      {showPetPanel && (
+      {ENABLE_PETS && showPetPanel && (
         <PetPanel
           onClose={() => setShowPetPanel(false)}
           onFeed={() => setFeedTrigger(c => c + 1)}

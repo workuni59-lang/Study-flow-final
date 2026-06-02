@@ -18,7 +18,9 @@ import { ZenHero } from './dashboard/ZenHero';
 import { DevMenu } from './dashboard/DevMenu';
 import PetEngine from './dashboard/PetEngine';
 import PetPanel from './dashboard/PetPanel';
+import RewardAnimationLayer from './ui/RewardAnimationLayer';
 import { storage } from '../services/storage';
+import { ENABLE_PETS } from '../config/features';
 
 type OverlayType = 'tasks' | 'quests' | 'exams' | null;
 
@@ -164,7 +166,7 @@ const Dashboard = () => {
       </div>
 
       {/* Pet Engine - draggable interactive companion */}
-      {petVisible && <PetEngine onOpenPanel={() => setShowPetPanel(true)} feedTrigger={feedTrigger} overlayOpen={activeOverlay !== null} petSize={petSize} />}
+      {ENABLE_PETS && petVisible && <PetEngine onOpenPanel={() => setShowPetPanel(true)} feedTrigger={feedTrigger} overlayOpen={activeOverlay !== null} petSize={petSize} />}
 
       {/* Bottom Action Toolbar - centered dock */}
       <div className="fixed bottom-20 lg:bottom-6 left-1/2 -translate-x-1/2 z-30">
@@ -186,24 +188,28 @@ const Dashboard = () => {
               </button>
             );
           })}
-          <div className="w-px h-5 lg:h-6 bg-white/[0.06]" />
-          <button
-            onClick={() => setShowPetPanel(true)}
-            className={`relative flex flex-col items-center gap-0.5 px-2 lg:px-3 py-1.5 lg:py-2 rounded-lg lg:rounded-xl transition-all ${
-              showPetPanel
-                ? 'bg-purple-500/20 text-purple-300 shadow-lg'
-                : 'text-white/50 hover:text-white/80 hover:bg-white/[0.08]'
-            }`}
-          >
-            <PawPrint className="w-3.5 lg:w-4 h-3.5 lg:h-4" />
-            <span className="text-[6px] lg:text-[7px] font-bold uppercase tracking-wider">Pet</span>
-            {/* Hunger indicator dot */}
-            <span className={`absolute -top-0.5 -right-0.5 w-1.5 lg:w-2 h-1.5 lg:h-2 rounded-full border border-slate-900 transition-colors ${
-              petState.health === 'dormant' ? 'bg-slate-500' :
-              petState.health === 'weak' ? 'bg-rose-400' :
-              petState.hunger > 50 ? 'bg-emerald-400' : 'bg-amber-400'
-            }`} />
-          </button>
+          {ENABLE_PETS && (
+            <>
+              <div className="w-px h-5 lg:h-6 bg-white/[0.06]" />
+              <button
+                onClick={() => setShowPetPanel(true)}
+                className={`relative flex flex-col items-center gap-0.5 px-2 lg:px-3 py-1.5 lg:py-2 rounded-lg lg:rounded-xl transition-all ${
+                  showPetPanel
+                    ? 'bg-purple-500/20 text-purple-300 shadow-lg'
+                    : 'text-white/50 hover:text-white/80 hover:bg-white/[0.08]'
+                }`}
+              >
+                <PawPrint className="w-3.5 lg:w-4 h-3.5 lg:h-4" />
+                <span className="text-[6px] lg:text-[7px] font-bold uppercase tracking-wider">Pet</span>
+                {/* Hunger indicator dot */}
+                <span className={`absolute -top-0.5 -right-0.5 w-1.5 lg:w-2 h-1.5 lg:h-2 rounded-full border border-slate-900 transition-colors ${
+                  petState.health === 'dormant' ? 'bg-slate-500' :
+                  petState.health === 'weak' ? 'bg-rose-400' :
+                  petState.hunger > 50 ? 'bg-emerald-400' : 'bg-amber-400'
+                }`} />
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -214,7 +220,7 @@ const Dashboard = () => {
 
       {/* Pet panel */}
       <AnimatePresence>
-        {showPetPanel && <PetPanel onClose={() => setShowPetPanel(false)} onFeed={() => setFeedTrigger(c => c + 1)} petVisible={petVisible} petSize={petSize} onToggleVisible={(v) => { setPetVisible(v); storage.savePetVisible(v); }} onChangeSize={(s) => { setPetSize(s); storage.savePetSize(s); }} />}
+        {ENABLE_PETS && showPetPanel && <PetPanel onClose={() => setShowPetPanel(false)} onFeed={() => setFeedTrigger(c => c + 1)} petVisible={petVisible} petSize={petSize} onToggleVisible={(v) => { setPetVisible(v); storage.savePetVisible(v); }} onChangeSize={(s) => { setPetSize(s); storage.savePetSize(s); }} />}
       </AnimatePresence>
 
       {/* Modals */}
@@ -250,6 +256,7 @@ const Dashboard = () => {
         />
       )}
 
+      {ENABLE_PETS && <RewardAnimationLayer />}
       <DevMenu />
     </div>
   );

@@ -37,7 +37,11 @@ const SimpleSpinner = () => (
   </div>
 );
 
-export const MainLayout = () => {
+interface MainLayoutProps {
+  onOpenAuth?: () => void;
+}
+
+export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
   const { user } = useAuth();
   const { userStats, activeNotification, confettiActive, closeNotification } = useStudy();
   const [mode, setMode] = useState<Mode>('focus');
@@ -221,6 +225,19 @@ export const MainLayout = () => {
       <LevelUpModal level={userStats.level} isOpen={showLevelUp} onClose={() => setShowLevelUp(false)} />
       <PremiumModal />
       <PanicModeUI />
+
+      {/* Sign-in prompt for unauthenticated users */}
+      {!user && onOpenAuth && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden lg:flex items-center gap-3 px-4 py-2.5 rounded-xl bg-white/[0.06] backdrop-blur-xl border border-white/[0.1] shadow-lg">
+          <span className="text-xs text-white/60 font-medium">✦ Free to use</span>
+          <span className="w-px h-3 bg-white/[0.1]" />
+          <button onClick={onOpenAuth}
+            className="text-xs text-white/90 hover:text-brand font-semibold transition-colors"
+          >
+            Sign in <span className="text-white/50 font-normal">for cloud sync &amp; premium</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 };

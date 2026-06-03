@@ -5,7 +5,6 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import AuthModal from './components/auth/AuthModal';
 import { useReduceMotion } from './hooks/useReduceMotion';
 
-const LandingPage = lazy(() => import('./components/landing/LandingPage'));
 const MainLayout = lazy(() => import('./components/layout/MainLayout').then(m => ({ default: m.MainLayout })));
 const MobileLayout = lazy(() => import('./components/layout/MobileLayout').then(m => ({ default: m.MobileLayout })));
 
@@ -32,6 +31,7 @@ const AppContent = () => {
   const isMobile = useIsMobile();
   const reduceMotion = useReduceMotion();
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const handleOpenAuth = () => setAuthModalOpen(true);
 
   // Always apply dark mode (theming handled by atmospheres + wallpapers)
   useEffect(() => {
@@ -56,19 +56,9 @@ const AppContent = () => {
 
   return (
     <MotionConfig reducedMotion={reduceMotion ? 'always' : 'never'}>
-      {!user ? (
-        <Suspense fallback={<MobileSpinner />}>
-          <LandingPage onOpenAuth={() => setAuthModalOpen(true)} />
-        </Suspense>
-      ) : isMobile ? (
-        <Suspense fallback={<MobileSpinner />}>
-          <MobileLayout />
-        </Suspense>
-      ) : (
-        <Suspense fallback={<MobileSpinner />}>
-          <MainLayout />
-        </Suspense>
-      )}
+      <Suspense fallback={<MobileSpinner />}>
+        {isMobile ? <MobileLayout onOpenAuth={handleOpenAuth} /> : <MainLayout onOpenAuth={handleOpenAuth} />}
+      </Suspense>
       <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
     </MotionConfig>
   );

@@ -31,7 +31,11 @@ const MobileSkeleton = () => (
 
 const skeletonKeyframes = `@keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.7; } }`;
 
-export const MobileLayout = () => {
+interface MobileLayoutProps {
+  onOpenAuth?: () => void;
+}
+
+export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
   const { user } = useAuth();
   const { userStats, themeConfig, activeNotification, confettiActive, closeNotification } = useStudy();
   const [mode, setMode] = useState<Mode>('focus');
@@ -192,6 +196,19 @@ export const MobileLayout = () => {
       <LevelUpModal level={userStats.level} isOpen={showLevelUp} onClose={() => setShowLevelUp(false)} />
       <PremiumModal />
       <PanicModeUI />
+
+      {/* Sign-in prompt for unauthenticated users */}
+      {!user && onOpenAuth && (
+        <div className="fixed bottom-24 left-6 z-40 lg:hidden flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.06]">
+          <span className="text-[10px] text-white/40 font-medium">✦ Free</span>
+          <span className="w-px h-2.5 bg-white/[0.08]" />
+          <button onClick={onOpenAuth}
+            className="text-[10px] text-white/70 hover:text-brand font-semibold transition-colors"
+          >
+            Sign in <span className="text-white/40 font-normal">sync</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 };

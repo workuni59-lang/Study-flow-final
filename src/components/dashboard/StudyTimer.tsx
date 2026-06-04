@@ -290,11 +290,11 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
   const renderTimerControls = () => (
     <div className="space-y-3">
       <div className="flex gap-2.5">
-        <button onClick={toggleTimer} className={`flex-1 py-3.5 rounded-2xl font-semibold text-xs uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all ${isActive ? 'bg-amber-500/90 text-white shadow-xl shadow-amber-500/20' : 'bg-white text-slate-900 hover:bg-white/90 shadow-xl'}`}>
+        <button onClick={toggleTimer} className={`flex-1 py-3 rounded-2xl font-semibold text-xs uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all ${isActive ? 'bg-amber-500/90 text-white shadow-lg shadow-amber-500/20' : 'bg-white/90 text-slate-900 hover:bg-white/70 shadow-lg'}`}>
           {isActive ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current translate-x-0.5" />}
           {isActive ? 'Pause' : 'Start'}
         </button>
-        <button onClick={() => { setIsActive(false); setTimeLeft(activePreset.focus * 60); }} className="px-4 py-3.5 bg-white/[0.06] hover:bg-white/[0.10] rounded-2xl transition-colors"><RotateCcw className="w-4 h-4 text-white/50" /></button>
+        <button onClick={() => { setIsActive(false); setTimeLeft(activePreset.focus * 60); }} className="px-4 py-3 bg-white/[0.06] hover:bg-white/[0.10] rounded-2xl transition-colors"><RotateCcw className="w-4 h-4 text-white/50" /></button>
       </div>
     </div>
   );
@@ -448,8 +448,8 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
 
   return (
     <>
-      <DashboardCard className={`bg-gradient-to-br from-slate-900 to-slate-950 dark:from-[#0c0e14] dark:to-[#080a10] text-white relative border-none shadow-2xl shadow-black/20 ${compact ? 'p-0' : ''}`}>
-        <div className={`absolute -top-32 -right-32 w-80 h-80 bg-gradient-to-br ${currentAtmosphere.color.replace('bg-', 'from-')}/15 to-transparent rounded-full blur-[100px] opacity-40`} />
+      <DashboardCard className={`text-white relative border-none shadow-none bg-transparent ${compact ? 'p-0' : ''}`}>
+        <div className={`absolute -top-24 -right-24 w-64 h-64 bg-gradient-to-br ${currentAtmosphere.color.replace('bg-', 'from-')}/10 to-transparent rounded-full blur-[80px] opacity-30 pointer-events-none`} />
         
         <div className="relative z-10 space-y-3">
           {/* Compact: timer + theme */}
@@ -520,16 +520,17 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
                           </div>
                         )}
 
-                        <div className="text-center mb-4">
-                          <motion.div key={mode} initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-5xl font-display font-light tracking-tighter tabular-nums text-white/90 select-none"
-                            style={{ fontSize: 'calc(3rem * var(--scale-factor, 1))' }}>
+                        <div className="text-center my-6">
+                          <motion.div key={mode} initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+                            className="timer-display text-white/90 select-none"
+                            style={{ fontSize: 'calc(4rem * var(--scale-factor, 1))' }}>
                             {formatTime(timeLeft)}
                           </motion.div>
                           {/* Progress bar */}
-                          <div className="w-full max-w-[200px] mx-auto h-[3px] bg-white/5 rounded-full overflow-hidden mt-2">
-                            <div className="h-full bg-gradient-to-r from-brand/60 to-brand-light rounded-full transition-transform duration-1000 ease-linear" style={{ transform: `scaleX(${progress})`, transformOrigin: 'left' }} />
+                          <div className="w-full max-w-[180px] mx-auto h-[2px] bg-white/5 rounded-full overflow-hidden mt-3">
+                            <div className="h-full bg-gradient-to-r from-brand/50 to-brand-light/70 rounded-full transition-transform duration-1000 ease-linear" style={{ transform: `scaleX(${progress})`, transformOrigin: 'left' }} />
                           </div>
-                          <div className="flex items-center justify-center gap-2 mt-2">
+                          <div className="flex items-center justify-center gap-2 mt-3">
                             {renderTallies()}
                           </div>
                         </div>
@@ -598,16 +599,17 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
                 </div>
               )}
 
-              <div className="py-6 text-center">
-                <motion.div key={mode} initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-6xl md:text-7xl font-display font-light tracking-tighter tabular-nums text-white/90 select-none"
-                  style={{ fontSize: 'calc(3.75rem * var(--scale-factor, 1))' }}>
+              <div className="py-8 text-center">
+                <motion.div key={mode} initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+                  className="timer-display text-white/90 select-none"
+                  style={{ fontSize: 'calc(4.5rem * var(--scale-factor, 1))' }}>
                   {formatTime(timeLeft)}
                 </motion.div>
                 {/* Progress bar */}
-                <div className="w-full max-w-[200px] mx-auto h-[3px] bg-white/5 rounded-full overflow-hidden mt-3">
-                  <div className="h-full bg-gradient-to-r from-brand/60 to-brand-light rounded-full transition-transform duration-1000 ease-linear" style={{ transform: `scaleX(${progress})`, transformOrigin: 'left' }} />
+                <div className="w-full max-w-[160px] mx-auto h-[2px] bg-white/5 rounded-full overflow-hidden mt-4">
+                  <div className="h-full bg-gradient-to-r from-brand/50 to-brand-light/70 rounded-full transition-transform duration-1000 ease-linear" style={{ transform: `scaleX(${progress})`, transformOrigin: 'left' }} />
                 </div>
-                <div className="flex items-center justify-center gap-2 mt-2">
+                <div className="flex items-center justify-center gap-2 mt-3">
                   {renderTallies()}
                 </div>
               </div>

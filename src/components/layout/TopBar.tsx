@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, memo } from 'react';
 import { ExternalLink } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -16,7 +16,7 @@ const HELP_LINKS = [
   { icon: '🎮', label: 'Join Discord', url: 'https://discord.gg/tUFvKERC' },
 ];
 
-export const TopBar = ({ mode, onModeChange, onMenuOpen }: TopBarProps) => {
+export const TopBar = memo(({ mode, onModeChange, onMenuOpen }: TopBarProps) => {
   const [helpOpen, setHelpOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -146,21 +146,21 @@ export const TopBar = ({ mode, onModeChange, onMenuOpen }: TopBarProps) => {
       </div>
 
       {/* Mode toggle pill */}
-      <div className="top-bar fixed top-5 left-1/2 -translate-x-1/2 z-30 flex gap-0.5 p-0.5 rounded-[10px] bg-white/30 dark:bg-[#0a0c10]/40 backdrop-blur-xl border border-white/20 dark:border-white/[0.06] shadow-sm">
+      <div className="top-bar fixed top-5 left-1/2 -translate-x-1/2 z-30 flex gap-0.5 p-0.5 rounded-[10px] backdrop-blur-xl border border-white/[0.08] bg-black/20">
         <button onClick={() => onModeChange('home')}
-          className={`px-2.5 py-1 rounded-[7px] text-[9px] font-semibold uppercase tracking-wider transition-all ${
+          className={`px-3 py-1.5 rounded-[7px] text-[9px] font-semibold uppercase tracking-wider transition-all ${
             mode === 'home'
-              ? 'bg-white/70 dark:bg-white/10 text-slate-900 dark:text-white shadow-xs'
-              : 'text-slate-500/70 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+              ? 'bg-white/10 text-white shadow-xs'
+              : 'text-white/40 hover:text-white/70'
           }`}
         >
           Home
         </button>
         <button onClick={() => onModeChange('focus')}
-          className={`px-2.5 py-1 rounded-[7px] text-[9px] font-semibold uppercase tracking-wider transition-all ${
+          className={`px-3 py-1.5 rounded-[7px] text-[9px] font-semibold uppercase tracking-wider transition-all ${
             mode === 'focus'
-              ? 'bg-white/70 dark:bg-white/10 text-slate-900 dark:text-white shadow-xs'
-              : 'text-slate-500/70 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+              ? 'bg-white/10 text-white shadow-xs'
+              : 'text-white/40 hover:text-white/70'
           }`}
         >
           Focus
@@ -178,4 +178,4 @@ export const TopBar = ({ mode, onModeChange, onMenuOpen }: TopBarProps) => {
       `}</style>
     </>
   );
-};
+});

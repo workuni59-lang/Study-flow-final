@@ -240,5 +240,17 @@ export const WallpaperEngine = ({ visible = true }: { visible?: boolean }) => {
     );
   };
 
-  return useMemo(() => renderWallpaper(), [themeConfig, lensX, lensY, imageX, imageY]);
+  return (
+    <>
+      {useMemo(() => renderWallpaper(), [themeConfig, lensX, lensY, imageX, imageY])}
+      {/* Theme-aware overlay — blends wallpaper with UI */}
+      <div
+        className="wallpaper-overlay"
+        style={{
+          opacity: visible && themeConfig.wallpaper !== 'none' ? 1 : 0,
+          transition: 'opacity 1s ease',
+        }}
+      />
+    </>
+  );
 };

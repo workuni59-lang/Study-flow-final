@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { motion } from 'motion/react';
 
 interface DashboardCardProps {
@@ -6,11 +6,12 @@ interface DashboardCardProps {
   className?: string;
 }
 
-export const DashboardCard = ({ children, className = '' }: DashboardCardProps) => {
+export const DashboardCard = memo(({ children, className = '' }: DashboardCardProps) => {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
       className={`
         bg-white 
         dark:bg-[#141622]
@@ -26,4 +27,4 @@ export const DashboardCard = ({ children, className = '' }: DashboardCardProps) 
       {children}
     </motion.div>
   );
-};
+});

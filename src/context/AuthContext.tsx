@@ -54,6 +54,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const isDemo = !supabase || window.location.search.includes('demo=1');
+console.log('[AUTH] isDemo:', isDemo, '| supabase is null:', !supabase, '| demo=1 in URL:', window.location.search.includes('demo=1'));
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
@@ -127,15 +128,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signInWithGoogle = useCallback(async () => {
+    console.log('[AUTH] signInWithGoogle CLICKED');
     if (isDemo) {
+      console.log('[AUTH] DEMO BRANCH — setting DEMO_USER, returning early (signInWithOAuth NOT called)');
       setUser(DEMO_USER);
       return;
     }
     const redirectTo = window.location.origin;
-    await supabase!.auth.signInWithOAuth({
+    console.log('[AUTH] Calling signInWithOAuth with redirectTo:', redirectTo);
+    const { data, error } = await supabase!.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo },
     });
+    console.log('[AUTH] signInWithOAuth response:', { data, error });
+    if (error) console.error('[AUTH] OAuth error:', error.message);
   }, []);
 
   const signOut = useCallback(async () => {

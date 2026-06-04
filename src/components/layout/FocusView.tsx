@@ -1,6 +1,6 @@
-import { CheckSquare, Headphones, PenSquare, Zap, Target } from 'lucide-react';
+import { useMemo, memo } from 'react';
+import { CheckSquare, Headphones, PenSquare, Target, X } from 'lucide-react';
 import { StudyTimer } from '../dashboard/StudyTimer';
-import { DeadlinesSection } from '../dashboard/DeadlinesSection';
 
 interface FocusViewProps {
   onTasksOpen: () => void;
@@ -9,51 +9,45 @@ interface FocusViewProps {
   onQuestsOpen?: () => void;
 }
 
-export const FocusView = ({ onTasksOpen, onMusicOpen, onNotepadOpen, onQuestsOpen }: FocusViewProps) => (
-  <div className="flex flex-col items-center px-4 pt-4 pb-28 lg:pb-8 text-center min-h-screen">
-    <StudyTimer compact />
+const panelButtons = [
+  { id: 'tasks', icon: CheckSquare, label: 'Tasks' },
+  { id: 'ambience', icon: Headphones, label: 'Ambience' },
+  { id: 'notes', icon: PenSquare, label: 'Notes' },
+  { id: 'quests', icon: Target, label: 'Quests' },
+] as const;
 
-    {/* Panel triggers */}
-    <div className="dashboard-stats mt-6 flex gap-3">
-      <button onClick={onTasksOpen}
-        className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-sm font-medium active:scale-95 transition-transform"
-      >
-        <CheckSquare className="w-4 h-4" />
-        Tasks
-      </button>
-      <button onClick={onMusicOpen}
-        className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-sm font-medium active:scale-95 transition-transform"
-      >
-        <Headphones className="w-4 h-4" />
-        Ambience
-      </button>
-      {onNotepadOpen && (
-        <button onClick={onNotepadOpen}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-sm font-medium active:scale-95 transition-transform"
-        >
-          <PenSquare className="w-4 h-4" />
-          Notes
-        </button>
-      )}
-      {onQuestsOpen && (
-        <button onClick={onQuestsOpen}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-sm font-medium active:scale-95 transition-transform"
-        >
-          <Target className="w-4 h-4" />
-          Quests
-        </button>
-      )}
+export const FocusView = memo(({ onTasksOpen, onMusicOpen, onNotepadOpen, onQuestsOpen }: FocusViewProps) => {
+  const handlers = useMemo(() => ({
+    tasks: onTasksOpen,
+    ambience: onMusicOpen,
+    notes: onNotepadOpen,
+    quests: onQuestsOpen,
+  }), [onTasksOpen, onMusicOpen, onNotepadOpen, onQuestsOpen]);
+
+  return (
+    <div className="flex flex-col items-center justify-center px-6 pb-24 lg:pb-12 text-center min-h-screen">
+      {/* Timer — the primary focal point, full width */}
+      <div className="w-full max-w-lg mx-auto animate-fade-in-up">
+        <StudyTimer compact />
       </div>
 
-      {/* Deadlines */}
-      <div className="dashboard-stats mt-6 w-full max-w-sm">
-        <DeadlinesSection />
-      </div>
-
-      {/* Brand watermark */}
-      <div className="fixed bottom-20 lg:bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 opacity-15 pointer-events-none">
-        <img src="/logo.png" alt="" className="w-4 h-4 object-contain grayscale" />
-        <span className="text-[9px] font-bold dark:text-white tracking-tight">StudyFlow</span>
+      {/* Minimal panel triggers — hidden during active focus via clear mode */}
+      <div className="dashboard-stats mt-8 flex flex-wrap justify-center gap-2 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+        {panelButtons.map(({ id, icon: Icon, label }) => {
+          const handler = handlers[id as keyof typeof handlers];
+          if (!handler) return null;
+          return (
+            <button
+              key={id}
+              onClick={handler}
+              className="btn-ghost text-[11px]"
+            >
+              <Icon className="w-3.5 h-3.5" />
+              {label}
+            </button>
+          );
+        })}
       </div>
     </div>
-);
+  );
+});

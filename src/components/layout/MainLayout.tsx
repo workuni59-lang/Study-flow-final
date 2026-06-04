@@ -228,13 +228,13 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
 
       {/* Sign-in prompt for unauthenticated users */}
       {!user && onOpenAuth && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden lg:flex items-center gap-3 px-4 py-2.5 rounded-xl bg-white/[0.06] backdrop-blur-xl border border-white/[0.1] shadow-lg">
-          <span className="text-xs text-white/60 font-medium">✦ Free to use</span>
-          <span className="w-px h-3 bg-white/[0.1]" />
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden lg:flex items-center gap-3 px-4 py-2.5 rounded-xl backdrop-blur-xl border border-white/10 bg-black/25">
+          <span className="text-xs text-white/50 font-medium">✦ Free</span>
+          <span className="w-px h-3 bg-white/10" />
           <button onClick={onOpenAuth}
-            className="text-xs text-white/90 hover:text-brand font-semibold transition-colors"
+            className="text-xs text-white/80 hover:text-brand-light font-semibold transition-colors"
           >
-            Sign in <span className="text-white/50 font-normal">for cloud sync &amp; premium</span>
+            Sign in <span className="text-white/40 font-normal">for sync &amp; premium</span>
           </button>
         </div>
       )}

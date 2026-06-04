@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   Play, Pause, RotateCcw, Zap, Maximize2, X,
-  Palette, Crown, Timer, Rocket, Check, Upload
+  Palette, Crown, Timer, Rocket, Check, Upload, Settings2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { DashboardCard } from './DashboardCard';
@@ -30,9 +30,9 @@ const TALLY_SETS: Record<string, string[]> = {
   snow: ['❄', '❄', '❄', '❄'],
 };
 
-interface StudyTimerProps { onTick?: () => void; compact?: boolean; }
+interface StudyTimerProps { onTick?: () => void; compact?: boolean; variant?: 'card' | 'floating'; }
 
-export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
+export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProps) => {
   const { 
     themeConfig, setThemeConfig, completeFocusSession, logSession, 
     userStats, triggerConfetti, setShowPremiumModal,
@@ -55,8 +55,6 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
   const [wallpaperBrightness, setWallpaperBrightness] = useState<string>('All');
   const [wallpaperEnvironment, setWallpaperEnvironment] = useState<string>('All');
   const [sessionsCompleted, setSessionsCompleted] = useState(0);
-  const [timerBgColor, setTimerBgColor] = useState(() => localStorage.getItem('sf_timer_bg_color') || '');
-  const [showTimerColorPicker, setShowTimerColorPicker] = useState(false);
   const [customImgError, setCustomImgError] = useState(false);
   const [tallyStyle, setTallyStyle] = useState('dots');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -275,29 +273,92 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
     </div>
   );
 
-  const zenBg: Record<string, string> = {
-    indigo: '#0a0c1a',
-    rose: '#1a0f0f',
-    emerald: '#0a1a0f',
-    violet: '#0f0a1a',
-    amber: '#1a140a',
-    cyan: '#0a141a',
-    pink: '#1a0a14',
-    slate: '#0a0c10',
-    neon: '#050010',
-  };
+  const TimerModePills = ({ glassVariant }: { glassVariant?: boolean }) => (
+    glassVariant ? (
+      <div className="flex justify-center gap-1.5">
+        {(['focus', 'shortBreak', 'longBreak'] as const).map(m => (
+          <button key={m} onClick={() => { setIsActive(false); setMode(m); const d = m === 'focus' ? activePreset.focus : m === 'shortBreak' ? activePreset.short : activePreset.long; setTimeLeft(d * 60); }}
+            className={`px-4 py-1.5 rounded-full text-[9px] font-semibold uppercase tracking-wider transition-all backdrop-blur-md border ${
+              mode === m
+                ? 'bg-white/10 border-white/20 text-white shadow-sm'
+                : 'bg-white/[0.02] border-white/[0.04] text-white/30 hover:text-white/60 hover:bg-white/[0.06]'
+            }`}>
+            {m === 'focus' ? 'Focus' : m === 'shortBreak' ? 'Break' : 'Long Break'}
+          </button>
+        ))}
+      </div>
+    ) : (
+      <div className="flex gap-1.5 bg-white/[0.04] p-1 rounded-xl overflow-x-auto no-scrollbar">
+        {(['focus', 'shortBreak', 'longBreak', 'taskETA'] as const).map(m => (
+          <button key={m} onClick={() => { 
+            setIsActive(false); setMode(m); 
+            const d = m === 'taskETA' ? (tasks.find(t => t.id === selectedTaskId)?.estimatedMinutes ?? 25) : m === 'focus' ? activePreset.focus : m === 'shortBreak' ? activePreset.short : activePreset.long; 
+            setTimeLeft(d * 60); 
+          }} 
+            className={`shrink-0 px-4 py-2 rounded-[10px] text-[9px] font-semibold uppercase tracking-wider transition-all ${mode === m ? 'bg-white/10 text-white shadow-sm' : 'text-white/30 hover:text-white/60'}`}>
+            {m === 'focus' ? 'Focus' : m === 'shortBreak' ? 'Break' : m === 'longBreak' ? 'Long Break' : 'Task ETA'}
+          </button>
+        ))}
+      </div>
+    )
+  );
 
-  const renderTimerControls = () => (
-    <div className="space-y-3">
-      <div className="flex gap-2.5">
-        <button onClick={toggleTimer} className={`flex-1 py-3 rounded-2xl font-semibold text-xs uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all ${isActive ? 'bg-amber-500/90 text-white shadow-lg shadow-amber-500/20' : 'bg-white/90 text-slate-900 hover:bg-white/70 shadow-lg'}`}>
-          {isActive ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current translate-x-0.5" />}
-          {isActive ? 'Pause' : 'Start'}
-        </button>
-        <button onClick={() => { setIsActive(false); setTimeLeft(activePreset.focus * 60); }} className="px-4 py-3 bg-white/[0.06] hover:bg-white/[0.10] rounded-2xl transition-colors"><RotateCcw className="w-4 h-4 text-white/50" /></button>
+  const TimerDisplay = ({ size = 'md', floating }: { size?: 'md' | 'lg'; floating?: boolean }) => (
+    <div className="text-center">
+      <div className="timer-display text-white/90 select-none"
+        style={{
+          fontSize: floating ? 'clamp(5rem, 18vw, 12rem)' : size === 'lg' ? 'clamp(5rem, 18vw, 12rem)' : 'calc(4.5rem * var(--scale-factor, 1))',
+          textShadow: floating ? '0 4px 40px rgba(0,0,0,0.3)' : 'none',
+        }}>
+        {formatTime(timeLeft)}
+      </div>
+      <div className={`mx-auto h-[2px] bg-white/5 rounded-full overflow-hidden mt-4 ${floating ? 'max-w-[140px]' : 'max-w-[160px]'}`}>
+        <div className="h-full bg-gradient-to-r from-brand/50 to-brand-light/70 rounded-full transition-transform duration-1000 ease-linear" style={{ transform: `scaleX(${progress})`, transformOrigin: 'left' }} />
+      </div>
+      <div className="flex items-center justify-center gap-2 mt-3">
+        {renderTallies()}
       </div>
     </div>
   );
+
+  const TimerButtons = ({ glassVariant }: { glassVariant?: boolean }) => (
+    <div className={glassVariant ? 'flex justify-center' : ''}>
+      <div className="flex gap-2.5">
+        <button onClick={toggleTimer} className={`flex items-center justify-center gap-2.5 font-semibold text-xs uppercase tracking-wider transition-all ${
+          glassVariant
+            ? isActive
+              ? 'px-6 py-3 rounded-full bg-amber-500/80 text-white shadow-lg backdrop-blur-md'
+              : 'px-6 py-3 rounded-full bg-white/15 text-white hover:bg-white/25 backdrop-blur-md border border-white/10'
+            : `flex-1 py-3 rounded-2xl ${isActive ? 'bg-amber-500/90 text-white shadow-lg shadow-amber-500/20' : 'bg-white/90 text-slate-900 hover:bg-white/70 shadow-lg'}`
+        }`}>
+          {isActive ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current translate-x-0.5" />}
+          {isActive ? 'Pause' : 'Start'}
+        </button>
+        <button onClick={() => { setIsActive(false); setTimeLeft(activePreset.focus * 60); }}
+          className={`transition-colors ${
+            glassVariant
+              ? 'px-4 py-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10'
+              : 'px-4 py-3 bg-white/[0.06] hover:bg-white/[0.10] rounded-2xl'
+          }`}>
+          <RotateCcw className={`w-4 h-4 ${glassVariant ? 'text-white/60' : 'text-white/50'}`} />
+        </button>
+        {glassVariant && (
+          <>
+            <button onClick={() => { setShowPresetPicker(v => !v); setShowThemePicker(false); }}
+              className="px-4 py-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10 transition-colors">
+              <Timer className="w-4 h-4 text-white/60" />
+            </button>
+            <button onClick={() => setShowThemePicker(v => !v)}
+              className="px-4 py-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10 transition-colors">
+              <Palette className="w-4 h-4 text-white/60" />
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+
+  const renderTimerControls = () => <TimerButtons />;
 
   const renderAtmosphereTab = () => (
     <motion.div key="atm" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.15 }} className="pt-1">
@@ -446,8 +507,46 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
     </motion.div>
   );
 
+  const renderTimerFace = () => (
+    <div className="flex flex-col items-center">
+      <TimerDisplay floating />
+    </div>
+  );
+
+  const renderControls = () => <TimerButtons glassVariant />;
+
+  /* ── Floating variant: no card, no container, rendered directly on environment ── */
+  if (variant === 'floating') {
+    return (
+      <div className="flex flex-col items-center gap-8 py-8">
+        {renderTimerFace()}
+        <AnimatePresence mode="wait">
+          {showThemePicker ? (
+            <motion.div key="theme" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="w-full max-w-xs">
+              {renderThemePicker()}
+            </motion.div>
+          ) : showPresetPicker ? (
+            <motion.div key="presets" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="w-full max-w-xs">
+              {renderPresetPicker()}
+            </motion.div>
+          ) : (
+            <motion.div key="controls" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-4">
+              <button onClick={() => { setShowPresetPicker(true); setShowThemePicker(false); }}
+                className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.04] hover:bg-white/[0.08] transition-colors text-[9px] font-semibold uppercase tracking-wider text-white/50">
+                <activePreset.icon className="w-3 h-3 text-brand-light" />
+                {activePreset.name}
+              </button>
+              {renderControls()}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  }
+
   return (
     <>
+      {!isZenMode && (
       <DashboardCard className={`text-white relative border-none shadow-none bg-transparent ${compact ? 'p-0' : ''}`}>
         <div className={`absolute -top-24 -right-24 w-64 h-64 bg-gradient-to-br ${currentAtmosphere.color.replace('bg-', 'from-')}/10 to-transparent rounded-full blur-[80px] opacity-30 pointer-events-none`} />
         
@@ -461,95 +560,6 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
                   <span className="text-[9px] font-semibold uppercase tracking-wider text-white/60">{activePreset.name}</span>
                 </button>
                 <div className="flex items-center gap-1">
-                  <button onClick={() => setShowThemePicker(!showThemePicker)} className={`p-2 rounded-xl transition-all ${showThemePicker ? 'bg-brand/20 text-white' : 'text-white/40 hover:text-white/70 hover:bg-white/5'}`}>
-                    <Palette className="w-4 h-4" />
-                  </button>
-                  <button onClick={() => setIsZenMode(true)} className="p-2 text-white/40 hover:text-white/70 hover:bg-white/5 rounded-xl transition-all">
-                    <Maximize2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="px-4 pb-4">
-                <div className="mt-3 space-y-2">
-                  <AnimatePresence mode="wait">
-                    {showThemePicker ? (
-                      <motion.div key="compact-theme" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                        {renderThemePicker()}
-                      </motion.div>
-                    ) : showPresetPicker ? renderPresetPicker() : (
-                      <motion.div key="compact-controls" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                        {/* Mode tabs above timer */}
-                        <div className="flex gap-1.5 bg-white/[0.04] p-1 rounded-xl mb-4 overflow-x-auto no-scrollbar">
-                          {(['focus', 'shortBreak', 'longBreak', 'taskETA'] as const).map(m => (
-                            <button key={m} onClick={() => { 
-                              setIsActive(false); 
-                              setMode(m); 
-                              const d = m === 'taskETA' ? (tasks.find(t => t.id === selectedTaskId)?.estimatedMinutes ?? 25) : m === 'focus' ? activePreset.focus : m === 'shortBreak' ? activePreset.short : activePreset.long; 
-                              setTimeLeft(d * 60); 
-                            }} 
-                              className={`shrink-0 px-3 py-2 rounded-[10px] text-[9px] font-semibold uppercase tracking-wider transition-all ${mode === m ? 'bg-white/10 text-white shadow-sm' : 'text-white/30 hover:text-white/60'}`}>
-                              {m === 'focus' ? 'Focus' : m === 'shortBreak' ? 'Break' : m === 'longBreak' ? 'Long Break' : 'Task ETA'}
-                            </button>
-                          ))}
-                        </div>
-
-                        {/* Task Selector for Task ETA Mode */}
-                        {mode === 'taskETA' && (
-                          <div className="mb-4">
-                            <select 
-                              value={selectedTaskId || ''} 
-                              onChange={(e) => {
-                                const id = e.target.value;
-                                setSelectedTaskId(id);
-                                const task = tasks.find(t => t.id === id);
-                                if (task) {
-                                  setTimeLeft((task.estimatedMinutes || 25) * 60);
-                                  setIsActive(false);
-                                }
-                              }}
-                              className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-[10px] font-bold text-white focus:outline-none appearance-none cursor-pointer"
-                            >
-                              <option value="" className="bg-slate-900">Select a task...</option>
-                              {tasks.filter(t => !t.completed).map(t => (
-                                <option key={t.id} value={t.id} className="bg-slate-900">
-                                  {t.title} ({t.estimatedMinutes || 25}m)
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                        )}
-
-                        <div className="text-center my-6">
-                          <motion.div key={mode} initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-                            className="timer-display text-white/90 select-none"
-                            style={{ fontSize: 'calc(4rem * var(--scale-factor, 1))' }}>
-                            {formatTime(timeLeft)}
-                          </motion.div>
-                          {/* Progress bar */}
-                          <div className="w-full max-w-[180px] mx-auto h-[2px] bg-white/5 rounded-full overflow-hidden mt-3">
-                            <div className="h-full bg-gradient-to-r from-brand/50 to-brand-light/70 rounded-full transition-transform duration-1000 ease-linear" style={{ transform: `scaleX(${progress})`, transformOrigin: 'left' }} />
-                          </div>
-                          <div className="flex items-center justify-center gap-2 mt-3">
-                            {renderTallies()}
-                          </div>
-                        </div>
-                        {renderTimerControls()}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </div>
-            </>
-          ) : (
-            /* Full mode */
-            <>
-              <div className="flex items-center justify-between">
-                <button onClick={() => setShowPresetPicker(!showPresetPicker)} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.10] transition-colors">
-                  <activePreset.icon className="w-3 h-3 text-brand-light" />
-                  <span className="text-[9px] font-semibold uppercase tracking-wider text-white/60">{activePreset.name}</span>
-                </button>
-                <div className="flex items-center gap-1">
                   <button onClick={() => setShowThemePicker(!showThemePicker)} className={`p-2 rounded-xl transition-all ${showThemePicker ? 'bg-brand text-white shadow-lg' : 'text-white/40 hover:text-white/70 hover:bg-white/5'}`}>
                     <Palette className="w-4 h-4" />
                   </button>
@@ -559,19 +569,7 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
                 </div>
               </div>
 
-              <div className="flex gap-1.5 bg-white/[0.04] p-1 rounded-xl overflow-x-auto no-scrollbar">
-                {(['focus', 'shortBreak', 'longBreak', 'taskETA'] as const).map(m => (
-                  <button key={m} onClick={() => { 
-                    setIsActive(false); 
-                    setMode(m); 
-                    const d = m === 'taskETA' ? (tasks.find(t => t.id === selectedTaskId)?.estimatedMinutes ?? 25) : m === 'focus' ? activePreset.focus : m === 'shortBreak' ? activePreset.short : activePreset.long; 
-                    setTimeLeft(d * 60); 
-                  }} 
-                    className={`shrink-0 px-4 py-2 rounded-[10px] text-[9px] font-semibold uppercase tracking-wider transition-all ${mode === m ? 'bg-white/10 text-white shadow-sm' : 'text-white/30 hover:text-white/60'}`}>
-                    {m === 'focus' ? 'Focus' : m === 'shortBreak' ? 'Break' : m === 'longBreak' ? 'Long Break' : 'Task ETA'}
-                  </button>
-                ))}
-              </div>
+              <TimerModePills />
 
               {/* Task Selector for Task ETA Mode */}
               {mode === 'taskETA' && (
@@ -599,20 +597,63 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
                 </div>
               )}
 
-              <div className="py-8 text-center">
-                <motion.div key={mode} initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-                  className="timer-display text-white/90 select-none"
-                  style={{ fontSize: 'calc(4.5rem * var(--scale-factor, 1))' }}>
-                  {formatTime(timeLeft)}
-                </motion.div>
-                {/* Progress bar */}
-                <div className="w-full max-w-[160px] mx-auto h-[2px] bg-white/5 rounded-full overflow-hidden mt-4">
-                  <div className="h-full bg-gradient-to-r from-brand/50 to-brand-light/70 rounded-full transition-transform duration-1000 ease-linear" style={{ transform: `scaleX(${progress})`, transformOrigin: 'left' }} />
-                </div>
-                <div className="flex items-center justify-center gap-2 mt-3">
-                  {renderTallies()}
+              <TimerDisplay />
+              
+              <AnimatePresence mode="wait">
+                {showThemePicker ? renderThemePicker() : showPresetPicker ? renderPresetPicker() : (
+                  <motion.div key="controls" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
+                    {renderTimerControls()}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </>
+          ) : (
+            /* Full mode */
+            <>
+              <div className="flex items-center justify-between">
+                <button onClick={() => setShowPresetPicker(!showPresetPicker)} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.10] transition-colors">
+                  <activePreset.icon className="w-3 h-3 text-brand-light" />
+                  <span className="text-[9px] font-semibold uppercase tracking-wider text-white/60">{activePreset.name}</span>
+                </button>
+                <div className="flex items-center gap-1">
+                  <button onClick={() => setShowThemePicker(!showThemePicker)} className={`p-2 rounded-xl transition-all ${showThemePicker ? 'bg-brand text-white shadow-lg' : 'text-white/40 hover:text-white/70 hover:bg-white/5'}`}>
+                    <Palette className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => setIsZenMode(true)} className="p-2 text-white/40 hover:text-white/70 hover:bg-white/5 rounded-xl transition-all">
+                    <Maximize2 className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
+
+              <TimerModePills />
+
+              {/* Task Selector for Task ETA Mode */}
+              {mode === 'taskETA' && (
+                <div className="mt-4 px-1">
+                  <select 
+                    value={selectedTaskId || ''} 
+                    onChange={(e) => {
+                      const id = e.target.value;
+                      setSelectedTaskId(id);
+                      const task = tasks.find(t => t.id === id);
+                      if (task) {
+                        setTimeLeft((task.estimatedMinutes || 25) * 60);
+                        setIsActive(false);
+                      }
+                    }}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-[10px] font-bold text-white focus:outline-none appearance-none cursor-pointer"
+                  >
+                    <option value="" className="bg-slate-900">Select a task...</option>
+                    {tasks.filter(t => !t.completed).map(t => (
+                      <option key={t.id} value={t.id} className="bg-slate-900">
+                        {t.title} ({t.estimatedMinutes || 25}m)
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              <TimerDisplay />
               
               <AnimatePresence mode="wait">
                 {showThemePicker ? renderThemePicker() : showPresetPicker ? renderPresetPicker() : (
@@ -625,74 +666,102 @@ export const StudyTimer = ({ onTick, compact }: StudyTimerProps) => {
           )}
         </div>
       </DashboardCard>
+      )}
       
       {/* ZEN MODE */}
       <AnimatePresence>
         {isZenMode && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex flex-col items-center justify-center p-6 text-center transition-colors duration-700"
-            style={{ backgroundColor: timerBgColor || zenBg[themeConfig.atmosphere] || '#0a0c10' }}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex flex-col items-center justify-center p-6 text-center"
           >
             <button onClick={() => setIsZenMode(false)} className="absolute top-10 right-10 p-3 bg-white/5 text-white/40 hover:text-white rounded-xl z-50"><X className="w-6 h-6" /></button>
-            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="relative z-10 w-full flex flex-col items-center">
-              <div className="mb-6 flex flex-col items-center gap-3">
-                <span className={`px-4 py-1.5 rounded-full text-[9px] font-semibold uppercase tracking-wider border ${
-                  mode === 'focus' || mode === 'taskETA' ? 'bg-brand/10 border-brand/20 text-brand-light' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-                }`}>
-                  {mode === 'focus' ? 'Deep Focus' : mode === 'taskETA' ? 'Task Session' : mode === 'shortBreak' ? 'Recharge' : 'Restoration'}
-                </span>
-                {mode === 'taskETA' && selectedTask && (
-                  <span className="text-white/60 text-sm font-medium tracking-wide italic">"{selectedTask.title}"</span>
-                )}
+
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              className="relative z-10 w-full flex flex-col items-center"
+            >
+              {/* Mode tabs — ghost style */}
+              <div className="flex justify-center gap-6 mb-6">
+                {(['focus', 'shortBreak', 'longBreak'] as const).map(m => (
+                  <button
+                    key={m}
+                    onClick={() => {
+                      setIsActive(false);
+                      setMode(m);
+                      const d = m === 'focus' ? activePreset.focus : m === 'shortBreak' ? activePreset.short : activePreset.long;
+                      setTimeLeft(d * 60);
+                    }}
+                    className={`text-[10px] font-semibold uppercase tracking-widest pb-1 transition-all border-b ${
+                      mode === m
+                        ? 'text-white/95 border-white/60'
+                        : 'text-white/30 border-transparent hover:text-white/55'
+                    }`}
+                  >
+                    {m === 'focus' ? 'Focus' : m === 'shortBreak' ? 'Break' : 'Long Break'}
+                  </button>
+                ))}
               </div>
-              <div className="text-[15vw] md:text-[12vw] font-display font-thin tracking-tighter text-white tabular-nums leading-[1] select-none opacity-90 mb-10">{formatTime(timeLeft)}</div>
-              <div className="flex justify-center items-center gap-8">
-                <button onClick={() => { setIsActive(false); setTimeLeft(activePreset.focus * 60); }} className="p-5 bg-white/5 rounded-full text-white/40 hover:text-white"><RotateCcw className="w-6 h-6" /></button>
-                <button onClick={toggleTimer} className={`w-28 h-28 rounded-full flex items-center justify-center transition-all shadow-2xl ${isActive ? 'bg-amber-500 text-white' : 'bg-white text-slate-950 scale-105'}`}>
-                  {isActive ? <Pause className="w-10 h-10 fill-current" /> : <Play className="w-10 h-10 fill-current translate-x-1" />}
+
+              {/* Timer digits — text-shadow sole legibility */}
+              <div
+                className="font-display font-bold tabular-nums text-white select-none leading-none mb-3"
+                style={{
+                  fontSize: 'clamp(80px, 18vw, 140px)',
+                  letterSpacing: '-0.04em',
+                  textShadow: '0 0 60px rgba(0,0,0,0.9), 0 4px 16px rgba(0,0,0,0.7)',
+                  color: mode !== 'focus' ? 'rgba(160,240,200,0.95)' : '#ffffff',
+                  transition: 'color 0.4s ease',
+                }}
+              >
+                {formatTime(timeLeft)}
+              </div>
+
+              {/* Progress bar — hairline */}
+              <div className="w-40 h-[2px] bg-white/10 rounded-full overflow-hidden mx-auto mb-5">
+                <div
+                  className="h-full bg-white/50 rounded-full transition-all duration-1000 ease-linear"
+                  style={{ width: `${progress * 100}%` }}
+                />
+              </div>
+
+              {/* Tallies */}
+              <div className="flex justify-center mb-6">
+                {renderTallies()}
+              </div>
+
+              {/* Controls — ghost buttons */}
+              <div className="flex items-center justify-center gap-4">
+                <button
+                  onClick={() => { setIsActive(false); setTimeLeft(activePreset.focus * 60); }}
+                  className="w-12 h-12 rounded-full border border-white/15 bg-white/[0.04] text-white/40 hover:text-white/80 hover:border-white/30 hover:bg-white/[0.08] transition-all flex items-center justify-center"
+                >
+                  <RotateCcw className="w-5 h-5" />
                 </button>
-                <button onClick={() => setShowTimerColorPicker(v => !v)} className="p-5 bg-white/5 rounded-full text-white/40 relative"><Palette className="w-6 h-6" /></button>
-                {showTimerColorPicker && (
-                  <div className="absolute bottom-24 left-1/2 -translate-x-1/2 p-4 rounded-2xl bg-[#141622] border border-slate-800/50 shadow-2xl z-50" style={{ width: '220px' }}>
-                    <p className="text-[9px] font-bold uppercase tracking-wider text-white/40 mb-3 text-center">Background Color</p>
-                    <div className="grid grid-cols-5 gap-2">
-                      {([
 
-                        ['indigo', '#0a0c1a'],
-                        ['slate', '#0a0c10'],
-                        ['emerald', '#0a1a0f'],
-                        ['rose', '#1a0f0f'],
-                        ['amber', '#1a140a'],
-                        ['violet', '#0f0a1a'],
-                        ['cyan', '#0a141a'],
-                        ['pink', '#1a0a14'],
-                        ['neon', '#050010'],
+                <button
+                  onClick={toggleTimer}
+                  className={`w-20 h-20 rounded-full border flex items-center justify-center transition-all ${
+                    isActive
+                      ? 'border-amber-400/50 bg-amber-500/15 text-amber-300 hover:bg-amber-500/25'
+                      : 'border-white/25 bg-white/[0.07] text-white hover:bg-white/[0.14] hover:border-white/40'
+                  }`}
+                >
+                  {isActive
+                    ? <Pause className="w-8 h-8 fill-current" />
+                    : <Play className="w-8 h-8 fill-current translate-x-0.5" />
+                  }
+                </button>
 
-                      ] as const).map(([name, hex]) => (
-                        <button key={name}
-                          onClick={() => {
-                            setTimerBgColor(hex);
-                            localStorage.setItem('sf_timer_bg_color', hex);
-                            setShowTimerColorPicker(false);
-                          }}
-                          className="w-8 h-8 rounded-xl border border-white/10 hover:scale-110 transition-transform"
-                          style={{ backgroundColor: hex }}
-                          title={name}
-                        />
-                      ))}
-                      <button
-                        onClick={() => {
-                          setTimerBgColor('');
-                          localStorage.removeItem('sf_timer_bg_color');
-                          setShowTimerColorPicker(false);
-                        }}
-                        className="col-span-5 mt-1 py-1.5 rounded-xl bg-white/5 text-[8px] font-bold text-white/40 hover:text-white/70 uppercase tracking-wider transition-colors"
-                      >
-                        Reset to default
-                      </button>
-                    </div>
-                  </div>
-                )}
+                <button
+                  onClick={() => setShowPresetPicker(true)}
+                  className="w-12 h-12 rounded-full border border-white/15 bg-white/[0.04] text-white/40 hover:text-white/80 hover:border-white/30 hover:bg-white/[0.08] transition-all flex items-center justify-center"
+                >
+                  <Settings2 className="w-5 h-5" />
+                </button>
               </div>
             </motion.div>
           </motion.div>

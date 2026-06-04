@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { TopBar, type Mode } from './TopBar';
 import { BottomBar } from './BottomBar';
 import { HomeView } from './HomeView';
-import { FocusView } from './FocusView';
+import { FocusEnvironment } from './FocusEnvironment';
 import { MenuDrawer, type Section } from './MenuDrawer';
 import { DesktopSidebar } from './DesktopSidebar';
 import { SidePanel } from '../panels/SidePanel';
@@ -129,7 +129,7 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
           <main className="main-layout-content">
             {mode === 'home' && <HomeView onNotepadOpen={() => setPanelOpen('notepad')} onQuestsOpen={() => setSection('quests')} onMusicOpen={() => setPanelOpen('ambience')} onProgressionOpen={() => setSection('progression')} menuOpen={menuOpen} />}
             {mode === 'focus' && (
-              <FocusView
+              <FocusEnvironment
                 onTasksOpen={() => setPanelOpen('tasks')}
                 onMusicOpen={() => setPanelOpen('ambience')}
                 onNotepadOpen={() => setPanelOpen('notepad')}

@@ -57,15 +57,15 @@ export const HomeView = memo(({ onNotepadOpen, onQuestsOpen, onMusicOpen, onProg
       {/* Badge — top-right */}
       <button
         onClick={onProgressionOpen}
-        className="fixed top-20 right-4 z-20 flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl glass-panel-light text-white/80 hover:bg-white/[0.08] transition-all text-[11px] font-semibold"
+        className="fixed top-20 left-4 z-20 flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl glass-panel-light text-white/80 hover:bg-white/[0.08] transition-all text-[11px] font-semibold"
       >
         <BadgeSvg tier={badgeInfo.tier} size={20} unlocked={true} />
         Lv.{badgeInfo.level}
         <ArrowUpRight className="w-3 h-3 text-white/30" />
       </button>
 
-      {/* Central content */}
-      <div className="glass-panel flex flex-col items-center px-8 py-8 w-full max-w-sm animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+      {/* Central content — transparent floating panel, no backdrop blur */}
+      <div className="flex flex-col items-center px-6 py-8 w-full max-w-sm animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
         {/* Greeting */}
         {themeConfig.showGreeting !== false && (
           <p className="text-sm font-medium text-white/60 mb-0.5">
@@ -87,10 +87,10 @@ export const HomeView = memo(({ onNotepadOpen, onQuestsOpen, onMusicOpen, onProg
             : 'Ready for a focused session?'}
         </p>
 
-        {/* Stats row */}
+        {/* Stats row — ultra-light glass cards */}
         <div className="flex gap-2 w-full max-w-xs">
           {statCards.map(({ icon: Icon, value, label, color }) => (
-            <div key={label} className="card-sm flex-1 py-2.5 px-1 text-center">
+            <div key={label} className="flex-1 py-2.5 px-1 text-center rounded-xl bg-white/[0.03] border border-white/[0.04]">
               <Icon size={14} className="mx-auto mb-1" style={{ color }} />
               <p className="text-sm font-bold text-white/85 leading-tight timer-display">{value}</p>
               <p className="text-[7px] font-bold uppercase tracking-widest text-white/35 mt-0.5">{label}</p>
@@ -98,15 +98,16 @@ export const HomeView = memo(({ onNotepadOpen, onQuestsOpen, onMusicOpen, onProg
           ))}
         </div>
 
-        {/* Quote */}
-        {themeConfig.showQuote !== false && (
-          <div className="mt-4 w-full max-w-xs px-3 py-2 rounded-lg bg-white/[0.03]">
-            <p className="text-[10px] italic text-white/40 truncate">
-              &ldquo;{quote.text}&rdquo;
-            </p>
-          </div>
-        )}
       </div>
+
+      {/* Quote — fixed top-right, no overlap with badge (now top-left) */}
+      {themeConfig.showQuote !== false && (
+        <div className="fixed top-28 right-6 z-20 max-w-[280px]">
+          <p className="font-serif text-[18px] font-bold italic leading-tight text-white/90 text-right" style={{ textShadow: '0 2px 20px rgba(0,0,0,0.7), 0 0 60px rgba(0,0,0,0.3)' }}>
+            &ldquo;{quote.text}&rdquo;
+          </p>
+        </div>
+      )}
 
       {/* Bottom-left icon cluster */}
       {!menuOpen && (

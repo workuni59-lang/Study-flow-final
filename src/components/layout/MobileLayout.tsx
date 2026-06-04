@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { TopBar, type Mode } from './TopBar';
 import { BottomBar } from './BottomBar';
 import { HomeView } from './HomeView';
-import { FocusView } from './FocusView';
+import { FocusEnvironment } from './FocusEnvironment';
 import { MenuDrawer, type Section } from './MenuDrawer';
 import { SidePanel } from '../panels/SidePanel';
 import { TasksPanel } from '../panels/TasksPanel';
@@ -124,7 +124,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
           <main>
             {mode === 'home' && <HomeView onNotepadOpen={() => setPanelOpen('notepad')} menuOpen={menuOpen} />}
             {mode === 'focus' && (
-              <FocusView
+              <FocusEnvironment
                 onTasksOpen={() => setPanelOpen('tasks')}
                 onMusicOpen={() => setPanelOpen('ambience')}
                 onNotepadOpen={() => setPanelOpen('notepad')}

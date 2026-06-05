@@ -54,6 +54,10 @@ export interface UserStats {
 export type AtmosphereId = 'indigo' | 'emerald' | 'rose' | 'amber' | 'violet' | 'slate' | 'cyan' | 'pink' | 'neon';
 
 export type WallpaperId =
+  // Moods (CSS Gradient — animated/static)
+  | 'ember-glow' | 'frost-mint' | 'twilight-sky' | 'warm-latte' | 'charcoal'
+  | 'blush' | 'lavender-dream' | 'midnight-ocean' | 'golden-hour' | 'northern-sky'
+  | 'rose-quartz' | 'cobalt-night' | 'harvest' | 'moonlit-fog' | 'terra-cotta'
   // Animated / Abstract
   | 'none' | 'minimal' | 'dots' | 'mesh' | 'aurora' | 'stardust' | 'cyberpunk' | 'zen'
   // Forests & Trees
@@ -203,6 +207,25 @@ export const WALLPAPERS: Wallpaper[] = [
   { id: 'sunflower-field', name: 'Sunflower Field', isPremium: true, type: 'image', category: 'Flowers', url: 'https://images.unsplash.com/photo-1597848212624-a19eb35e2651?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
   { id: 'rose-garden', name: 'Rose Garden', isPremium: true, type: 'image', category: 'Flowers', url: 'https://images.unsplash.com/photo-1455659817273-f96807779a8a?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
   { id: 'tulip-field', name: 'Tulip Field', isPremium: true, type: 'image', category: 'Flowers', url: 'https://images.unsplash.com/photo-1520763185298-1b434c919102?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
+
+  // ── MOODS (CSS Gradient — animated/static) ──
+  // Free
+  { id: 'ember-glow', name: 'Ember Glow', isPremium: false, type: 'animated', category: 'Moods', brightness: 'vibrant', environment: 'abstract' },
+  { id: 'frost-mint', name: 'Frost Mint', isPremium: false, type: 'animated', category: 'Moods', brightness: 'light', environment: 'abstract' },
+  { id: 'twilight-sky', name: 'Twilight Sky', isPremium: false, type: 'animated', category: 'Moods', brightness: 'dark', environment: 'abstract' },
+  { id: 'warm-latte', name: 'Warm Latte', isPremium: false, type: 'animated', category: 'Moods', brightness: 'light', environment: 'abstract' },
+  { id: 'charcoal', name: 'Charcoal', isPremium: false, type: 'animated', category: 'Moods', brightness: 'dark', environment: 'abstract' },
+  // Premium
+  { id: 'blush', name: 'Blush', isPremium: true, type: 'animated', category: 'Moods', brightness: 'light', environment: 'abstract' },
+  { id: 'lavender-dream', name: 'Lavender Dream', isPremium: true, type: 'animated', category: 'Moods', brightness: 'vibrant', environment: 'abstract' },
+  { id: 'midnight-ocean', name: 'Midnight Ocean', isPremium: true, type: 'animated', category: 'Moods', brightness: 'dark', environment: 'abstract' },
+  { id: 'golden-hour', name: 'Golden Hour', isPremium: true, type: 'animated', category: 'Moods', brightness: 'vibrant', environment: 'abstract' },
+  { id: 'northern-sky', name: 'Northern Sky', isPremium: true, type: 'animated', category: 'Moods', brightness: 'vibrant', environment: 'abstract' },
+  { id: 'rose-quartz', name: 'Rose Quartz', isPremium: true, type: 'animated', category: 'Moods', brightness: 'light', environment: 'abstract' },
+  { id: 'cobalt-night', name: 'Cobalt Night', isPremium: true, type: 'animated', category: 'Moods', brightness: 'dark', environment: 'abstract' },
+  { id: 'harvest', name: 'Harvest', isPremium: true, type: 'animated', category: 'Moods', brightness: 'vibrant', environment: 'abstract' },
+  { id: 'moonlit-fog', name: 'Moonlit Fog', isPremium: true, type: 'animated', category: 'Moods', brightness: 'light', environment: 'abstract' },
+  { id: 'terra-cotta', name: 'Terra Cotta', isPremium: true, type: 'animated', category: 'Moods', brightness: 'vibrant', environment: 'abstract' },
 
   // ── SPECIAL ──
   { id: 'custom', name: 'Custom URL', isPremium: true, type: 'custom', category: 'Special', brightness: 'dark', environment: 'abstract' },

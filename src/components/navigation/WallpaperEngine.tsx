@@ -4,6 +4,30 @@ import { useStudy } from '../../context/StudyContext';
 import { WALLPAPERS } from '../../lib/gamification';
 import { useReduceMotion } from '../../hooks/useReduceMotion';
 
+// ── Moods Gradient Recipes ──────────────────────────────────────
+const MOOD_GRADIENTS: Record<string, string> = {
+  'ember-glow': 'linear-gradient(135deg, #f97316, #dc2626, #ea580c)',
+  'frost-mint': 'linear-gradient(135deg, #0d9488, #2dd4bf, #67e8f9)',
+  'twilight-sky': 'linear-gradient(135deg, #1e3a5f, #7c3aed, #e11d48)',
+  'warm-latte': 'linear-gradient(135deg, #fef3c7, #d97706, #78350f)',
+  'charcoal': 'linear-gradient(135deg, #1e293b, #0f172a, #000000)',
+  'blush': 'linear-gradient(135deg, #fce7f3, #fda4af, #fff1f2)',
+  'lavender-dream': 'linear-gradient(135deg, #e8d5f5, #c084fc, #a855f7)',
+  'midnight-ocean': 'linear-gradient(135deg, #0f172a, #0d9488, #1e293b)',
+  'golden-hour': 'linear-gradient(135deg, #fbbf24, #f59e0b, #fcd34d)',
+  'northern-sky': 'linear-gradient(135deg, #059669, #0d9488, #4f46e5)',
+  'rose-quartz': 'linear-gradient(135deg, #fbcfe8, #e879f9, #d8b4fe)',
+  'cobalt-night': 'linear-gradient(135deg, #1e3a5f, #1e1b4b, #3730a3)',
+  'harvest': 'linear-gradient(135deg, #d97706, #b91c1c, #f59e0b)',
+  'moonlit-fog': 'linear-gradient(135deg, #94a3b8, #cbd5e1, #f1f5f9)',
+  'terra-cotta': 'linear-gradient(135deg, #c2410c, #9a3412, #7c2d12)',
+};
+
+const MOOD_ANIMATED = new Set([
+  'ember-glow', 'frost-mint', 'twilight-sky',
+  'lavender-dream', 'midnight-ocean', 'northern-sky', 'cobalt-night', 'harvest',
+]);
+
 export const WallpaperEngine = ({ visible = true }: { visible?: boolean }) => {
   const { themeConfig } = useStudy();
   const reduceMotion = useReduceMotion();
@@ -102,6 +126,11 @@ export const WallpaperEngine = ({ visible = true }: { visible?: boolean }) => {
                 0% { transform: scale(0.8); opacity: 0; }
                 50% { opacity: 0.5; }
                 100% { transform: scale(1.5); opacity: 0; }
+              }
+              @keyframes mood-shift {
+                0% { background-position: 0% 50%; }
+                50% { background-position: 100% 50%; }
+                100% { background-position: 0% 50%; }
               }
             `}
           </style>
@@ -233,6 +262,20 @@ export const WallpaperEngine = ({ visible = true }: { visible?: boolean }) => {
                 <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-indigo-500/8 dark:to-indigo-400/15" />
                 <div className="absolute inset-0 bg-radial-[circle_at_center] from-transparent via-transparent to-slate-950/30 dark:to-black/50" />
               </div>
+            )}
+
+            {/* Moods (CSS Gradient Collection) — no parallax / no mouse tracking */}
+            {currentWallpaper.category === 'Moods' && (
+              <div
+                className={`absolute inset-0 ${MOOD_ANIMATED.has(themeConfig.wallpaper) ? 'animate-mood-shift' : ''}`}
+                style={{
+                  background: MOOD_GRADIENTS[themeConfig.wallpaper] || MOOD_GRADIENTS['ember-glow'],
+                  backgroundSize: MOOD_ANIMATED.has(themeConfig.wallpaper) ? '200% 200%' : '100% 100%',
+                  animationDuration: '20s',
+                  animationTimingFunction: 'ease-in-out',
+                  animationIterationCount: 'infinite',
+                }}
+              />
             )}
           </div>
         )}

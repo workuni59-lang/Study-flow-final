@@ -13,6 +13,24 @@ import { playAlertSound } from '../../lib/alertSounds';
 // Extract unique categories from wallpapers
 const IMAGE_CATEGORIES = [...new Set(WALLPAPERS.filter(w => w.type === 'image' && w.category).map(w => w.category!))];
 
+const MOOD_GRADIENTS: Record<string, string> = {
+  'ember-glow': 'linear-gradient(135deg, #f97316, #dc2626, #ea580c)',
+  'frost-mint': 'linear-gradient(135deg, #0d9488, #2dd4bf, #67e8f9)',
+  'twilight-sky': 'linear-gradient(135deg, #1e3a5f, #7c3aed, #e11d48)',
+  'warm-latte': 'linear-gradient(135deg, #fef3c7, #d97706, #78350f)',
+  'charcoal': 'linear-gradient(135deg, #1e293b, #0f172a, #000000)',
+  'blush': 'linear-gradient(135deg, #fce7f3, #fda4af, #fff1f2)',
+  'lavender-dream': 'linear-gradient(135deg, #e8d5f5, #c084fc, #a855f7)',
+  'midnight-ocean': 'linear-gradient(135deg, #0f172a, #0d9488, #1e293b)',
+  'golden-hour': 'linear-gradient(135deg, #fbbf24, #f59e0b, #fcd34d)',
+  'northern-sky': 'linear-gradient(135deg, #059669, #0d9488, #4f46e5)',
+  'rose-quartz': 'linear-gradient(135deg, #fbcfe8, #e879f9, #d8b4fe)',
+  'cobalt-night': 'linear-gradient(135deg, #1e3a5f, #1e1b4b, #3730a3)',
+  'harvest': 'linear-gradient(135deg, #d97706, #b91c1c, #f59e0b)',
+  'moonlit-fog': 'linear-gradient(135deg, #94a3b8, #cbd5e1, #f1f5f9)',
+  'terra-cotta': 'linear-gradient(135deg, #c2410c, #9a3412, #7c2d12)',
+};
+
 type TimerMode = 'focus' | 'shortBreak' | 'longBreak' | 'taskETA';
 interface Preset { id: string; name: string; icon: any; focus: number; short: number; long: number; }
 
@@ -411,7 +429,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
 
       {/* Animated wallpapers — simple name tags */}
       <div className="flex flex-wrap gap-1.5 mb-3">
-        {WALLPAPERS.filter(w => !w.url).filter(w => {
+        {WALLPAPERS.filter(w => !w.url && w.category !== 'Moods').filter(w => {
           if (wallpaperType !== 'All' && w.type !== wallpaperType.toLowerCase()) return false;
           if (wallpaperCategory !== 'All' && w.category !== wallpaperCategory) return false;
           if (wallpaperBrightness !== 'All' && w.brightness !== wallpaperBrightness.toLowerCase()) return false;
@@ -429,6 +447,24 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
             {!userStats.isPremium && w.isPremium && <Crown className="w-2.5 h-2.5 inline ml-1 -mt-0.5" />}
           </button>
         ))}
+      </div>
+
+      {/* Moods gradient grid */}
+      <div className="mb-3">
+        <p className="text-[8px] font-bold uppercase tracking-widest text-white/30 mb-2">Moods</p>
+        <div className="grid grid-cols-2 gap-2">
+          {WALLPAPERS.filter(w => w.category === 'Moods').map(w => (
+            <button key={w.id} onClick={() => { if(w.isPremium && !userStats.isPremium) setShowPremiumModal(true); else setThemeConfig({...themeConfig, wallpaper: w.id}); }}
+              className={`aspect-[4/3] rounded-xl relative overflow-hidden transition-all group ${themeConfig.wallpaper === w.id ? 'ring-2 ring-brand' : 'hover:ring-1 ring-white/20'}`}>
+              <div className="absolute inset-0" style={{ background: MOOD_GRADIENTS[w.id] || MOOD_GRADIENTS['ember-glow'] }} />
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-2">
+                <span className="text-[9px] font-bold text-white leading-tight block truncate">{w.name}</span>
+              </div>
+              {themeConfig.wallpaper === w.id && <div className="absolute top-2 right-2 bg-brand rounded-full p-0.5"><Check className="w-3 h-3 text-white" /></div>}
+              {!userStats.isPremium && w.isPremium && <div className="absolute top-2 left-2"><Crown className="w-3 h-3 text-white" /></div>}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Image wallpaper grid */}

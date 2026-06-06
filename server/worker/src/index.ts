@@ -9,6 +9,7 @@ interface Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
   POLAR_API_URL?: string;
   FRONTEND_URL?: string;
+  POLAR_WEBHOOK_SECRET: string;
 }
 
 function corsHeaders(origin: string): Record<string, string> {
@@ -21,6 +22,51 @@ function corsHeaders(origin: string): Record<string, string> {
 
 function supabaseAdmin(env: Env) {
   return createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
+}
+
+const encoder = new TextEncoder();
+
+function base64decode(str: string): Uint8Array {
+  const binary = atob(str);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+}
+
+async function verifyWebhookSignature(
+  rawBody: string,
+  webhookId: string,
+  webhookTimestamp: string,
+  signatureHeader: string,
+  secret: string,
+): Promise<boolean> {
+  const secretBytes = base64decode(secret);
+  const signedContent = `${webhookId}.${webhookTimestamp}.${rawBody}`;
+
+  const key = await crypto.subtle.importKey(
+    'raw',
+    secretBytes,
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['verify'],
+  );
+
+  const expectedSignatures = signatureHeader.split(' ');
+
+  for (const sig of expectedSignatures) {
+    const sigBytes = base64decode(sig);
+    const valid = await crypto.subtle.verify(
+      'HMAC',
+      key,
+      sigBytes,
+      encoder.encode(signedContent),
+    );
+    if (valid) return true;
+  }
+
+  return false;
 }
 
 export default {
@@ -107,6 +153,22 @@ async function handleCreateCheckout(
 async function handlePolarWebhook(request: Request, env: Env): Promise<Response> {
   try {
     const raw = await request.text();
+
+    const webhookId = request.headers.get('webhook-id') || '';
+    const webhookTimestamp = request.headers.get('webhook-timestamp') || '';
+    const signatureHeader = request.headers.get('webhook-signature') || '';
+
+    if (!webhookId || !webhookTimestamp || !signatureHeader) {
+      console.error('Missing webhook headers:', { webhookId, webhookTimestamp, signatureHeader });
+      return new Response('Unauthorized', { status: 401 });
+    }
+
+    const valid = await verifyWebhookSignature(raw, webhookId, webhookTimestamp, signatureHeader, env.POLAR_WEBHOOK_SECRET);
+    if (!valid) {
+      console.error('Invalid webhook signature');
+      return new Response('Unauthorized', { status: 401 });
+    }
+
     const event = JSON.parse(raw);
     const db = supabaseAdmin(env);
 

@@ -163,7 +163,7 @@ export const PremiumModal = () => {
                       billing === 'monthly' ? 'bg-white/10 text-white' : 'text-white/30 hover:text-white/50'
                     }`}
                   >
-                    Monthly<br /><span className="text-[10px] font-black">$9.99</span>
+                    Monthly<br /><span className="text-[10px] font-black">$7.99</span>
                   </button>
                   <button
                     onClick={() => setBilling('yearly')}
@@ -171,8 +171,8 @@ export const PremiumModal = () => {
                       billing === 'yearly' ? 'bg-white/10 text-white' : 'text-white/30 hover:text-white/50'
                     }`}
                   >
-                    Yearly<br /><span className="text-[10px] font-black">$69.99</span>
-                    <span className="text-[7px] text-emerald-400 ml-1">Save 42%</span>
+                    Yearly<br /><span className="text-[10px] font-black">$64.99</span>
+                    <span className="text-[7px] text-emerald-400 ml-1">Save 32%</span>
                   </button>
                 </div>
 
@@ -204,7 +204,7 @@ export const PremiumModal = () => {
                   {userStats.isPremium ? 'Dev: Deactivate Premium' : 'Dev: Activate Premium'}
                 </button>
                 <p className="text-[8px] text-center text-white/30 font-bold uppercase tracking-widest">
-                  {billing === 'monthly' ? '$9.99/MO' : '$69.99/YR'} • CANCEL ANYTIME • 7-DAY FREE TRIAL
+                  {billing === 'monthly' ? '$7.99/MO' : '$64.99/YR'} • CANCEL ANYTIME • 7-DAY FREE TRIAL
                 </p>
                 {!userStats.isPremium && (
                   <p className="text-[8px] text-center text-white/15">

@@ -4,6 +4,8 @@ import { X, Crown, Zap, Shield, Sparkles, CheckCircle2, Monitor, Palette, Headph
 import { useStudy } from '../../context/StudyContext';
 import { useAuth } from '../../context/AuthContext';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'https://studyflow-api.workuni59.workers.dev';
+
 const features = [
   { icon: Monitor, t: 'Elite Environments', d: 'Cyber Library, Zen Garden, Animated Mesh & more.', free: '3 wallpapers', premium: '12+ wallpapers' },
   { icon: Palette, t: 'Clock Customizer', d: 'Full control over fonts, hands, faces, and presets.', free: 'Basic variants', premium: 'All variants + presets' },
@@ -27,7 +29,7 @@ export const PremiumModal = () => {
 
     try {
       if (forceDev) {
-        const devRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/dev-activate`, {
+        const devRes = await fetch(`${API_BASE}/api/dev-activate`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId: user?.uid }),
@@ -38,7 +40,7 @@ export const PremiumModal = () => {
         return;
       }
 
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/create-checkout`, {
+      const res = await fetch(`${API_BASE}/api/create-checkout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -54,15 +56,9 @@ export const PremiumModal = () => {
 
       window.location.href = data.url;
     } catch (err: any) {
-      console.warn('Server unreachable, using dev toggle:', err.message);
-      await new Promise(r => setTimeout(r, 800));
-      togglePremium();
-      setActivated(true);
-      setTimeout(() => {
-        setShowPremiumModal(false);
-        setActivated(false);
-        setActivating(false);
-      }, 1800);
+      console.error('API unreachable:', err.message);
+      setError('Could not reach payment server. Please try again.');
+      setActivating(false);
     }
   };
 

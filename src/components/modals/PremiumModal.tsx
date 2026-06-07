@@ -9,9 +9,9 @@ const API_BASE = import.meta.env.VITE_API_URL || 'https://studyflow-api.workuni5
 const features = [
   { icon: Palette,     label: '15 Mood Themes',        desc: 'All 15 mood themes' },
   { icon: Sparkles,    label: '7 Animated Themes',      desc: 'All animated themes' },
-  { icon: Image,       label: 'Wallpapers + Custom Upload', desc: 'Use your own images' },
+  { icon: Image,       label: '57 Wallpapers + Custom Upload', desc: 'Use your own images' },
   { icon: SwatchBook,  label: 'Full Color Palette',     desc: 'All 9 colors unlocked' },
-  { icon: Headphones,  label: 'Ambience Library',       desc: '35 sounds + streaming' },
+  { icon: Headphones,  label: 'Ambience Library',       desc: '35 sounds + custom playlists' },
   { icon: BarChart3,   label: 'Full Analytics',         desc: 'Heatmaps & velocity tracking' },
   { icon: Brain,       label: 'Brain Scan',             desc: 'Full mastery heatmap' },
   { icon: Clock,       label: 'Clock Customizer',       desc: 'All clock variants & presets' },

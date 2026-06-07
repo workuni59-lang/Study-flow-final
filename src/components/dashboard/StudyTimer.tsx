@@ -553,8 +553,36 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
   /* ── Floating variant: no card, no container, rendered directly on environment ── */
   if (variant === 'floating') {
     return (
-      <div className="flex flex-col items-center gap-8 py-8">
+      <div className="flex flex-col items-center gap-6 py-6">
         {renderTimerFace()}
+
+        <TimerModePills />
+
+        {mode === 'taskETA' && (
+          <div className="w-full max-w-[200px] px-1">
+            <select 
+              value={selectedTaskId || ''} 
+              onChange={(e) => {
+                const id = e.target.value;
+                setSelectedTaskId(id);
+                const task = tasks.find(t => t.id === id);
+                if (task) {
+                  setTimeLeft((task.estimatedMinutes || 25) * 60);
+                  setIsActive(false);
+                }
+              }}
+              className="w-full bg-white/5 border border-white/10 rounded-xl p-2 text-[10px] font-bold text-white focus:outline-none appearance-none cursor-pointer text-center"
+            >
+              <option value="" className="bg-[#0a0c10]">Select a task...</option>
+              {tasks.filter(t => !t.completed).map(t => (
+                <option key={t.id} value={t.id} className="bg-[#0a0c10]">
+                  {t.title} ({t.estimatedMinutes || 25}m)
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <AnimatePresence mode="wait">
           {showThemePicker ? (
             <motion.div key="theme" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="w-full max-w-xs">

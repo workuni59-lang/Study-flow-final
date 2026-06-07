@@ -18,7 +18,7 @@ const features = [
 ];
 
 export const PremiumModal = () => {
-  const { userStats, setShowPremiumModal, showPremiumModal, togglePremium } = useStudy();
+  const { userStats, setShowPremiumModal, showPremiumModal } = useStudy();
   const { user } = useAuth();
   const [activating, setActivating] = useState(false);
   const [activated, setActivated] = useState(false);
@@ -187,16 +187,6 @@ export const PremiumModal = () => {
                   </div>
                 ))}
               </div>
-            </div>
-
-            {/* Dev toggle */}
-            <div className="px-6 pb-5 shrink-0">
-              <button
-                onClick={() => { togglePremium(); setShowPremiumModal(false); }}
-                className="block mx-auto text-[8px] text-white/15 hover:text-white/30 underline underline-offset-2 transition-colors"
-              >
-                {userStats.isPremium ? 'Dev: Deactivate Premium' : 'Dev: Activate Premium'}
-              </button>
             </div>
           </motion.div>
         </div>

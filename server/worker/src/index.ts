@@ -135,7 +135,7 @@ async function handleCreateCheckout(
       customer_email: email || undefined,
       metadata: { user_id: userId },
       success_url: returnUrl || `${requestOrigin}/settings?upgrade=success`,
-      product_id: productId,
+      products: [productId],
     }),
   });
 

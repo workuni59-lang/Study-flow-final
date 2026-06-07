@@ -3,5 +3,12 @@
   "name": "studyflow-api",
   "main": "src/index.ts",
   "compatibility_date": "2026-06-02",
-  "compatibility_flags": ["nodejs_compat"]
+  "compatibility_flags": ["nodejs_compat"],
+  "vars": {
+    "POLAR_API_URL": "https://api.polar.sh",
+    "POLAR_ORGANIZATION_ID": "6208ec7c-8f01-4407-b952-6ef44eee9bbc",
+    "POLAR_PRODUCT_MONTHLY": "ba2e0a7b-8e36-41ce-a6c6-af914f5eb647",
+    "POLAR_PRODUCT_YEARLY": "72493ad3-4471-4e9c-814c-e02e8a60c734",
+    "SUPABASE_URL": "https://cxmwfmbmkjsnhtarktfe.supabase.co"
+  }
 }

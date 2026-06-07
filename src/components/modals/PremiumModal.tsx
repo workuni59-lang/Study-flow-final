@@ -169,7 +169,7 @@ export const PremiumModal = () => {
                 </button>
               )}
 
-              <p className="mt-2 text-[9px] text-center text-white/20 font-medium">Secure payment via Pulse</p>
+              <p className="mt-2 text-[9px] text-center text-white/20 font-medium">Secure payment via Polar</p>
             </div>
 
             {/* SECTION 4 — FEATURES */}

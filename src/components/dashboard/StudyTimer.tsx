@@ -121,6 +121,10 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
+  const filteredPhotos = useMemo(() =>
+    WALLPAPERS.filter(w => w.url).filter(w => photoCategory === 'All' || w.category === photoCategory),
+  [photoCategory]);
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -463,7 +467,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
       </div>
 
       <div className="grid grid-cols-2 gap-2">
-        {useMemo(() => WALLPAPERS.filter(w => w.url).filter(w => photoCategory === 'All' || w.category === photoCategory), [photoCategory]).map(w => (
+        {filteredPhotos.map(w => (
           <button key={w.id} onClick={() => { if(w.isPremium && !userStats.isPremium) setShowPremiumModal(true); else setThemeConfig({...themeConfig, wallpaper: w.id}); }}
             className={`aspect-[4/3] rounded-xl relative overflow-hidden transition-all group ${themeConfig.wallpaper === w.id ? 'ring-2 ring-brand' : 'hover:ring-1 ring-white/20'}`}>
             <img src={w.url} alt={w.name} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />

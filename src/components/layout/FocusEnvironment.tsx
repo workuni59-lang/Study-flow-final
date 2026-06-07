@@ -1,5 +1,6 @@
 import { memo, useMemo, useState, useRef, useEffect } from 'react';
 import { StudyTimer } from '../dashboard/StudyTimer';
+import { NotesPanel } from '../panels/NotesPanel';
 
 interface FocusEnvironmentProps {
   onTasksOpen: () => void;
@@ -74,6 +75,7 @@ export const FocusEnvironment = memo(({
 }: FocusEnvironmentProps) => {
   const dockRef = useRef<HTMLDivElement>(null);
   const [dockVisible, setDockVisible] = useState(true);
+  const [isNotesOpen, setIsNotesOpen] = useState(false);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
   // Auto-hide dock when idle
@@ -102,19 +104,12 @@ export const FocusEnvironment = memo(({
   // Performance gate for particles
   const canParticles = typeof navigator === 'undefined' || navigator.hardwareConcurrency > 4;
 
-  const handlers = useMemo(() => ({
-    tasks: onTasksOpen,
-    ambience: onMusicOpen,
-    notes: onNotepadOpen,
-    quests: onQuestsOpen,
-  }), [onTasksOpen, onMusicOpen, onNotepadOpen, onQuestsOpen]);
-
   const utilityItems = useMemo(() => [
-    { id: 'tasks', label: 'Tasks', handler: handlers.tasks },
-    { id: 'ambience', label: 'Ambience', handler: handlers.ambience },
-    { id: 'notes', label: 'Notes', handler: handlers.notes },
-    { id: 'quests', label: 'Quests', handler: handlers.quests },
-  ].filter(i => i.handler), [handlers]);
+    { id: 'tasks', label: 'Tasks', handler: onTasksOpen },
+    { id: 'notes', label: 'Notes', handler: () => setIsNotesOpen(true) },
+    { id: 'ambience', label: 'Ambience', handler: onMusicOpen },
+    { id: 'quests', label: 'Quests', handler: onQuestsOpen },
+  ].filter(i => i.handler), [onTasksOpen, onMusicOpen, onQuestsOpen]);
 
   return (
     <div className="relative flex flex-col items-center w-full min-h-[calc(100dvh-8rem)]">
@@ -148,6 +143,8 @@ export const FocusEnvironment = memo(({
           </UtilityButton>
         ))}
       </div>
+
+      <NotesPanel isOpen={isNotesOpen} onClose={() => setIsNotesOpen(false)} />
     </div>
   );
 });

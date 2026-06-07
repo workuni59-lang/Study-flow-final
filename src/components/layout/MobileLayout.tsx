@@ -8,9 +8,11 @@ import { HomeView } from './HomeView';
 import { FocusEnvironment } from './FocusEnvironment';
 import { MenuDrawer, type Section } from './MenuDrawer';
 import { SidePanel } from '../panels/SidePanel';
-import { TasksPanel } from '../panels/TasksPanel';
 import { AmbiencePanel, type CuratedPlaylist } from '../panels/AmbiencePanel';
-import { NotepadPanel } from '../panels/NotepadPanel';
+import { NotesPanel } from '../panels/NotesPanel';
+
+const TasksPanelLazy = lazy(() => import('../panels/TasksPanel').then(m => ({ default: m.TasksPanel })));
+const NotepadPanelLazy = lazy(() => import('../panels/NotepadPanel').then(m => ({ default: m.NotepadPanel })));
 import { PremiumModal } from '../modals/PremiumModal';
 import { AchievementNotification } from '../notifications/AchievementNotification';
 import { Confetti } from '../notifications/Confetti';
@@ -42,6 +44,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
   const [section, setSection] = useState<Section>('dashboard');
   const [menuOpen, setMenuOpen] = useState(false);
   const [panelOpen, setPanelOpen] = useState<'tasks' | 'ambience' | 'notepad' | null>(null);
+  const [isNotesOpen, setIsNotesOpen] = useState(false);
   const [ambienceUrl, setAmbienceUrl] = useState<CuratedPlaylist | null>(null);
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [prevLevel, setPrevLevel] = useState(userStats.level);
@@ -122,12 +125,12 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
 
           {/* Main content */}
           <main>
-            {mode === 'home' && <HomeView onNotepadOpen={() => setPanelOpen('notepad')} menuOpen={menuOpen} />}
+            {mode === 'home' && <HomeView onNotepadOpen={() => setIsNotesOpen(true)} menuOpen={menuOpen} />}
             {mode === 'focus' && (
               <FocusEnvironment
                 onTasksOpen={() => setPanelOpen('tasks')}
                 onMusicOpen={() => setPanelOpen('ambience')}
-                onNotepadOpen={() => setPanelOpen('notepad')}
+                onNotepadOpen={() => setIsNotesOpen(true)}
               />
             )}
           </main>
@@ -138,7 +141,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
             onModeChange={setMode}
             onTasksOpen={() => setPanelOpen('tasks')}
             onStatsOpen={() => setSection('analytics')}
-            onNotepadOpen={() => setPanelOpen('notepad')}
+            onNotepadOpen={() => setIsNotesOpen(true)}
           />
         </>
       )}
@@ -154,7 +157,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
 
       {/* Side panels */}
       <SidePanel open={panelOpen === 'tasks'} onClose={() => setPanelOpen(null)} title="Tasks">
-        <TasksPanel />
+        <Suspense fallback={null}><TasksPanelLazy /></Suspense>
       </SidePanel>
 
       <SidePanel open={panelOpen === 'ambience'} onClose={() => setPanelOpen(null)} title="Ambience">
@@ -187,7 +190,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
       )}
 
       <SidePanel open={panelOpen === 'notepad'} onClose={() => setPanelOpen(null)} title="Notepad">
-        <NotepadPanel />
+        <Suspense fallback={null}><NotepadPanelLazy /></Suspense>
       </SidePanel>
 
       {/* Overlays & modals */}
@@ -209,6 +212,8 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
           </button>
         </div>
       )}
+
+      <NotesPanel isOpen={isNotesOpen} onClose={() => setIsNotesOpen(false)} />
     </div>
   );
 };

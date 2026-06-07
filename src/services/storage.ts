@@ -3,6 +3,15 @@
  * High-reliability implementation with global error catching.
  */
 
+export interface Note {
+  id: string;
+  title: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+  theme?: 'dark' | 'cream' | 'sepia' | 'gray';
+}
+
 const STORAGE_KEYS = {
   TASKS: 'study_flow_tasks',
   EXAMS: 'study_flow_exams',
@@ -20,6 +29,7 @@ const STORAGE_KEYS = {
   PET_SIZE: 'study_flow_pet_size',
   SIDEBAR_COLLAPSED: 'study_flow_sidebar_collapsed',
   NOTEPAD: 'study_flow_notepad',
+  NOTES: 'study_flow_notes',
   MASTER_VOLUME: 'study_flow_master_volume',
   ACTIVE_TRACKS: 'study_flow_active_tracks',
   TRACK_VOLUMES: 'study_flow_track_volumes',
@@ -109,9 +119,25 @@ export const storage = {
   saveSidebarCollapsed: (collapsed: boolean) => safeSet(STORAGE_KEYS.SIDEBAR_COLLAPSED, collapsed),
   getSidebarCollapsed: (): boolean | null => safeGet(STORAGE_KEYS.SIDEBAR_COLLAPSED),
 
-  // --- Notepad ---
-  saveNotepad: (content: string) => safeSet(STORAGE_KEYS.NOTEPAD, content),
-  getNotepad: (): string | null => safeGet(STORAGE_KEYS.NOTEPAD),
+  // --- Notepad (multi-note) ---
+  getNotes: (): Note[] => {
+    const old = safeGet(STORAGE_KEYS.NOTEPAD);
+    if (typeof old === 'string') {
+      const notes: Note[] = [{
+        id: Date.now().toString(),
+        title: 'Notes',
+        content: old,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        theme: 'dark',
+      }];
+      safeSet(STORAGE_KEYS.NOTES, notes);
+      safeSet(STORAGE_KEYS.NOTEPAD, null);
+      return notes;
+    }
+    return (safeGet(STORAGE_KEYS.NOTES) || []).map((n: Note) => ({ ...n, theme: n.theme || 'dark' }));
+  },
+  saveNotes: (notes: Note[]) => safeSet(STORAGE_KEYS.NOTES, notes),
 
   // --- Audio ---
   saveMasterVolume: (vol: number) => safeSet(STORAGE_KEYS.MASTER_VOLUME, vol),

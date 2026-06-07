@@ -10,8 +10,43 @@ import { useStudy, useFocus } from '../../context/StudyContext';
 import { ATMOSPHERES, WALLPAPERS } from '../../lib/gamification';
 import { playAlertSound } from '../../lib/alertSounds';
 
-// Extract unique categories from wallpapers
-const IMAGE_CATEGORIES = [...new Set(WALLPAPERS.filter(w => w.type === 'image' && w.category).map(w => w.category!))];
+const PHOTO_CATEGORIES = [...new Set(WALLPAPERS.filter(w => w.type === 'image' && w.category).map(w => w.category!))];
+
+const formatTimeBase = (seconds: number) => {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+};
+
+const MemoTimerDisplay = React.memo(({ timeLeft, progress, completed, tallyEmojis, sessionsCompleted, size, floating }: {
+  timeLeft: number; progress: number; completed: number; tallyEmojis: string[];
+  sessionsCompleted: number; size?: 'md' | 'lg'; floating?: boolean;
+}) => (
+  <div className="text-center">
+    <div className="timer-display text-white/90 select-none"
+      style={{
+        fontSize: floating ? 'clamp(5rem, 18vw, 12rem)' : size === 'lg' ? 'clamp(5rem, 18vw, 12rem)' : 'calc(4.5rem * var(--scale-factor, 1))',
+        textShadow: floating ? '0 4px 40px rgba(0,0,0,0.3)' : 'none',
+      }}>
+      {formatTimeBase(timeLeft)}
+    </div>
+    <div className={`mx-auto h-[2px] bg-white/5 rounded-full overflow-hidden mt-4 ${floating ? 'max-w-[140px]' : 'max-w-[160px]'}`}>
+      <div className="h-full bg-gradient-to-r from-brand/50 to-brand-light/70 rounded-full transition-transform duration-1000 ease-linear" style={{ transform: `scaleX(${progress})`, transformOrigin: 'left' }} />
+    </div>
+    <div className="flex items-center justify-center gap-2 mt-3">
+      <div className="flex items-center gap-2">
+        <div className="flex">
+          {[...Array(4)].map((_, i) => (
+            <span key={i} className={`w-5 h-5 flex items-center justify-center text-[11px] transition-all ${i < completed ? 'opacity-100 scale-110' : 'opacity-20 scale-90'}`}>
+              {tallyEmojis[i]}
+            </span>
+          ))}
+        </div>
+        <span className="text-[8px] font-medium uppercase tracking-wider text-white/30">Cycle {Math.floor(sessionsCompleted / 4) + 1}</span>
+      </div>
+    </div>
+  </div>
+));
 
 const MOOD_GRADIENTS: Record<string, string> = {
   'ember-glow': 'linear-gradient(135deg, #f97316, #dc2626, #ea580c)',
@@ -29,6 +64,17 @@ const MOOD_GRADIENTS: Record<string, string> = {
   'harvest': 'linear-gradient(135deg, #d97706, #b91c1c, #f59e0b)',
   'moonlit-fog': 'linear-gradient(135deg, #94a3b8, #cbd5e1, #f1f5f9)',
   'terra-cotta': 'linear-gradient(135deg, #c2410c, #9a3412, #7c2d12)',
+};
+
+const ANIMATED_ACCENTS: Record<string, string> = {
+  'none': '#64748b',
+  'minimal': '#94a3b8',
+  'mesh': '#818cf8',
+  'cyberpunk': '#e879f9',
+  'dots': '#38bdf8',
+  'aurora': '#34d399',
+  'stardust': '#1e293b',
+  'zen': '#c084fc',
 };
 
 type TimerMode = 'focus' | 'shortBreak' | 'longBreak' | 'taskETA';
@@ -67,11 +113,8 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
   // Theme Picker State
   const [showThemePicker, setShowThemePicker] = useState(false);
   const [showPresetPicker, setShowPresetPicker] = useState(false);
-  const [pickerTab, setPickerTab] = useState<'atm' | 'wall'>('atm');
-  const [wallpaperCategory, setWallpaperCategory] = useState<string>('All');
-  const [wallpaperType, setWallpaperType] = useState<string>('All');
-  const [wallpaperBrightness, setWallpaperBrightness] = useState<string>('All');
-  const [wallpaperEnvironment, setWallpaperEnvironment] = useState<string>('All');
+  const [pickerTab, setPickerTab] = useState<'atm' | 'moods' | 'animated' | 'photos' | 'custom'>('atm');
+  const [photoCategory, setPhotoCategory] = useState<string>('All');
   const [sessionsCompleted, setSessionsCompleted] = useState(0);
   const [customImgError, setCustomImgError] = useState(false);
   const [tallyStyle, setTallyStyle] = useState('dots');
@@ -261,12 +304,6 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
     }
   };
 
-  const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-  };
-
   const handleCustomizationClick = (type: 'atm' | 'wall', id: any, isPremium: boolean, levelReq: number) => {
     if (isPremium && !userStats.isPremium) { setShowPremiumModal(true); return; }
     if (userStats.level < levelReq) return;
@@ -322,21 +359,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
   );
 
   const TimerDisplay = ({ size = 'md', floating }: { size?: 'md' | 'lg'; floating?: boolean }) => (
-    <div className="text-center">
-      <div className="timer-display text-white/90 select-none"
-        style={{
-          fontSize: floating ? 'clamp(5rem, 18vw, 12rem)' : size === 'lg' ? 'clamp(5rem, 18vw, 12rem)' : 'calc(4.5rem * var(--scale-factor, 1))',
-          textShadow: floating ? '0 4px 40px rgba(0,0,0,0.3)' : 'none',
-        }}>
-        {formatTime(timeLeft)}
-      </div>
-      <div className={`mx-auto h-[2px] bg-white/5 rounded-full overflow-hidden mt-4 ${floating ? 'max-w-[140px]' : 'max-w-[160px]'}`}>
-        <div className="h-full bg-gradient-to-r from-brand/50 to-brand-light/70 rounded-full transition-transform duration-1000 ease-linear" style={{ transform: `scaleX(${progress})`, transformOrigin: 'left' }} />
-      </div>
-      <div className="flex items-center justify-center gap-2 mt-3">
-        {renderTallies()}
-      </div>
-    </div>
+    <MemoTimerDisplay timeLeft={timeLeft} progress={progress} completed={completed} tallyEmojis={tallyEmojis} sessionsCompleted={sessionsCompleted} size={size} floating={floating} />
   );
 
   const TimerButtons = ({ glassVariant }: { glassVariant?: boolean }) => (
@@ -364,11 +387,11 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
           <>
             <button onClick={() => { setShowPresetPicker(v => !v); setShowThemePicker(false); }}
               className="px-4 py-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10 transition-colors">
-              <Timer className="w-4 h-4 text-white/60" />
+              <Timer className="w-4 h-4 text-white/80" />
             </button>
             <button onClick={() => setShowThemePicker(v => !v)}
               className="px-4 py-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10 transition-colors">
-              <Palette className="w-4 h-4 text-white/60" />
+              <Palette className="w-4 h-4 text-white/80" />
             </button>
           </>
         )}
@@ -391,91 +414,56 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
     </motion.div>
   );
 
-  const renderGalleryTab = () => (
-    <motion.div key="wall" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.15 }} className="space-y-3 pt-1">
-      {/* Type filter pills */}
-      <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
-        {['All', 'Animated', 'Image'].map(t => (
-          <button key={t} onClick={() => setWallpaperType(t)}
-            className={`shrink-0 px-2.5 py-1 rounded-lg text-[7px] font-bold uppercase tracking-wider transition-all ${wallpaperType === t ? 'bg-brand text-white' : 'bg-white/[0.04] text-white/40 hover:text-white/60'}`}>{t}</button>
-        ))}
-      </div>
-
-      {/* Brightness filter pills */}
-      <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
-        {['All', 'Light', 'Dark', 'Vibrant'].map(b => (
-          <button key={b} onClick={() => setWallpaperBrightness(b)}
-            className={`shrink-0 px-2.5 py-1 rounded-lg text-[7px] font-bold uppercase tracking-wider transition-all ${wallpaperBrightness === b ? 'bg-brand text-white' : 'bg-white/[0.04] text-white/40 hover:text-white/60'}`}>{b}</button>
-        ))}
-      </div>
-
-      {/* Environment filter pills */}
-      <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
-        {['All', 'Nature', 'Urban', 'Abstract', 'Interior', 'Scenic'].map(e => (
-          <button key={e} onClick={() => setWallpaperEnvironment(e)}
-            className={`shrink-0 px-2.5 py-1 rounded-lg text-[7px] font-bold uppercase tracking-wider transition-all ${wallpaperEnvironment === e ? 'bg-brand text-white' : 'bg-white/[0.04] text-white/40 hover:text-white/60'}`}>{e}</button>
-        ))}
-      </div>
-
-      {/* Category filter pills */}
-      <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
-        <button onClick={() => setWallpaperCategory('All')}
-          className={`shrink-0 px-2.5 py-1 rounded-lg text-[7px] font-bold uppercase tracking-wider transition-all ${wallpaperCategory === 'All' ? 'bg-brand text-white' : 'bg-white/[0.04] text-white/40 hover:text-white/60'}`}>All</button>
-        {IMAGE_CATEGORIES.map(cat => (
-          <button key={cat} onClick={() => setWallpaperCategory(cat)}
-            className={`shrink-0 px-2.5 py-1 rounded-lg text-[7px] font-bold uppercase tracking-wider transition-all ${wallpaperCategory === cat ? 'bg-brand text-white' : 'bg-white/[0.04] text-white/40 hover:text-white/60'}`}>{cat}</button>
-        ))}
-      </div>
-
-      {/* Animated wallpapers — simple name tags */}
-      <div className="flex flex-wrap gap-1.5 mb-3">
-        {WALLPAPERS.filter(w => !w.url && w.category !== 'Moods').filter(w => {
-          if (wallpaperType !== 'All' && w.type !== wallpaperType.toLowerCase()) return false;
-          if (wallpaperCategory !== 'All' && w.category !== wallpaperCategory) return false;
-          if (wallpaperBrightness !== 'All' && w.brightness !== wallpaperBrightness.toLowerCase()) return false;
-          if (wallpaperEnvironment !== 'All' && w.environment !== wallpaperEnvironment.toLowerCase()) return false;
-          return true;
-        }).map(w => (
+  const renderMoodsTab = () => (
+    <motion.div key="moods" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.15 }} className="pt-1">
+      <div className="grid grid-cols-2 gap-2">
+        {WALLPAPERS.filter(w => w.category === 'Moods').map(w => (
           <button key={w.id} onClick={() => { if(w.isPremium && !userStats.isPremium) setShowPremiumModal(true); else setThemeConfig({...themeConfig, wallpaper: w.id}); }}
-            className={`px-2.5 py-1 rounded-lg text-[8px] font-bold tracking-wider transition-all ${
-              themeConfig.wallpaper === w.id
-                ? 'bg-brand text-white'
-                : 'bg-white/[0.04] text-white/40 hover:text-white/60 hover:bg-white/[0.08]'
-            }`}
-          >
-            {w.name}
-            {!userStats.isPremium && w.isPremium && <Crown className="w-2.5 h-2.5 inline ml-1 -mt-0.5" />}
+            className={`aspect-[4/3] rounded-xl relative overflow-hidden transition-all group ${themeConfig.wallpaper === w.id ? 'ring-2 ring-brand' : 'hover:ring-1 ring-white/20'}`}>
+            <div className="absolute inset-0" style={{ background: MOOD_GRADIENTS[w.id] || MOOD_GRADIENTS['ember-glow'] }} />
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-2">
+              <span className="text-[9px] font-bold text-white leading-tight block truncate">{w.name}</span>
+            </div>
+            {themeConfig.wallpaper === w.id && <div className="absolute top-2 right-2 bg-brand rounded-full p-0.5"><Check className="w-3 h-3 text-white" /></div>}
+            {!userStats.isPremium && w.isPremium && <div className="absolute top-2 left-2"><Crown className="w-3 h-3 text-white" /></div>}
           </button>
         ))}
       </div>
+    </motion.div>
+  );
 
-      {/* Moods gradient grid */}
-      <div className="mb-3">
-        <p className="text-[8px] font-bold uppercase tracking-widest text-white/30 mb-2">Moods</p>
-        <div className="grid grid-cols-2 gap-2">
-          {WALLPAPERS.filter(w => w.category === 'Moods').map(w => (
-            <button key={w.id} onClick={() => { if(w.isPremium && !userStats.isPremium) setShowPremiumModal(true); else setThemeConfig({...themeConfig, wallpaper: w.id}); }}
-              className={`aspect-[4/3] rounded-xl relative overflow-hidden transition-all group ${themeConfig.wallpaper === w.id ? 'ring-2 ring-brand' : 'hover:ring-1 ring-white/20'}`}>
-              <div className="absolute inset-0" style={{ background: MOOD_GRADIENTS[w.id] || MOOD_GRADIENTS['ember-glow'] }} />
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-2">
-                <span className="text-[9px] font-bold text-white leading-tight block truncate">{w.name}</span>
-              </div>
-              {themeConfig.wallpaper === w.id && <div className="absolute top-2 right-2 bg-brand rounded-full p-0.5"><Check className="w-3 h-3 text-white" /></div>}
-              {!userStats.isPremium && w.isPremium && <div className="absolute top-2 left-2"><Crown className="w-3 h-3 text-white" /></div>}
-            </button>
-          ))}
-        </div>
+  const renderAnimatedTab = () => (
+    <motion.div key="animated" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.15 }} className="pt-1">
+      <div className="flex flex-wrap gap-1.5">
+        {WALLPAPERS.filter(w => w.type === 'animated' && w.category !== 'Moods').map(w => (
+          <button key={w.id} onClick={() => { if(w.isPremium && !userStats.isPremium) setShowPremiumModal(true); else setThemeConfig({...themeConfig, wallpaper: w.id}); }}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[8px] font-bold tracking-wider transition-all ${
+              themeConfig.wallpaper === w.id
+                ? 'bg-brand text-white shadow-lg'
+                : 'bg-black/15 backdrop-blur-sm border border-white/10 text-white/60 hover:text-white/90 hover:bg-black/25'
+            }`}>
+            <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: ANIMATED_ACCENTS[w.id] || '#64748b' }} />
+            {w.name}
+            {!userStats.isPremium && w.isPremium && <Crown className="w-2.5 h-2.5 ml-0.5" />}
+          </button>
+        ))}
+      </div>
+    </motion.div>
+  );
+
+  const renderPhotosTab = () => (
+    <motion.div key="photos" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.15 }} className="pt-1 space-y-3">
+      <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+        <button onClick={() => setPhotoCategory('All')}
+          className={`shrink-0 px-2.5 py-1 rounded-lg text-[7px] font-bold uppercase tracking-wider transition-all ${photoCategory === 'All' ? 'bg-brand text-white shadow-sm' : 'bg-black/15 backdrop-blur-sm border border-white/10 text-white/50 hover:text-white/80 hover:bg-black/25'}`}>All</button>
+        {PHOTO_CATEGORIES.map(cat => (
+          <button key={cat} onClick={() => setPhotoCategory(cat)}
+            className={`shrink-0 px-2.5 py-1 rounded-lg text-[7px] font-bold uppercase tracking-wider transition-all ${photoCategory === cat ? 'bg-brand text-white shadow-sm' : 'bg-black/15 backdrop-blur-sm border border-white/10 text-white/50 hover:text-white/80 hover:bg-black/25'}`}>{cat}</button>
+        ))}
       </div>
 
-      {/* Image wallpaper grid */}
       <div className="grid grid-cols-2 gap-2">
-        {WALLPAPERS.filter(w => w.url).filter(w => {
-          if (wallpaperType !== 'All' && w.type !== wallpaperType.toLowerCase()) return false;
-          if (wallpaperCategory !== 'All' && w.category !== wallpaperCategory) return false;
-          if (wallpaperBrightness !== 'All' && w.brightness !== wallpaperBrightness.toLowerCase()) return false;
-          if (wallpaperEnvironment !== 'All' && w.environment !== wallpaperEnvironment.toLowerCase()) return false;
-          return true;
-        }).map(w => (
+        {useMemo(() => WALLPAPERS.filter(w => w.url).filter(w => photoCategory === 'All' || w.category === photoCategory), [photoCategory]).map(w => (
           <button key={w.id} onClick={() => { if(w.isPremium && !userStats.isPremium) setShowPremiumModal(true); else setThemeConfig({...themeConfig, wallpaper: w.id}); }}
             className={`aspect-[4/3] rounded-xl relative overflow-hidden transition-all group ${themeConfig.wallpaper === w.id ? 'ring-2 ring-brand' : 'hover:ring-1 ring-white/20'}`}>
             <img src={w.url} alt={w.name} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
@@ -486,48 +474,55 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
             {!userStats.isPremium && w.isPremium && <div className="absolute top-2 left-2"><Crown className="w-3 h-3 text-white" /></div>}
           </button>
         ))}
+      </div>
+    </motion.div>
+  );
 
-        {/* Custom wallpaper tile */}
-        <button onClick={() => { if(!userStats.isPremium) setShowPremiumModal(true); else setThemeConfig({...themeConfig, wallpaper: 'custom'}); }}
-          className={`aspect-[4/3] rounded-xl relative overflow-hidden transition-all group ${themeConfig.wallpaper === 'custom' ? 'ring-2 ring-brand' : 'hover:ring-1 ring-white/20'}`}>
-          {themeConfig.customWallpaperUrl && !customImgError ? (
-            <img src={themeConfig.customWallpaperUrl} alt="Custom" className="absolute inset-0 w-full h-full object-cover" loading="lazy" onError={() => setCustomImgError(true)} />
-          ) : themeConfig.customWallpaperUrl && customImgError ? (
-            <div className="absolute inset-0 flex items-center justify-center bg-white/[0.03] p-2">
-              <span className="text-[6px] font-mono text-white/30 break-all text-center leading-tight">{themeConfig.customWallpaperUrl}</span>
-            </div>
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center bg-white/[0.03] border-2 border-dashed border-white/10">
-              <span className="text-[8px] font-bold text-white/30 uppercase tracking-widest">Custom</span>
-            </div>
-          )}
-          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-2">
-            <span className="text-[9px] font-bold text-white leading-tight block truncate">Custom</span>
+  const renderCustomTab = () => (
+    <motion.div key="custom" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.15 }} className="pt-1 space-y-3">
+      <button onClick={() => { if(!userStats.isPremium) setShowPremiumModal(true); else setThemeConfig({...themeConfig, wallpaper: 'custom'}); }}
+        className={`w-full aspect-[4/3] rounded-xl relative overflow-hidden transition-all group ${themeConfig.wallpaper === 'custom' ? 'ring-2 ring-brand' : 'hover:ring-1 ring-white/20'}`}>
+        {themeConfig.customWallpaperUrl && !customImgError ? (
+          <img src={themeConfig.customWallpaperUrl} alt="Custom" className="absolute inset-0 w-full h-full object-cover" loading="lazy" onError={() => setCustomImgError(true)} />
+        ) : themeConfig.customWallpaperUrl && customImgError ? (
+          <div className="absolute inset-0 flex items-center justify-center bg-white/[0.03] p-2">
+            <span className="text-[6px] font-mono text-white/30 break-all text-center leading-tight">{themeConfig.customWallpaperUrl}</span>
           </div>
-          {themeConfig.wallpaper === 'custom' && <div className="absolute top-2 right-2 bg-brand rounded-full p-0.5"><Check className="w-3 h-3 text-white" /></div>}
-        </button>
-      </div>
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center bg-white/[0.03] border-2 border-dashed border-white/10">
+            <span className="text-[8px] font-bold text-white/30 uppercase tracking-widest">Custom</span>
+          </div>
+        )}
+        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-2">
+          <span className="text-[9px] font-bold text-white leading-tight block truncate">Custom</span>
+        </div>
+        {themeConfig.wallpaper === 'custom' && <div className="absolute top-2 right-2 bg-brand rounded-full p-0.5"><Check className="w-3 h-3 text-white" /></div>}
+      </button>
 
-      {/* Custom background upload */}
-      <div className="pt-1">
-        <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
-        <button onClick={() => fileInputRef.current?.click()} className="w-full flex items-center justify-center gap-2 bg-white/[0.04] border-2 border-dashed border-white/10 rounded-xl p-3 text-[9px] font-semibold hover:bg-white/[0.08] hover:border-white/20 transition-all text-white/50 hover:text-white/70 uppercase tracking-wider">
-          <Upload className="w-3 h-3" /> Upload Image
-        </button>
-      </div>
+      <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+      <button onClick={() => fileInputRef.current?.click()} className="w-full flex items-center justify-center gap-2 bg-black/15 backdrop-blur-sm border border-dashed border-white/20 hover:border-white/30 rounded-xl p-3 text-[9px] font-semibold hover:bg-black/25 transition-all text-white/60 hover:text-white/80 uppercase tracking-wider">
+        <Upload className="w-3 h-3" /> Upload Image
+      </button>
     </motion.div>
   );
 
   const renderThemePicker = () => (
     <motion.div key="theme" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
-      <div className="flex gap-3 p-1 bg-white/[0.04] rounded-xl">
-        <button onClick={() => setPickerTab('atm')} className={`flex-1 py-1.5 rounded-lg text-[8px] font-semibold uppercase tracking-wider transition-all ${pickerTab === 'atm' ? 'bg-white/10 text-white' : 'text-white/40'}`}>Atmosphere</button>
-        {!isMobile && <button onClick={() => setPickerTab('wall')} className={`flex-1 py-1.5 rounded-lg text-[8px] font-semibold uppercase tracking-wider transition-all ${pickerTab === 'wall' ? 'bg-white/10 text-white' : 'text-white/40'}`}>Gallery</button>}
+      <div className="flex gap-1 p-1 bg-black/15 backdrop-blur-lg border border-white/10 rounded-xl overflow-x-auto no-scrollbar">
+        <button onClick={() => setPickerTab('atm')} className={`shrink-0 px-2 py-1.5 rounded-lg text-[7px] font-semibold uppercase tracking-wider transition-all ${pickerTab === 'atm' ? 'bg-white/15 text-white shadow-sm' : 'text-white/50 backdrop-blur-sm border border-white/[0.04]'}`}>Atmosphere</button>
+        {!isMobile && <button onClick={() => setPickerTab('moods')} className={`shrink-0 px-2 py-1.5 rounded-lg text-[7px] font-semibold uppercase tracking-wider transition-all ${pickerTab === 'moods' ? 'bg-white/15 text-white shadow-sm' : 'text-white/50 backdrop-blur-sm border border-white/[0.04]'}`}>Moods</button>}
+        {!isMobile && <button onClick={() => setPickerTab('animated')} className={`shrink-0 px-2 py-1.5 rounded-lg text-[7px] font-semibold uppercase tracking-wider transition-all ${pickerTab === 'animated' ? 'bg-white/15 text-white shadow-sm' : 'text-white/50 backdrop-blur-sm border border-white/[0.04]'}`}>Animated</button>}
+        {!isMobile && <button onClick={() => setPickerTab('photos')} className={`shrink-0 px-2 py-1.5 rounded-lg text-[7px] font-semibold uppercase tracking-wider transition-all ${pickerTab === 'photos' ? 'bg-white/15 text-white shadow-sm' : 'text-white/50 backdrop-blur-sm border border-white/[0.04]'}`}>Photos</button>}
+        {!isMobile && <button onClick={() => setPickerTab('custom')} className={`shrink-0 px-2 py-1.5 rounded-lg text-[7px] font-semibold uppercase tracking-wider transition-all ${pickerTab === 'custom' ? 'bg-white/15 text-white shadow-sm' : 'text-white/50 backdrop-blur-sm border border-white/[0.04]'}`}>Custom</button>}
       </div>
       <div className="max-h-[45vh] overflow-y-auto no-scrollbar mt-3">
-        {pickerTab === 'atm' ? renderAtmosphereTab() : !isMobile && renderGalleryTab()}
+        {pickerTab === 'atm' && renderAtmosphereTab()}
+        {pickerTab === 'moods' && !isMobile && renderMoodsTab()}
+        {pickerTab === 'animated' && !isMobile && renderAnimatedTab()}
+        {pickerTab === 'photos' && !isMobile && renderPhotosTab()}
+        {pickerTab === 'custom' && !isMobile && renderCustomTab()}
       </div>
-      <button onClick={() => setShowThemePicker(false)} className="w-full mt-3 py-2.5 bg-white/[0.06] hover:bg-white/[0.10] rounded-xl text-[9px] font-semibold uppercase tracking-wider text-white/60 transition-colors">Done</button>
+      <button onClick={() => setShowThemePicker(false)} className="w-full mt-3 py-2.5 bg-black/25 backdrop-blur-sm border border-white/10 rounded-xl text-[9px] font-semibold uppercase tracking-wider text-white/70 hover:bg-black/35 transition-colors">Done</button>
     </motion.div>
   );
 
@@ -535,7 +530,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
     <motion.div key="presets" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-2">
       {PRESETS.map(p => (
         <button key={p.id} onClick={() => { setActivePreset(p); setIsActive(false); setMode('focus'); setTimeLeft(p.focus * 60); setShowPresetPicker(false); }}
-          className={`w-full p-3 rounded-xl flex items-center justify-between transition-all ${activePreset.id === p.id ? 'bg-brand/20 text-white' : 'bg-white/[0.04] text-white/40 hover:bg-white/[0.08]'}`}>
+          className={`w-full p-3 rounded-xl flex items-center justify-between transition-all ${activePreset.id === p.id ? 'bg-brand/20 text-white' : 'bg-black/15 backdrop-blur-sm border border-white/10 text-white/50 hover:bg-black/25 hover:text-white/80'}`}>
           <div className="flex items-center gap-2.5"><p.icon className="w-3.5 h-3.5" /><span className="text-[9px] font-semibold uppercase tracking-wider">{p.name}</span></div>
           <span className="text-[9px] font-medium text-white/30">{p.focus}m / {p.short}m</span>
         </button>
@@ -568,7 +563,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
           ) : (
             <motion.div key="controls" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-4">
               <button onClick={() => { setShowPresetPicker(true); setShowThemePicker(false); }}
-                className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.04] hover:bg-white/[0.08] transition-colors text-[9px] font-semibold uppercase tracking-wider text-white/50">
+                className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/15 backdrop-blur-sm border border-white/10 hover:bg-black/25 transition-colors text-[9px] font-semibold uppercase tracking-wider text-white/60">
                 <activePreset.icon className="w-3 h-3 text-brand-light" />
                 {activePreset.name}
               </button>
@@ -593,10 +588,10 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
               <div className="flex items-center justify-between px-4 pt-4">
                 <button onClick={() => { setShowPresetPicker(!showPresetPicker); setShowThemePicker(false); }} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.10] transition-colors">
                   <activePreset.icon className="w-3 h-3 text-brand-light" />
-                  <span className="text-[9px] font-semibold uppercase tracking-wider text-white/60">{activePreset.name}</span>
+                  <span className="text-[9px] font-semibold uppercase tracking-wider text-white/70">{activePreset.name}</span>
                 </button>
                 <div className="flex items-center gap-1">
-                  <button onClick={() => setShowThemePicker(!showThemePicker)} className={`p-2 rounded-xl transition-all ${showThemePicker ? 'bg-brand text-white shadow-lg' : 'text-white/40 hover:text-white/70 hover:bg-white/5'}`}>
+                  <button onClick={() => setShowThemePicker(!showThemePicker)} className={`p-2 rounded-xl transition-all ${showThemePicker ? 'bg-brand text-white shadow-lg' : 'text-white/50 hover:text-white/80 hover:bg-black/10 backdrop-blur-sm border border-white/10'}`}>
                     <Palette className="w-4 h-4" />
                   </button>
                   <button onClick={() => setIsZenMode(true)} className="p-2 text-white/40 hover:text-white/70 hover:bg-white/5 rounded-xl transition-all">
@@ -649,10 +644,10 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
               <div className="flex items-center justify-between">
                 <button onClick={() => setShowPresetPicker(!showPresetPicker)} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.10] transition-colors">
                   <activePreset.icon className="w-3 h-3 text-brand-light" />
-                  <span className="text-[9px] font-semibold uppercase tracking-wider text-white/60">{activePreset.name}</span>
+                  <span className="text-[9px] font-semibold uppercase tracking-wider text-white/70">{activePreset.name}</span>
                 </button>
                 <div className="flex items-center gap-1">
-                  <button onClick={() => setShowThemePicker(!showThemePicker)} className={`p-2 rounded-xl transition-all ${showThemePicker ? 'bg-brand text-white shadow-lg' : 'text-white/40 hover:text-white/70 hover:bg-white/5'}`}>
+                  <button onClick={() => setShowThemePicker(!showThemePicker)} className={`p-2 rounded-xl transition-all ${showThemePicker ? 'bg-brand text-white shadow-lg' : 'text-white/50 hover:text-white/80 hover:bg-black/10 backdrop-blur-sm border border-white/10'}`}>
                     <Palette className="w-4 h-4" />
                   </button>
                   <button onClick={() => setIsZenMode(true)} className="p-2 text-white/40 hover:text-white/70 hover:bg-white/5 rounded-xl transition-all">
@@ -713,7 +708,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[100] flex flex-col items-center justify-center p-6 text-center"
           >
-            <button onClick={() => setIsZenMode(false)} className="absolute top-10 right-10 p-3 bg-white/5 text-white/40 hover:text-white rounded-xl z-50"><X className="w-6 h-6" /></button>
+            <button onClick={() => setIsZenMode(false)} className="absolute top-10 right-10 p-3 bg-black/25 backdrop-blur-sm border border-white/15 text-white/60 hover:text-white rounded-xl z-50"><X className="w-6 h-6" /></button>
 
             <motion.div
               initial={{ y: 20, opacity: 0 }}
@@ -753,7 +748,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
                   transition: 'color 0.4s ease',
                 }}
               >
-                {formatTime(timeLeft)}
+                {formatTimeBase(timeLeft)}
               </div>
 
               {/* Progress bar — hairline */}
@@ -773,13 +768,13 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
               <div className="flex items-center justify-center gap-4">
                 <button
                   onClick={() => { setIsActive(false); setTimeLeft(activePreset.focus * 60); }}
-                  className="w-12 h-12 rounded-full border border-white/15 bg-white/[0.04] text-white/40 hover:text-white/80 hover:border-white/30 hover:bg-white/[0.08] transition-all flex items-center justify-center"
-                >
-                  <RotateCcw className="w-5 h-5" />
-                </button>
+                    className="w-12 h-12 rounded-full border border-white/15 bg-black/20 backdrop-blur-sm text-white/50 hover:text-white/90 hover:border-white/30 hover:bg-black/30 transition-all flex items-center justify-center"
+                  >
+                    <RotateCcw className="w-5 h-5" />
+                  </button>
 
-                <button
-                  onClick={toggleTimer}
+                  <button
+                    onClick={toggleTimer}
                   className={`w-20 h-20 rounded-full border flex items-center justify-center transition-all ${
                     isActive
                       ? 'border-amber-400/50 bg-amber-500/15 text-amber-300 hover:bg-amber-500/25'
@@ -794,9 +789,9 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
 
                 <button
                   onClick={() => setShowPresetPicker(true)}
-                  className="w-12 h-12 rounded-full border border-white/15 bg-white/[0.04] text-white/40 hover:text-white/80 hover:border-white/30 hover:bg-white/[0.08] transition-all flex items-center justify-center"
-                >
-                  <Settings2 className="w-5 h-5" />
+                    className="w-12 h-12 rounded-full border border-white/15 bg-black/20 backdrop-blur-sm text-white/50 hover:text-white/90 hover:border-white/30 hover:bg-black/30 transition-all flex items-center justify-center"
+                  >
+                    <Settings2 className="w-5 h-5" />
                 </button>
               </div>
             </motion.div>

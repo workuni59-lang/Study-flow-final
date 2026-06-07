@@ -9,9 +9,11 @@ import { FocusEnvironment } from './FocusEnvironment';
 import { MenuDrawer, type Section } from './MenuDrawer';
 import { DesktopSidebar } from './DesktopSidebar';
 import { SidePanel } from '../panels/SidePanel';
-import { TasksPanel } from '../panels/TasksPanel';
 import { AmbiencePanel, type CuratedPlaylist } from '../panels/AmbiencePanel';
-import { NotepadPanel } from '../panels/NotepadPanel';
+import { NotesPanel } from '../panels/NotesPanel';
+
+const TasksPanelLazy = lazy(() => import('../panels/TasksPanel').then(m => ({ default: m.TasksPanel })));
+const NotepadPanelLazy = lazy(() => import('../panels/NotepadPanel').then(m => ({ default: m.NotepadPanel })));
 import { PremiumModal } from '../modals/PremiumModal';
 import { AchievementNotification } from '../notifications/AchievementNotification';
 import { Confetti } from '../notifications/Confetti';
@@ -48,6 +50,7 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
   const [section, setSection] = useState<Section>('dashboard');
   const [menuOpen, setMenuOpen] = useState(false);
   const [panelOpen, setPanelOpen] = useState<'tasks' | 'ambience' | 'notepad' | null>(null);
+  const [isNotesOpen, setIsNotesOpen] = useState(false);
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [prevLevel, setPrevLevel] = useState(userStats.level);
   const [ambienceUrl, setAmbienceUrl] = useState<CuratedPlaylist | null>(null);
@@ -127,12 +130,12 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
 
           {/* Main content */}
           <main className="main-layout-content">
-            {mode === 'home' && <HomeView onNotepadOpen={() => setPanelOpen('notepad')} onQuestsOpen={() => setSection('quests')} onMusicOpen={() => setPanelOpen('ambience')} onProgressionOpen={() => setSection('progression')} menuOpen={menuOpen} />}
+            {mode === 'home' && <HomeView onNotepadOpen={() => setIsNotesOpen(true)} onQuestsOpen={() => setSection('quests')} onMusicOpen={() => setPanelOpen('ambience')} onProgressionOpen={() => setSection('progression')} menuOpen={menuOpen} />}
             {mode === 'focus' && (
               <FocusEnvironment
                 onTasksOpen={() => setPanelOpen('tasks')}
                 onMusicOpen={() => setPanelOpen('ambience')}
-                onNotepadOpen={() => setPanelOpen('notepad')}
+                onNotepadOpen={() => setIsNotesOpen(true)}
                 onQuestsOpen={() => setSection('quests')}
               />
             )}
@@ -144,7 +147,7 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
             onModeChange={setMode}
             onTasksOpen={() => setPanelOpen('tasks')}
             onStatsOpen={() => setSection('analytics')}
-            onNotepadOpen={() => setPanelOpen('notepad')}
+            onNotepadOpen={() => setIsNotesOpen(true)}
             onQuestsOpen={() => setSection('quests')}
           />
 
@@ -171,7 +174,7 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
 
       {/* Side panels */}
       <SidePanel open={panelOpen === 'tasks'} onClose={() => setPanelOpen(null)} title="Tasks">
-        <TasksPanel />
+        <Suspense fallback={null}><TasksPanelLazy /></Suspense>
       </SidePanel>
 
       <SidePanel open={panelOpen === 'ambience'} onClose={() => setPanelOpen(null)} title="Ambience">
@@ -204,7 +207,7 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
       )}
 
       <SidePanel open={panelOpen === 'notepad'} onClose={() => setPanelOpen(null)} title="Notepad">
-        <NotepadPanel />
+        <Suspense fallback={null}><NotepadPanelLazy /></Suspense>
       </SidePanel>
 
       {/* Pet panel */}
@@ -238,6 +241,8 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
           </button>
         </div>
       )}
+
+      <NotesPanel isOpen={isNotesOpen} onClose={() => setIsNotesOpen(false)} />
     </div>
   );
 };

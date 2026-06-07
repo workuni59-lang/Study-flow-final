@@ -7,14 +7,14 @@ import { useAuth } from '../../context/AuthContext';
 const API_BASE = import.meta.env.VITE_API_URL || 'https://studyflow-api.workuni59.workers.dev';
 
 const features = [
-  { icon: Palette,     label: '15 Mood Themes',        desc: 'All 15 moods (free users get 5)' },
-  { icon: Sparkles,    label: '7 Animated Themes',      desc: 'All animated themes (free users get 3)' },
-  { icon: Image,       label: '57 Wallpapers + Custom Upload', desc: 'Full library + use your own image as background' },
-  { icon: SwatchBook,  label: 'Full Color Palette',     desc: 'All 9 atmosphere colors unlocked' },
-  { icon: Headphones,  label: 'Ambience Library',       desc: '35 sounds + Spotify, YouTube Music & Apple Music playlists' },
-  { icon: BarChart3,   label: 'Full Analytics',         desc: 'Heatmaps, subject breakdown & velocity tracking' },
-  { icon: Brain,       label: 'Brain Scan',             desc: 'Full proficiency heatmap with mastery insights' },
-  { icon: Clock,       label: 'Clock Customizer',       desc: 'All font variants, faces & presets' },
+  { icon: Palette,     label: '15 Mood Themes',        desc: 'All 15 mood themes' },
+  { icon: Sparkles,    label: '7 Animated Themes',      desc: 'All animated themes' },
+  { icon: Image,       label: 'Wallpapers + Custom Upload', desc: 'Use your own images' },
+  { icon: SwatchBook,  label: 'Full Color Palette',     desc: 'All 9 colors unlocked' },
+  { icon: Headphones,  label: 'Ambience Library',       desc: '35 sounds + streaming' },
+  { icon: BarChart3,   label: 'Full Analytics',         desc: 'Heatmaps & velocity tracking' },
+  { icon: Brain,       label: 'Brain Scan',             desc: 'Full mastery heatmap' },
+  { icon: Clock,       label: 'Clock Customizer',       desc: 'All clock variants & presets' },
 ];
 
 export const PremiumModal = () => {
@@ -173,16 +173,16 @@ export const PremiumModal = () => {
             </div>
 
             {/* SECTION 4 — FEATURES */}
-            <div className="px-6 pt-5 pb-6 shrink-0">
-              <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+            <div className="px-6 pt-4 pb-5 shrink-0">
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1">
                 {features.map((f) => (
-                  <div key={f.label} className="flex items-start gap-2.5 py-1">
-                    <div className="w-8 shrink-0 flex items-center justify-center pt-0.5">
+                  <div key={f.label} className="flex items-start gap-2">
+                    <div className="w-6 shrink-0 flex items-center justify-center pt-0.5">
                       <f.icon className="w-4 h-4 text-indigo-400/80" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[13px] font-semibold text-white/90 leading-tight truncate">{f.label}</p>
-                      <p className="text-[10px] text-white/30 leading-tight truncate">{f.desc}</p>
+                      <p className="text-[13px] font-semibold text-white/90 leading-tight">{f.label}</p>
+                      <p className="text-[10px] text-white/30 leading-tight">{f.desc}</p>
                     </div>
                   </div>
                 ))}

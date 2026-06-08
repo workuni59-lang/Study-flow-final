@@ -396,7 +396,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
     <motion.div key="atm" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.15 }} className="pt-1">
       <div className="flex gap-2 flex-wrap justify-center">
         {ATMOSPHERES.map(atm => (
-          <button key={atm.id} onClick={() => { if(atm.isPremium && !userStats.isPremium) setShowPremiumModal(true); else setThemeConfig({...themeConfig, atmosphere: atm.id, wallpaper: themeConfig.wallpaper in MOOD_GRADIENTS ? 'mesh' : themeConfig.wallpaper}); }}
+          <button key={atm.id} onClick={() => { if(atm.isPremium && !userStats.isPremium) setShowPremiumModal(true); else setThemeConfig({...themeConfig, atmosphere: atm.id, wallpaper: 'mesh'}); }}
             className={`w-7 h-7 rounded-full ${atm.color} border-2 transition-all relative flex items-center justify-center ${themeConfig.atmosphere === atm.id ? 'border-white scale-110 shadow-xl' : 'border-transparent opacity-40 hover:opacity-80'}`}>
             {atm.isPremium && !userStats.isPremium ? <Crown className="w-2.5 h-2.5 text-white" /> : null}
           </button>

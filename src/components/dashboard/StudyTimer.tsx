@@ -337,24 +337,28 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
       <div className="flex justify-center gap-1.5">
         {(['focus', 'shortBreak', 'longBreak'] as const).map(m => (
           <button key={m} onClick={() => { setIsActive(false); setMode(m); const d = m === 'focus' ? activePreset.focus : m === 'shortBreak' ? activePreset.short : activePreset.long; setTimeLeft(d * 60); }}
-            className={`px-4 py-1.5 rounded-full text-[9px] font-semibold uppercase tracking-wider transition-all backdrop-blur-md border ${
+            className={`px-4 py-1.5 rounded-full text-[9px] font-semibold uppercase tracking-wider transition-all border ${
               mode === m
-                ? 'bg-white/10 border-white/20 text-white shadow-sm'
-                : 'bg-white/[0.02] border-white/[0.04] text-white/30 hover:text-white/60 hover:bg-white/[0.06]'
+                ? 'bg-white/15 border-white/20 text-white shadow-sm'
+                : 'bg-black/15 backdrop-blur-sm border-white/10 text-white/50 hover:text-white/80 hover:bg-black/25'
             }`}>
             {m === 'focus' ? 'Focus' : m === 'shortBreak' ? 'Break' : 'Long Break'}
           </button>
         ))}
       </div>
     ) : (
-      <div className="flex gap-1.5 bg-white/[0.04] p-1 rounded-xl overflow-x-auto no-scrollbar">
+      <div className="flex gap-1.5 bg-black/10 backdrop-blur-sm border border-white/[0.06] p-1 rounded-xl overflow-x-auto no-scrollbar">
         {(['focus', 'shortBreak', 'longBreak', 'taskETA'] as const).map(m => (
           <button key={m} onClick={() => { 
             setIsActive(false); setMode(m); 
             const d = m === 'taskETA' ? (tasks.find(t => t.id === selectedTaskId)?.estimatedMinutes ?? 25) : m === 'focus' ? activePreset.focus : m === 'shortBreak' ? activePreset.short : activePreset.long; 
             setTimeLeft(d * 60); 
           }} 
-            className={`shrink-0 px-4 py-2 rounded-[10px] text-[9px] font-semibold uppercase tracking-wider transition-all ${mode === m ? 'bg-white/10 text-white shadow-sm' : 'text-white/30 hover:text-white/60'}`}>
+            className={`shrink-0 px-4 py-2 rounded-[10px] text-[9px] font-semibold uppercase tracking-wider transition-all border ${
+              mode === m
+                ? 'bg-white/15 border-white/10 text-white shadow-sm'
+                : 'bg-black/15 backdrop-blur-sm border-white/[0.06] text-white/50 hover:text-white/80 hover:bg-black/25'
+            }`}>
             {m === 'focus' ? 'Focus' : m === 'shortBreak' ? 'Break' : m === 'longBreak' ? 'Long Break' : 'Task ETA'}
           </button>
         ))}

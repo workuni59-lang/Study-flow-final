@@ -276,26 +276,40 @@ export const AmbiencePanel = ({ ambienceUrl, onAmbienceUrlChange }: AmbiencePane
   // ── My Music Tab ──────────────────────────────────────────────
   const renderMusicTab = () => (
     <div className="space-y-4">
-      <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
-        Paste a Spotify, YouTube, or Apple Music link to play it here.
-      </p>
+      {userStats.isPremium ? (
+        <>
+          <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
+            Paste a Spotify, YouTube, or Apple Music link to play it here.
+          </p>
 
-      <div className="flex gap-2">
-        <select value={customService} onChange={e => setCustomService(e.target.value as any)}
-          className="px-2 py-1.5 rounded-xl bg-slate-100 dark:bg-white/[0.03] text-[10px] font-bold text-slate-500 border-0 cursor-pointer outline-none">
-          <option value="spotify">Spotify</option>
-          <option value="youtube">YouTube</option>
-          <option value="apple-music">Apple Music</option>
-        </select>
-        <input type="text" value={customUrl} onChange={e => setCustomUrl(e.target.value)}
-          placeholder="Paste playlist URL..."
-          onKeyDown={e => e.key === 'Enter' && addCustomUrl()}
-          className="flex-1 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-white/[0.03] text-[11px] outline-none placeholder:text-slate-400 dark:text-white/80 border-0" />
-        <button onClick={addCustomUrl}
-          className="shrink-0 px-3 py-1.5 rounded-xl bg-brand text-white text-[9px] font-black uppercase tracking-widest hover:bg-brand/90 transition-all">
-          Load
-        </button>
-      </div>
+          <div className="flex gap-2">
+            <select value={customService} onChange={e => setCustomService(e.target.value as any)}
+              className="px-2 py-1.5 rounded-xl bg-slate-100 dark:bg-white/[0.03] text-[10px] font-bold text-slate-500 border-0 cursor-pointer outline-none">
+              <option value="spotify">Spotify</option>
+              <option value="youtube">YouTube</option>
+              <option value="apple-music">Apple Music</option>
+            </select>
+            <input type="text" value={customUrl} onChange={e => setCustomUrl(e.target.value)}
+              placeholder="Paste playlist URL..."
+              onKeyDown={e => e.key === 'Enter' && addCustomUrl()}
+              className="flex-1 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-white/[0.03] text-[11px] outline-none placeholder:text-slate-400 dark:text-white/80 border-0" />
+            <button onClick={addCustomUrl}
+              className="shrink-0 px-3 py-1.5 rounded-xl bg-brand text-white text-[9px] font-black uppercase tracking-widest hover:bg-brand/90 transition-all">
+              Load
+            </button>
+          </div>
+        </>
+      ) : (
+        <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/[0.06] text-center space-y-2">
+          <Crown className="w-5 h-5 text-amber-400 mx-auto" />
+          <p className="text-[11px] font-bold text-white/70">Custom Playlists</p>
+          <p className="text-[9px] text-white/40">Add any Spotify, YouTube, or Apple Music playlist. Upgrade to Elite Scholar to unlock.</p>
+          <button onClick={() => setShowPremiumModal(true)}
+            className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 text-white text-[9px] font-black uppercase tracking-widest hover:brightness-110 transition-all">
+            Upgrade to Unlock
+          </button>
+        </div>
+      )}
 
       {favorites.length > 0 && (
         <div className="space-y-1">

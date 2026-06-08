@@ -48,13 +48,13 @@ export const WallpaperEngine = ({ visible = true }: { visible?: boolean }) => {
   }, [mouseX, mouseY, reduceMotion]);
 
   const baseBackgrounds: Record<string, string> = {
-    indigo: 'bg-[#f8fafc] dark:bg-slate-950',
-    rose: 'bg-[#fff5f5] dark:bg-[#1a0f0f]',
-    emerald: 'bg-[#f2fcf5] dark:bg-[#0f1a13]',
-    violet: 'bg-[#f8f5ff] dark:bg-[#130f1a]',
-    amber: 'bg-[#fffbf2] dark:bg-[#1a160f]',
-    cyan: 'bg-[#f2fbff] dark:bg-[#0f181a]',
-    pink: 'bg-[#fff2f9] dark:bg-[#1a0f16]',
+    indigo: 'bg-[#f8fafc] dark:bg-indigo-950',
+    rose: 'bg-[#fff5f5] dark:bg-rose-950',
+    emerald: 'bg-[#f2fcf5] dark:bg-emerald-950',
+    violet: 'bg-[#f8f5ff] dark:bg-violet-950',
+    amber: 'bg-[#fffbf2] dark:bg-amber-950',
+    cyan: 'bg-[#f2fbff] dark:bg-cyan-950',
+    pink: 'bg-[#fff2f9] dark:bg-pink-950',
     slate: 'bg-[#f8fafc] dark:bg-slate-950',
     neon: 'bg-[#0f0a1a] dark:bg-[#050010]',
   };

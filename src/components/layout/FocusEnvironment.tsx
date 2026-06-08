@@ -63,7 +63,7 @@ const UtilityButton = memo(({ onClick, children, label }: {
   <button
     onClick={onClick}
     className="flex items-center gap-1.5 px-3 py-2 rounded-xl backdrop-blur-md bg-white/[0.04] border border-white/[0.04] text-white/40 hover:text-white/80 hover:bg-white/[0.08] transition-all text-[10px] font-medium"
-    title={label}
+    title={label} aria-label={label}
   >
     {children}
     <span className="hidden sm:inline">{label}</span>
@@ -74,12 +74,14 @@ export const FocusEnvironment = memo(({
   onTasksOpen, onMusicOpen, onNotepadOpen, onQuestsOpen,
 }: FocusEnvironmentProps) => {
   const dockRef = useRef<HTMLDivElement>(null);
+  const [isMobile] = useState(() => window.innerWidth < 768);
   const [dockVisible, setDockVisible] = useState(true);
   const [isNotesOpen, setIsNotesOpen] = useState(false);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
-  // Auto-hide dock when idle
+  // Auto-hide dock when idle (desktop only — mobile always shows)
   useEffect(() => {
+    if (isMobile) return;
     const show = () => {
       setDockVisible(true);
       clearTimeout(hideTimerRef.current);
@@ -99,7 +101,7 @@ export const FocusEnvironment = memo(({
       document.removeEventListener('mouseleave', hide);
       clearTimeout(hideTimerRef.current);
     };
-  }, []);
+  }, [isMobile]);
 
   // Performance gate for particles
   const canParticles = typeof navigator === 'undefined' || navigator.hardwareConcurrency > 4;

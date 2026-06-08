@@ -184,7 +184,7 @@ export const AmbiencePanel = ({ ambienceUrl, onAmbienceUrlChange }: AmbiencePane
             <option value="All">All Categories</option>
             {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
-          <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400 pointer-events-none" />
+          <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-600 dark:text-slate-400 pointer-events-none" />
         </div>
       </div>
 
@@ -209,7 +209,7 @@ export const AmbiencePanel = ({ ambienceUrl, onAmbienceUrlChange }: AmbiencePane
               {/* Favorite Heart */}
               <button onClick={e => { e.stopPropagation(); toggleFavorite(asset.id, asset.name); }}
                 className={`absolute top-2 right-2 p-1 rounded-full transition-all opacity-0 group-hover:opacity-100 ${
-                  fav ? 'opacity-100 text-rose-500' : 'text-slate-400 hover:text-rose-400'
+                  fav ? 'opacity-100 text-rose-500' : 'text-slate-600 dark:text-slate-400 hover:text-rose-400'
                 }`}>
                 <Heart className={`w-3 h-3 ${fav ? 'fill-rose-500' : ''}`} />
               </button>
@@ -268,7 +268,7 @@ export const AmbiencePanel = ({ ambienceUrl, onAmbienceUrlChange }: AmbiencePane
       </div>
 
       {atMaxLayers && (
-        <p className="text-[9px] text-center text-slate-400 font-medium">Maximum 5 sounds reached</p>
+        <p className="text-[9px] text-center text-slate-600 dark:text-slate-400 font-medium">Maximum 5 sounds reached</p>
       )}
     </div>
   );
@@ -292,7 +292,7 @@ export const AmbiencePanel = ({ ambienceUrl, onAmbienceUrlChange }: AmbiencePane
             <input type="text" value={customUrl} onChange={e => setCustomUrl(e.target.value)}
               placeholder="Paste playlist URL..."
               onKeyDown={e => e.key === 'Enter' && addCustomUrl()}
-              className="flex-1 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-white/[0.03] text-[11px] outline-none placeholder:text-slate-400 dark:text-white/80 border-0" />
+              className="flex-1 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-white/[0.03] text-[11px] outline-none placeholder:text-slate-600 dark:placeholder:text-slate-400 dark:text-white/80 border-0" />
             <button onClick={addCustomUrl}
               className="shrink-0 px-3 py-1.5 rounded-xl bg-brand text-white text-[9px] font-black uppercase tracking-widest hover:bg-brand/90 transition-all">
               Load
@@ -313,7 +313,7 @@ export const AmbiencePanel = ({ ambienceUrl, onAmbienceUrlChange }: AmbiencePane
 
       {favorites.length > 0 && (
         <div className="space-y-1">
-          <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 px-1">Favorites</h4>
+          <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 dark:text-slate-500 px-1">Favorites</h4>
           {favorites.map((fav, idx) => (
             <div key={idx}
               className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 dark:bg-white/[0.03] hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors group">
@@ -321,7 +321,7 @@ export const AmbiencePanel = ({ ambienceUrl, onAmbienceUrlChange }: AmbiencePane
               <span className="flex-1 text-[11px] font-bold truncate dark:text-white/80">{fav.name}</span>
               {fav.type === 'sound' ? (
                 <button onClick={() => toggleTrack(fav.uri)}
-                  className="p-1 rounded-lg hover:bg-white/10 text-slate-400 transition-colors">
+                  className="p-1 rounded-lg hover:bg-white/10 text-slate-600 dark:text-slate-400 transition-colors">
                   <Play className="w-3 h-3" />
                 </button>
               ) : (
@@ -329,12 +329,12 @@ export const AmbiencePanel = ({ ambienceUrl, onAmbienceUrlChange }: AmbiencePane
                   onAmbienceUrlChange({ name: fav.name, emoji: '🎵', embedUrl: fav.uri, service: fav.type });
                   setActiveTab('playlists');
                 }}
-                  className="p-1 rounded-lg hover:bg-white/10 text-slate-400 transition-colors">
+                  className="p-1 rounded-lg hover:bg-white/10 text-slate-600 dark:text-slate-400 transition-colors">
                   <ExternalLink className="w-3 h-3" />
                 </button>
               )}
               <button onClick={() => removeFavorite(idx)}
-                className="p-1 rounded-lg hover:bg-rose-500/10 text-slate-400 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100">
+                className="p-1 rounded-lg hover:bg-rose-500/10 text-slate-600 dark:text-slate-400 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100">
                 <X className="w-3 h-3" />
               </button>
             </div>
@@ -364,9 +364,9 @@ export const AmbiencePanel = ({ ambienceUrl, onAmbienceUrlChange }: AmbiencePane
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-[11px] font-bold truncate dark:text-white/80">{pl.name}</div>
-              <div className="text-[9px] font-medium text-slate-400 uppercase tracking-wider">{pl.service}</div>
+              <div className="text-[9px] font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wider">{pl.service}</div>
             </div>
-            <Play className="w-3.5 h-3.5 text-slate-400 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <Play className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
           </button>
         ))}
       </div>
@@ -386,7 +386,7 @@ export const AmbiencePanel = ({ ambienceUrl, onAmbienceUrlChange }: AmbiencePane
             className={`flex items-center gap-1.5 flex-1 px-3 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${
               activeTab === tab.id
                 ? 'bg-white dark:bg-white/10 text-brand shadow-sm'
-                : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
+                : 'text-slate-600 dark:text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
             }`}>
             <tab.icon className="w-3 h-3" />
             {tab.label}
@@ -403,10 +403,10 @@ export const AmbiencePanel = ({ ambienceUrl, onAmbienceUrlChange }: AmbiencePane
       <div className="space-y-2 pt-4 border-t border-slate-100 dark:border-white/[0.05]">
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-2">
-            <Volume2 className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">Master Volume</span>
+            <Volume2 className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400 dark:text-slate-500" />
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 dark:text-slate-400 dark:text-slate-500">Master Volume</span>
           </div>
-          <span className="text-[10px] font-mono font-bold text-slate-400">{Math.round(masterVolume * 100)}%</span>
+          <span className="text-[10px] font-mono font-bold text-slate-600 dark:text-slate-400">{Math.round(masterVolume * 100)}%</span>
         </div>
         <input type="range" min="0" max="1" step="0.01" value={masterVolume}
           onChange={(e) => setMasterVolume(parseFloat(e.target.value))}
@@ -417,7 +417,7 @@ export const AmbiencePanel = ({ ambienceUrl, onAmbienceUrlChange }: AmbiencePane
       {/* Timer Alert Sound */}
       <div className="space-y-3 pt-2">
         <div className="flex items-center gap-2 px-1">
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">Timer Alert</span>
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 dark:text-slate-400 dark:text-slate-500">Timer Alert</span>
         </div>
         <div className="flex gap-1.5 flex-wrap">
           {ALERT_SOUNDS.map(a => (
@@ -434,12 +434,12 @@ export const AmbiencePanel = ({ ambienceUrl, onAmbienceUrlChange }: AmbiencePane
         </div>
         {alertSound !== 'none' && (
           <div className="flex items-center gap-3 px-1">
-            <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 w-12">Volume</span>
+            <span className="text-[9px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 w-12">Volume</span>
             <input type="range" min="0" max="1" step="0.01" value={alertVolume}
               onChange={(e) => setAlertVolume(parseFloat(e.target.value))}
               className="flex-1 h-1 bg-slate-200 dark:bg-white/10 rounded-full appearance-none accent-brand cursor-pointer"
             />
-            <span className="text-[10px] font-mono font-bold text-slate-400 w-8 text-right">{Math.round(alertVolume * 100)}%</span>
+            <span className="text-[10px] font-mono font-bold text-slate-600 dark:text-slate-400 w-8 text-right">{Math.round(alertVolume * 100)}%</span>
           </div>
         )}
       </div>

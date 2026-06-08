@@ -56,7 +56,7 @@ export const PanicModeUI = () => {
                 <AlertTriangle className="w-10 h-10" />
               </motion.div>
               <h1 className="text-5xl font-display font-black uppercase tracking-tighter mb-4 text-rose-500">Panic Mode Active</h1>
-              <p className="text-slate-400 font-bold uppercase tracking-widest text-sm text-center">Exam is in less than 24 hours. Focus only on High Yield.</p>
+              <p className="text-slate-600 dark:text-slate-400 font-bold uppercase tracking-widest text-sm text-center">Exam is in less than 24 hours. Focus only on High Yield.</p>
             </header>
 
             <div className="w-full space-y-4 mb-12 overflow-y-auto max-h-[40vh] pr-2 custom-scrollbar">

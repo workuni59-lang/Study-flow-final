@@ -59,7 +59,7 @@ export const DesktopSidebar = ({ mode, onModeChange, activeSection, onNavigate, 
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold dark:text-white truncate">{user?.displayName || 'Student'}</p>
-              <p className="text-[9px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+              <p className="text-[9px] font-medium text-slate-600 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                 {progression.rank.icon} Level {progression.level} &middot; {progression.rank.title}
               </p>
             </div>
@@ -68,14 +68,14 @@ export const DesktopSidebar = ({ mode, onModeChange, activeSection, onNavigate, 
 
         {/* Mode toggle */}
         <div className="px-4 pt-3 pb-2">
-          <p className="text-[9px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2 px-1">Mode</p>
+          <p className="text-[9px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 dark:text-slate-500 mb-2 px-1">Mode</p>
           <div className="flex bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg">
             {(['home', 'focus'] as const).map(m => (
               <button key={m} onClick={() => onModeChange(m)}
                 className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md text-[11px] font-semibold uppercase tracking-wider transition-colors ${
                   mode === m
                     ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
-                    : 'text-slate-400 dark:text-slate-500'
+                    : 'text-slate-600 dark:text-slate-400 dark:text-slate-500'
                 }`}
               >
                 {m === 'home' ? <LayoutDashboard className="w-3.5 h-3.5" /> : <Target className="w-3.5 h-3.5" />}
@@ -87,7 +87,7 @@ export const DesktopSidebar = ({ mode, onModeChange, activeSection, onNavigate, 
 
         {/* Quick nav */}
         <div className="px-3 pt-2 pb-3">
-          <p className="text-[9px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2 px-1">Insights</p>
+          <p className="text-[9px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 dark:text-slate-500 mb-2 px-1">Insights</p>
           <div className="space-y-0.5">
             {/* Progression Badge Widget */}
             <button onClick={() => handleNav('progression')}
@@ -140,7 +140,7 @@ export const DesktopSidebar = ({ mode, onModeChange, activeSection, onNavigate, 
         {/* Pet */}
         {ENABLE_PETS && (
           <div className="px-3 pb-2">
-            <p className="text-[9px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2 px-1">Companion</p>
+            <p className="text-[9px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 dark:text-slate-500 mb-2 px-1">Companion</p>
             <div className="flex gap-1.5">
               <button onClick={onPetPanelOpen}
                 className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"

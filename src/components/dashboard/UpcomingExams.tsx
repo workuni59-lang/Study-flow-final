@@ -44,7 +44,7 @@ export const UpcomingExams = ({ exams, onDelete, onAdd, onViewPath }: UpcomingEx
         </div>
         <button 
           onClick={onAdd}
-          className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors text-slate-400 hover:text-brand"
+          className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors text-slate-600 dark:text-slate-400 hover:text-brand"
         >
           <Plus className="w-4 h-4" />
         </button>
@@ -78,13 +78,13 @@ export const UpcomingExams = ({ exams, onDelete, onAdd, onViewPath }: UpcomingEx
                 </div>
                 
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[9px] font-medium tracking-wide text-slate-400">{exam.type}</span>
+                  <span className="text-[9px] font-medium tracking-wide text-slate-600 dark:text-slate-400">{exam.type}</span>
                   {progress !== null && (
                     <span className="text-[9px] font-medium tracking-wide text-emerald-500">· {progress}% mastered</span>
                   )}
                 </div>
 
-                <div className="flex items-center gap-1.5 text-slate-400 text-[10px]">
+                <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400 text-[10px]">
                   <Clock className="w-3 h-3" />
                   {exam.date}
                 </div>
@@ -104,14 +104,14 @@ export const UpcomingExams = ({ exams, onDelete, onAdd, onViewPath }: UpcomingEx
 
         {exams.length === 0 && (
           <div className="py-6 text-center border border-dashed border-slate-100 dark:border-slate-800/40 rounded-2xl">
-            <p className="text-slate-400 text-xs font-medium">No deadlines yet</p>
+            <p className="text-slate-600 dark:text-slate-400 text-xs font-medium">No deadlines yet</p>
           </div>
         )}
       </div>
       
       <button 
         onClick={onAdd}
-        className="w-full mt-5 py-3 bg-slate-50/50 dark:bg-slate-800/30 text-slate-400 rounded-xl text-[9px] font-medium tracking-wide hover:bg-brand hover:text-white transition-all flex items-center justify-center gap-1.5"
+        className="w-full mt-5 py-3 bg-slate-50/50 dark:bg-slate-800/30 text-slate-600 dark:text-slate-400 rounded-xl text-[9px] font-medium tracking-wide hover:bg-brand hover:text-white transition-all flex items-center justify-center gap-1.5"
       >
         <Plus className="w-3.5 h-3.5" /> Add Deadline
       </button>

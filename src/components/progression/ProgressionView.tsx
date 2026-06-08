@@ -12,7 +12,7 @@ const BADGE_TIER_MAP: Record<string, BadgeTier> = {
 };
 
 const RARITY_COLORS: Record<string, string> = {
-  Common: 'text-slate-400',
+  Common: 'text-slate-600 dark:text-slate-400',
   Rare: 'text-blue-400',
   Epic: 'text-purple-400',
   Legendary: 'text-amber-400',
@@ -370,7 +370,7 @@ export const ProgressionView = () => {
                   </div>
 
                   <p className={`text-xs mt-1.5 leading-relaxed ${
-                    unlocked ? 'text-slate-400' : 'text-slate-600'
+                    unlocked ? 'text-slate-600 dark:text-slate-400' : 'text-slate-600'
                   }`}>
                     {b.description}
                   </p>
@@ -514,10 +514,10 @@ export const ProgressionView = () => {
                           </span>
                         )}
                       </td>
-                      <td className="p-3 hidden sm:table-cell font-mono text-slate-400">
+                      <td className="p-3 hidden sm:table-cell font-mono text-slate-600 dark:text-slate-400">
                         {formatXP(xpForLevel(l))}
                       </td>
-                      <td className="p-3 hidden md:table-cell font-mono text-slate-400">
+                      <td className="p-3 hidden md:table-cell font-mono text-slate-600 dark:text-slate-400">
                         {formatXP(totalXpForLevel(l))}
                       </td>
                       <td className="p-3 pr-5">

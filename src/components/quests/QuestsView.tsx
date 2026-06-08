@@ -30,7 +30,7 @@ const QuestCard = ({ quest, progress }: { quest: GameQuest; progress: number }) 
     }`}>
       <div className="flex items-start justify-between mb-3">
         <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
-          completed ? 'bg-emerald-500 text-white' : 'bg-white/40 dark:bg-slate-800/40 text-slate-400'
+          completed ? 'bg-emerald-500 text-white' : 'bg-white/40 dark:bg-slate-800/40 text-slate-600 dark:text-slate-400'
         }`}>
           {completed ? <CheckCircle2 className="w-4 h-4" /> : <Target className="w-4 h-4" />}
         </div>
@@ -45,16 +45,16 @@ const QuestCard = ({ quest, progress }: { quest: GameQuest; progress: number }) 
       }`}>
         {quest.title}
       </h4>
-      <p className="text-[10px] text-slate-400 dark:text-slate-500 leading-relaxed mb-3 flex-1">
+      <p className="text-[10px] text-slate-600 dark:text-slate-400 dark:text-slate-500 leading-relaxed mb-3 flex-1">
         {quest.description}
       </p>
 
       <div className="space-y-1.5">
         <div className="flex justify-between text-[8px] font-medium uppercase tracking-wider">
-          <span className={completed ? 'text-emerald-500' : 'text-slate-400'}>
+          <span className={completed ? 'text-emerald-500' : 'text-slate-600 dark:text-slate-400'}>
             {completed ? 'Done' : 'Progress'}
           </span>
-          <span className="text-slate-400">{progress} / {quest.goal}</span>
+          <span className="text-slate-600 dark:text-slate-400">{progress} / {quest.goal}</span>
         </div>
         <div className="w-full h-1 bg-slate-100 dark:bg-slate-800/50 rounded-full overflow-hidden">
           <motion.div
@@ -83,7 +83,7 @@ const QuestSection = ({ tier, quests, progress }: { tier: GameQuest['tier']; que
     <section className="space-y-4">
       <div>
         <h3 className="text-sm font-display font-semibold dark:text-white/80 tracking-tight">{titles[tier]}</h3>
-        <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">{descs[tier]}</p>
+        <p className="text-[10px] text-slate-600 dark:text-slate-400 dark:text-slate-500 mt-0.5">{descs[tier]}</p>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {tierQuests.map(q => (
@@ -112,15 +112,15 @@ export const QuestsView = () => {
         <div className="flex items-center gap-4 bg-white dark:bg-slate-900 p-6 rounded-[32px] border border-slate-100 dark:border-slate-800 shadow-sm">
           <div className="flex items-center gap-4">
             <div className="text-center">
-              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">Level</p>
+              <p className="text-[9px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 mb-1">Level</p>
               <p className="text-2xl font-display font-black dark:text-white">{gameLevel}</p>
             </div>
             <div className="text-center">
-              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">Gold</p>
+              <p className="text-[9px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 mb-1">Gold</p>
               <p className="text-2xl font-display font-black text-amber-500">{gameGold}</p>
             </div>
             <div className="text-center">
-              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">XP</p>
+              <p className="text-[9px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 mb-1">XP</p>
               <p className="text-2xl font-display font-black text-purple-500">{gameXp}</p>
             </div>
           </div>

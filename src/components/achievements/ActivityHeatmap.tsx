@@ -61,7 +61,7 @@ export const ActivityHeatmap = () => {
         </div>
         <div className="flex gap-2">
            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700">
-              <span className="text-[8px] font-black uppercase text-slate-400">Consistency:</span>
+              <span className="text-[8px] font-black uppercase text-slate-600 dark:text-slate-400">Consistency:</span>
               <span className="text-[10px] font-bold dark:text-white">94%</span>
            </div>
         </div>
@@ -93,19 +93,19 @@ export const ActivityHeatmap = () => {
 
         <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-700">
-              <p className="text-[8px] font-black uppercase text-slate-400 mb-1">Weekly Velocity</p>
+              <p className="text-[8px] font-black uppercase text-slate-600 dark:text-slate-400 mb-1">Weekly Velocity</p>
               <p className="text-sm font-bold dark:text-white">{weeklyXp.toLocaleString()} XP</p>
            </div>
            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-700">
-              <p className="text-[8px] font-black uppercase text-slate-400 mb-1">Peak Hour</p>
+              <p className="text-[8px] font-black uppercase text-slate-600 dark:text-slate-400 mb-1">Peak Hour</p>
               <p className="text-sm font-bold dark:text-white">10:00 PM</p>
            </div>
            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-700">
-              <p className="text-[8px] font-black uppercase text-slate-400 mb-1">Flow Streak</p>
+              <p className="text-[8px] font-black uppercase text-slate-600 dark:text-slate-400 mb-1">Flow Streak</p>
               <p className="text-sm font-bold dark:text-white">12 Days</p>
            </div>
            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-700">
-              <p className="text-[8px] font-black uppercase text-slate-400 mb-1">Grade Outlook</p>
+              <p className="text-[8px] font-black uppercase text-slate-600 dark:text-slate-400 mb-1">Grade Outlook</p>
               <p className="text-sm font-bold text-emerald-500">Distinction</p>
            </div>
         </div>

@@ -85,7 +85,7 @@ export const AddExamModal = ({ isOpen, onClose, onAdd }: AddExamModalProps) => {
                         className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
                           selectedSubjectId === s.id 
                             ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' 
-                            : 'bg-slate-50 dark:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
+                            : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
                         }`}
                       >
                         {s.name}
@@ -140,7 +140,7 @@ export const AddExamModal = ({ isOpen, onClose, onAdd }: AddExamModalProps) => {
                       onChange={(e) => setDate(e.target.value)}
                       className="w-full bg-slate-50 dark:bg-slate-950 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-5 text-base font-bold text-slate-900 dark:text-white focus:border-indigo-600 focus:outline-none min-h-[64px] cursor-pointer"
                     />
-                    <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 group-hover:text-indigo-600 transition-colors">
+                    <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-600 dark:text-slate-400 group-hover:text-indigo-600 transition-colors">
                       <Calendar className="w-5 h-5" />
                     </div>
                   </div>

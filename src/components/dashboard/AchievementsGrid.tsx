@@ -38,7 +38,7 @@ export const AchievementsGrid = () => {
         </div>
         <div className="text-right">
            <span className="text-4xl font-display font-black text-indigo-600">{unlockedBadges.length}</span>
-           <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block">Badges Earned</span>
+           <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 block">Badges Earned</span>
         </div>
       </div>
 
@@ -71,7 +71,7 @@ export const AchievementsGrid = () => {
                 </div>
                 <div>
                   <h4 className="font-bold dark:text-white leading-tight">{achievement.title}</h4>
-                  <span className={`text-[8px] font-black uppercase tracking-widest ${isUnlocked ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400'}`}>
+                  <span className={`text-[8px] font-black uppercase tracking-widest ${isUnlocked ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-400'}`}>
                     {achievement.rarity}
                   </span>
                 </div>

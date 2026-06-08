@@ -366,7 +366,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
           {isActive ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current translate-x-0.5" />}
           {isActive ? 'Pause' : 'Start'}
         </button>
-        <button onClick={() => { setIsActive(false); setTimeLeft(activePreset.focus * 60); }}
+        <button onClick={() => { setIsActive(false); setTimeLeft(activePreset.focus * 60); }} aria-label="Reset timer"
           className={`transition-colors ${
             glassVariant
               ? 'px-4 py-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10'
@@ -376,11 +376,11 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
         </button>
         {glassVariant && (
           <>
-            <button onClick={() => { setShowPresetPicker(v => !v); setShowThemePicker(false); }}
+            <button onClick={() => { setShowPresetPicker(v => !v); setShowThemePicker(false); }} aria-label="Timer presets"
               className="px-4 py-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10 transition-colors">
               <Timer className="w-4 h-4 text-white/80" />
             </button>
-            <button onClick={() => setShowThemePicker(v => !v)}
+            <button onClick={() => setShowThemePicker(v => !v)} aria-label="Theme and atmosphere"
               className="px-4 py-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10 transition-colors">
               <Palette className="w-4 h-4 text-white/80" />
             </button>

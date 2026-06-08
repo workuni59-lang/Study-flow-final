@@ -97,7 +97,7 @@ export const SettingsView = () => {
                {/* Blur Slider */}
                <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Background Blur</span>
+                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">Background Blur</span>
                      <span className="text-xs font-bold dark:text-white">{themeConfig.blur}px</span>
                   </div>
                   <input 
@@ -111,7 +111,7 @@ export const SettingsView = () => {
                {/* Brightness Slider */}
                <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Dim Intensity</span>
+                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">Dim Intensity</span>
                      <span className="text-xs font-bold dark:text-white">{100 - themeConfig.brightness}%</span>
                   </div>
                   <input 
@@ -125,7 +125,7 @@ export const SettingsView = () => {
                {/* Saturation Slider */}
                <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Saturation</span>
+                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">Saturation</span>
                      <span className="text-xs font-bold dark:text-white">{themeConfig.saturation}%</span>
                   </div>
                   <input 
@@ -150,28 +150,28 @@ export const SettingsView = () => {
              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <button 
                   onClick={() => updateConfig('showGreeting', !themeConfig.showGreeting)}
-                  className={`p-4 rounded-[24px] border-2 transition-all flex flex-col items-center gap-3 ${themeConfig.showGreeting ? 'border-indigo-600 bg-indigo-50/50 dark:bg-indigo-900/20' : 'border-slate-100 dark:border-slate-800 text-slate-400'}`}
+                  className={`p-4 rounded-[24px] border-2 transition-all flex flex-col items-center gap-3 ${themeConfig.showGreeting ? 'border-indigo-600 bg-indigo-50/50 dark:bg-indigo-900/20' : 'border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400'}`}
                 >
                    <User className="w-5 h-5" />
                    <span className="text-[9px] font-black uppercase tracking-widest text-center">Greetings</span>
                 </button>
                 <button 
                    onClick={() => updateConfig('showClock', !themeConfig.showClock)}
-                  className={`p-4 rounded-[24px] border-2 transition-all flex flex-col items-center gap-3 ${themeConfig.showClock ? 'border-indigo-600 bg-indigo-50/50 dark:bg-indigo-900/20' : 'border-slate-100 dark:border-slate-800 text-slate-400'}`}
+                  className={`p-4 rounded-[24px] border-2 transition-all flex flex-col items-center gap-3 ${themeConfig.showClock ? 'border-indigo-600 bg-indigo-50/50 dark:bg-indigo-900/20' : 'border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400'}`}
                 >
                    <ClockIcon className="w-5 h-5" />
                    <span className="text-[9px] font-black uppercase tracking-widest text-center">Zen Clock</span>
                 </button>
                 <button 
                    onClick={() => updateConfig('showQuote', !themeConfig.showQuote)}
-                  className={`p-4 rounded-[24px] border-2 transition-all flex flex-col items-center gap-3 ${themeConfig.showQuote ? 'border-indigo-600 bg-indigo-50/50 dark:bg-indigo-900/20' : 'border-slate-100 dark:border-slate-800 text-slate-400'}`}
+                  className={`p-4 rounded-[24px] border-2 transition-all flex flex-col items-center gap-3 ${themeConfig.showQuote ? 'border-indigo-600 bg-indigo-50/50 dark:bg-indigo-900/20' : 'border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400'}`}
                 >
                    <MessageSquare className="w-5 h-5" />
                    <span className="text-[9px] font-black uppercase tracking-widest text-center">Daily Quote</span>
                 </button>
                 <button 
                    onClick={() => updateConfig('clearMode', !themeConfig.clearMode)}
-                  className={`p-4 rounded-[24px] border-2 transition-all flex flex-col items-center gap-3 ${themeConfig.clearMode ? 'border-indigo-600 bg-indigo-50/50 dark:bg-indigo-900/20' : 'border-slate-100 dark:border-slate-800 text-slate-400'}`}
+                  className={`p-4 rounded-[24px] border-2 transition-all flex flex-col items-center gap-3 ${themeConfig.clearMode ? 'border-indigo-600 bg-indigo-50/50 dark:bg-indigo-900/20' : 'border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400'}`}
                 >
                    <Sparkles className="w-5 h-5" />
                    <span className="text-[9px] font-black uppercase tracking-widest text-center">Clear Mode</span>
@@ -193,14 +193,14 @@ export const SettingsView = () => {
 
              <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 ${!userStats.isPremium ? 'opacity-40 pointer-events-none' : ''}`}>
                 <div className="space-y-3">
-                   <p className="text-[8px] font-black uppercase tracking-widest text-slate-400 ml-1">Auto-Start Next Session</p>
+                   <p className="text-[8px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 ml-1">Auto-Start Next Session</p>
                    <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800">
                       <span className="text-xs font-bold dark:text-white uppercase">Disabled</span>
                       <div className="w-10 h-5 bg-slate-200 dark:bg-slate-700 rounded-full relative"><div className="absolute top-1 left-1 w-3 h-3 bg-white rounded-full" /></div>
                    </div>
                 </div>
                 <div className="space-y-3">
-                   <p className="text-[8px] font-black uppercase tracking-widest text-slate-400 ml-1">Sound Selection</p>
+                   <p className="text-[8px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 ml-1">Sound Selection</p>
                    <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800">
                       <span className="text-xs font-bold dark:text-white uppercase">Minimal Chime</span>
                       <Volume2 className="w-4 h-4 text-indigo-600" />
@@ -209,7 +209,7 @@ export const SettingsView = () => {
                {/* Scale Slider */}
                <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Scale</span>
+                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">Scale</span>
                      <span className="text-xs font-bold dark:text-white">{Math.round(themeConfig.scaleFactor * 100)}%</span>
                   </div>
                   <input type="range" min="0.5" max="1.5" step="0.05" value={themeConfig.scaleFactor} onChange={(e) => updateConfig('scaleFactor', parseFloat(e.target.value))}
@@ -232,7 +232,7 @@ export const SettingsView = () => {
 
               <div className="space-y-4">
                  <div>
-                    <label className="text-[8px] font-black uppercase tracking-widest text-slate-400 ml-2 mb-1 block">Display Name</label>
+                    <label className="text-[8px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 ml-2 mb-1 block">Display Name</label>
                     <input 
                       type="text" 
                       value={name} 
@@ -268,7 +268,7 @@ export const SettingsView = () => {
                     ) : (
                        <>
                           <div className="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                             <Lock className="w-5 h-5 text-slate-400" />
+                             <Lock className="w-5 h-5 text-slate-600 dark:text-slate-400" />
                           </div>
                           <div>
                              <h4 className="font-display font-black uppercase tracking-tight dark:text-white">Free Plan</h4>

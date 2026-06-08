@@ -27,7 +27,7 @@ export const TasksPanel = () => {
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleAdd()}
           placeholder="Add a task..."
-          className="flex-1 px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-sm dark:text-white placeholder:text-slate-400 border-none outline-none focus:ring-2 focus:ring-brand/30"
+          className="flex-1 px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-sm dark:text-white placeholder:text-slate-600 dark:placeholder:text-slate-400 border-none outline-none focus:ring-2 focus:ring-brand/30"
         />
         <button onClick={handleAdd}
           className="w-11 h-11 rounded-xl bg-brand text-white flex items-center justify-center shrink-0"
@@ -45,7 +45,7 @@ export const TasksPanel = () => {
             className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all border ${
               duration === mins
                 ? 'bg-brand/10 text-brand border-brand/30'
-                : 'bg-slate-50 dark:bg-slate-800/50 text-slate-400 dark:text-slate-500 border-transparent hover:border-slate-200 dark:hover:border-slate-700'
+                : 'bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 dark:text-slate-500 border-transparent hover:border-slate-200 dark:hover:border-slate-700'
             }`}
           >
             {mins}m
@@ -55,7 +55,7 @@ export const TasksPanel = () => {
 
       <div className="space-y-1">
         {tasks.length === 0 ? (
-          <p className="text-sm text-slate-400 dark:text-slate-500 text-center py-8">No tasks yet.</p>
+          <p className="text-sm text-slate-600 dark:text-slate-400 dark:text-slate-500 text-center py-8">No tasks yet.</p>
         ) : (
           <Reorder.Group axis="y" values={tasks} onReorder={setTasks} className="space-y-1">
             {tasks.map(task => (
@@ -77,11 +77,11 @@ export const TasksPanel = () => {
                 >
                   {task.completed && <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M20 6L9 17l-5-5" /></svg>}
                 </button>
-                <span className={`flex-1 text-sm leading-tight ${task.completed ? 'line-through text-slate-400 dark:text-slate-500' : 'dark:text-white'}`}>
+                <span className={`flex-1 text-sm leading-tight ${task.completed ? 'line-through text-slate-600 dark:text-slate-400 dark:text-slate-500' : 'dark:text-white'}`}>
                   {task.title}
                 </span>
                 <button onClick={() => deleteTask(task.id)}
-                  className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors shrink-0">
+                  className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors shrink-0">
                   <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2" /></svg>
                 </button>
               </Reorder.Item>

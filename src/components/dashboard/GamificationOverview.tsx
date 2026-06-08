@@ -24,7 +24,7 @@ export const GamificationOverview = () => {
               <h2 className="text-4xl font-display font-black dark:text-white leading-none">Level {level}</h2>
             </div>
             <div className="text-right">
-              <span className="text-xs font-bold text-slate-400 block mb-1">{currentXp} / {xpForNext} XP</span>
+              <span className="text-xs font-bold text-slate-600 dark:text-slate-400 block mb-1">{currentXp} / {xpForNext} XP</span>
             </div>
           </div>
 
@@ -54,10 +54,10 @@ export const GamificationOverview = () => {
           {nextRank && (
             <div className="mt-4 flex items-center gap-3 px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
               <span className="text-sm">{rank.icon}</span>
-              <ArrowRight className="w-3 h-3 text-slate-400" />
+              <ArrowRight className="w-3 h-3 text-slate-600 dark:text-slate-400" />
               <span className="text-sm dark:text-white/60">{nextRank.icon} {nextRank.title}</span>
               <div className="flex-1" />
-              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Next Rank</span>
+              <span className="text-[9px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Next Rank</span>
             </div>
           )}
         </div>
@@ -86,7 +86,7 @@ export const GamificationOverview = () => {
              )}
            </div>
            <span className="text-5xl font-display font-black dark:text-white mt-4">{userStats.currentStreak}</span>
-           <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-2">Days Consistent</p>
+           <p className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 mt-2">Days Consistent</p>
         </div>
       </div>
     </div>

@@ -147,12 +147,12 @@ const Dashboard = () => {
         <div className="flex items-center gap-3 px-4 py-2 bg-white/30 dark:bg-slate-900/30 backdrop-blur-xl rounded-2xl border border-white/20 dark:border-white/[0.06] shadow-lg">
           <div className="text-right hidden sm:block">
             <p className="text-sm font-medium dark:text-white/90 leading-tight">{user?.displayName}</p>
-            <p className="text-[9px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Scholar</p>
+            <p className="text-[9px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 dark:text-slate-500">Scholar</p>
           </div>
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand to-violet-600 flex items-center justify-center text-white text-sm font-bold shadow-lg shadow-brand/20">
             {user?.displayName?.charAt(0) || 'S'}
           </div>
-          <button onClick={() => signOut()} className="p-2 rounded-xl text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition-all" title="Logout">
+          <button onClick={() => signOut()} className="p-2 rounded-xl text-slate-600 dark:text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition-all" title="Logout">
             <LogOut className="w-4 h-4" />
           </button>
         </div>

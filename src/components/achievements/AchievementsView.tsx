@@ -40,9 +40,9 @@ export const AchievementsView = () => {
               {rank.icon}
            </div>
            <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Status</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 mb-1">Status</p>
               <p className="text-xl font-display font-black dark:text-white leading-none">{rank.title}</p>
-              <p className="text-[9px] text-slate-400 mt-0.5">Level {progression.level}</p>
+              <p className="text-[9px] text-slate-600 dark:text-slate-400 mt-0.5">Level {progression.level}</p>
            </div>
         </div>
       </header>
@@ -52,7 +52,7 @@ export const AchievementsView = () => {
         <section className="space-y-4">
           <div>
             <h3 className="text-sm font-display font-semibold dark:text-white/80 tracking-tight">Progression Badges</h3>
-            <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Milestone badges earned by reaching level thresholds.</p>
+            <p className="text-[10px] text-slate-600 dark:text-slate-400 dark:text-slate-500 mt-0.5">Milestone badges earned by reaching level thresholds.</p>
           </div>
           <div className="flex flex-wrap gap-3">
             {progressionBadges.map(badge => {

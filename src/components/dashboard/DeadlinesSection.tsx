@@ -43,7 +43,7 @@ export const DeadlinesSection = () => {
                 <p className={`text-xs font-semibold truncate ${exam.daysLeft <= 3 ? 'text-red-800 dark:text-red-200' : 'text-slate-700 dark:text-slate-300'}`}>
                   {exam.subject}
                 </p>
-                <p className={`text-[8px] font-medium ${exam.daysLeft <= 3 ? 'text-red-500/70' : 'text-slate-400'}`}>
+                <p className={`text-[8px] font-medium ${exam.daysLeft <= 3 ? 'text-red-500/70' : 'text-slate-600 dark:text-slate-400'}`}>
                   {exam.type} &middot; {exam.date}
                 </p>
               </div>

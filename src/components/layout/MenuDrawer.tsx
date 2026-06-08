@@ -56,7 +56,7 @@ export const MenuDrawer = ({ open, onClose, activeSection, onNavigate }: MenuDra
                   </div>
                   <div>
                     <p className="text-sm font-semibold dark:text-white">{user?.displayName || 'Student'}</p>
-                    <p className="text-[9px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                    <p className="text-[9px] font-medium text-slate-600 dark:text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                       {progression.rank.icon} Level {progression.level} &middot; {progression.rank.title}
                     </p>
                   </div>

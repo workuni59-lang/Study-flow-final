@@ -33,7 +33,7 @@ export const StudyAnalytics = () => {
              <BarChart3 className="w-4 h-4 text-indigo-600" />
              <h3 className="text-xl font-display font-black dark:text-white uppercase tracking-tight">Activity</h3>
           </div>
-          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">XP gained last 7 days</p>
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">XP gained last 7 days</p>
         </div>
         
         <div className="bg-indigo-50 dark:bg-indigo-900/20 px-3 py-1.5 rounded-xl flex items-center gap-2">
@@ -60,7 +60,7 @@ export const StudyAnalytics = () => {
                 className={`w-full max-w-[32px] rounded-t-xl transition-colors ${day.xp > 0 ? 'bg-indigo-600 group-hover/bar:bg-indigo-500 shadow-[0_0_12px_rgba(79,70,229,0.3)]' : 'bg-slate-50 dark:bg-slate-800'}`}
                />
             </div>
-            <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">
+            <span className="text-[8px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">
               {day.label}
             </span>
           </div>

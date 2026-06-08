@@ -61,7 +61,7 @@ export const DailyReflection = ({
                   <span className="text-xs font-black uppercase tracking-widest">Achieved</span>
                 </div>
                 <p className="text-3xl font-display font-black dark:text-white leading-tight">
-                  {stats.completedTasks} <span className="text-lg text-slate-400">/ {stats.totalTasks}</span>
+                  {stats.completedTasks} <span className="text-lg text-slate-600 dark:text-slate-400">/ {stats.totalTasks}</span>
                 </p>
                 <p className="text-xs text-slate-500 font-bold mt-1">Tasks finished</p>
               </div>
@@ -80,12 +80,12 @@ export const DailyReflection = ({
 
             {unfinishedTasks.length > 0 && (
               <div className="mb-12 relative z-10">
-                <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4 px-2">Rolling over to next session</p>
+                <p className="text-xs font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 mb-4 px-2">Rolling over to next session</p>
                 <div className="space-y-2 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
                   {unfinishedTasks.map((task, i) => (
                     <div key={i} className="flex justify-between items-center p-4 bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-2xl">
                       <span className="font-bold text-sm dark:text-white truncate pr-4">{task.title}</span>
-                      <span className="text-[8px] font-black uppercase tracking-tighter px-2 py-0.5 bg-slate-50 dark:bg-slate-800 rounded-full text-slate-400">{task.category}</span>
+                      <span className="text-[8px] font-black uppercase tracking-tighter px-2 py-0.5 bg-slate-50 dark:bg-slate-800 rounded-full text-slate-600 dark:text-slate-400">{task.category}</span>
                     </div>
                   ))}
                 </div>
@@ -101,7 +101,7 @@ export const DailyReflection = ({
               </button>
               <button 
                 onClick={onClose}
-                className="w-full text-slate-400 hover:text-slate-600 font-bold text-sm transition-colors py-2"
+                className="w-full text-slate-600 dark:text-slate-400 hover:text-slate-600 font-bold text-sm transition-colors py-2"
               >
                 Continue Studying
               </button>

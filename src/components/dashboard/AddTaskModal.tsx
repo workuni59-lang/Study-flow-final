@@ -113,7 +113,7 @@ export const AddTaskModal = ({ isOpen, onClose, onAdd }: AddTaskModalProps) => {
                       className={`py-3 rounded-xl border-2 font-bold transition-all ${
                         duration === mins 
                           ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400' 
-                          : 'border-slate-100 dark:border-slate-800 text-slate-400'
+                          : 'border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400'
                       }`}
                     >
                       {mins}m

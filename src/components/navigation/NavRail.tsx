@@ -41,7 +41,7 @@ export const NavRail = ({ activeView, onViewChange }: NavRailProps) => {
               className={`p-3 rounded-xl transition-all relative group ${
                 activeView === item.id 
                   ? 'bg-brand/10 text-brand' 
-                  : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
               }`}
             >
               <item.icon className="w-5 h-5" />
@@ -64,7 +64,7 @@ export const NavRail = ({ activeView, onViewChange }: NavRailProps) => {
             className={`p-3 rounded-xl transition-all relative group ${
               activeView === 'settings' 
                 ? 'bg-brand/10 text-brand' 
-                : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
             }`}
           >
             <Settings className="w-5 h-5" />
@@ -83,7 +83,7 @@ export const NavRail = ({ activeView, onViewChange }: NavRailProps) => {
             className={`flex flex-col items-center gap-1 transition-colors ${
               activeView === item.id 
                 ? 'text-brand' 
-                : 'text-slate-400'
+                : 'text-slate-600 dark:text-slate-400'
             }`}
           >
             <item.icon className={`w-5 h-5 transition-transform ${activeView === item.id ? 'scale-110' : ''}`} />

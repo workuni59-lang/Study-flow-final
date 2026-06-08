@@ -134,7 +134,7 @@ export const PathToMastery = ({ isOpen, onClose, subject, examTitle, daysLeft }:
 
               {subject.topics.length === 0 && (
                 <div className="py-20 text-center">
-                  <p className="text-slate-400 font-medium">Add topics to this subject to see your path to mastery.</p>
+                  <p className="text-slate-600 dark:text-slate-400 font-medium">Add topics to this subject to see your path to mastery.</p>
                 </div>
               )}
             </div>

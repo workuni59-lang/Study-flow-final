@@ -130,7 +130,7 @@ export const DevMenu = () => {
               </button>
             </div>
 
-            <p className="mt-6 text-[8px] text-center text-slate-400 font-bold uppercase tracking-widest leading-relaxed">
+            <p className="mt-6 text-[8px] text-center text-slate-600 dark:text-slate-400 font-bold uppercase tracking-widest leading-relaxed">
               Use these tools to simulate progression and visual effects.
             </p>
           </motion.div>

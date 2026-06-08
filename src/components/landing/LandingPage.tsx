@@ -290,14 +290,14 @@ export default function LandingPage({ onOpenAuth }: LandingPageProps) {
             {/* Free Card */}
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-3xl p-8 flex flex-col justify-between transition-all duration-200">
               <div>
-                <span className="text-[#6b7280] text-xs uppercase font-bold tracking-widest font-mono">
+                <span className="text-[#9ca3af] text-xs uppercase font-bold tracking-widest font-mono">
                   Standard Access
                 </span>
                 <h3 className="text-2xl font-display font-extrabold text-white mt-1 mb-2">
                   StudyFlow Free
                 </h3>
                 <div className="h-12 flex items-center mb-6">
-                  <span className="text-sm font-semibold text-[#6b7280]">
+                  <span className="text-sm font-semibold text-[#9ca3af]">
                     Core Dashboard Sandbox
                   </span>
                 </div>
@@ -305,23 +305,23 @@ export default function LandingPage({ onOpenAuth }: LandingPageProps) {
 
                 <ul className="space-y-4 text-xs font-medium text-[#c0c4cc]">
                   <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-4 h-4 text-[#6b7280]" />
+                    <CheckCircle2 className="w-4 h-4 text-[#9ca3af]" />
                     <span>Single Active Study Plan</span>
                   </li>
                   <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-4 h-4 text-[#6b7280]" />
+                    <CheckCircle2 className="w-4 h-4 text-[#9ca3af]" />
                     <span>Focus Web Dashboard</span>
                   </li>
                   <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-4 h-4 text-[#6b7280]" />
+                    <CheckCircle2 className="w-4 h-4 text-[#9ca3af]" />
                     <span>Standard Focus Templates</span>
                   </li>
                   <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-4 h-4 text-[#6b7280]" />
+                    <CheckCircle2 className="w-4 h-4 text-[#9ca3af]" />
                     <span>Basic Wallpapers (3 variations)</span>
                   </li>
                   <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-4 h-4 text-[#6b7280]" />
+                    <CheckCircle2 className="w-4 h-4 text-[#9ca3af]" />
                     <span>Basic Clock Variants</span>
                   </li>
                 </ul>
@@ -425,15 +425,15 @@ export default function LandingPage({ onOpenAuth }: LandingPageProps) {
              </span>
            </div>
 
-          <div className="text-xs text-[#4b5563]" id="copyright">
+          <div className="text-xs text-[#9ca3af]" id="copyright">
             &copy; {new Date().getFullYear()} StudyFlow. Designed for extreme visual containment. All rights reserved.
           </div>
 
           <div className="flex gap-4" id="footer-socials">
-            <span className="text-xs text-[#4b5563] hover:text-white transition-colors cursor-pointer">
+            <span className="text-xs text-[#9ca3af] hover:text-white transition-colors cursor-pointer">
               Privacy Outline
             </span>
-            <span className="text-xs text-[#4b5563] hover:text-white transition-colors cursor-pointer">
+            <span className="text-xs text-[#9ca3af] hover:text-white transition-colors cursor-pointer">
               Terms of Focus
             </span>
           </div>

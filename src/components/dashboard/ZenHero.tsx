@@ -85,7 +85,7 @@ export const ZenHero = ({ timerSlot }: ZenHeroProps) => {
               <p className="text-sm md:text-base text-slate-600 dark:text-slate-300 font-light leading-relaxed italic">
                 "{quote.text}"
               </p>
-              <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-400 mt-3">
+              <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-slate-600 dark:text-slate-400 dark:text-slate-400 mt-3">
                 — {quote.author}
               </p>
             </div>

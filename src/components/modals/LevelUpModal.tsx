@@ -102,19 +102,19 @@ export const LevelUpModal = ({ level: oldLevel, isOpen, onClose }: LevelUpModalP
             {/* Celebration Stats */}
             <div className="mt-8 flex justify-center gap-8 border-t border-slate-100 dark:border-slate-800 pt-8">
                <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Rank</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 mb-1">Rank</p>
                   <p className="text-sm font-bold dark:text-white">{rank.icon} {rank.title}</p>
                </div>
                <div className="w-px h-8 bg-slate-100 dark:bg-slate-800" />
                <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Reward</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 mb-1">Reward</p>
                   <p className="text-sm font-bold text-amber-500 flex items-center gap-1 justify-center"><Coins className="w-3.5 h-3.5" />+{gold} Gold</p>
                </div>
                {nextRank && (
                  <>
                    <div className="w-px h-8 bg-slate-100 dark:bg-slate-800" />
                    <div>
-                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Next Rank</p>
+                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 mb-1">Next Rank</p>
                      <p className="text-sm font-bold dark:text-white/60">{nextRank.icon} {nextRank.title}</p>
                    </div>
                  </>

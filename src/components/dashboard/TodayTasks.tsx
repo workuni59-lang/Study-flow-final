@@ -61,7 +61,7 @@ export const TodayTasks = ({ tasks, onToggle, onDelete, onAddTask, onReorder }: 
     <DashboardCard>
       <div className="flex justify-between items-start mb-6">
         <div>
-          <p className="text-slate-400 dark:text-slate-500 text-xs font-medium tracking-wide">Step by step toward mastery.</p>
+          <p className="text-slate-600 dark:text-slate-400 dark:text-slate-500 text-xs font-medium tracking-wide">Step by step toward mastery.</p>
         </div>
         <div className="flex gap-2">
           <button
@@ -147,7 +147,7 @@ export const TodayTasks = ({ tasks, onToggle, onDelete, onAddTask, onReorder }: 
                     </button>
 
                     <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-medium dark:text-white/90 transition-all line-clamp-1 ${task.completed ? 'line-through text-slate-400' : ''}`}>
+                      <p className={`text-sm font-medium dark:text-white/90 transition-all line-clamp-1 ${task.completed ? 'line-through text-slate-600 dark:text-slate-400' : ''}`}>
                         {task.title}
                       </p>
                       <div className="flex items-center gap-2 mt-0.5">
@@ -182,7 +182,7 @@ export const TodayTasks = ({ tasks, onToggle, onDelete, onAddTask, onReorder }: 
                   <Calendar className="w-6 h-6" />
                 </div>
                 <h3 className="font-medium dark:text-white/70 text-base relative z-10">Clear skies today.</h3>
-                <p className="text-slate-400 text-xs max-w-[200px] mt-1 relative z-10">Add a task to start your flow.</p>
+                <p className="text-slate-600 dark:text-slate-400 text-xs max-w-[200px] mt-1 relative z-10">Add a task to start your flow.</p>
               </div>
             )}
           </div>

@@ -64,7 +64,7 @@ export const SubjectsView = () => {
                     <div key={i} className={`w-2 h-2 rounded-full bg-${i === 0 ? 'green' : i === 1 ? 'amber' : 'rose'}-500 border border-white dark:border-slate-900`} />
                   ))}
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">
                   {subject.topics.length} Topics
                 </span>
               </div>
@@ -95,7 +95,7 @@ export const SubjectsView = () => {
               <img src="/logo.png" alt="" className="w-64 h-64 object-contain grayscale" />
             </div>
             <BookOpen className="w-16 h-16 text-slate-200 mx-auto mb-6 relative z-10" />
-            <p className="text-xl text-slate-400 font-medium mb-8 relative z-10">No subjects yet. Start your journey by adding one.</p>
+            <p className="text-xl text-slate-600 dark:text-slate-400 font-medium mb-8 relative z-10">No subjects yet. Start your journey by adding one.</p>
             <button 
                onClick={() => setIsAddingSubject(true)}
                className="px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-slate-900 transition-all relative z-10"
@@ -191,7 +191,7 @@ const SubjectDetails = ({ subject, onBack }: { subject: Subject, onBack: () => v
       <div className="flex justify-between items-start mb-8">
         <button 
           onClick={onBack}
-          className="flex items-center gap-2 text-slate-400 hover:text-indigo-600 font-black text-xs uppercase tracking-widest transition-colors group"
+          className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-indigo-600 font-black text-xs uppercase tracking-widest transition-colors group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Back to Subjects
         </button>
@@ -233,7 +233,7 @@ const SubjectDetails = ({ subject, onBack }: { subject: Subject, onBack: () => v
           <DashboardCard>
              <div className="flex justify-between items-center mb-8">
                 <h3 className="text-2xl font-display font-black dark:text-white tracking-tight">Syllabus Topics</h3>
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{subject.topics.length} Total</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">{subject.topics.length} Total</span>
              </div>
 
              <form onSubmit={handleAddTopic} className="mb-8 flex gap-3">
@@ -277,7 +277,7 @@ const SubjectDetails = ({ subject, onBack }: { subject: Subject, onBack: () => v
                               className={`px-3 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${
                                 topic.mastery === level 
                                   ? `${masteryColors[level]} text-white shadow-sm` 
-                                  : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
+                                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
                               }`}
                             >
                               {level}
@@ -298,7 +298,7 @@ const SubjectDetails = ({ subject, onBack }: { subject: Subject, onBack: () => v
                 {subject.topics.length === 0 && (
                    <div className="py-12 text-center">
                      <Target className="w-12 h-12 text-slate-100 mx-auto mb-4" />
-                     <p className="text-slate-400 font-medium px-4 text-sm">No topics added yet. Break down your syllabus to track progress.</p>
+                     <p className="text-slate-600 dark:text-slate-400 font-medium px-4 text-sm">No topics added yet. Break down your syllabus to track progress.</p>
                    </div>
                 )}
              </div>
@@ -335,7 +335,7 @@ const SubjectDetails = ({ subject, onBack }: { subject: Subject, onBack: () => v
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
                        <span className="text-3xl font-display font-black dark:text-white">{calculateProgress()}%</span>
-                       <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">Complete</span>
+                       <span className="text-[8px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">Complete</span>
                     </div>
                  </div>
               </div>
@@ -418,13 +418,13 @@ const AddSubjectModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => 
             <div className="flex gap-4 mb-8 p-1.5 bg-slate-50 dark:bg-slate-800 rounded-2xl w-fit">
               <button 
                 onClick={() => setActiveTab('custom')}
-                className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'custom' ? 'bg-white dark:bg-slate-700 text-indigo-600 shadow-sm' : 'text-slate-400'}`}
+                className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'custom' ? 'bg-white dark:bg-slate-700 text-indigo-600 shadow-sm' : 'text-slate-600 dark:text-slate-400'}`}
               >
                 Custom
               </button>
               <button 
                 onClick={() => setActiveTab('templates')}
-                className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'templates' ? 'bg-white dark:bg-slate-700 text-indigo-600 shadow-sm' : 'text-slate-400'}`}
+                className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'templates' ? 'bg-white dark:bg-slate-700 text-indigo-600 shadow-sm' : 'text-slate-600 dark:text-slate-400'}`}
               >
                 Templates
               </button>
@@ -433,7 +433,7 @@ const AddSubjectModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => 
             {activeTab === 'custom' ? (
               <form onSubmit={handleSubmit} className="space-y-8">
                 <div>
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-3 block">Course Name</label>
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 dark:text-slate-400 mb-3 block">Course Name</label>
                   <input 
                     autoFocus
                     type="text" 
@@ -446,7 +446,7 @@ const AddSubjectModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => 
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-3 block">Theme Color</label>
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 dark:text-slate-400 mb-3 block">Theme Color</label>
                   <div className="flex gap-3">
                     {colors.map((c) => (
                       <button
@@ -487,7 +487,7 @@ const AddSubjectModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => 
                         <h4 className="text-lg font-black dark:text-white">{template.name}</h4>
                         <div className={`w-3 h-3 rounded-full bg-${template.color}-500 shadow-lg`} />
                      </div>
-                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-relaxed">
+                     <p className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest leading-relaxed">
                        {template.topics.length} High-Yield Topics included
                      </p>
                    </button>

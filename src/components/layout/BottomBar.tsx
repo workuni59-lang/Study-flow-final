@@ -14,7 +14,7 @@ interface BottomBarProps {
 const TabButton = memo(({ active, onClick, icon: Icon, label }: { active?: boolean; onClick: () => void; icon: typeof LayoutDashboard; label: string }) => (
   <button onClick={onClick}
     className={`flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-xl transition-colors ${
-      active ? 'text-brand' : 'text-slate-400 dark:text-slate-500'
+      active ? 'text-brand' : 'text-slate-600 dark:text-slate-400 dark:text-slate-500'
     }`}
   >
     <Icon className="w-5 h-5" />

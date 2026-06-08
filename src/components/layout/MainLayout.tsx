@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { TopBar, type Mode } from './TopBar';
 import { BottomBar } from './BottomBar';
 import { HomeView } from './HomeView';
-import { FocusEnvironment } from './FocusEnvironment';
+const FocusEnvironmentLazy = lazy(() => import('./FocusEnvironment').then(m => ({ default: m.FocusEnvironment })));
 import { MenuDrawer, type Section } from './MenuDrawer';
 import { DesktopSidebar } from './DesktopSidebar';
 import { SidePanel } from '../panels/SidePanel';
@@ -131,12 +131,14 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
           <main className="main-layout-content">
             {mode === 'home' && <HomeView onNotepadOpen={() => setIsNotesOpen(true)} onQuestsOpen={() => setSection('quests')} onMusicOpen={() => setPanelOpen('ambience')} onProgressionOpen={() => setSection('progression')} menuOpen={menuOpen} />}
             {mode === 'focus' && (
-              <FocusEnvironment
-                onTasksOpen={() => setPanelOpen('tasks')}
-                onMusicOpen={() => setPanelOpen('ambience')}
-                onNotepadOpen={() => setIsNotesOpen(true)}
-                onQuestsOpen={() => setSection('quests')}
-              />
+              <Suspense fallback={null}>
+                <FocusEnvironmentLazy
+                  onTasksOpen={() => setPanelOpen('tasks')}
+                  onMusicOpen={() => setPanelOpen('ambience')}
+                  onNotepadOpen={() => setIsNotesOpen(true)}
+                  onQuestsOpen={() => setSection('quests')}
+                />
+              </Suspense>
             )}
           </main>
 

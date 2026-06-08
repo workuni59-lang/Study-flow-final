@@ -5,7 +5,7 @@ import { useStudy } from '../../context/StudyContext';
 import { TopBar, type Mode } from './TopBar';
 import { BottomBar } from './BottomBar';
 import { HomeView } from './HomeView';
-import { FocusEnvironment } from './FocusEnvironment';
+const FocusEnvironmentLazy = lazy(() => import('./FocusEnvironment').then(m => ({ default: m.FocusEnvironment })));
 import { MenuDrawer, type Section } from './MenuDrawer';
 import { SidePanel } from '../panels/SidePanel';
 import { AmbiencePanel, type CuratedPlaylist } from '../panels/AmbiencePanel';
@@ -110,7 +110,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
           <div className="min-h-screen">
             <header className="sticky top-0 z-30 bg-white/70 dark:bg-[#0a0c10]/70 backdrop-blur-2xl border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-3 h-14 px-4">
-                <button onClick={() => setSection('dashboard')}
+                <button onClick={() => setSection('dashboard')} aria-label="Go back"
                   className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                 >
                   <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
@@ -143,11 +143,13 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
           <main>
             {mode === 'home' && <HomeView onNotepadOpen={() => setIsNotesOpen(true)} menuOpen={menuOpen} />}
             {mode === 'focus' && (
-              <FocusEnvironment
-                onTasksOpen={() => setPanelOpen('tasks')}
-                onMusicOpen={() => setPanelOpen('ambience')}
-                onNotepadOpen={() => setIsNotesOpen(true)}
-              />
+              <Suspense fallback={null}>
+                <FocusEnvironmentLazy
+                  onTasksOpen={() => setPanelOpen('tasks')}
+                  onMusicOpen={() => setPanelOpen('ambience')}
+                  onNotepadOpen={() => setIsNotesOpen(true)}
+                />
+              </Suspense>
             )}
           </main>
 
@@ -165,7 +167,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
 
       {/* Floating mood button — only on dashboard */}
       {!isFullView && (
-        <button onClick={() => setShowMoodPicker(v => !v)}
+        <button onClick={() => setShowMoodPicker(v => !v)} aria-label="Change background"
           className="fixed bottom-24 right-4 z-40 w-11 h-11 rounded-full bg-black/40 backdrop-blur-lg border border-white/15 flex items-center justify-center text-white/70 hover:text-white hover:bg-black/55 transition-all shadow-lg active:scale-95">
           <Palette className="w-5 h-5" />
         </button>
@@ -197,7 +199,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
               {/* Header */}
               <div className="flex items-center justify-between px-5 py-3">
                 <span className="text-sm font-semibold text-white/90">Mood</span>
-                <button onClick={() => setShowMoodPicker(false)}
+                <button onClick={() => setShowMoodPicker(false)} aria-label="Close"
                   className="w-7 h-7 rounded-full bg-white/[0.06] flex items-center justify-center text-white/40 hover:text-white hover:bg-white/[0.12] transition-all">
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -257,7 +259,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
             <span className="text-sm">{ambienceUrl.emoji}</span>
             <span className="flex-1 text-[10px] font-bold truncate text-white/80">{ambienceUrl.name}</span>
             <span className="text-[7px] font-bold uppercase tracking-wider text-white/40">{ambienceUrl.service}</span>
-            <button onClick={() => setAmbienceUrl(null)}
+            <button onClick={() => setAmbienceUrl(null)} aria-label="Close ambience"
               className="p-0.5 rounded hover:bg-white/10 text-white/40 transition-colors">
               <X className="w-3 h-3" />
             </button>

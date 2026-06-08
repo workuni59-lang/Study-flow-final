@@ -1,5 +1,6 @@
-import { useState, lazy, Suspense, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { useState, lazy, Suspense, useEffect, useMemo } from 'react';
+import { X, Palette, Check, Crown } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useStudy } from '../../context/StudyContext';
 import { TopBar, type Mode } from './TopBar';
 import { BottomBar } from './BottomBar';
@@ -9,6 +10,8 @@ import { MenuDrawer, type Section } from './MenuDrawer';
 import { SidePanel } from '../panels/SidePanel';
 import { AmbiencePanel, type CuratedPlaylist } from '../panels/AmbiencePanel';
 import { NotesPanel } from '../panels/NotesPanel';
+import { MOOD_GRADIENTS } from '../../lib/wallpapers';
+import { WALLPAPERS } from '../../lib/gamification';
 
 const TasksPanelLazy = lazy(() => import('../panels/TasksPanel').then(m => ({ default: m.TasksPanel })));
 const NotepadPanelLazy = lazy(() => import('../panels/NotepadPanel').then(m => ({ default: m.NotepadPanel })));
@@ -37,7 +40,7 @@ interface MobileLayoutProps {
 }
 
 export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
-  const { userStats, gameLevel, levelUpEvent, dismissLevelUp, themeConfig, activeNotification, confettiActive, closeNotification } = useStudy();
+  const { userStats, gameLevel, levelUpEvent, dismissLevelUp, themeConfig, setThemeConfig, activeNotification, confettiActive, closeNotification, setShowPremiumModal } = useStudy();
   const [mode, setMode] = useState<Mode>('focus');
   const [section, setSection] = useState<Section>('dashboard');
   const [menuOpen, setMenuOpen] = useState(false);
@@ -45,6 +48,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
   const [isNotesOpen, setIsNotesOpen] = useState(false);
   const [ambienceUrl, setAmbienceUrl] = useState<CuratedPlaylist | null>(null);
   const [showLevelUp, setShowLevelUp] = useState(false);
+  const [showMoodPicker, setShowMoodPicker] = useState(false);
 
   useEffect(() => {
     if (levelUpEvent) {
@@ -67,6 +71,22 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
 
   const isFullView = section !== 'dashboard';
 
+  const isMood = themeConfig.wallpaper in MOOD_GRADIENTS;
+  const moodGradient = isMood ? MOOD_GRADIENTS[themeConfig.wallpaper] : undefined;
+
+  const moodWallpapers = useMemo(() =>
+    WALLPAPERS.filter(w => w.category === 'Moods'),
+  []);
+
+  const handleMoodSelect = (id: string, isPremium: boolean) => {
+    if (isPremium && !userStats.isPremium) {
+      setShowPremiumModal(true);
+      return;
+    }
+    setThemeConfig({ ...themeConfig, wallpaper: id });
+    setShowMoodPicker(false);
+  };
+
   const baseBg: Record<string, string> = {
     indigo: 'bg-[#f8fafc] dark:bg-slate-950',
     rose: 'bg-[#fff5f5] dark:bg-[#1a0f0f]',
@@ -80,7 +100,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
   };
 
   return (
-    <div className={`min-h-screen transition-colors duration-1000 ${baseBg[themeConfig.atmosphere] || baseBg.indigo}`} style={{ backgroundAttachment: 'scroll' }}>
+    <div className={`min-h-screen transition-colors duration-1000 ${baseBg[themeConfig.atmosphere] || baseBg.indigo}`} style={{ backgroundAttachment: 'scroll', backgroundImage: moodGradient }}>
       <style>{skeletonKeyframes}</style>
       {/* Main content area */}
       <div>
@@ -142,6 +162,76 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
         </>
       )}
       </div>
+
+      {/* Floating mood button — only on dashboard */}
+      {!isFullView && (
+        <button onClick={() => setShowMoodPicker(v => !v)}
+          className="fixed bottom-24 right-4 z-40 w-11 h-11 rounded-full bg-black/40 backdrop-blur-lg border border-white/15 flex items-center justify-center text-white/70 hover:text-white hover:bg-black/55 transition-all shadow-lg active:scale-95">
+          <Palette className="w-5 h-5" />
+        </button>
+      )}
+
+      {/* Mood picker bottom sheet */}
+      <AnimatePresence>
+        {showMoodPicker && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 bg-black/40"
+              onClick={() => setShowMoodPicker(false)}
+            />
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              className="fixed inset-x-0 bottom-0 z-50 rounded-t-3xl bg-[#0f0f1f] border-t border-white/[0.06] pb-8"
+            >
+              {/* Drag handle */}
+              <div className="flex justify-center pt-2 pb-1">
+                <div className="w-10 h-1 rounded-full bg-white/[0.12]" />
+              </div>
+
+              {/* Header */}
+              <div className="flex items-center justify-between px-5 py-3">
+                <span className="text-sm font-semibold text-white/90">Mood</span>
+                <button onClick={() => setShowMoodPicker(false)}
+                  className="w-7 h-7 rounded-full bg-white/[0.06] flex items-center justify-center text-white/40 hover:text-white hover:bg-white/[0.12] transition-all">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* Mood grid */}
+              <div className="grid grid-cols-5 gap-3 px-5 max-h-[50vh] overflow-y-auto no-scrollbar">
+                {moodWallpapers.map(w => {
+                  const selected = themeConfig.wallpaper === w.id;
+                  return (
+                    <button key={w.id} onClick={() => handleMoodSelect(w.id, w.isPremium)}
+                      className={`relative w-full aspect-square rounded-2xl transition-all active:scale-90 ${
+                        selected ? 'ring-2 ring-white ring-offset-2 ring-offset-[#0f0f1f]' : 'ring-1 ring-white/[0.06] hover:ring-white/25'
+                      }`}
+                      style={{ background: MOOD_GRADIENTS[w.id] }}
+                      title={w.name}>
+                      {selected && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-2xl">
+                          <Check className="w-5 h-5 text-white drop-shadow-md" />
+                        </div>
+                      )}
+                      {!userStats.isPremium && w.isPremium && (
+                        <div className="absolute top-0.5 right-0.5">
+                          <Crown className="w-3 h-3 text-amber-400 drop-shadow-md" />
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Menu drawer (slide-in from left) */}
       <MenuDrawer

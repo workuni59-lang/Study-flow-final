@@ -8,6 +8,7 @@ import { DashboardCard } from './DashboardCard';
 import { storage } from '../../services/storage';
 import { useStudy, useFocus } from '../../context/StudyContext';
 import { ATMOSPHERES, WALLPAPERS } from '../../lib/gamification';
+import { MOOD_GRADIENTS, MOOD_ANIMATED } from '../../lib/wallpapers';
 import { playAlertSound } from '../../lib/alertSounds';
 
 const PHOTO_CATEGORIES = [...new Set(WALLPAPERS.filter(w => w.type === 'image' && w.category).map(w => w.category!))];
@@ -47,24 +48,6 @@ const MemoTimerDisplay = React.memo(({ timeLeft, progress, completed, tallyEmoji
     </div>
   </div>
 ));
-
-const MOOD_GRADIENTS: Record<string, string> = {
-  'ember-glow': 'linear-gradient(135deg, #f97316, #dc2626, #ea580c)',
-  'frost-mint': 'linear-gradient(135deg, #0d9488, #2dd4bf, #67e8f9)',
-  'twilight-sky': 'linear-gradient(135deg, #1e3a5f, #7c3aed, #e11d48)',
-  'warm-latte': 'linear-gradient(135deg, #fef3c7, #d97706, #78350f)',
-  'charcoal': 'linear-gradient(135deg, #1e293b, #0f172a, #000000)',
-  'blush': 'linear-gradient(135deg, #fce7f3, #fda4af, #fff1f2)',
-  'lavender-dream': 'linear-gradient(135deg, #e8d5f5, #c084fc, #a855f7)',
-  'midnight-ocean': 'linear-gradient(135deg, #0f172a, #0d9488, #1e293b)',
-  'golden-hour': 'linear-gradient(135deg, #fbbf24, #f59e0b, #fcd34d)',
-  'northern-sky': 'linear-gradient(135deg, #059669, #0d9488, #4f46e5)',
-  'rose-quartz': 'linear-gradient(135deg, #fbcfe8, #e879f9, #d8b4fe)',
-  'cobalt-night': 'linear-gradient(135deg, #1e3a5f, #1e1b4b, #3730a3)',
-  'harvest': 'linear-gradient(135deg, #d97706, #b91c1c, #f59e0b)',
-  'moonlit-fog': 'linear-gradient(135deg, #94a3b8, #cbd5e1, #f1f5f9)',
-  'terra-cotta': 'linear-gradient(135deg, #c2410c, #9a3412, #7c2d12)',
-};
 
 const ANIMATED_ACCENTS: Record<string, string> = {
   'none': '#64748b',

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, memo } from 'react';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, LogIn } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useAuth } from '../../context/AuthContext';
 
 export type Mode = 'home' | 'focus';
 
@@ -8,6 +9,7 @@ interface TopBarProps {
   mode: Mode;
   onModeChange: (m: Mode) => void;
   onMenuOpen: () => void;
+  onOpenAuth?: () => void;
 }
 
 const HELP_LINKS = [
@@ -16,7 +18,8 @@ const HELP_LINKS = [
   { icon: '🎮', label: 'Join Discord', url: 'https://discord.gg/tUFvKERC' },
 ];
 
-export const TopBar = memo(({ mode, onModeChange, onMenuOpen }: TopBarProps) => {
+export const TopBar = memo(({ mode, onModeChange, onMenuOpen, onOpenAuth }: TopBarProps) => {
+  const { user } = useAuth();
   const [helpOpen, setHelpOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -78,8 +81,33 @@ export const TopBar = memo(({ mode, onModeChange, onMenuOpen }: TopBarProps) => 
         </div>
       </div>
 
-      {/* ? Help button — top right */}
-      <div style={{ position: 'fixed', top: '16px', right: '16px', zIndex: 30 }}>
+      {/* Sign-in + Help — top right */}
+      <div style={{ position: 'fixed', top: '16px', right: '16px', zIndex: 30, display: 'flex', alignItems: 'center', gap: '6px' }}>
+        {!user && onOpenAuth && (
+          <button onClick={onOpenAuth}
+            style={{
+              height: '32px',
+              padding: '0 12px',
+              borderRadius: '8px',
+              backgroundColor: 'rgba(0,0,0,0.35)',
+              backdropFilter: 'blur(8px)',
+              border: '1px solid rgba(255,255,255,0.12)',
+              color: 'rgba(255,255,255,0.75)',
+              fontSize: '11px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px',
+              transition: 'border-color 0.15s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; }}
+          >
+            <LogIn size={12} />
+            Sign in
+          </button>
+        )}
         <button
           ref={buttonRef}
           onClick={() => setHelpOpen(v => !v)}

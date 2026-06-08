@@ -1,7 +1,6 @@
 import { useState, lazy, Suspense, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { useStudy } from '../../context/StudyContext';
-import { useAuth } from '../../context/AuthContext';
 import { TopBar, type Mode } from './TopBar';
 import { BottomBar } from './BottomBar';
 import { HomeView } from './HomeView';
@@ -38,8 +37,7 @@ interface MobileLayoutProps {
 }
 
 export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
-  const { user } = useAuth();
-  const { userStats, themeConfig, activeNotification, confettiActive, closeNotification } = useStudy();
+  const { userStats, gameLevel, levelUpEvent, dismissLevelUp, themeConfig, activeNotification, confettiActive, closeNotification } = useStudy();
   const [mode, setMode] = useState<Mode>('focus');
   const [section, setSection] = useState<Section>('dashboard');
   const [menuOpen, setMenuOpen] = useState(false);
@@ -47,15 +45,12 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
   const [isNotesOpen, setIsNotesOpen] = useState(false);
   const [ambienceUrl, setAmbienceUrl] = useState<CuratedPlaylist | null>(null);
   const [showLevelUp, setShowLevelUp] = useState(false);
-  const [prevLevel, setPrevLevel] = useState(userStats.level);
 
   useEffect(() => {
-    if (userStats.level > prevLevel) {
+    if (levelUpEvent) {
       setShowLevelUp(true);
-      setPrevLevel(userStats.level);
     }
-  }, [userStats.level, prevLevel]);
-
+  }, [levelUpEvent]);
   useEffect(() => {
     const t = setTimeout(() => import('../analytics/AnalyticsDashboard'), 2000);
     return () => clearTimeout(t);
@@ -103,7 +98,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
                 <span className="text-sm font-semibold dark:text-white capitalize">{section}</span>
               </div>
             </header>
-            <main className="p-4 pb-28">
+            <main className="p-3 md:p-4 pb-28">
               <Suspense fallback={<MobileSkeleton />}>
                 {section === 'analytics' && <AnalyticsDashboardLazy />}
                 {section === 'subjects' && <SubjectsViewLazy />}
@@ -121,6 +116,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
             mode={mode}
             onModeChange={setMode}
             onMenuOpen={() => setMenuOpen(v => !v)}
+            onOpenAuth={onOpenAuth}
           />
 
           {/* Main content */}
@@ -196,22 +192,9 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
       {/* Overlays & modals */}
       <AchievementNotification achievement={activeNotification} onClose={closeNotification} />
       <Confetti active={confettiActive} />
-      <LevelUpModal level={userStats.level} isOpen={showLevelUp} onClose={() => setShowLevelUp(false)} />
+      <LevelUpModal level={levelUpEvent ?? gameLevel} isOpen={showLevelUp} onClose={() => { setShowLevelUp(false); dismissLevelUp(); }} />
       <PremiumModal />
       <PanicModeUI />
-
-      {/* Sign-in prompt for unauthenticated users */}
-      {!user && onOpenAuth && (
-        <div className="fixed bottom-24 left-6 z-40 lg:hidden flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.06]">
-          <span className="text-[10px] text-white/40 font-medium">✦ Free</span>
-          <span className="w-px h-2.5 bg-white/[0.08]" />
-          <button onClick={onOpenAuth}
-            className="text-[10px] text-white/70 hover:text-brand font-semibold transition-colors"
-          >
-            Sign in <span className="text-white/40 font-normal">sync</span>
-          </button>
-        </div>
-      )}
 
       <NotesPanel isOpen={isNotesOpen} onClose={() => setIsNotesOpen(false)} />
     </div>

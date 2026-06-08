@@ -1,10 +1,10 @@
 import React from 'react';
-import { Flame, Shield, ShieldCheck, Zap, ArrowRight } from 'lucide-react';
+import { Flame, ShieldCheck, Zap, ArrowRight } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useStudy } from '../../context/StudyContext';
 
 export const GamificationOverview = () => {
-  const { userStats, progression, buyShield } = useStudy();
+  const { userStats, progression } = useStudy();
   const { rank, nextRank, level, currentXp, xpForNext, percentage, totalXp } = progression;
 
   return (
@@ -71,17 +71,7 @@ export const GamificationOverview = () => {
             <div className="flex items-center gap-1.5 px-2 py-1 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-lg border border-emerald-100 dark:border-emerald-800/50">
                <ShieldCheck className="w-3 h-3" />
                <span className="text-[8px] font-black uppercase tracking-widest">Active</span>
-            </div>
-          ) : (
-            <button 
-              onClick={buyShield}
-              className="flex items-center gap-1.5 px-2 py-1 bg-slate-50 dark:bg-slate-800 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg border border-transparent hover:border-indigo-100 transition-all group/btn"
-              title="Buy Streak Shield for 1000 XP"
-            >
-               <Shield className="w-3 h-3" />
-               <span className="text-[8px] font-black uppercase tracking-widest">Buy Shield</span>
-            </button>
-          )}
+            </div>) : null}
         </div>
         
         <div className="flex flex-col items-center justify-center flex-1">

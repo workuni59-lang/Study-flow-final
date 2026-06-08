@@ -31,7 +31,7 @@ export const SidePanel = ({ open, onClose, title, children, side = 'right' }: Si
                 </svg>
               </button>
             </div>
-            <div className="overflow-y-auto h-[calc(100%-60px)] p-5">
+            <div className="overflow-y-auto h-[calc(100%-60px)] p-4 md:p-5">
               {children}
             </div>
           </div>

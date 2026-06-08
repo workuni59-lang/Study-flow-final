@@ -25,6 +25,18 @@ export const ActivityHeatmap = () => {
     return data;
   }, [userStats.dailyXPHistory]);
 
+  const weeklyXp = useMemo(() => {
+    const today = new Date();
+    let total = 0;
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().split("T")[0];
+      total += userStats.dailyXPHistory[dateStr] || 0;
+    }
+    return total;
+  }, [userStats.dailyXPHistory]);
+
   const getColor = (xp: number) => {
     if (xp === 0) return 'bg-slate-100 dark:bg-slate-800/50';
     if (xp < 200) return 'bg-indigo-200 dark:bg-indigo-900/30';
@@ -82,7 +94,7 @@ export const ActivityHeatmap = () => {
         <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-700">
               <p className="text-[8px] font-black uppercase text-slate-400 mb-1">Weekly Velocity</p>
-              <p className="text-sm font-bold dark:text-white">+1,240 XP</p>
+              <p className="text-sm font-bold dark:text-white">{weeklyXp.toLocaleString()} XP</p>
            </div>
            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-700">
               <p className="text-[8px] font-black uppercase text-slate-400 mb-1">Peak Hour</p>

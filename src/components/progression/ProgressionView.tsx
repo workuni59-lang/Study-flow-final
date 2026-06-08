@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Sparkles, Target, ChevronRight, Zap, ArrowUpRight, ArrowRight, Lock } from 'lucide-react';
+import { Sparkles, Target, ChevronRight, Zap, ArrowUpRight, Lock, Star } from 'lucide-react';
 import { useStudy } from '../../context/StudyContext';
-import { RANK_TIERS, PROGRESSION_BADGES, getNewlyUnlockedBadges, totalXpForLevel, xpForLevel } from '../../lib/progression';
+import { RANK_TIERS, PROGRESSION_BADGES, totalXpForLevel, xpForLevel } from '../../lib/progression';
 import { getIdentity } from '../../lib/progression/identities';
 import { RankCard } from './RankCard';
 import { BadgeSvg, formatXP, type BadgeTier } from './BadgeSvg';
@@ -11,158 +11,180 @@ const BADGE_TIER_MAP: Record<string, BadgeTier> = {
   bronze: 'bronze', silver: 'silver', gold: 'gold', platinum: 'platinum', diamond: 'diamond', legend: 'legend',
 };
 
-const TIER_GLOW: Record<string, string> = {
-  bronze: '0 0 10px rgba(205,127,50,0.4)',
-  silver: '0 0 10px rgba(100,160,220,0.4)',
-  gold: '0 0 14px rgba(240,184,0,0.5)',
-  platinum: '0 0 14px rgba(180,130,220,0.5)',
-  diamond: '0 0 18px rgba(100,200,240,0.5)',
-  legend: '0 0 22px rgba(255,107,53,0.6)',
+const RARITY_COLORS: Record<string, string> = {
+  Common: 'text-slate-400',
+  Rare: 'text-blue-400',
+  Epic: 'text-purple-400',
+  Legendary: 'text-amber-400',
 };
 
-const RARITY_TEXT: Record<string, string> = {
-  Common: '#94a3b8',
-  Rare: '#60a5fa',
-  Epic: '#a78bfa',
-  Legendary: '#fbbf24',
-};
+const STAGGER = 0.03;
 
 export const ProgressionView = () => {
+  const [isMobile] = useState(() => window.innerWidth < 768);
   const { progression, progressionBadges, gameXp } = useStudy();
   const { level, totalXp, currentXp, xpForNext, percentage, rank, nextRank } = progression;
   const identity = getIdentity(rank.id);
 
   const nextUnlockedBadge = PROGRESSION_BADGES.find(b => level < b.levelRequired);
   const prevBadges = PROGRESSION_BADGES.filter(b => level >= b.levelRequired);
+  const milestones = PROGRESSION_BADGES;
+
+  const P = (p: { d?: number; h?: any }) => p;
 
   return (
-    <div style={{ maxWidth: '1024px', margin: '0 auto' }} className="space-y-12 pb-16">
+    <div className="max-w-[1024px] mx-auto space-y-8 md:space-y-12 pb-16">
       {/* ── Header: Current Status ── */}
-      <header className="space-y-6">
-        <div
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: '8px',
-            padding: '4px 12px', borderRadius: '9999px',
-            background: 'rgba(99,102,241,0.08)',
-            border: '1px solid rgba(99,102,241,0.2)',
-            fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em',
-            color: 'rgb(99,102,241)',
-          }}
+      <header className="space-y-4 md:space-y-6">
+        <motion.div
+          initial={isMobile ? false : { opacity: 0, y: -8 }}
+          animate={isMobile ? {} : { opacity: 1, y: 0 }}
         >
-          <Sparkles style={{ width: '12px', height: '12px' }} />
-          Progression Journey
-        </div>
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">
+            <Sparkles className="w-3 h-3" />
+            Progression Journey
+          </div>
+        </motion.div>
 
-        {/* Current Rank Hero — all stats inside */}
-        <div
+        {/* Current Rank Hero */}
+        <motion.div
+          initial={isMobile ? false : { opacity: 0, y: 20 }}
+          animate={isMobile ? {} : { opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full rounded-2xl md:rounded-[32px] p-5 md:p-10 text-white relative overflow-hidden"
           style={{
-            width: '100%', borderRadius: '32px', padding: '32px', color: '#fff',
-            position: 'relative', overflow: 'hidden',
             background: `linear-gradient(135deg, ${identity.gradientFrom}, ${identity.gradientTo})`,
           }}
         >
-          <div style={{
-            position: 'absolute', top: 0, right: 0, fontSize: '120px', opacity: 0.1,
-            userSelect: 'none', lineHeight: 1, pointerEvents: 'none',
-          }}>
+          {/* Animated background pattern — hidden on mobile */}
+          <div className="absolute inset-0 opacity-[0.06]">
+            <div className="absolute inset-0" style={{
+              backgroundImage: `radial-gradient(circle at 25% 25%, #fff 1px, transparent 1px)`,
+              backgroundSize: '40px 40px',
+            }} />
+            <div className="hidden md:block absolute -top-1/2 -right-1/2 w-full h-full rounded-full"
+              style={{
+                background: 'radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%)',
+              }}
+            />
+          </div>
+
+          {/* Giant icon watermark */}
+          <div className="absolute top-0 right-0 p-5 md:p-8 text-[60px] md:text-[120px] opacity-[0.08] select-none leading-none pointer-events-none">
             {rank.icon}
           </div>
-          <div style={{ position: 'relative', zIndex: 10 }}>
-            <span style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.3em', color: 'rgba(255,255,255,0.7)' }}>
+
+          <div className="relative z-10">
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/60">
               Current Rank
             </span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '8px', marginBottom: '4px' }}>
-              <span style={{ fontSize: '30px' }}>{rank.icon}</span>
-              <h1 style={{ fontSize: '30px', fontWeight: 900, letterSpacing: '-0.02em' }}>{rank.title}</h1>
+
+            <div className="flex items-center gap-3 mt-2 mb-1">
+              <motion.span
+                initial={isMobile ? false : { scale: 0, rotate: -20 }}
+                animate={isMobile ? {} : { scale: 1, rotate: 0 }}
+                transition={{ type: 'spring', stiffness: 200, delay: 0.2 }}
+                className="text-2xl md:text-3xl"
+              >
+                {rank.icon}
+              </motion.span>
+              <h1 className="text-2xl md:text-3xl font-black tracking-tight">{rank.title}</h1>
             </div>
-            <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.8)', marginTop: '4px', maxWidth: '448px' }}>
+
+            <p className="text-sm text-white/70 max-w-md mt-1 leading-relaxed">
               {identity.description}
             </p>
 
-            {/* Level / XP / To Next stats */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '24px', marginTop: '24px' }}>
-              <div>
-                <p style={{ fontSize: '9px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.6)' }}>Level</p>
-                <p style={{ fontSize: '24px', fontWeight: 900 }}>{level}</p>
+            {/* Stats row */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mt-4 md:mt-6">
+              <div className="bg-white/[0.12] md:bg-white/10 md:backdrop-blur-sm rounded-xl p-3 border border-white/10">
+                <p className="text-[9px] font-black uppercase tracking-[0.1em] text-white/50">Level</p>
+                <p className="text-xl md:text-2xl font-black mt-0.5">{level}</p>
               </div>
-              <div>
-                <p style={{ fontSize: '9px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.6)' }}>Total XP</p>
-                <p style={{ fontSize: '24px', fontWeight: 900 }}>{formatXP(totalXp)}</p>
+              <div className="bg-white/[0.12] md:bg-white/10 md:backdrop-blur-sm rounded-xl p-3 border border-white/10">
+                <p className="text-[9px] font-black uppercase tracking-[0.1em] text-white/50">Total XP</p>
+                <p className="text-xl md:text-2xl font-black mt-0.5">{formatXP(totalXp)}</p>
               </div>
-              <div>
-                <p style={{ fontSize: '9px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.6)' }}>To Next</p>
-                <p style={{ fontSize: '24px', fontWeight: 900 }}>{formatXP(xpForNext - currentXp)}</p>
+              <div className="bg-white/[0.12] md:bg-white/10 md:backdrop-blur-sm rounded-xl p-3 border border-white/10">
+                <p className="text-[9px] font-black uppercase tracking-[0.1em] text-white/50">To Next</p>
+                <p className="text-xl md:text-2xl font-black mt-0.5">{formatXP(xpForNext - currentXp)}</p>
               </div>
             </div>
 
-            {/* XP progress bar */}
-            <div style={{ marginTop: '16px', width: '100%', height: '10px', background: 'rgba(255,255,255,0.2)', borderRadius: '9999px', overflow: 'hidden' }}>
+            {/* XP bar */}
+            <div className="mt-4 md:mt-5 w-full h-3 bg-white/15 rounded-full overflow-hidden border border-white/5">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${percentage}%` }}
-                transition={{ duration: 0.8, ease: 'easeOut' }}
-                style={{ height: '100%', background: 'linear-gradient(90deg, #fff, rgba(255,255,255,0.7))', borderRadius: '9999px' }}
+                transition={{ duration: 1, ease: 'easeOut', delay: isMobile ? 0 : 0.3 }}
+                className="h-full bg-white rounded-full relative"
+                style={{
+                  boxShadow: '0 0 12px rgba(255,255,255,0.4), inset 0 1px 0 rgba(255,255,255,0.6)',
+                }}
               />
             </div>
 
-            {/* Badges Earned + Rank Progress inside card */}
-            <div style={{ display: 'flex', gap: '24px', marginTop: '20px', flexWrap: 'wrap' }}>
+            {/* Badges earned + Rank progress */}
+            <div className="flex gap-4 md:gap-6 mt-4 md:mt-5 flex-wrap">
               <div>
-                <p style={{ fontSize: '9px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.6)' }}>Badges Earned</p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
-                  <span style={{ fontSize: '20px', fontWeight: 900 }}>{prevBadges.length}</span>
-                  <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>/ {PROGRESSION_BADGES.length}</span>
+                <p className="text-[9px] font-black uppercase tracking-[0.1em] text-white/50">Badges</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-lg md:text-xl font-black">{prevBadges.length}</span>
+                  <span className="text-xs text-white/40">/ {milestones.length}</span>
                 </div>
-                <div style={{ display: 'flex', gap: '4px', marginTop: '4px' }}>
-                  {PROGRESSION_BADGES.map((b, i) => {
+                <div className="flex gap-1 mt-1.5">
+                  {milestones.map((b, i) => {
                     const unlocked = level >= b.levelRequired;
+                    const id = getIdentity(i + 1);
                     return (
                       <div
                         key={b.id}
-                        style={{
-                          width: '8px', height: '8px', borderRadius: '50%',
-                          background: unlocked
-                            ? `linear-gradient(135deg, ${getIdentity(i + 1).gradientFrom}, ${getIdentity(i + 1).gradientTo})`
-                            : 'rgba(255,255,255,0.2)',
-                          border: unlocked ? 'none' : '1px solid rgba(255,255,255,0.15)',
-                        }}
+                        className={`w-2 h-2 rounded-full transition-all duration-500 ${
+                          unlocked
+                            ? ''
+                            : 'bg-white/15 border border-white/10'
+                        }`}
+                        style={unlocked ? {
+                          background: `linear-gradient(135deg, ${id.gradientFrom}, ${id.gradientTo})`,
+                        } : {}}
                       />
                     );
                   })}
                 </div>
               </div>
               <div>
-                <p style={{ fontSize: '9px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.6)' }}>Rank Progress</p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px', fontSize: '13px' }}>
-                  <Zap style={{ width: '14px', height: '14px', color: 'rgba(255,255,255,0.7)' }} />
-                  <span style={{ fontWeight: 700 }}>{formatXP(currentXp)}</span>
-                  <span style={{ color: 'rgba(255,255,255,0.5)' }}>/ {formatXP(xpForNext)} XP</span>
+                <p className="text-[9px] font-black uppercase tracking-[0.1em] text-white/50">Progress</p>
+                <div className="flex items-center gap-1.5 mt-1.5 text-sm">
+                  <Zap className="w-3.5 h-3.5 text-white/60" />
+                  <span className="font-bold">{formatXP(currentXp)}</span>
+                  <span className="text-white/40">/ {formatXP(xpForNext)} XP</span>
                 </div>
               </div>
             </div>
 
             {/* Next rank indicator */}
             {nextRank && (
-              <div style={{
-                marginTop: '20px', display: 'flex', alignItems: 'center', gap: '8px',
-                background: 'rgba(255,255,255,0.1)', borderRadius: '12px',
-                padding: '10px 16px', color: 'rgba(255,255,255,0.9)', fontSize: '12px',
-              }}>
-                <ArrowRight style={{ width: '14px', height: '14px', color: 'rgba(255,255,255,0.6)' }} />
-                <span style={{ fontWeight: 600 }}>Next: {nextRank.icon} {nextRank.title}</span>
-                <ChevronRight style={{ width: '12px', height: '12px', color: 'rgba(255,255,255,0.4)' }} />
-                <span style={{ fontWeight: 700 }}>Level {nextRank.minLevel}</span>
-              </div>
+              <motion.div
+                initial={isMobile ? false : { opacity: 0, y: 8 }}
+                animate={isMobile ? {} : { opacity: 1, y: 0 }}
+                transition={{ delay: isMobile ? 0 : 0.5 }}
+                className="mt-4 md:mt-5 flex items-center gap-2 bg-white/10 md:backdrop-blur-sm rounded-xl px-4 py-2.5 text-sm border border-white/10"
+              >
+                <ArrowUpRight className="w-3.5 h-3.5 text-white/50" />
+                <span className="font-semibold text-white/80">Next: {nextRank.icon} {nextRank.title}</span>
+                <ChevronRight className="w-3 h-3 text-white/30" />
+                <span className="font-bold text-white/90">Level {nextRank.minLevel}</span>
+              </motion.div>
             )}
           </div>
-        </div>
+        </motion.div>
       </header>
 
       {/* ── Full Rank Roadmap ── */}
       <section className="space-y-4">
         <div>
-          <h3 style={{ fontSize: '14px', fontWeight: 600, letterSpacing: '-0.01em', color: 'rgba(255,255,255,0.85)' }}>The Journey</h3>
-          <p style={{ fontSize: '10px', color: 'rgba(148,163,184,0.5)', marginTop: '2px' }}>Every rank tells a story. Here is your complete path.</p>
+          <h3 className="text-sm font-semibold tracking-tight text-white/85">The Journey</h3>
+          <p className="text-[10px] text-slate-500 mt-0.5">Every rank tells a story. Here is your complete path.</p>
         </div>
 
         <div className="space-y-2">
@@ -178,71 +200,81 @@ export const ProgressionView = () => {
         </div>
       </section>
 
-      {/* ── Badge Collection Gallery — horizontal row ── */}
-      <section className="space-y-6">
-        <div>
-          <h3 style={{ fontSize: '14px', fontWeight: 600, letterSpacing: '-0.01em', color: 'rgba(255,255,255,0.85)' }}>Badge Collection</h3>
-          <p style={{ fontSize: '10px', color: 'rgba(148,163,184,0.5)', marginTop: '2px' }}>Milestone badges marking your greatest achievements.</p>
-        </div>
+      {/* ── Badge Collection Gallery ── */}
+      <section className="space-y-4 md:space-y-6">
+        <motion.div
+          initial={isMobile ? false : { opacity: 0 }}
+          animate={isMobile ? {} : { opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
+          <h3 className="text-sm font-semibold tracking-tight text-white/85">Badge Collection</h3>
+          <p className="text-[10px] text-slate-500 mt-0.5">Milestone badges marking your greatest achievements.</p>
+        </motion.div>
 
-        <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '8px' }}>
-          {PROGRESSION_BADGES.map(b => {
+        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin snap-x snap-mandatory">
+          {milestones.map((b, idx) => {
             const tier = BADGE_TIER_MAP[b.id];
             if (!tier) return null;
             const unlocked = level >= b.levelRequired;
             const rarity = b.rarity;
+
             return (
               <motion.div
                 key={b.id}
-                whileHover={{ y: -4 }}
+                initial={isMobile ? false : { opacity: 0, y: 16 }}
+                animate={isMobile ? {} : { opacity: 1, y: 0 }}
+                transition={{ delay: isMobile ? 0 : 0.35 + idx * STAGGER, duration: 0.4 }}
+                whileHover={isMobile ? {} : { y: -6, scale: 1.02 }}
+                className="flex-shrink-0 w-[130px] md:w-[160px] snap-start rounded-2xl p-4 md:p-5 flex flex-col items-center text-center relative border transition-all duration-300"
                 style={{
-                  flex: '0 0 auto', width: '160px', borderRadius: '16px', padding: '20px 16px',
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
-                  position: 'relative',
-                  border: unlocked
-                    ? `1px solid ${rarity === 'Common' ? 'rgba(148,163,184,0.25)' : rarity === 'Rare' ? 'rgba(96,165,250,0.3)' : rarity === 'Epic' ? 'rgba(167,139,250,0.3)' : 'rgba(251,191,36,0.3)'}`
-                    : '1px solid rgba(148,163,184,0.12)',
+                  borderColor: unlocked
+                    ? rarity === 'Common' ? 'rgba(148,163,184,0.25)' :
+                      rarity === 'Rare' ? 'rgba(96,165,250,0.3)' :
+                      rarity === 'Epic' ? 'rgba(167,139,250,0.3)' :
+                      'rgba(251,191,36,0.3)'
+                    : 'rgba(255,255,255,0.1)',
                   background: unlocked
-                    ? 'rgba(30,41,59,0.5)'
-                    : 'rgba(255,255,255,0.07)',
+                    ? 'linear-gradient(180deg, rgba(30,41,59,0.6), rgba(30,41,59,0.3))'
+                    : 'linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02))',
                 }}
               >
-                <div style={!unlocked ? { filter: 'opacity(0.75)', position: 'relative' } : {}}>
-                  <BadgeSvg tier={tier} size={72} unlocked={unlocked} />
+                <div className={!unlocked ? 'opacity-75 relative' : ''}>
+                  <BadgeSvg tier={tier} size={isMobile ? 56 : 72} unlocked={unlocked} animate={!isMobile && unlocked && (rarity === 'Legendary' || rarity === 'Epic')} />
                   {!unlocked && (
-                    <Lock style={{ position: 'absolute', top: 0, right: 0, width: '12px', height: '12px', color: 'rgba(255,255,255,0.8)', zIndex: 10 }} />
+                    <div className="absolute inset-0 flex items-center justify-center bg-slate-900/40 rounded-full">
+                      <Lock className="w-5 h-5 text-white/60" />
+                    </div>
                   )}
                 </div>
 
-                <p style={{
-                  fontSize: '11px', fontWeight: 700, marginTop: '10px', lineHeight: 1.25,
-                  color: unlocked ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.5)',
-                }}>
+                <p className={`text-[11px] font-bold mt-2.5 leading-tight ${unlocked ? 'text-white/90' : 'text-white/50'}`}>
                   {b.name}
                 </p>
 
-                <span style={{
-                  fontSize: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: '4px',
-                  color: unlocked ? RARITY_TEXT[rarity] || 'rgba(148,163,184,0.6)' : 'rgba(255,255,255,0.5)',
-                }}>
+                <span className={`text-[8px] font-bold uppercase tracking-wider mt-1 ${
+                  unlocked ? RARITY_COLORS[rarity] || 'text-slate-500' : 'text-white/40'
+                }`}>
                   {b.rarity}
                 </span>
 
-                <span style={{
-                  marginTop: '8px', padding: '2px 10px', borderRadius: '9999px',
-                  background: unlocked ? 'rgba(16,185,129,0.12)' : 'rgba(148,163,184,0.08)',
-                  fontSize: '9px', fontWeight: 700,
-                  color: unlocked ? 'rgb(16,185,129)' : 'rgba(255,255,255,0.5)',
-                }}>
+                <span className={`mt-2 px-3 py-1 rounded-full text-[9px] font-bold ${
+                  unlocked
+                    ? 'bg-emerald-500/15 text-emerald-400'
+                    : 'bg-white/5 text-white/50'
+                }`}>
                   {unlocked ? 'Earned' : `Lv ${b.levelRequired}`}
                 </span>
 
-                {/* Glow for unlocked epic/legendary */}
-                {unlocked && (
-                  <div style={{
-                    position: 'absolute', inset: 0, borderRadius: '16px', pointerEvents: 'none',
-                    boxShadow: rarity === 'Epic' || rarity === 'Legendary' ? TIER_GLOW[tier] : 'none',
-                  }} />
+                {/* Glow for unlocked high-rarity badges */}
+                {unlocked && (rarity === 'Epic' || rarity === 'Legendary') && (
+                  <div
+                    className="absolute inset-0 rounded-2xl pointer-events-none"
+                    style={{
+                      boxShadow: rarity === 'Legendary'
+                        ? 'inset 0 0 30px rgba(255,107,53,0.15), 0 0 20px rgba(255,107,53,0.1)'
+                        : 'inset 0 0 30px rgba(167,139,250,0.12), 0 0 20px rgba(167,139,250,0.08)',
+                    }}
+                  />
                 )}
               </motion.div>
             );
@@ -250,85 +282,79 @@ export const ProgressionView = () => {
         </div>
       </section>
 
-      {/* ── Milestone Timeline — individual card layout ── */}
-      <section className="space-y-6">
-        <div>
-          <h3 style={{ fontSize: '14px', fontWeight: 600, letterSpacing: '-0.01em', color: 'rgba(255,255,255,0.85)' }}>Milestone Timeline</h3>
-          <p style={{ fontSize: '10px', color: 'rgba(148,163,184,0.5)', marginTop: '2px' }}>Key progression milestones and what they unlock.</p>
-        </div>
+      {/* ── Milestone Timeline ── */}
+      <section className="space-y-4 md:space-y-6">
+        <motion.div
+          initial={isMobile ? false : { opacity: 0 }}
+          animate={isMobile ? {} : { opacity: 1 }}
+          transition={{ delay: 0.4 }}
+        >
+          <h3 className="text-sm font-semibold tracking-tight text-white/85">Milestone Timeline</h3>
+          <p className="text-[10px] text-slate-500 mt-0.5">Key progression milestones and what they unlock.</p>
+        </motion.div>
 
         <div className="space-y-3">
-          {PROGRESSION_BADGES.map((b, i) => {
+          {milestones.map((b, i) => {
             const tier = BADGE_TIER_MAP[b.id];
             if (!tier) return null;
             const unlocked = level >= b.levelRequired;
-            const isNext = !unlocked && (i === 0 || level >= (PROGRESSION_BADGES[i - 1]?.levelRequired ?? 0));
+            const isNext = !unlocked && (i === 0 || level >= (milestones[i - 1]?.levelRequired ?? 0));
             const rankAtBadge = RANK_TIERS.find(r => b.levelRequired >= r.minLevel && b.levelRequired <= (r.maxLevel === Infinity ? Infinity : r.maxLevel));
 
+            const Tag = isMobile ? 'div' : motion.div;
+
             return (
-              <motion.div
+              <Tag
                 key={b.id}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                style={{
-                  display: 'flex', alignItems: 'flex-start', gap: '16px',
-                  borderRadius: '16px', padding: '20px',
-                  border: unlocked
-                    ? '1px solid rgba(16,185,129,0.2)'
+                {...(!isMobile ? {
+                  initial: { opacity: 0, y: 12 },
+                  animate: { opacity: 1, y: 0 },
+                  transition: { delay: 0.45 + i * 0.05 },
+                } : {})}
+                className={`
+                  flex items-start gap-4 rounded-2xl p-5 border transition-all duration-300
+                  ${unlocked
+                    ? 'border-emerald-500/20 bg-emerald-500/5'
                     : isNext
-                      ? '1px solid rgba(99,102,241,0.3)'
-                      : '1px solid rgba(148,163,184,0.08)',
-                  background: unlocked
-                    ? 'rgba(30,41,59,0.5)'
-                    : isNext
-                      ? 'rgba(99,102,241,0.05)'
-                      : 'rgba(30,41,59,0.3)',
-                  opacity: !unlocked && !isNext ? 0.7 : 1,
-                }}
+                      ? 'border-indigo-500/30 bg-indigo-500/5'
+                      : 'border-white/5 bg-white/[0.02]'
+                  }
+                `}
               >
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '4px' }}>
-                  <div style={{
-                    width: '44px', height: '44px', borderRadius: '14px', display: 'flex',
-                    alignItems: 'center', justifyContent: 'center',
-                    border: unlocked
-                      ? '2px solid rgba(16,185,129,0.5)'
+                {/* Icon column with connector */}
+                <div className="flex flex-col items-center pt-1">
+                  <div className={`
+                    w-11 h-11 rounded-xl flex items-center justify-center border-2 transition-all duration-300
+                    ${unlocked
+                      ? 'border-emerald-500/50 bg-emerald-500/10'
                       : isNext
-                        ? '2px solid rgba(99,102,241,0.6)'
-                        : '2px solid rgba(148,163,184,0.2)',
-                    background: unlocked
-                      ? 'rgba(16,185,129,0.08)'
-                      : isNext
-                        ? 'rgba(99,102,241,0.08)'
-                        : 'rgba(148,163,184,0.05)',
-                    boxShadow: isNext ? '0 0 16px rgba(99,102,241,0.2)' : 'none',
-                  }}>
-                    <div style={{ opacity: unlocked ? 1 : 0.5, filter: unlocked ? 'none' : 'grayscale(0.7)' }}>
-                      <BadgeSvg tier={tier} size={26} unlocked={unlocked} />
+                        ? 'border-indigo-500/60 bg-indigo-500/10'
+                        : 'border-white/20 bg-white/5'
+                    }
+                  `}
+                    style={isNext ? { boxShadow: '0 0 16px rgba(99,102,241,0.2)' } : {}}
+                  >
+                    <div className={`${unlocked ? '' : 'opacity-50 grayscale'} transition-all`}>
+                      <BadgeSvg tier={tier} size={24} unlocked={unlocked} />
                     </div>
                   </div>
-                  {i < PROGRESSION_BADGES.length - 1 && (
-                    <div style={{
-                      width: '2px', height: '24px', marginTop: '8px',
-                      background: unlocked ? 'rgba(16,185,129,0.2)' : 'rgba(148,163,184,0.12)',
-                      borderRadius: '1px',
-                    }} />
+                  {i < milestones.length - 1 && (
+                    <div className={`w-0.5 h-6 mt-2 rounded-full ${
+                      unlocked ? 'bg-emerald-500/20' : 'bg-white/10'
+                    }`} />
                   )}
                 </div>
 
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                    <h4 style={{
-                      fontSize: '15px', fontWeight: 700,
-                      color: unlocked ? 'rgba(255,255,255,0.95)' : isNext ? 'rgb(99,102,241)' : 'rgba(148,163,184,0.6)',
-                    }}>
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h4 className={`text-sm font-bold ${
+                      unlocked ? 'text-white/95' : isNext ? 'text-indigo-400' : 'text-slate-500'
+                    }`}>
                       {b.name}
                     </h4>
                     {unlocked && (
-                      <span style={{
-                        padding: '2px 8px', borderRadius: '4px',
-                        background: 'rgba(16,185,129,0.12)', color: 'rgb(16,185,129)',
-                        fontSize: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em',
-                      }}>
+                      <span className="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 text-[8px] font-bold uppercase tracking-wider">
                         Unlocked
                       </span>
                     )}
@@ -336,106 +362,108 @@ export const ProgressionView = () => {
                       <motion.span
                         animate={{ boxShadow: ['0 0 0px rgba(99,102,241,0.3)', '0 0 14px rgba(99,102,241,0.6)', '0 0 0px rgba(99,102,241,0.3)'] }}
                         transition={{ duration: 2, repeat: Infinity }}
-                        style={{
-                          padding: '2px 8px', borderRadius: '4px',
-                          background: 'rgb(99,102,241)', color: '#fff',
-                          fontSize: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em',
-                        }}
+                        className="px-2 py-0.5 rounded bg-indigo-500 text-white text-[8px] font-bold uppercase tracking-wider"
                       >
                         Next
                       </motion.span>
                     )}
                   </div>
 
-                  <p style={{
-                    fontSize: '12px', marginTop: '4px', lineHeight: 1.5,
-                    color: unlocked ? 'rgba(203,213,225,0.7)' : 'rgba(148,163,184,0.5)',
-                  }}>
+                  <p className={`text-xs mt-1.5 leading-relaxed ${
+                    unlocked ? 'text-slate-400' : 'text-slate-600'
+                  }`}>
                     {b.description}
                   </p>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '8px' }}>
-                    <span style={{
-                      fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em',
-                      color: unlocked ? 'rgba(148,163,184,0.5)' : 'rgba(100,116,139,0.5)',
-                    }}>
+                  <div className="flex items-center gap-3 mt-2">
+                    <span className={`text-[10px] font-bold uppercase tracking-wider ${
+                      unlocked ? 'text-slate-500' : 'text-slate-600'
+                    }`}>
                       Level {b.levelRequired}
                     </span>
                     {rankAtBadge && (
                       <>
-                        <span style={{ fontSize: '8px', color: 'rgba(148,163,184,0.3)' }}>·</span>
-                        <span style={{ fontSize: '10px', fontWeight: 500, color: 'rgba(148,163,184,0.5)' }}>
+                        <span className="text-[8px] text-slate-600">·</span>
+                        <span className="text-[10px] font-medium text-slate-500">
                           {rankAtBadge.icon} {rankAtBadge.title}
                         </span>
                       </>
                     )}
                     {!unlocked && (
                       <>
-                        <span style={{ fontSize: '8px', color: 'rgba(148,163,184,0.3)' }}>·</span>
-                        <span style={{ fontSize: '10px', fontWeight: 600, color: 'rgb(99,102,241)' }}>
+                        <span className="text-[8px] text-slate-600">·</span>
+                        <span className="text-[10px] font-semibold text-indigo-400">
                           {b.levelRequired - level} levels away
                         </span>
                       </>
                     )}
                   </div>
                 </div>
-              </motion.div>
+              </Tag>
             );
           })}
         </div>
       </section>
 
-      {/* ── What You Unlock Next ── */}
+      {/* ── Next Reward ── */}
       {nextUnlockedBadge && (
         <section className="space-y-4">
-          <div>
-            <h3 style={{ fontSize: '14px', fontWeight: 600, letterSpacing: '-0.01em', color: 'rgba(255,255,255,0.85)' }}>Next Reward</h3>
-            <p style={{ fontSize: '10px', color: 'rgba(148,163,184,0.5)', marginTop: '2px' }}>Keep studying to unlock your next milestone.</p>
-          </div>
+          <motion.div
+            initial={isMobile ? false : { opacity: 0 }}
+            animate={isMobile ? {} : { opacity: 1 }}
+            transition={{ delay: 0.5 }}
+          >
+            <h3 className="text-sm font-semibold tracking-tight text-white/85">Next Reward</h3>
+            <p className="text-[10px] text-slate-500 mt-0.5">Keep studying to unlock your next milestone.</p>
+          </motion.div>
 
           <motion.div
-            whileHover={{ scale: 1.01 }}
-            style={{
-              position: 'relative', overflow: 'hidden', borderRadius: '24px', padding: '24px',
-              background: 'rgba(99,102,241,0.06)',
-              border: '1px solid rgba(99,102,241,0.15)',
-            }}
+            initial={isMobile ? false : { opacity: 0, y: 16 }}
+            animate={isMobile ? {} : { opacity: 1, y: 0 }}
+            transition={{ delay: 0.55, duration: 0.5 }}
+            whileHover={isMobile ? {} : { scale: 1.01 }}
+            className="relative overflow-hidden rounded-3xl p-6 md:p-8 bg-indigo-500/5 border border-indigo-500/15"
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '24px', flexWrap: 'wrap' }}>
-              <div style={{ opacity: 0.45, filter: 'grayscale(1)' }}>
-                <BadgeSvg tier={BADGE_TIER_MAP[nextUnlockedBadge.id] || 'bronze'} size={88} unlocked={false} />
+            {/* Decorative glow — hidden on mobile */}
+            <div className="hidden md:block absolute -top-20 -right-20 w-40 h-40 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
+
+            <div className="relative z-10 flex items-center gap-4 md:gap-6 flex-wrap">
+              <div className="opacity-50 grayscale relative">
+                <BadgeSvg tier={BADGE_TIER_MAP[nextUnlockedBadge.id] || 'bronze'} size={isMobile ? 64 : 88} unlocked={false} />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Star className="w-6 h-6 text-indigo-300/60" />
+                </div>
               </div>
-              <div style={{ flex: 1, minWidth: '200px' }}>
-                <div style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '6px',
-                  padding: '2px 8px', borderRadius: '9999px',
-                  background: 'rgba(99,102,241,0.1)',
-                  color: 'rgb(99,102,241)',
-                  fontSize: '8px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em',
-                  marginBottom: '8px',
-                }}>
-                  <Target style={{ width: '10px', height: '10px' }} />
+
+              <div className="flex-1 min-w-[180px] md:min-w-[200px]">
+                <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-[8px] font-black uppercase tracking-wider mb-2">
+                  <Target className="w-2.5 h-2.5" />
                   Next Milestone
                 </div>
-                <h4 style={{ fontSize: '18px', fontWeight: 900, color: 'rgba(255,255,255,0.95)' }}>{nextUnlockedBadge.name}</h4>
-                <p style={{ fontSize: '14px', color: 'rgba(148,163,184,0.6)', marginTop: '4px' }}>{nextUnlockedBadge.description}</p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '12px', flexWrap: 'wrap' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px' }}>
-                    <span style={{ fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>Level {nextUnlockedBadge.levelRequired}</span>
-                    <span style={{ color: 'rgba(148,163,184,0.5)' }}>required</span>
+                <h4 className="text-base md:text-lg font-black text-white/95">{nextUnlockedBadge.name}</h4>
+                <p className="text-sm text-slate-500 mt-1">{nextUnlockedBadge.description}</p>
+
+                <div className="flex items-center gap-4 mt-3 flex-wrap">
+                  <div className="flex items-center gap-1.5 text-sm">
+                    <span className="font-bold text-white/90">Level {nextUnlockedBadge.levelRequired}</span>
+                    <span className="text-slate-500">required</span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', fontWeight: 600, color: 'rgb(99,102,241)' }}>
-                    <ArrowUpRight style={{ width: '14px', height: '14px' }} />
+                  <div className="flex items-center gap-1.5 text-sm font-semibold text-indigo-400">
+                    <ArrowUpRight className="w-3.5 h-3.5" />
                     <span>{nextUnlockedBadge.levelRequired - level} levels to go</span>
                   </div>
                 </div>
 
-                <div style={{ marginTop: '12px', width: '100%', height: '8px', background: 'rgba(148,163,184,0.1)', borderRadius: '9999px', overflow: 'hidden' }}>
+                <div className="mt-3 w-full h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${Math.min(100, (level / nextUnlockedBadge.levelRequired) * 100)}%` }}
-                    transition={{ duration: 0.8, ease: 'easeOut' }}
-                    style={{ height: '100%', background: 'linear-gradient(90deg, rgb(99,102,241), rgb(139,92,246))', borderRadius: '9999px' }}
+                    transition={{ duration: 0.8, ease: 'easeOut', delay: isMobile ? 0 : 0.3 }}
+                    className="h-full rounded-full"
+                    style={{
+                      background: 'linear-gradient(90deg, rgb(99,102,241), rgb(139,92,246))',
+                      boxShadow: '0 0 8px rgba(99,102,241,0.3)',
+                    }}
                   />
                 </div>
               </div>
@@ -444,47 +472,63 @@ export const ProgressionView = () => {
         </section>
       )}
 
-      {/* ── XP Required Table ── */}
+      {/* ── Level Requirements ── */}
       <section className="space-y-4">
         <div>
-          <h3 style={{ fontSize: '14px', fontWeight: 600, letterSpacing: '-0.01em', color: 'rgba(255,255,255,0.85)' }}>Level Requirements</h3>
-          <p style={{ fontSize: '10px', color: 'rgba(148,163,184,0.5)', marginTop: '2px' }}>XP needed for each level milestone.</p>
+          <h3 className="text-sm font-semibold tracking-tight text-white/85">Level Requirements</h3>
+          <p className="text-[10px] text-slate-500 mt-0.5">XP needed for each level milestone.</p>
         </div>
 
-        <div style={{
-          borderRadius: '16px', overflow: 'hidden',
-          border: '1px solid rgba(148,163,184,0.1)',
-          background: 'rgba(30,41,59,0.4)',
-        }}>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
+        <div className="rounded-2xl overflow-hidden border border-white/10 bg-slate-900/40">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
               <thead>
-                <tr style={{ fontSize: '9px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'rgba(148,163,184,0.5)' }}>
-                  <th style={{ padding: '12px 16px' }}>Level</th>
-                  <th style={{ padding: '12px 16px' }} className="hidden sm:table-cell">XP Required</th>
-                  <th style={{ padding: '12px 16px' }} className="hidden md:table-cell">Total XP</th>
-                  <th style={{ padding: '12px 16px' }}>Rank</th>
+                <tr className="text-[9px] font-black uppercase tracking-wider text-slate-500">
+                  <th className="p-3 pl-5">Level</th>
+                  <th className="p-3 hidden sm:table-cell">XP Required</th>
+                  <th className="p-3 hidden md:table-cell">Total XP</th>
+                  <th className="p-3 pr-5">Rank</th>
                 </tr>
               </thead>
               <tbody>
                 {[1, 5, 10, 15, 20, 30, 40, 50, 70, 100].map(l => {
                   const r = RANK_TIERS.find(rt => l >= rt.minLevel && l <= (rt.maxLevel === Infinity ? Infinity : rt.maxLevel));
                   const isRowActive = level === l;
+                  const isRowPassed = level > l;
                   return (
                     <tr
                       key={l}
-                      style={{
-                        fontSize: '12px',
-                        borderTop: '1px solid rgba(148,163,184,0.06)',
-                        background: isRowActive ? 'rgba(99,102,241,0.06)' : 'transparent',
-                        fontWeight: isRowActive ? 600 : 400,
-                        color: level >= l ? 'rgba(255,255,255,0.8)' : 'rgba(148,163,184,0.4)',
-                      }}
+                      className={`text-xs border-t border-white/5 transition-colors ${
+                        isRowActive
+                          ? 'bg-indigo-500/10 font-semibold'
+                          : isRowPassed
+                            ? 'text-white/80'
+                            : 'text-slate-500'
+                      }`}
                     >
-                      <td style={{ padding: '10px 16px' }}>Level {l}{l === 100 ? '+' : ''}</td>
-                      <td style={{ padding: '10px 16px' }} className="hidden sm:table-cell">{formatXP(xpForLevel(l))}</td>
-                      <td style={{ padding: '10px 16px' }} className="hidden md:table-cell">{formatXP(totalXpForLevel(l))}</td>
-                      <td style={{ padding: '10px 16px' }}>{r ? `${r.icon} ${r.title}` : '—'}</td>
+                      <td className="p-3 pl-5 font-bold">
+                        Level {l}{l === 100 ? '+' : ''}
+                        {isRowActive && (
+                          <span className="ml-2 px-1.5 py-0.5 rounded bg-indigo-500 text-white text-[7px] font-black uppercase tracking-wider">
+                            You
+                          </span>
+                        )}
+                      </td>
+                      <td className="p-3 hidden sm:table-cell font-mono text-slate-400">
+                        {formatXP(xpForLevel(l))}
+                      </td>
+                      <td className="p-3 hidden md:table-cell font-mono text-slate-400">
+                        {formatXP(totalXpForLevel(l))}
+                      </td>
+                      <td className="p-3 pr-5">
+                        {r ? (
+                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/5 text-slate-300 text-[10px] font-medium">
+                            {r.icon} {r.title}
+                          </span>
+                        ) : (
+                          <span className="text-slate-600">—</span>
+                        )}
+                      </td>
                     </tr>
                   );
                 })}
@@ -494,8 +538,9 @@ export const ProgressionView = () => {
         </div>
       </section>
 
-      <div style={{ padding: '32px 0', display: 'flex', justifyContent: 'center', opacity: 0.2 }}>
-        <div style={{ width: '128px', height: '4px', background: 'linear-gradient(90deg, transparent, rgb(99,102,241), transparent)', borderRadius: '9999px' }} />
+      {/* Divider */}
+      <div className="flex justify-center py-8">
+        <div className="w-32 h-1 rounded-full bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent" />
       </div>
     </div>
   );

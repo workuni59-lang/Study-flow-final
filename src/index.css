@@ -207,10 +207,17 @@
 
 /* ─── Clear Mode ─── */
 [data-clear-mode="true"] .sidebar,
-[data-clear-mode="true"] .nav-rail,
-[data-clear-mode="true"] .top-bar,
-[data-clear-mode="true"] .bottom-bar {
+[data-clear-mode="true"] .nav-rail {
   @apply opacity-0 pointer-events-none transition-all duration-700;
+}
+
+@media (min-width: 1024px) {
+  [data-clear-mode="true"] .top-bar,
+  [data-clear-mode="true"] .bottom-bar {
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.7s;
+  }
 }
 
 [data-clear-mode="true"] .dashboard-stats,

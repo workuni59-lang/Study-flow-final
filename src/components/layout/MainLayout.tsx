@@ -45,14 +45,13 @@ interface MainLayoutProps {
 
 export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
   const { user } = useAuth();
-  const { userStats, activeNotification, confettiActive, closeNotification } = useStudy();
+  const { userStats, gameLevel, levelUpEvent, dismissLevelUp, activeNotification, confettiActive, closeNotification } = useStudy();
   const [mode, setMode] = useState<Mode>('focus');
   const [section, setSection] = useState<Section>('dashboard');
   const [menuOpen, setMenuOpen] = useState(false);
   const [panelOpen, setPanelOpen] = useState<'tasks' | 'ambience' | 'notepad' | null>(null);
   const [isNotesOpen, setIsNotesOpen] = useState(false);
   const [showLevelUp, setShowLevelUp] = useState(false);
-  const [prevLevel, setPrevLevel] = useState(userStats.level);
   const [ambienceUrl, setAmbienceUrl] = useState<CuratedPlaylist | null>(null);
   const [showPetPanel, setShowPetPanel] = useState(false);
   const [feedTrigger, setFeedTrigger] = useState(0);
@@ -60,11 +59,10 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
   const [petSize, setPetSize] = useState(() => storage.getPetSize() ?? 140);
 
   useEffect(() => {
-    if (userStats.level > prevLevel) {
+    if (levelUpEvent) {
       setShowLevelUp(true);
-      setPrevLevel(userStats.level);
     }
-  }, [userStats.level, prevLevel]);
+  }, [levelUpEvent]);
 
   // Preload analytics chunk after paint
   useEffect(() => {
@@ -126,6 +124,7 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
             mode={mode}
             onModeChange={setMode}
             onMenuOpen={() => setMenuOpen(v => !v)}
+            onOpenAuth={onOpenAuth}
           />
 
           {/* Main content */}
@@ -225,22 +224,9 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
       {/* Overlays & modals */}
       <AchievementNotification achievement={activeNotification} onClose={closeNotification} />
       <Confetti active={confettiActive} />
-      <LevelUpModal level={userStats.level} isOpen={showLevelUp} onClose={() => setShowLevelUp(false)} />
+      <LevelUpModal level={levelUpEvent ?? gameLevel} isOpen={showLevelUp} onClose={() => { setShowLevelUp(false); dismissLevelUp(); }} />
       <PremiumModal />
       <PanicModeUI />
-
-      {/* Sign-in prompt for unauthenticated users */}
-      {!user && onOpenAuth && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden lg:flex items-center gap-3 px-4 py-2.5 rounded-xl backdrop-blur-xl border border-white/10 bg-black/25">
-          <span className="text-xs text-white/50 font-medium">✦ Free</span>
-          <span className="w-px h-3 bg-white/10" />
-          <button onClick={onOpenAuth}
-            className="text-xs text-white/80 hover:text-brand-light font-semibold transition-colors"
-          >
-            Sign in <span className="text-white/40 font-normal">for sync &amp; premium</span>
-          </button>
-        </div>
-      )}
 
       <NotesPanel isOpen={isNotesOpen} onClose={() => setIsNotesOpen(false)} />
     </div>

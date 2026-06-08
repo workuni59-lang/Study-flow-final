@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import confetti from 'canvas-confetti';
 import { audioController } from '../services/AudioController';
 import { storage } from '../services/storage';
-import { UserStats, Badge, ACHIEVEMENTS, Achievement, Quest, calculateLevel, XP_PER_TASK, XP_PER_FOCUS_MINUTE, AtmosphereId, WallpaperId, PetState, PetFood, PET_FOODS, PET_SPECIES, PET_SKINS, INITIAL_PET_STATE, PET_HUNGER_DECAY_PER_HOUR, PET_WEAK_THRESHOLD, PET_WEAK_DURATION_MS, PET_DORMANT_DURATION_MS, PetHealth, PetEvent, PetEventType, PetMood, PetAnimation, getPetMood, getPetAnimation, GameQuest, SEED_QUESTS, calculateFormalLevel, goldForTask, goldForLevelUp, MAX_HP, HP_REGEN_PER_SESSION, INITIAL_HP, HpState, checkDailyHp as checkHpFn, regenHp, shouldResetQuests, ShopItem, SHOP_ITEMS, XP_TASK_BASE, XP_FOCUS_SESSION, XP_STREAK_BONUS_PER_DAY } from '../lib/gamification';
+import { UserStats, Badge, ACHIEVEMENTS, Achievement, Quest, XP_PER_TASK, XP_PER_FOCUS_MINUTE, AtmosphereId, WallpaperId, PetState, PetFood, PET_FOODS, PET_SPECIES, PET_SKINS, INITIAL_PET_STATE, PET_HUNGER_DECAY_PER_HOUR, PET_WEAK_THRESHOLD, PET_WEAK_DURATION_MS, PET_DORMANT_DURATION_MS, PetHealth, PetEvent, PetEventType, PetMood, PetAnimation, getPetMood, getPetAnimation, GameQuest, SEED_QUESTS, calculateFormalLevel, goldForTask, goldForLevelUp, MAX_HP, HP_REGEN_PER_SESSION, INITIAL_HP, HpState, checkDailyHp as checkHpFn, regenHp, shouldResetQuests, ShopItem, SHOP_ITEMS, XP_STREAK_BONUS_PER_DAY } from '../lib/gamification';
 import { getProgress, getRankForLevel, getNextRank, getBadgesForLevel, getNewlyUnlockedBadges, getRewardsBetweenLevels, type ProgressionState, type ProgressionBadge } from '../lib/progression';
 export interface FocusSessionState {
   mode: 'focus' | 'shortBreak' | 'longBreak' | 'idle' | 'taskETA';
@@ -108,12 +108,9 @@ interface StudyContextType {
   deleteExam: (id: string) => void;
   recalibrateTasks: () => void;
   setTasks: (tasks: Task[]) => void;
-  addXP: (amount: number) => void;
   completeFocusSession: (seconds: number) => void;
   logSession: (record: import('../lib/gamification').SessionRecord) => void;
   closeNotification: () => void;
-  buyShield: () => void;
-  togglePremium: () => void;
   triggerConfetti: () => void;
   resetStreak: () => void;
   setPanicMode: (active: boolean) => void;
@@ -247,6 +244,15 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
 
   const [levelUpEvent, setLevelUpEvent] = useState<number | null>(null);
   const [questCompleteEvent, setQuestCompleteEvent] = useState<string | null>(null);
+
+  // Migrate v1 XP into v2 pool on first load
+  useEffect(() => {
+    const savedStats = storage.getUserStats();
+    if (savedStats && savedStats.xp > 0 && gameXp === 0) {
+      setGameXp(savedStats.xp);
+    }
+  }, []);
+
   const [playerDownEvent, setPlayerDownEvent] = useState(false);
 
   const gameLevel = useMemo(() => calculateFormalLevel(gameXp), [gameXp]);
@@ -406,15 +412,20 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const updateQuestProgress = (type: Quest['type'], amount: number) => {
-    setQuests(prev => prev.map(q => {
-      if (q.type === type && !q.completed) {
-        const newProgress = q.progress + amount;
-        const isNowCompleted = newProgress >= q.requirement;
-        if (isNowCompleted) { addXP(q.xpReward); triggerConfetti(); }
-        return { ...q, progress: Math.min(newProgress, q.requirement), completed: isNowCompleted };
-      }
-      return q;
-    }));
+    const completedRewards: number[] = [];
+    setQuests(prev => {
+      const result = prev.map(q => {
+        if (q.type === type && !q.completed) {
+          const newProgress = q.progress + amount;
+          const isNowCompleted = newProgress >= q.requirement;
+          if (isNowCompleted) completedRewards.push(q.xpReward);
+          return { ...q, progress: Math.min(newProgress, q.requirement), completed: isNowCompleted };
+        }
+        return q;
+      });
+      return result;
+    });
+    completedRewards.forEach(xp => { earnXp(xp); triggerConfetti(); });
   };
 
   const updateStreak = () => {
@@ -430,7 +441,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       const diffDays = Math.floor((todayDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
       if (diffDays === 1) {
         newStreak += 1;
-        awardXp(XP_STREAK_BONUS_PER_DAY);
+        earnXp(XP_STREAK_BONUS_PER_DAY);
         awardGold(2);
       } else if (diffDays > 1) {
         if (userStats.hasShield) {
@@ -450,39 +461,16 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     }));
   };
 
-  const addXP = (amount: number) => {
-    const today = new Date().toISOString().split('T')[0];
+  const earnXp = (amount: number) => {
+    const today = new Date().toISOString().split("T")[0];
     setUserStats(prev => {
-      const newXP = prev.xp + amount;
-      const newLevel = calculateLevel(newXP);
-      if (newLevel > prev.level) {
-        setTimeout(() => firePetEvent('level_up'), 50);
-      }
       const newHistory = { ...prev.dailyXPHistory };
       newHistory[today] = (newHistory[today] || 0) + amount;
-      const nextStats = { ...prev, xp: newXP, level: newLevel, dailyXPHistory: newHistory };
-      checkAchievements(nextStats);
-      return nextStats;
+      return { ...prev, xp: prev.xp + amount, dailyXPHistory: newHistory };
     });
+    awardXp(amount);
   };
 
-  const buyShield = () => {
-    const COST = 1000;
-    if (userStats.xp < COST) { alert("Not enough XP!"); return; }
-    if (userStats.hasShield) { alert("Already active!"); return; }
-    setUserStats(prev => ({ ...prev, xp: prev.xp - COST, hasShield: true }));
-  };
-
-  const togglePremium = () => {
-    setUserStats(prev => {
-      const nextPremium = !prev.isPremium;
-      return {
-        ...prev,
-        isPremium: nextPremium,
-        hasShield: nextPremium ? true : prev.hasShield
-      };
-    });
-  };
 
   const syncPremiumStatus = useCallback((isPremium: boolean) => {
     setUserStats(prev => {
@@ -536,35 +524,25 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   };
 
   const toggleTask = (id: string) => {
-    let wasCompleted = false;
-    setTasks(prev => {
-      const task = prev.find(t => t.id === id);
-      if (task && !task.completed) wasCompleted = true;
-      const next = prev.map(t => {
-        if (t.id === id) {
-          if (!t.completed) {
-            addXP(XP_PER_TASK);
-            awardXp(XP_TASK_BASE);
-            awardGold(goldForTask(t.priority));
-            earnFood('task', 1);
-            setUserStats(s => {
-              const nextStats = { ...s, totalTasksCompleted: s.totalTasksCompleted + 1 };
-              checkAchievements(nextStats);
-              return nextStats;
-            });
-            updateQuestProgress('tasks', 1);
-            updateGameQuestProgress('tasks_completed', 1);
-          }
-          return { ...t, completed: !t.completed };
-        }
-        return t;
-      });
-      if (next.length > 0 && next.every(t => t.completed)) {
+    const task = tasks.find(t => t.id === id);
+    const isCompleting = task && !task.completed;
+    if (isCompleting) {
+      earnXp(XP_PER_TASK);
+      awardGold(goldForTask(task!.priority));
+      earnFood('task', 1);
+      updateQuestProgress('tasks', 1);
+      updateGameQuestProgress('tasks_completed', 1);
+      firePetEvent('task_done');
+    }
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
+    if (isCompleting) {
+      const newTotal = userStats.totalTasksCompleted + 1;
+      setUserStats(prev => ({ ...prev, totalTasksCompleted: newTotal }));
+      checkAchievements({ ...userStats, totalTasksCompleted: newTotal });
+      if (tasks.filter(t => t.id !== id).every(t => t.completed)) {
         setTimeout(() => confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }), 0);
       }
-      return next;
-    });
-    if (wasCompleted) firePetEvent('task_done');
+    }
   };
 
   const deleteTask = (id: string) => setTasks(prev => prev.filter(t => t.id !== id));
@@ -607,19 +585,20 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateTopicMastery = (subjectId: string, topicId: string, mastery: MasteryLevel) => {
-    setSubjects(subjects.map(s => {
-      if (s.id === subjectId) {
-        const wasGreen = s.topics.find(t => t.id === topicId)?.mastery === 'Green';
-        if (!wasGreen && mastery === 'Green') {
-          updateQuestProgress('mastery', 1);
-          addXP(100);
-          earnFood('mastery', 1);
-          triggerConfetti(); 
-        }
-        return { ...s, topics: s.topics.map(t => t.id === topicId ? { ...t, mastery } : t) };
-      }
-      return s;
-    }));
+    const subject = subjects.find(s => s.id === subjectId);
+    const topic = subject?.topics.find(t => t.id === topicId);
+    const isNewGreen = topic && topic.mastery !== 'Green' && mastery === 'Green';
+    if (isNewGreen) {
+      updateQuestProgress('mastery', 1);
+      earnXp(100);
+      earnFood('mastery', 1);
+      triggerConfetti();
+    }
+    setSubjects(prev => prev.map(s =>
+      s.id === subjectId
+        ? { ...s, topics: s.topics.map(t => t.id === topicId ? { ...t, mastery } : t) }
+        : s
+    ));
   };
 
   const deleteTopic = (subjectId: string, topicId: string) => {
@@ -628,26 +607,30 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
 
   const completeFocusSession = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
-    addXP(minutes * XP_PER_FOCUS_MINUTE);
-    awardXp(XP_FOCUS_SESSION);
+    earnXp(minutes * XP_PER_FOCUS_MINUTE);
     updateQuestProgress('focus', seconds);
     updateGameQuestProgress('sessions_completed', 1);
     earnFood('focus', seconds);
     setGameHp(prev => regenHp(prev));
     countSessionForPet();
-    setUserStats(prev => {
-      const next = { ...prev, totalFocusSeconds: prev.totalFocusSeconds + seconds };
-      checkAchievements(next);
-      return next;
-    });
+    const newTotalFocus = (userStats.totalFocusSeconds || 0) + seconds;
+    setUserStats(prev => ({ ...prev, totalFocusSeconds: newTotalFocus }));
+    checkAchievements({ ...userStats, totalFocusSeconds: newTotalFocus });
     firePetEvent('focus_done');
   };
 
   const logSession = (record: import('../lib/gamification').SessionRecord) => {
-    setUserStats(prev => ({
-      ...prev,
-      sessionHistory: [...prev.sessionHistory, record],
-    }));
+    setUserStats(prev => {
+      const updated = [...prev.sessionHistory, record].sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - 90);
+      return {
+        ...prev,
+        sessionHistory: updated.filter(s => new Date(s.date) >= cutoff).slice(0, 500),
+      };
+    });
   };
 
   const closeNotification = () => { setActiveNotification(null); };
@@ -659,20 +642,18 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const awardXp = useCallback((amount: number) => {
-    setGameXp(prev => {
-      const newTotal = prev + amount;
-      const newLevel = calculateFormalLevel(newTotal);
-      const oldLevel = calculateFormalLevel(prev);
-      if (newLevel > oldLevel) {
-        const goldReward = goldForLevelUp(newLevel);
-        setGameGold(g => g + goldReward);
-        setLevelUpEvent(newLevel);
-        setPetState(p => ({ ...p, lastLevelUpAt: Date.now() }));
-        setTimeout(() => firePetEvent('level_up'), 50);
-      }
-      return newTotal;
-    });
-  }, []);
+    const newTotal = gameXp + amount;
+    const newLevel = calculateFormalLevel(newTotal);
+    const oldLevel = calculateFormalLevel(gameXp);
+    setGameXp(newTotal);
+    if (newLevel > oldLevel) {
+      const goldReward = goldForLevelUp(newLevel);
+      setGameGold(g => g + goldReward);
+      setLevelUpEvent(newLevel);
+      setPetState(p => ({ ...p, lastLevelUpAt: Date.now() }));
+      setTimeout(() => firePetEvent('level_up'), 50);
+    }
+  }, [gameXp]);
 
   const dismissLevelUp = useCallback(() => setLevelUpEvent(null), []);
   const dismissQuestComplete = useCallback(() => setQuestCompleteEvent(null), []);
@@ -709,33 +690,31 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
 
   const updateGameQuestProgress = useCallback((metric: GameQuest['metric'], amount: number) => {
     const today = new Date().toISOString();
-    setQuestResets(prev => {
-      const next = { ...prev };
-      SEED_QUESTS.forEach(q => {
-        if (q.metric === metric && shouldResetQuests(q.tier, prev[q.id] ?? null)) {
-          next[q.id] = today;
-          setGameQuestProgress(p => ({ ...p, [q.id]: 0 }));
-        }
-      });
-      return next;
+    const nextResets = { ...questResets };
+    SEED_QUESTS.forEach(q => {
+      if (q.metric === metric && shouldResetQuests(q.tier, questResets[q.id] ?? null)) {
+        nextResets[q.id] = today;
+      }
     });
-    setGameQuestProgress(prev => {
-      const next = { ...prev };
-      SEED_QUESTS.forEach(q => {
-        if (q.metric !== metric) return;
-        const current = next[q.id] ?? 0;
-        const newProgress = current + amount;
-        const capped = Math.min(newProgress, q.goal);
-        next[q.id] = capped;
-        if (current < q.goal && capped >= q.goal) {
-          const tierGold = q.tier === 'milestone' ? 100 : q.tier === 'weekly' ? 50 : 25;
-          awardGold(tierGold);
-          setQuestCompleteEvent(q.id);
-        }
-      });
-      return next;
+    setQuestResets(nextResets);
+
+    const nextProgress = { ...gameQuestProgress };
+    SEED_QUESTS.forEach(q => {
+      if (q.metric !== metric) return;
+      const needsReset = nextResets[q.id] !== questResets[q.id];
+      const baseValue = needsReset ? 0 : (nextProgress[q.id] ?? 0);
+      const newProgress = baseValue + amount;
+      const capped = Math.min(newProgress, q.goal);
+      nextProgress[q.id] = capped;
+      const wasBelow = nextProgress[q.id] !== capped || baseValue < q.goal;
+      if (baseValue < q.goal && capped >= q.goal) {
+        earnXp(q.reward.xp);
+        awardGold(q.reward.gold);
+        setQuestCompleteEvent(q.id);
+      }
     });
-  }, [awardGold]);
+    setGameQuestProgress(nextProgress);
+  }, [awardGold, questResets, gameQuestProgress]);
 
   const countSessionForPet = useCallback(() => {
     const today = new Date().toISOString().split('T')[0];
@@ -783,7 +762,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       setPetState(prev => ({ ...prev, species: speciesId, name: species.name }));
       return;
     }
-    if (!petState.unlockedSpecies.includes(speciesId) && userStats.level < species.unlockLevel) return;
+    if (!petState.unlockedSpecies.includes(speciesId) && gameLevel < species.unlockLevel) return;
     setPetState(prev => ({ ...prev, species: speciesId, name: species.name }));
   };
 
@@ -806,10 +785,10 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       firePetEvent('achievement_unlocked');
       return true;
     }
-    if (userStats.level < skin.unlockLevel) return false;
+    if (gameLevel < skin.unlockLevel) return false;
     if (skin.isPremium && !userStats.isPremium && skin.price > 0) return false;
-    if (userStats.xp < skin.price) return false;
-    setUserStats(prev => ({ ...prev, xp: prev.xp - skin.price }));
+    if (gameGold < skin.price) return false;
+    setGameGold(prev => prev - skin.price);
     setPetState(prev => ({ ...prev, unlockedSkins: [...prev.unlockedSkins, skinId], skin: skinId }));
     triggerConfetti();
     firePetEvent('achievement_unlocked');
@@ -853,11 +832,11 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   // Unlock pet species on level up
   useEffect(() => {
     setPetState(prev => {
-      const newlyUnlocked = PET_SPECIES.filter(s => !s.isPremium && userStats.level >= s.unlockLevel && !prev.unlockedSpecies.includes(s.id));
+      const newlyUnlocked = PET_SPECIES.filter(s => !s.isPremium && gameLevel >= s.unlockLevel && !prev.unlockedSpecies.includes(s.id));
       if (newlyUnlocked.length === 0) return prev;
       return { ...prev, unlockedSpecies: [...prev.unlockedSpecies, ...newlyUnlocked.map(s => s.id)] };
     });
-  }, [userStats.level]);
+  }, [gameLevel]);
 
   // Earn food hooks
   const earnFood = useCallback((source: 'focus' | 'task' | 'mastery', amount: number) => {
@@ -878,7 +857,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     accessToken, subjects, tasks, exams, quests, themeConfig, userStats, unlockedBadges, activeNotification,
     confettiActive, panicModeActive, selectedExamForPath, petState, setThemeConfig, addSubject, deleteSubject, addTopic,
     updateTopicMastery, deleteTopic, addTask, toggleTask, deleteTask, addExam, deleteExam, recalibrateTasks,
-    setTasks, addXP, completeFocusSession, logSession, closeNotification, buyShield, togglePremium, syncPremiumStatus, triggerConfetti, resetStreak, setPanicMode,
+    setTasks, earnXp, completeFocusSession, logSession, closeNotification, syncPremiumStatus, triggerConfetti, resetStreak, setPanicMode,
     setSelectedExamForPath, feedPet, petInteract, changePetSpecies, changePetSkin, purchaseSkin, setPetName, tickPet, petEvent, firePetEvent,
     showPremiumModal, setShowPremiumModal,
     activeTracks, masterVolume, toggleTrack, setTrackVolume, stopAllTracks, setMasterVolume,

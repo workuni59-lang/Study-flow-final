@@ -53,7 +53,7 @@ export const HomeView = memo(({ onNotepadOpen, onQuestsOpen, onMusicOpen, onProg
   ], [userStats.totalFocusSeconds, userStats.currentStreak, userStats.totalXP]);
 
   return (
-    <div className="relative flex flex-col items-center justify-center min-h-screen px-6 pb-28 lg:pb-12">
+    <div className="relative flex flex-col items-center justify-center min-h-screen px-4 md:px-6 pb-28 lg:pb-12">
       {/* Badge — top-right */}
       <button
         onClick={onProgressionOpen}

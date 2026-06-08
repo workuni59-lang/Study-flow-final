@@ -99,7 +99,7 @@ interface StudyTimerProps { onTick?: () => void; compact?: boolean; variant?: 'c
 export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProps) => {
   const { 
     themeConfig, setThemeConfig, completeFocusSession, logSession, 
-    userStats, triggerConfetti, setShowPremiumModal,
+    userStats, gameLevel, triggerConfetti, setShowPremiumModal,
     tasks, selectedTaskId, setSelectedTaskId
   } = useStudy();
   const { setFocusSession } = useFocus();
@@ -153,6 +153,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
   const progress = totalTime > 0 ? (totalTime - timeLeft) / totalTime : 0;
 
   const sessionElapsed = useRef(0);
+  const totalFocusRef = useRef(0);
   const sessionStartTime = useRef<string | null>(null);
   const wakeLockRef = useRef<any>(null);
   const timerBaseRef = useRef<{ startTimeLeft: number; startTimestamp: number } | null>(null);
@@ -230,6 +231,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
 
       if (modeRef.current === 'focus') {
         sessionElapsed.current += 1;
+        totalFocusRef.current += 1;
         if (sessionElapsed.current >= 60) {
           completeFocusSession(60);
           sessionElapsed.current = 0;
@@ -270,7 +272,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
   const handleTimerComplete = () => {
     setIsActive(false);
     releaseWakeLock();
-    if (mode === 'focus' || mode === 'taskETA') logFocusSession(totalTime);
+    if (mode === 'focus' || mode === 'taskETA') logFocusSession(totalFocusRef.current); totalFocusRef.current = 0;
     triggerConfetti();
     const alertId = (() => { try { return JSON.parse(localStorage.getItem('study_flow_alert_sound') || '"sparkle"'); } catch { return 'sparkle'; } })();
     const alertVol = (() => { try { return JSON.parse(localStorage.getItem('study_flow_alert_volume') || '0.75'); } catch { return 0.75; } })();
@@ -303,14 +305,12 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
         completeFocusSession(sessionElapsed.current);
         sessionElapsed.current = 0;
       }
-      const elapsed = totalTime - timeLeft;
-      logFocusSession(elapsed);
     }
   };
 
   const handleCustomizationClick = (type: 'atm' | 'wall', id: any, isPremium: boolean, levelReq: number) => {
     if (isPremium && !userStats.isPremium) { setShowPremiumModal(true); return; }
-    if (userStats.level < levelReq) return;
+    if (gameLevel < levelReq) return;
     if (type === 'atm') setThemeConfig({ ...themeConfig, atmosphere: id });
     else setThemeConfig({ ...themeConfig, wallpaper: id });
   };

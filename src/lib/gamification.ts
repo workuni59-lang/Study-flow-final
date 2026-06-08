@@ -393,42 +393,9 @@ export const ATMOSPHERE_REQUIREMENTS: Record<string, number> = {
   violet: 10
 };
 
+
 export const XP_PER_TASK = 50;
 export const XP_PER_FOCUS_MINUTE = 10;
-export const XP_LEVEL_BASE = 1000;
-export const XP_LEVEL_MULTIPLIER = 1.2;
-
-export const calculateLevel = (xp: number): number => {
-  let level = 1;
-  let xpRequired = XP_LEVEL_BASE;
-  while (xp >= xpRequired) {
-    xp -= xpRequired;
-    level++;
-    xpRequired = Math.floor(xpRequired * XP_LEVEL_MULTIPLIER);
-  }
-  return level;
-};
-
-export const getXPForLevel = (level: number): number => {
-  let xpRequired = XP_LEVEL_BASE;
-  for (let i = 1; i < level; i++) {
-    xpRequired = Math.floor(xpRequired * XP_LEVEL_MULTIPLIER);
-  }
-  return xpRequired;
-};
-
-export const getProgressToNextLevel = (xp: number) => {
-  let currentLevelXP = xp;
-  let level = 1;
-  let requiredForNext = XP_LEVEL_BASE;
-  while (currentLevelXP >= requiredForNext) {
-    currentLevelXP -= requiredForNext;
-    level++;
-    requiredForNext = Math.floor(requiredForNext * XP_LEVEL_MULTIPLIER);
-  }
-  return { level, currentXP: currentLevelXP, requiredXP: requiredForNext, percentage: (currentLevelXP / requiredForNext) * 100 };
-};
-
 // ─── FORMALIZED XP & LEVELING ────────────────────────────────────
 
 export const XP_TASK_BASE = 20;

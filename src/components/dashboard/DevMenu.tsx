@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { Settings, Zap, Sparkles, RefreshCcw, ShieldCheck, Crown, CheckCircle2, Plus, AlertTriangle, FastForward } from 'lucide-react';
+import { Settings, Zap, Sparkles, RefreshCcw, CheckCircle2, Plus, AlertTriangle, FastForward } from 'lucide-react';
+import { storage } from '../../services/storage';
 import { motion, AnimatePresence } from 'motion/react';
 import { useStudy } from '../../context/StudyContext';
-import { storage } from '../../services/storage';
 
 export const DevMenu = () => {
   const { 
-    addXP, triggerConfetti, resetStreak, togglePremium, userStats, 
+    earnXp, triggerConfetti, resetStreak, userStats, 
     tasks, toggleTask, addTask, panicModeActive, setPanicMode, setTasks 
   } = useStudy();
   const [isOpen, setIsOpen] = useState(false);
@@ -29,25 +29,21 @@ export const DevMenu = () => {
   };
 
   const simulateLevelUp = () => {
-    const xpNeeded = 1000 * Math.pow(1.2, userStats.level - 1);
-    addXP(Math.ceil(xpNeeded));
+    earnXp(10000);
     triggerConfetti();
   };
 
   const simulateNextDay = () => {
-    // 1. Move lastActiveDate back by 1 day in storage so the app thinks today is a new day
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     const yesterdayStr = yesterday.toISOString().split('T')[0];
     
-    // We modify the stats in storage and then reload to trigger the Context initialization logic
     const stats = storage.getUserStats();
     if (stats) {
       stats.lastActiveDate = yesterdayStr;
       storage.saveUserStats(stats);
     }
 
-    // 2. Make some tasks overdue
     const overdueDate = new Date();
     overdueDate.setDate(overdueDate.getDate() - 1);
     const overdueDateStr = overdueDate.toISOString().split('T')[0];
@@ -120,7 +116,7 @@ export const DevMenu = () => {
               </button>
 
               <button 
-                onClick={() => { addXP(100); }}
+                onClick={() => { earnXp(100); }}
                 className="w-full py-3 bg-slate-50 dark:bg-slate-800 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all flex items-center justify-center gap-2"
               >
                 <Plus className="w-3 h-3" /> +100 XP
@@ -131,17 +127,6 @@ export const DevMenu = () => {
                 className="w-full py-3 bg-slate-50 dark:bg-slate-800 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-300 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all flex items-center justify-center gap-2"
               >
                 <RefreshCcw className="w-3 h-3" /> Reset Streak
-              </button>
-
-              <button 
-                onClick={togglePremium}
-                className={`w-full py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${
-                  userStats.isPremium 
-                  ? 'bg-emerald-500 text-white shadow-lg' 
-                  : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'
-                }`}
-              >
-                <Crown className="w-3 h-3" /> {userStats.isPremium ? 'PRO Active' : 'Toggle PRO'}
               </button>
             </div>
 

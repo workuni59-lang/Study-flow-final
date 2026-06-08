@@ -51,6 +51,7 @@ function restore(editor: HTMLDivElement, range: Range | null) {
 }
 
 export const NotesPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+  const [isMobile] = useState(() => window.innerWidth < 768);
   const [notes, setNotes] = useState<Note[]>(load);
   const [activeId, setActiveId] = useState<string | null>(notes[0]?.id || null);
   const [saved, setSaved] = useState(true);
@@ -193,11 +194,15 @@ export const NotesPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () =
 
   if (!isOpen) return null;
 
-  const rightContent = activeNote ? (
+  const editorArea = (
     <>
-      <div className="flex items-center gap-2 px-4 pt-4 pb-2 shrink-0">
-        <ChevronLeft className="w-4 h-4 text-white/30 shrink-0" />
-        <input ref={titleRef} value={activeNote.title}
+      <div className="flex items-center gap-2 px-4 pt-3 pb-2 shrink-0">
+        {isMobile && (
+          <button onClick={onClose} className="p-1 -ml-1 rounded-lg hover:bg-white/[0.08] text-white/50 hover:text-white/80 transition-all shrink-0">
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+        )}
+        <input ref={titleRef} value={activeNote?.title || ''}
           onChange={e => handleTitleChange(e.target.value)}
           placeholder="Note title"
           className="flex-1 bg-transparent text-base font-semibold text-white outline-none placeholder-white/20 min-w-0" />
@@ -242,16 +247,21 @@ export const NotesPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () =
           className="p-1.5 rounded-lg hover:bg-white/[0.08] text-white/50 hover:text-white/80 transition-all" title="Highlight">
           <span className="text-[10px] font-bold leading-none">Hl</span>
         </button>
-        <button onClick={() => setFullscreen(v => !v)}
-          className="p-1.5 rounded-lg hover:bg-white/[0.08] text-white/50 hover:text-white/80 transition-all" title="Fullscreen">
-          {fullscreen ? <Minimize2 className="w-[18px] h-[18px]" /> : <Maximize2 className="w-[18px] h-[18px]" />}
-        </button>
+        {!isMobile && (
+          <div className="w-px h-4 bg-white/[0.08] mx-1" />
+        )}
+        {!isMobile && (
+          <button onClick={() => setFullscreen(v => !v)}
+            className="p-1.5 rounded-lg hover:bg-white/[0.08] text-white/50 hover:text-white/80 transition-all" title="Fullscreen">
+            {fullscreen ? <Minimize2 className="w-[18px] h-[18px]" /> : <Maximize2 className="w-[18px] h-[18px]" />}
+          </button>
+        )}
       </div>
 
-      <div className="flex-1 px-4 pb-2 min-h-0">
+      <div className="flex-1 px-4 min-h-0 flex flex-col w-full">
         <div ref={editorRef} contentEditable
           onInput={handleEditorInput}
-          className="w-full h-full overflow-y-auto outline-none text-sm text-white/80 leading-relaxed
+          className="flex-1 min-h-0 overflow-y-auto outline-none text-sm text-white/80 leading-relaxed w-full
             empty:before:content-[attr(data-placeholder)] empty:before:text-white/20 empty:before:cursor-text
             [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-5 [&_ol]:pl-5"
           data-placeholder="What are you working on?"
@@ -269,16 +279,67 @@ export const NotesPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () =
         </div>
         <div className="flex items-center gap-3 text-[10px] text-white/20">
           <span>{wordCount} {wordCount === 1 ? 'word' : 'words'}</span>
-          <span>{noteIndex} of {notes.length}</span>
+          {notes.length > 0 && <span>{noteIndex} of {notes.length}</span>}
         </div>
       </div>
     </>
-  ) : (
-    <div className="flex-1 flex items-center justify-center text-sm text-white/20">
-      Select or create a note to get started
-    </div>
   );
 
+  // ── Mobile Layout ──
+  if (isMobile) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.15, ease: 'easeOut' }}
+        className="fixed inset-0 z-[200] flex flex-col bg-[#0a0a14]"
+      >
+        {/* Top header bar */}
+        <div className="flex items-center gap-2 px-4 pt-3 pb-2 shrink-0 border-b border-white/[0.06]">
+          <button onClick={onClose} className="p-1 -ml-1 rounded-lg hover:bg-white/[0.08] text-white/50 hover:text-white/80 transition-all">
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <span className="text-base font-semibold text-white">Notes</span>
+          <span className="text-sm text-white/30 font-normal">({notes.length})</span>
+          <button onClick={createNote}
+            className="ml-auto w-7 h-7 rounded-full bg-white/[0.08] flex items-center justify-center text-white/50 hover:text-white hover:bg-white/[0.15] transition-all">
+            <Plus className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Note pills — horizontal scroll */}
+        {notes.length > 0 && (
+          <div className="flex gap-2 overflow-x-auto px-4 py-2 shrink-0 snap-x snap-mandatory no-scrollbar border-b border-white/[0.04]">
+            {notes.map(note => (
+              <button key={note.id} onClick={() => setActiveId(note.id)}
+                className={`snap-start shrink-0 px-3 py-2 rounded-lg text-left transition-colors border ${
+                  activeId === note.id
+                    ? 'bg-white/[0.12] border-white/15 text-white'
+                    : 'bg-white/[0.04] border-transparent text-white/60 hover:bg-white/[0.06]'
+                }`}>
+                <div className={`text-[13px] font-semibold truncate max-w-[120px] ${activeId === note.id ? 'text-white' : 'text-white/70'}`}>
+                  {note.title || 'Untitled'}
+                </div>
+                <div className="text-[10px] text-white/30 mt-0.5">{fmtTime(note.updatedAt)}</div>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Editor area */}
+        <div className="flex-1 flex flex-col min-h-0">
+          {activeNote ? editorArea : (
+            <div className="flex-1 flex items-center justify-center text-sm text-white/20">
+              Select or create a note to get started
+            </div>
+          )}
+        </div>
+      </motion.div>
+    );
+  }
+
+  // ── Desktop Layout (unchanged) ──
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -325,7 +386,11 @@ export const NotesPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () =
         </div>
         <div className="w-px bg-white/[0.06] shrink-0" />
         <div className="flex-1 flex flex-col min-w-0 bg-black/20">
-          {rightContent}
+          {activeNote ? editorArea : (
+            <div className="flex-1 flex items-center justify-center text-sm text-white/20">
+              Select or create a note to get started
+            </div>
+          )}
         </div>
       </div>
     </motion.div>

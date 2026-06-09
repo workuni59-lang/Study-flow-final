@@ -370,10 +370,9 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
   const TimerModePills = ({ glassVariant }: { glassVariant?: boolean }) => (
     glassVariant ? (
       <div className="flex justify-center gap-1.5">
-        {(['focus', 'shortBreak', 'longBreak', 'countUp', 'stopwatch'] as const).map(m => (
+        {(['focus', 'shortBreak', 'longBreak'] as const).map(m => (
           <button key={m} onClick={() => {
             setIsActive(false); setMode(m);
-            if (m === 'countUp' || m === 'stopwatch') { resetCountUp(); return; }
             const d = m === 'focus' ? activePreset.focus : m === 'shortBreak' ? activePreset.short : activePreset.long; setTimeLeft(d * 60);
           }}
             className={`px-4 py-1.5 rounded-full text-[9px] font-semibold uppercase tracking-wider transition-all border ${
@@ -381,16 +380,15 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
                 ? 'bg-white/15 border-white/20 text-white shadow-sm'
                 : 'bg-black/15 backdrop-blur-sm border-white/10 text-white/50 hover:text-white/80 hover:bg-black/25'
             }`}>
-            {m === 'focus' ? 'Focus' : m === 'shortBreak' ? 'Break' : m === 'longBreak' ? 'Long Break' : m === 'countUp' ? 'Timer' : 'Stopwatch'}
+            {m === 'focus' ? 'Focus' : m === 'shortBreak' ? 'Break' : 'Long Break'}
           </button>
         ))}
       </div>
     ) : (
       <div className="flex gap-1.5 bg-black/10 backdrop-blur-sm border border-white/[0.06] p-1 rounded-xl overflow-x-auto no-scrollbar">
-        {(['focus', 'shortBreak', 'longBreak', 'taskETA', 'countUp', 'stopwatch'] as const).map(m => (
+        {(['focus', 'shortBreak', 'longBreak', 'taskETA'] as const).map(m => (
           <button key={m} onClick={() => {
             setIsActive(false); setMode(m);
-            if (m === 'countUp' || m === 'stopwatch') { resetCountUp(); return; }
             const d = m === 'taskETA' ? (tasks.find(t => t.id === selectedTaskId)?.estimatedMinutes ?? 25) : m === 'focus' ? activePreset.focus : m === 'shortBreak' ? activePreset.short : activePreset.long;
             setTimeLeft(d * 60);
           }}
@@ -399,7 +397,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
                 ? 'bg-white/15 border-white/10 text-white shadow-sm'
                 : 'bg-black/15 backdrop-blur-sm border-white/[0.06] text-white/50 hover:text-white/80 hover:bg-black/25'
             }`}>
-            {m === 'focus' ? 'Focus' : m === 'shortBreak' ? 'Break' : m === 'longBreak' ? 'Long Break' : m === 'taskETA' ? 'Task ETA' : m === 'countUp' ? 'Timer' : 'Stopwatch'}
+            {m === 'focus' ? 'Focus' : m === 'shortBreak' ? 'Break' : m === 'longBreak' ? 'Long Break' : 'Task ETA'}
           </button>
         ))}
       </div>
@@ -602,11 +600,20 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
     <motion.div key="presets" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-2">
       {PRESETS.map(p => (
         <button key={p.id} onClick={() => { setActivePreset(p); setIsActive(false); setMode('focus'); setTimeLeft(p.focus * 60); setShowPresetPicker(false); }}
-          className={`w-full p-3 rounded-xl flex items-center justify-between transition-all ${activePreset.id === p.id ? 'bg-brand/20 text-white' : 'bg-black/15 backdrop-blur-sm border border-white/10 text-white/50 hover:bg-black/25 hover:text-white/80'}`}>
+          className={`w-full p-3 rounded-xl flex items-center justify-between transition-all ${activePreset.id === p.id && mode === 'focus' ? 'bg-brand/20 text-white' : 'bg-black/15 backdrop-blur-sm border border-white/10 text-white/50 hover:bg-black/25 hover:text-white/80'}`}>
           <div className="flex items-center gap-2.5"><p.icon className="w-3.5 h-3.5" /><span className="text-[9px] font-semibold uppercase tracking-wider">{p.name}</span></div>
           <span className="text-[9px] font-medium text-white/30">{p.focus}m / {p.short}m</span>
         </button>
       ))}
+      <div className="h-px bg-white/5" />
+      <button onClick={() => { resetCountUp(); setMode('countUp'); setShowPresetPicker(false); }}
+        className={`w-full p-3 rounded-xl flex items-center justify-between transition-all ${mode === 'countUp' ? 'bg-brand/20 text-white' : 'bg-black/15 backdrop-blur-sm border border-white/10 text-white/50 hover:bg-black/25 hover:text-white/80'}`}>
+        <div className="flex items-center gap-2.5"><Clock className="w-3.5 h-3.5" /><span className="text-[9px] font-semibold uppercase tracking-wider">Timer (Count Up)</span></div>
+      </button>
+      <button onClick={() => { resetCountUp(); setMode('stopwatch'); setShowPresetPicker(false); }}
+        className={`w-full p-3 rounded-xl flex items-center justify-between transition-all ${mode === 'stopwatch' ? 'bg-brand/20 text-white' : 'bg-black/15 backdrop-blur-sm border border-white/10 text-white/50 hover:bg-black/25 hover:text-white/80'}`}>
+        <div className="flex items-center gap-2.5"><Flag className="w-3.5 h-3.5" /><span className="text-[9px] font-semibold uppercase tracking-wider">Stopwatch</span></div>
+      </button>
     </motion.div>
   );
 
@@ -674,13 +681,11 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
             </motion.div>
           ) : (
             <motion.div key="controls" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-4">
-              {!cu && (
                 <button onClick={() => { setShowPresetPicker(true); setShowThemePicker(false); }}
                   className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/15 backdrop-blur-sm border border-white/10 hover:bg-black/25 transition-colors text-[9px] font-semibold uppercase tracking-wider text-white/60">
-                  <activePreset.icon className="w-3 h-3 text-brand-light" />
-                  {activePreset.name}
+                  {cu ? (mode === 'stopwatch' ? <Flag className="w-3 h-3 text-brand-light" /> : <Clock className="w-3 h-3 text-brand-light" />) : <activePreset.icon className="w-3 h-3 text-brand-light" />}
+                  {cu ? (mode === 'stopwatch' ? 'Stopwatch' : 'Timer') : activePreset.name}
                 </button>
-              )}
               {renderControls()}
             </motion.div>
           )}
@@ -700,12 +705,10 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
           {compact ? (
             <>
               <div className="flex items-center justify-between px-4 pt-4">
-                {!isCountUpMode() ? (
-                  <button onClick={() => { setShowPresetPicker(!showPresetPicker); setShowThemePicker(false); }} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.10] transition-colors">
-                    <activePreset.icon className="w-3 h-3 text-brand-light" />
-                    <span className="text-[9px] font-semibold uppercase tracking-wider text-white/70">{activePreset.name}</span>
-                  </button>
-                ) : <div />}
+                <button onClick={() => { setShowPresetPicker(!showPresetPicker); setShowThemePicker(false); }} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.10] transition-colors">
+                  {isCountUpMode() ? (mode === 'stopwatch' ? <Flag className="w-3 h-3 text-brand-light" /> : <Clock className="w-3 h-3 text-brand-light" />) : <activePreset.icon className="w-3 h-3 text-brand-light" />}
+                  <span className="text-[9px] font-semibold uppercase tracking-wider text-white/70">{isCountUpMode() ? (mode === 'stopwatch' ? 'Stopwatch' : 'Timer') : activePreset.name}</span>
+                </button>
                 <div className="flex items-center gap-1">
                   <button onClick={() => setShowThemePicker(!showThemePicker)} className={`p-2 rounded-xl transition-all ${showThemePicker ? 'bg-brand text-white shadow-lg' : 'text-white/50 hover:text-white/80 hover:bg-black/10 backdrop-blur-sm border border-white/10'}`}>
                     <Palette className="w-4 h-4" />
@@ -770,12 +773,10 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
             /* Full mode */
             <>
               <div className="flex items-center justify-between">
-                {!isCountUpMode() ? (
-                  <button onClick={() => setShowPresetPicker(!showPresetPicker)} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.10] transition-colors">
-                    <activePreset.icon className="w-3 h-3 text-brand-light" />
-                    <span className="text-[9px] font-semibold uppercase tracking-wider text-white/70">{activePreset.name}</span>
-                  </button>
-                ) : <div />}
+                <button onClick={() => setShowPresetPicker(!showPresetPicker)} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.10] transition-colors">
+                  {isCountUpMode() ? (mode === 'stopwatch' ? <Flag className="w-3 h-3 text-brand-light" /> : <Clock className="w-3 h-3 text-brand-light" />) : <activePreset.icon className="w-3 h-3 text-brand-light" />}
+                  <span className="text-[9px] font-semibold uppercase tracking-wider text-white/70">{isCountUpMode() ? (mode === 'stopwatch' ? 'Stopwatch' : 'Timer') : activePreset.name}</span>
+                </button>
                 <div className="flex items-center gap-1">
                   <button onClick={() => setShowThemePicker(!showThemePicker)} className={`p-2 rounded-xl transition-all ${showThemePicker ? 'bg-brand text-white shadow-lg' : 'text-white/50 hover:text-white/80 hover:bg-black/10 backdrop-blur-sm border border-white/10'}`}>
                     <Palette className="w-4 h-4" />
@@ -859,13 +860,12 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
             >
               {/* Mode tabs — ghost style */}
               <div className="flex justify-center gap-6 mb-6">
-                {(['focus', 'shortBreak', 'longBreak', 'countUp', 'stopwatch'] as const).map(m => (
+                {(['focus', 'shortBreak', 'longBreak'] as const).map(m => (
                   <button
                     key={m}
                     onClick={() => {
                       setIsActive(false);
                       setMode(m);
-                      if (m === 'countUp' || m === 'stopwatch') { resetCountUp(); return; }
                       const d = m === 'focus' ? activePreset.focus : m === 'shortBreak' ? activePreset.short : activePreset.long;
                       setTimeLeft(d * 60);
                     }}
@@ -875,7 +875,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
                         : 'text-white/30 border-transparent hover:text-white/55'
                     }`}
                   >
-                    {m === 'focus' ? 'Focus' : m === 'shortBreak' ? 'Break' : m === 'longBreak' ? 'Long Break' : m === 'countUp' ? 'Timer' : 'Stopwatch'}
+                    {m === 'focus' ? 'Focus' : m === 'shortBreak' ? 'Break' : 'Long Break'}
                   </button>
                 ))}
               </div>
@@ -924,6 +924,12 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
               )}
 
               {/* Controls — ghost buttons */}
+              {showPresetPicker ? (
+                <div className="w-full max-w-[220px]">
+                  {renderPresetPicker()}
+                  <button onClick={() => setShowPresetPicker(false)} className="w-full mt-2 py-2 text-[9px] font-semibold uppercase tracking-wider text-white/50 hover:text-white/80 transition-colors">Close</button>
+                </div>
+              ) : (
               <div className="flex items-center justify-center gap-4">
                 {mode === 'stopwatch' && (
                   <button
@@ -957,15 +963,14 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
                   }
                 </button>
 
-                {!isCountUpMode() && (
-                  <button
-                    onClick={() => setShowPresetPicker(true)}
-                      className="w-12 h-12 rounded-full border border-white/15 bg-black/20 backdrop-blur-sm text-white/50 hover:text-white/90 hover:border-white/30 hover:bg-black/30 transition-all flex items-center justify-center"
-                    >
-                      <Settings2 className="w-5 h-5" />
-                  </button>
-                )}
+                <button
+                  onClick={() => setShowPresetPicker(true)}
+                    className="w-12 h-12 rounded-full border border-white/15 bg-black/20 backdrop-blur-sm text-white/50 hover:text-white/90 hover:border-white/30 hover:bg-black/30 transition-all flex items-center justify-center"
+                  >
+                    <Settings2 className="w-5 h-5" />
+                </button>
               </div>
+              )}
             </motion.div>
           </motion.div>
         )}

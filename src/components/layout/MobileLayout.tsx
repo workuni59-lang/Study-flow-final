@@ -28,6 +28,7 @@ const AchievementsViewLazy = lazy(() => import('../achievements/AchievementsView
 const SettingsViewLazy = lazy(() => import('../navigation/SettingsView').then(m => ({ default: m.SettingsView })));
 const ProgressionViewLazy = lazy(() => import('../progression/ProgressionView').then(m => ({ default: m.ProgressionView })));
 const QuestsViewLazy = lazy(() => import('../quests/QuestsView').then(m => ({ default: m.QuestsView })));
+const LeaderboardViewLazy = lazy(() => import('../leaderboard/LeaderboardView').then(m => ({ default: m.LeaderboardView })));
 
 const MobileSkeleton = () => (
   <div style={{ width: '100%', minHeight: '100vh', backgroundColor: '#0f0f1a', animation: 'pulse 1.5s ease-in-out infinite' }} />
@@ -126,6 +127,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
                 {section === 'settings' && <SettingsViewLazy />}
                 {section === 'progression' && <ProgressionViewLazy />}
                 {section === 'quests' && <QuestsViewLazy />}
+                {section === 'leaderboard' && <LeaderboardViewLazy />}
               </Suspense>
             </main>
           </div>
@@ -137,6 +139,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
             onModeChange={setMode}
             onMenuOpen={() => setMenuOpen(v => !v)}
             onOpenAuth={onOpenAuth}
+            onLeaderboardOpen={() => setSection('leaderboard')}
           />
 
           {/* Main content */}

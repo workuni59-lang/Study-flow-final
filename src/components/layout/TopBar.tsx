@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, memo } from 'react';
-import { ExternalLink, LogIn } from 'lucide-react';
+import { ExternalLink, LogIn, ArrowUpDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -10,6 +10,7 @@ interface TopBarProps {
   onModeChange: (m: Mode) => void;
   onMenuOpen: () => void;
   onOpenAuth?: () => void;
+  onLeaderboardOpen?: () => void;
 }
 
 const HELP_LINKS = [
@@ -18,7 +19,7 @@ const HELP_LINKS = [
   { icon: '🎮', label: 'Join Discord', url: 'https://discord.gg/tUFvKERC' },
 ];
 
-export const TopBar = memo(({ mode, onModeChange, onMenuOpen, onOpenAuth }: TopBarProps) => {
+export const TopBar = memo(({ mode, onModeChange, onMenuOpen, onOpenAuth, onLeaderboardOpen }: TopBarProps) => {
   const { user } = useAuth();
   const [helpOpen, setHelpOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -81,8 +82,33 @@ export const TopBar = memo(({ mode, onModeChange, onMenuOpen, onOpenAuth }: TopB
         </div>
       </div>
 
-      {/* Sign-in + Help — top right */}
+      {/* Leaderboard + Sign-in + Help — top right */}
       <div style={{ position: 'fixed', top: '16px', right: '16px', zIndex: 30, display: 'flex', alignItems: 'center', gap: '6px' }}>
+        {onLeaderboardOpen && (
+          <button onClick={onLeaderboardOpen} title="Leaderboard"
+            style={{
+              height: '32px',
+              padding: '0 10px',
+              borderRadius: '8px',
+              backgroundColor: 'rgba(0,0,0,0.35)',
+              backdropFilter: 'blur(8px)',
+              border: '1px solid rgba(255,255,255,0.12)',
+              color: 'rgba(255,255,255,0.75)',
+              fontSize: '11px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px',
+              transition: 'border-color 0.15s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; }}
+          >
+            <ArrowUpDown size={12} />
+            Leaderboard
+          </button>
+        )}
         {!user && onOpenAuth && (
           <button onClick={onOpenAuth}
             style={{

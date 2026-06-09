@@ -4,6 +4,8 @@ import { audioController } from '../services/AudioController';
 import { storage } from '../services/storage';
 import { UserStats, Badge, ACHIEVEMENTS, Achievement, Quest, XP_PER_TASK, XP_PER_FOCUS_MINUTE, AtmosphereId, WallpaperId, PetState, PetFood, PET_FOODS, PET_SPECIES, PET_SKINS, INITIAL_PET_STATE, PET_HUNGER_DECAY_PER_HOUR, PET_WEAK_THRESHOLD, PET_WEAK_DURATION_MS, PET_DORMANT_DURATION_MS, PetHealth, PetEvent, PetEventType, PetMood, PetAnimation, getPetMood, getPetAnimation, GameQuest, SEED_QUESTS, calculateFormalLevel, goldForTask, goldForLevelUp, MAX_HP, HP_REGEN_PER_SESSION, INITIAL_HP, HpState, checkDailyHp as checkHpFn, regenHp, shouldResetQuests, ShopItem, SHOP_ITEMS, XP_STREAK_BONUS_PER_DAY } from '../lib/gamification';
 import { getProgress, getRankForLevel, getNextRank, getBadgesForLevel, getNewlyUnlockedBadges, getRewardsBetweenLevels, type ProgressionState, type ProgressionBadge } from '../lib/progression';
+import { syncFocusSession } from '../lib/leaderboard';
+import { useAuth } from './AuthContext';
 export interface FocusSessionState {
   mode: 'focus' | 'shortBreak' | 'longBreak' | 'idle' | 'taskETA';
   timeLeft: number;
@@ -192,6 +194,8 @@ const DEFAULT_THEME: ThemeConfig = {
 
 export function StudyProvider({ children }: { children: React.ReactNode }) {
   const [accessToken, setAccessToken] = useState<string | null>('mock-access-token');
+
+  const { user: authUser, profile: authProfile } = useAuth();
   
   const [tasks, setTasks] = useState<Task[]>(() => storage.getTasks() || []);
   const [subjects, setSubjects] = useState<Subject[]>(() => storage.getSubjects() || []);
@@ -617,6 +621,14 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     setUserStats(prev => ({ ...prev, totalFocusSeconds: newTotalFocus }));
     checkAchievements({ ...userStats, totalFocusSeconds: newTotalFocus });
     firePetEvent('focus_done');
+    if (authUser) {
+      syncFocusSession(
+        authUser.uid,
+        authProfile?.display_name ?? authUser.displayName ?? 'Anonymous',
+        authProfile?.avatar_url ?? null,
+        seconds,
+      );
+    }
   };
 
   const logSession = (record: import('../lib/gamification').SessionRecord) => {

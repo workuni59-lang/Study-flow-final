@@ -32,6 +32,7 @@ const AchievementsViewLazy = lazy(() => import('../achievements/AchievementsView
 const SettingsViewLazy = lazy(() => import('../navigation/SettingsView').then(m => ({ default: m.SettingsView })));
 const QuestsViewLazy = lazy(() => import('../quests/QuestsView').then(m => ({ default: m.QuestsView })));
 const ProgressionViewLazy = lazy(() => import('../progression/ProgressionView').then(m => ({ default: m.ProgressionView })));
+const LeaderboardViewLazy = lazy(() => import('../leaderboard/LeaderboardView').then(m => ({ default: m.LeaderboardView })));
 
 const SimpleSpinner = () => (
   <div className="flex items-center justify-center min-h-[60vh]">
@@ -114,6 +115,7 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
                 {section === 'subjects' && <SubjectsViewLazy />}
                 {section === 'achievements' && <AchievementsViewLazy />}
                 {section === 'settings' && <SettingsViewLazy />}
+                {section === 'leaderboard' && <LeaderboardViewLazy />}
               </Suspense>
             </main>
           </div>
@@ -125,6 +127,7 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
             onModeChange={setMode}
             onMenuOpen={() => setMenuOpen(v => !v)}
             onOpenAuth={onOpenAuth}
+            onLeaderboardOpen={() => setSection('leaderboard')}
           />
 
           {/* Main content */}

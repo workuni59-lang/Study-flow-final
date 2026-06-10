@@ -1,9 +1,11 @@
 import { useState, lazy, Suspense, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { X } from 'lucide-react';
 import { useStudy } from '../../context/StudyContext';
 import { useAuth } from '../../context/AuthContext';
 import { TopBar, type Mode } from './TopBar';
-import { useSectionHash } from '../../hooks/useSectionHash';
+import { useNavigationContext, type Panel } from '../../hooks/useNavigationContext';
+import { ROUTES } from '../../lib/routes';
 import { BottomBar } from './BottomBar';
 import { HomeView } from './HomeView';
 const FocusEnvironmentLazy = lazy(() => import('./FocusEnvironment').then(m => ({ default: m.FocusEnvironment })));
@@ -46,14 +48,12 @@ interface MainLayoutProps {
 }
 
 export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { userStats, gameLevel, levelUpEvent, dismissLevelUp, activeNotification, confettiActive, closeNotification } = useStudy();
-  const [mode, setMode] = useState<Mode>(
-    window.location.hash === '#focus' ? 'focus' : 'home'
-  );
-  const [section, setSection] = useSectionHash();
+  const { mode, section, activePanel: panelOpen, profileId: profileUserId } = useNavigationContext();
+
   const [menuOpen, setMenuOpen] = useState(false);
-  const [panelOpen, setPanelOpen] = useState<'tasks' | 'ambience' | 'notepad' | null>(null);
   const [isNotesOpen, setIsNotesOpen] = useState(false);
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [ambienceUrl, setAmbienceUrl] = useState<CuratedPlaylist | null>(null);
@@ -61,15 +61,37 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
   const [feedTrigger, setFeedTrigger] = useState(0);
   const [petVisible, setPetVisible] = useState(() => storage.getPetVisible() ?? true);
   const [petSize, setPetSize] = useState(() => storage.getPetSize() ?? 140);
-  const [profileUserId, setProfileUserId] = useState<string | null>(null);
+
+  const setMode = (m: Mode) => {
+    navigate(m === 'focus' ? ROUTES.FOCUS : ROUTES.HOME);
+  };
+
+  const setSection = (s: Section) => {
+    if (s === 'dashboard') {
+      setMode(mode);
+      return;
+    }
+    const routeKey = s.toUpperCase() as keyof typeof ROUTES;
+    const path = s === 'profile' ? ROUTES.PROFILE(user?.uid || 'me') : ROUTES[routeKey];
+    if (typeof path === 'string') navigate(path);
+  };
+
+  const setPanelOpen = (p: Panel | null) => {
+    if (!p) {
+      setMode(mode);
+      return;
+    }
+    const routeKey = `${mode === 'focus' ? 'FOCUS_' : ''}${p.toUpperCase()}` as keyof typeof ROUTES;
+    const path = ROUTES[routeKey];
+    if (typeof path === 'string') navigate(path);
+  };
 
   const handleViewProfile = (userId: string) => {
-    setProfileUserId(userId);
-    setSection('profile');
+    navigate(ROUTES.PROFILE(userId));
   };
 
   const handleEditProfile = () => {
-    setSection('settings');
+    navigate(ROUTES.SETTINGS);
   };
 
   useEffect(() => {
@@ -77,14 +99,6 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
       setShowLevelUp(true);
     }
   }, [levelUpEvent]);
-
-  useEffect(() => {
-    if (section === 'profile' && !profileUserId && user) {
-      setProfileUserId(user.uid);
-    } else if (section !== 'profile') {
-      setProfileUserId(null);
-    }
-  }, [section, user]);
 
   // Preload analytics chunk after paint
   useEffect(() => {
@@ -177,7 +191,7 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
             mode={mode}
             onModeChange={setMode}
             onTasksOpen={() => setPanelOpen('tasks')}
-            onStatsOpen={() => setSection('analytics')}
+            onStatsOpen={() => navigate(ROUTES.ANALYTICS)}
             onNotepadOpen={() => setIsNotesOpen(true)}
             onQuestsOpen={() => setSection('quests')}
           />

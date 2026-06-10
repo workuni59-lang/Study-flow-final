@@ -1,8 +1,10 @@
+import { Link, NavLink } from 'react-router-dom';
 import { BarChart3, BookOpen, Award, Settings, Crown, LogOut, Sparkles, LayoutDashboard, Target, Cat, Eye, EyeOff, Zap, Lock } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useStudy } from '../../context/StudyContext';
 import { PROGRESSION_BADGES } from '../../lib/progression';
 import { BadgeSvg, formatXP, type BadgeTier } from '../progression/BadgeSvg';
+import { ROUTES } from '../../lib/routes';
 import type { Mode } from './TopBar';
 import type { Section } from './MenuDrawer';
 import { ENABLE_PETS } from '../../config/features';
@@ -49,11 +51,11 @@ export const DesktopSidebar = ({ mode, onModeChange, activeSection, onNavigate, 
       <div className="flex flex-col h-full">
         {/* Brand */}
         <div className="px-5 pt-6 pb-4 border-b border-slate-100 dark:border-slate-800">
-          <div className="flex items-center gap-2.5 mb-4">
+          <Link to={ROUTES.HOME} className="flex items-center gap-2.5 mb-4" onClick={onClose}>
             <img src="/logo.png" alt="StudyFlow" className="w-8 h-8 object-contain" />
             <span className="text-sm font-bold dark:text-white tracking-tight">StudyFlow</span>
-          </div>
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => handleNav('profile')}>
+          </Link>
+          <Link to={ROUTES.PROFILE(user?.uid || 'me')} className="flex items-center gap-3 cursor-pointer" onClick={onClose}>
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand to-violet-600 flex items-center justify-center text-white font-bold text-xs shadow-sm">
               {user?.displayName?.charAt(0) || 'S'}
             </div>
@@ -63,7 +65,7 @@ export const DesktopSidebar = ({ mode, onModeChange, activeSection, onNavigate, 
                 {progression.rank.icon} Level {progression.level} &middot; {progression.rank.title}
               </p>
             </div>
-          </div>
+          </Link>
         </div>
 
         {/* Mode toggle */}
@@ -71,7 +73,7 @@ export const DesktopSidebar = ({ mode, onModeChange, activeSection, onNavigate, 
           <p className="text-[9px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 dark:text-slate-500 mb-2 px-1">Mode</p>
           <div className="flex bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg">
             {(['home', 'focus'] as const).map(m => (
-              <button key={m} onClick={() => onModeChange(m)}
+              <Link key={m} to={m === 'focus' ? ROUTES.FOCUS : ROUTES.HOME} onClick={onClose}
                 className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md text-[11px] font-semibold uppercase tracking-wider transition-colors ${
                   mode === m
                     ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
@@ -80,7 +82,7 @@ export const DesktopSidebar = ({ mode, onModeChange, activeSection, onNavigate, 
               >
                 {m === 'home' ? <LayoutDashboard className="w-3.5 h-3.5" /> : <Target className="w-3.5 h-3.5" />}
                 {m}
-              </button>
+              </Link>
             ))}
           </div>
         </div>
@@ -90,9 +92,9 @@ export const DesktopSidebar = ({ mode, onModeChange, activeSection, onNavigate, 
           <p className="text-[9px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 dark:text-slate-500 mb-2 px-1">Insights</p>
           <div className="space-y-0.5">
             {/* Progression Badge Widget */}
-            <button onClick={() => handleNav('progression')}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                activeSection === 'progression'
+            <NavLink to={ROUTES.PROGRESSION} onClick={onClose}
+              className={({ isActive }) => `w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                isActive
                   ? 'bg-brand/10 text-brand'
                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
               }`}
@@ -120,19 +122,19 @@ export const DesktopSidebar = ({ mode, onModeChange, activeSection, onNavigate, 
                   </div>
                 );
               })()}
-            </button>
+            </NavLink>
 
             {MENU_ITEMS.map(({ key, icon: Icon, label }) => (
-              <button key={key} onClick={() => handleNav(key)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                  activeSection === key
+              <NavLink key={key} to={ROUTES[key.toUpperCase() as keyof typeof ROUTES] as string} onClick={onClose}
+                className={({ isActive }) => `w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                  isActive
                     ? 'bg-brand/10 text-brand'
                     : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
                 }`}
               >
                 <Icon className="w-4 h-4" />
                 {label}
-              </button>
+              </NavLink>
             ))}
           </div>
         </div>

@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef, memo } from 'react';
+import { NavLink, Link } from 'react-router-dom';
 import { ExternalLink, LogIn } from 'lucide-react';
 import LadderIcon from '../ui/LadderIcon';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../../context/AuthContext';
+import { ROUTES } from '../../lib/routes';
 
 export type Mode = 'home' | 'focus';
 
@@ -59,28 +61,30 @@ export const TopBar = memo(({ mode, onModeChange, onMenuOpen, onOpenAuth, onLead
             <path d="M3 12h18M3 6h18M3 18h18" />
           </svg>
         </button>
-        <img src="/logo.png" alt="StudyFlow" className="w-6 h-6 object-contain" />
-        <span className="text-xs font-bold dark:text-white tracking-tight hidden sm:block">StudyFlow</span>
+        <Link to={ROUTES.HOME} className="flex items-center gap-2">
+          <img src="/logo.png" alt="StudyFlow" className="w-6 h-6 object-contain" />
+          <span className="text-xs font-bold dark:text-white tracking-tight hidden sm:block">StudyFlow</span>
+        </Link>
         <div className="w-px h-4 bg-slate-200 dark:bg-white/10 mx-1" />
         <div className="flex gap-0.5 p-0.5 rounded-[10px] backdrop-blur-xl border border-white/[0.08] bg-black/20">
-          <button onClick={() => onModeChange('home')}
-            className={`px-3 py-1.5 rounded-[7px] text-[9px] font-semibold uppercase tracking-wider transition-all ${
-              mode === 'home'
+          <NavLink to={ROUTES.HOME} end
+            className={({ isActive }) => `px-3 py-1.5 rounded-[7px] text-[9px] font-semibold uppercase tracking-wider transition-all ${
+              isActive
                 ? 'bg-white/10 text-white shadow-xs'
                 : 'text-white/40 hover:text-white/70'
             }`}
           >
             Home
-          </button>
-          <button onClick={() => onModeChange('focus')}
-            className={`px-3 py-1.5 rounded-[7px] text-[9px] font-semibold uppercase tracking-wider transition-all ${
-              mode === 'focus'
+          </NavLink>
+          <NavLink to={ROUTES.FOCUS}
+            className={({ isActive }) => `px-3 py-1.5 rounded-[7px] text-[9px] font-semibold uppercase tracking-wider transition-all ${
+              isActive
                 ? 'bg-white/10 text-white shadow-xs'
                 : 'text-white/40 hover:text-white/70'
             }`}
           >
             Focus
-          </button>
+          </NavLink>
         </div>
       </div>
 

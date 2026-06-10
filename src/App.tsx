@@ -1,9 +1,11 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import { MotionConfig } from 'motion/react';
 import { StudyProvider, FocusProvider, useStudy } from './context/StudyContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import AuthModal from './components/auth/AuthModal';
 import { useReduceMotion } from './hooks/useReduceMotion';
+import { MetaUpdater } from './components/navigation/MetaUpdater';
 
 const MainLayout = lazy(() => import('./components/layout/MainLayout').then(m => ({ default: m.MainLayout })));
 const MobileLayout = lazy(() => import('./components/layout/MobileLayout').then(m => ({ default: m.MobileLayout })));
@@ -56,6 +58,7 @@ const AppContent = () => {
 
   return (
     <MotionConfig reducedMotion={reduceMotion ? 'always' : 'never'}>
+      <MetaUpdater />
       <Suspense fallback={<MobileSpinner />}>
         {isMobile ? <MobileLayout onOpenAuth={handleOpenAuth} /> : <MainLayout onOpenAuth={handleOpenAuth} />}
       </Suspense>
@@ -69,7 +72,10 @@ export default function App() {
     <AuthProvider>
       <StudyProvider>
         <FocusProvider>
-          <AppContent />
+          <Routes>
+            <Route path="/profile/:id" element={<AppContent />} />
+            <Route path="/*" element={<AppContent />} />
+          </Routes>
         </FocusProvider>
       </StudyProvider>
     </AuthProvider>

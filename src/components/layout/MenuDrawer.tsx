@@ -1,8 +1,10 @@
+import { NavLink, Link } from 'react-router-dom';
 import { BarChart3, BookOpen, Award, Settings, Crown, LogOut, Sparkles, Zap, Target } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useStudy } from '../../context/StudyContext';
 import { PROGRESSION_BADGES } from '../../lib/progression';
 import { BadgeSvg, type BadgeTier } from '../progression/BadgeSvg';
+import { ROUTES } from '../../lib/routes';
 export type Section = 'dashboard' | 'subjects' | 'achievements' | 'analytics' | 'settings' | 'quests' | 'progression' | 'leaderboard' | 'profile';
 
 interface MenuDrawerProps {
@@ -42,15 +44,15 @@ export const MenuDrawer = ({ open, onClose, activeSection, onNavigate }: MenuDra
             <div className="flex flex-col h-full">
               {/* Brand */}
               <div className="px-5 pt-6 pb-3 border-b border-slate-100 dark:border-slate-800">
-                <div className="flex items-center gap-2.5">
+                <Link to={ROUTES.HOME} className="flex items-center gap-2.5" onClick={onClose}>
                   <img src="/logo.png" alt="StudyFlow" className="w-7 h-7 object-contain" />
                   <span className="text-sm font-bold dark:text-white tracking-tight">StudyFlow</span>
-                </div>
+                </Link>
               </div>
 
               {/* Header */}
               <div className="px-5 pt-6 pb-4 border-b border-slate-100 dark:border-slate-800">
-                <div className="flex items-center gap-3 mb-3">
+                <Link to={ROUTES.PROFILE(user?.uid || 'me')} className="flex items-center gap-3 mb-3" onClick={onClose}>
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand to-violet-600 flex items-center justify-center text-white font-bold shadow-sm">
                     {user?.displayName?.charAt(0) || 'S'}
                   </div>
@@ -60,7 +62,7 @@ export const MenuDrawer = ({ open, onClose, activeSection, onNavigate }: MenuDra
                       {progression.rank.icon} Level {progression.level} &middot; {progression.rank.title}
                     </p>
                   </div>
-                </div>
+                </Link>
                 <button onClick={() => { setShowPremiumModal(true); onClose(); }}
                   className="w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-gradient-to-r from-amber-500/10 to-rose-500/10 border border-amber-200 dark:border-amber-500/20 text-xs font-semibold text-amber-700 dark:text-amber-400"
                 >
@@ -73,9 +75,9 @@ export const MenuDrawer = ({ open, onClose, activeSection, onNavigate }: MenuDra
               {/* Nav items */}
               <div className="flex-1 py-2 px-3 space-y-0.5 overflow-y-auto">
                 {/* Progression Badge Widget */}
-                <button onClick={() => handleNav('progression')}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                    activeSection === 'progression'
+                <NavLink to={ROUTES.PROGRESSION} onClick={onClose}
+                  className={({ isActive }) => `w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                    isActive
                       ? 'bg-brand/10 text-brand'
                       : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
                   }`}
@@ -103,19 +105,19 @@ export const MenuDrawer = ({ open, onClose, activeSection, onNavigate }: MenuDra
                       </div>
                     );
                   })()}
-                </button>
+                </NavLink>
 
                 {MENU_ITEMS.map(({ key, icon: Icon, label }) => (
-                  <button key={key} onClick={() => handleNav(key)}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                      activeSection === key
+                  <NavLink key={key} to={ROUTES[key.toUpperCase() as keyof typeof ROUTES] as string} onClick={onClose}
+                    className={({ isActive }) => `w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                      isActive
                         ? 'bg-brand/10 text-brand'
                         : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
                     }`}
                   >
                     <Icon className="w-4 h-4" />
                     {label}
-                  </button>
+                  </NavLink>
                 ))}
               </div>
 

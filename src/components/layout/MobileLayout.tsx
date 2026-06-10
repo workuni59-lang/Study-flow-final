@@ -1,10 +1,12 @@
 import { useState, lazy, Suspense, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { X, Palette, Check, Crown } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../../context/AuthContext';
 import { useStudy } from '../../context/StudyContext';
 import { TopBar, type Mode } from './TopBar';
-import { useSectionHash } from '../../hooks/useSectionHash';
+import { useNavigationContext, type Panel } from '../../hooks/useNavigationContext';
+import { ROUTES } from '../../lib/routes';
 import { BottomBar } from './BottomBar';
 import { HomeView } from './HomeView';
 const FocusEnvironmentLazy = lazy(() => import('./FocusEnvironment').then(m => ({ default: m.FocusEnvironment })));
@@ -44,27 +46,47 @@ interface MobileLayoutProps {
 }
 
 export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { userStats, gameLevel, levelUpEvent, dismissLevelUp, themeConfig, setThemeConfig, activeNotification, confettiActive, closeNotification, setShowPremiumModal } = useStudy();
-  const [mode, setMode] = useState<Mode>(
-    window.location.hash === '#focus' ? 'focus' : 'home'
-  );
-  const [section, setSection] = useSectionHash();
+  const { mode, section, activePanel: panelOpen, profileId: profileUserId } = useNavigationContext();
+
   const [menuOpen, setMenuOpen] = useState(false);
-  const [panelOpen, setPanelOpen] = useState<'tasks' | 'ambience' | 'notepad' | null>(null);
   const [isNotesOpen, setIsNotesOpen] = useState(false);
   const [ambienceUrl, setAmbienceUrl] = useState<CuratedPlaylist | null>(null);
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [showMoodPicker, setShowMoodPicker] = useState(false);
-  const [profileUserId, setProfileUserId] = useState<string | null>(null);
+
+  const setMode = (m: Mode) => {
+    navigate(m === 'focus' ? ROUTES.FOCUS : ROUTES.HOME);
+  };
+
+  const setSection = (s: Section) => {
+    if (s === 'dashboard') {
+      setMode(mode);
+      return;
+    }
+    const routeKey = s.toUpperCase() as keyof typeof ROUTES;
+    const path = s === 'profile' ? ROUTES.PROFILE(user?.uid || 'me') : ROUTES[routeKey];
+    if (typeof path === 'string') navigate(path);
+  };
+
+  const setPanelOpen = (p: Panel | null) => {
+    if (!p) {
+      setMode(mode);
+      return;
+    }
+    const routeKey = `${mode === 'focus' ? 'FOCUS_' : ''}${p.toUpperCase()}` as keyof typeof ROUTES;
+    const path = ROUTES[routeKey];
+    if (typeof path === 'string') navigate(path);
+  };
 
   const handleViewProfile = (userId: string) => {
-    setProfileUserId(userId);
-    setSection('profile');
+    navigate(ROUTES.PROFILE(userId));
   };
 
   const handleEditProfile = () => {
-    setSection('settings');
+    navigate(ROUTES.SETTINGS);
   };
 
   useEffect(() => {
@@ -76,14 +98,6 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
     const t = setTimeout(() => import('../analytics/AnalyticsDashboard'), 2000);
     return () => clearTimeout(t);
   }, []);
-
-  useEffect(() => {
-    if (section === 'profile' && !profileUserId && user) {
-      setProfileUserId(user.uid);
-    } else if (section !== 'profile') {
-      setProfileUserId(null);
-    }
-  }, [section, user]);
 
   // Prefetch commonly opened panels after idle
   useEffect(() => {
@@ -192,7 +206,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
             mode={mode}
             onModeChange={setMode}
             onTasksOpen={() => setPanelOpen('tasks')}
-            onStatsOpen={() => setSection('analytics')}
+            onStatsOpen={() => navigate(ROUTES.ANALYTICS)}
             onNotepadOpen={() => setIsNotesOpen(true)}
           />
         </>

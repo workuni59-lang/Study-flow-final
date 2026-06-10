@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Play, Pause, RotateCcw, Zap, Maximize2, X,
   Palette, Crown, Timer, Rocket, Check, Upload, Settings2,
@@ -8,6 +9,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { DashboardCard } from './DashboardCard';
 import { storage } from '../../services/storage';
 import { useStudy, useFocus } from '../../context/StudyContext';
+import { useNavigationContext, type ThemeTab, type TimerModeId } from '../../hooks/useNavigationContext';
+import { ROUTES } from '../../lib/routes';
 import { ATMOSPHERES, WALLPAPERS } from '../../lib/gamification';
 import { MOOD_GRADIENTS, MOOD_ANIMATED } from '../../lib/wallpapers';
 import { playAlertSound } from '../../lib/alertSounds';
@@ -59,12 +62,14 @@ const TALLY_SETS: Record<string, string[]> = {
 interface StudyTimerProps { onTick?: () => void; compact?: boolean; variant?: 'card' | 'floating'; }
 
 export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProps) => {
+  const navigate = useNavigate();
   const { 
     themeConfig, setThemeConfig, completeFocusSession, logSession, 
     userStats, gameLevel, triggerConfetti, setShowPremiumModal,
     tasks, selectedTaskId, setSelectedTaskId
   } = useStudy();
   const { setFocusSession } = useFocus();
+  const { mode: navMode, activePanel, timerId: navTimerId, themeTab: navThemeTab } = useNavigationContext();
   
   const [activePreset, setActivePreset] = useState<Preset>(PRESETS[0]);
   const [mode, setMode] = useState<TimerMode>('focus');
@@ -74,9 +79,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
   const [isZenMode, setIsZenMode] = useState(false);
     
   // Theme Picker State
-  const [showThemePicker, setShowThemePicker] = useState(false);
-  const [showPresetPicker, setShowPresetPicker] = useState(false);
-  const [pickerTab, setPickerTab] = useState<'atm' | 'moods' | 'animated' | 'photos' | 'custom'>('atm');
+  const [pickerTab, setPickerTab] = useState<ThemeTab>('atm');
   const [photoCategory, setPhotoCategory] = useState<string>('All');
   const [sessionsCompleted, setSessionsCompleted] = useState(0);
   const [customImgError, setCustomImgError] = useState(false);
@@ -85,6 +88,29 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
   const [laps, setLaps] = useState<number[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
+  // Picker visibility derived from URL
+  const showThemePicker = activePanel === 'themes';
+  const showPresetPicker = navTimerId === null && !showThemePicker && !isActive && activePanel === null && (window.location.pathname.includes('/presets') || false); // Helper for mobile later
+  
+  // Custom picker visibility logic for StudyTimer (it used to be internal state)
+  // We'll use local state for "internal" preset picker triggers if no specific route is hit
+  const [internalPresetPicker, setInternalPresetPicker] = useState(false);
+  const isPresetPickerVisible = internalPresetPicker;
+
+  const handleSetPickerTab = (tab: ThemeTab) => {
+    navigate(ROUTES.FOCUS_THEMES_TAB(tab));
+  };
+  const activePickerTab = navThemeTab || pickerTab;
+
+  const setShowThemePicker = (val: boolean) => {
+    if (val) navigate(ROUTES.FOCUS_THEMES);
+    else navigate(navMode === 'focus' ? ROUTES.FOCUS : ROUTES.HOME);
+  };
+
+  const setShowPresetPicker = (val: boolean) => {
+    setInternalPresetPicker(val);
+  };
 
   const filteredPhotos = useMemo(() =>
     WALLPAPERS.filter(w => w.url).filter(w => photoCategory === 'All' || w.category === photoCategory),
@@ -475,11 +501,11 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
         </button>
         {glassVariant && (
           <>
-            <button onClick={() => { setShowPresetPicker(v => !v); setShowThemePicker(false); }} aria-label="Timer presets"
+            <button onClick={() => { setShowPresetPicker(!isPresetPickerVisible); setShowThemePicker(false); }} aria-label="Timer presets"
               className="px-4 py-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10 transition-colors">
               <Timer className="w-4 h-4 text-white/80" />
             </button>
-            <button onClick={() => setShowThemePicker(v => !v)} aria-label="Theme and atmosphere"
+            <button onClick={() => setShowThemePicker(!showThemePicker)} aria-label="Theme and atmosphere"
               className="px-4 py-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10 transition-colors">
               <Palette className="w-4 h-4 text-white/80" />
             </button>
@@ -599,18 +625,18 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
   const renderThemePicker = () => (
     <motion.div key="theme" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
       <div className="flex gap-1 p-1 bg-black/15 backdrop-blur-lg border border-white/10 rounded-xl overflow-x-auto no-scrollbar">
-        <button onClick={() => setPickerTab('atm')} className={`shrink-0 px-2 py-1.5 rounded-lg text-[7px] font-semibold uppercase tracking-wider transition-all ${pickerTab === 'atm' ? 'bg-white/15 text-white shadow-sm' : 'text-white/50 backdrop-blur-sm border border-white/[0.04]'}`}>Atmosphere</button>
-        {!isMobile && <button onClick={() => setPickerTab('moods')} className={`shrink-0 px-2 py-1.5 rounded-lg text-[7px] font-semibold uppercase tracking-wider transition-all ${pickerTab === 'moods' ? 'bg-white/15 text-white shadow-sm' : 'text-white/50 backdrop-blur-sm border border-white/[0.04]'}`}>Moods</button>}
-        {!isMobile && <button onClick={() => setPickerTab('animated')} className={`shrink-0 px-2 py-1.5 rounded-lg text-[7px] font-semibold uppercase tracking-wider transition-all ${pickerTab === 'animated' ? 'bg-white/15 text-white shadow-sm' : 'text-white/50 backdrop-blur-sm border border-white/[0.04]'}`}>Animated</button>}
-        {!isMobile && <button onClick={() => setPickerTab('photos')} className={`shrink-0 px-2 py-1.5 rounded-lg text-[7px] font-semibold uppercase tracking-wider transition-all ${pickerTab === 'photos' ? 'bg-white/15 text-white shadow-sm' : 'text-white/50 backdrop-blur-sm border border-white/[0.04]'}`}>Photos</button>}
-        {!isMobile && <button onClick={() => setPickerTab('custom')} className={`shrink-0 px-2 py-1.5 rounded-lg text-[7px] font-semibold uppercase tracking-wider transition-all ${pickerTab === 'custom' ? 'bg-white/15 text-white shadow-sm' : 'text-white/50 backdrop-blur-sm border border-white/[0.04]'}`}>Custom</button>}
+        <button onClick={() => handleSetPickerTab('atm')} className={`shrink-0 px-2 py-1.5 rounded-lg text-[7px] font-semibold uppercase tracking-wider transition-all ${activePickerTab === 'atm' ? 'bg-white/15 text-white shadow-sm' : 'text-white/50 backdrop-blur-sm border border-white/[0.04]'}`}>Atmosphere</button>
+        {!isMobile && <button onClick={() => handleSetPickerTab('moods')} className={`shrink-0 px-2 py-1.5 rounded-lg text-[7px] font-semibold uppercase tracking-wider transition-all ${activePickerTab === 'moods' ? 'bg-white/15 text-white shadow-sm' : 'text-white/50 backdrop-blur-sm border border-white/[0.04]'}`}>Moods</button>}
+        {!isMobile && <button onClick={() => handleSetPickerTab('animated')} className={`shrink-0 px-2 py-1.5 rounded-lg text-[7px] font-semibold uppercase tracking-wider transition-all ${activePickerTab === 'animated' ? 'bg-white/15 text-white shadow-sm' : 'text-white/50 backdrop-blur-sm border border-white/[0.04]'}`}>Animated</button>}
+        {!isMobile && <button onClick={() => handleSetPickerTab('photos')} className={`shrink-0 px-2 py-1.5 rounded-lg text-[7px] font-semibold uppercase tracking-wider transition-all ${activePickerTab === 'photos' ? 'bg-white/15 text-white shadow-sm' : 'text-white/50 backdrop-blur-sm border border-white/[0.04]'}`}>Photos</button>}
+        {!isMobile && <button onClick={() => handleSetPickerTab('custom')} className={`shrink-0 px-2 py-1.5 rounded-lg text-[7px] font-semibold uppercase tracking-wider transition-all ${activePickerTab === 'custom' ? 'bg-white/15 text-white shadow-sm' : 'text-white/50 backdrop-blur-sm border border-white/[0.04]'}`}>Custom</button>}
       </div>
       <div className="max-h-[45vh] overflow-y-auto no-scrollbar mt-3">
-        {pickerTab === 'atm' && renderAtmosphereTab()}
-        {pickerTab === 'moods' && !isMobile && renderMoodsTab()}
-        {pickerTab === 'animated' && !isMobile && renderAnimatedTab()}
-        {pickerTab === 'photos' && !isMobile && renderPhotosTab()}
-        {pickerTab === 'custom' && !isMobile && renderCustomTab()}
+        {activePickerTab === 'atm' && renderAtmosphereTab()}
+        {activePickerTab === 'moods' && !isMobile && renderMoodsTab()}
+        {activePickerTab === 'animated' && !isMobile && renderAnimatedTab()}
+        {activePickerTab === 'photos' && !isMobile && renderPhotosTab()}
+        {activePickerTab === 'custom' && !isMobile && renderCustomTab()}
       </div>
       <button onClick={() => setShowThemePicker(false)} className="w-full mt-3 py-2.5 bg-black/25 backdrop-blur-sm border border-white/10 rounded-xl text-[9px] font-semibold uppercase tracking-wider text-white/70 hover:bg-black/35 transition-colors">Done</button>
     </motion.div>
@@ -619,14 +645,20 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
   const renderPresetPicker = () => (
     <motion.div key="presets" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-2">
       {PRESETS.map(p => (
-        <button key={p.id} onClick={() => { setActivePreset(p); setIsActive(false); setMode('focus'); setTimeLeft(p.focus * 60); setShowPresetPicker(false); }}
+        <button key={p.id} onClick={() => { 
+          navigate(ROUTES[`FOCUS_${p.id.toUpperCase() as any}` as keyof typeof ROUTES] as string || ROUTES.FOCUS);
+          setShowPresetPicker(false); 
+        }}
           className={`w-full p-3 rounded-xl flex items-center justify-between transition-all ${activePreset.id === p.id && mode === 'focus' ? 'bg-brand/20 text-white' : 'bg-black/15 backdrop-blur-sm border border-white/10 text-white/50 hover:bg-black/25 hover:text-white/80'}`}>
           <div className="flex items-center gap-2.5"><p.icon className="w-3.5 h-3.5" /><span className="text-[9px] font-semibold uppercase tracking-wider">{p.name}</span></div>
           <span className="text-[9px] font-medium text-white/30">{p.focus}m / {p.short}m</span>
         </button>
       ))}
       <div className="h-px bg-white/5" />
-      <button onClick={() => { resetCountUp(); setMode('stopwatch'); setShowPresetPicker(false); }}
+      <button onClick={() => { 
+        navigate(ROUTES.FOCUS_STOPWATCH);
+        setShowPresetPicker(false); 
+      }}
         className={`w-full p-3 rounded-xl flex items-center justify-between transition-all ${mode === 'stopwatch' ? 'bg-brand/20 text-white' : 'bg-black/15 backdrop-blur-sm border border-white/10 text-white/50 hover:bg-black/25 hover:text-white/80'}`}>
         <div className="flex items-center gap-2.5"><Flag className="w-3.5 h-3.5" /><span className="text-[9px] font-semibold uppercase tracking-wider">Stopwatch</span></div>
       </button>
@@ -690,7 +722,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
             <motion.div key="theme" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="w-full max-w-xs">
               {renderThemePicker()}
             </motion.div>
-          ) : showPresetPicker ? (
+          ) : isPresetPickerVisible ? (
             <motion.div key="presets" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="w-full max-w-xs">
               {renderPresetPicker()}
             </motion.div>
@@ -777,7 +809,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
               )}
               
               <AnimatePresence mode="wait">
-                {showThemePicker ? renderThemePicker() : showPresetPicker ? renderPresetPicker() : (
+                {showThemePicker ? renderThemePicker() : isPresetPickerVisible ? renderPresetPicker() : (
                   <motion.div key="controls" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
                     {renderTimerControls()}
                   </motion.div>
@@ -788,7 +820,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
             /* Full mode */
             <>
               <div className="flex items-center justify-between">
-                <button onClick={() => setShowPresetPicker(!showPresetPicker)} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.10] transition-colors">
+                <button onClick={() => { setShowPresetPicker(!isPresetPickerVisible); setShowThemePicker(false); }} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.10] transition-colors">
                   {mode === 'stopwatch' ? <Flag className="w-3 h-3 text-brand-light" /> : <activePreset.icon className="w-3 h-3 text-brand-light" />}
                   <span className="text-[9px] font-semibold uppercase tracking-wider text-white/70">{mode === 'stopwatch' ? 'Stopwatch' : activePreset.name}</span>
                 </button>
@@ -845,7 +877,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
               )}
               
               <AnimatePresence mode="wait">
-                {showThemePicker ? renderThemePicker() : showPresetPicker ? renderPresetPicker() : (
+                {showThemePicker ? renderThemePicker() : isPresetPickerVisible ? renderPresetPicker() : (
                   <motion.div key="controls" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
                     {renderTimerControls()}
                   </motion.div>
@@ -939,7 +971,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
               )}
 
               {/* Controls — ghost buttons */}
-              {showPresetPicker ? (
+              {isPresetPickerVisible ? (
                 <div className="w-full max-w-[220px]">
                   {renderPresetPicker()}
                   <button onClick={() => setShowPresetPicker(false)} className="w-full mt-2 py-2 text-[9px] font-semibold uppercase tracking-wider text-white/50 hover:text-white/80 transition-colors">Close</button>

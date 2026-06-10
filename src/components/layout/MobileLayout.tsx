@@ -49,12 +49,13 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { userStats, gameLevel, levelUpEvent, dismissLevelUp, themeConfig, setThemeConfig, activeNotification, confettiActive, closeNotification, setShowPremiumModal } = useStudy();
-  const { mode, section, activePanel: panelOpen, profileId: profileUserId, ambienceTab } = useNavigationContext();
+  const { mode, section, activePanel, profileId: profileUserId, ambienceTab } = useNavigationContext();
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [ambienceUrl, setAmbienceUrl] = useState<CuratedPlaylist | null>(null);
   const [showLevelUp, setShowLevelUp] = useState(false);
-  const [showMoodPicker, setShowMoodPicker] = useState(false);
+
+  const showMoodPicker = activePanel === 'themes';
 
   const setMode = (m: Mode) => {
     navigate(m === 'focus' ? ROUTES.FOCUS : ROUTES.HOME);
@@ -89,6 +90,11 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
 
   const handleEditProfile = () => {
     navigate(ROUTES.SETTINGS);
+  };
+
+  const setShowMoodPicker = (val: boolean) => {
+    if (val) navigate(mode === 'focus' ? ROUTES.FOCUS_THEMES : ROUTES.THEMES);
+    else navigate(mode === 'focus' ? ROUTES.FOCUS : ROUTES.HOME);
   };
 
   useEffect(() => {
@@ -214,7 +220,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
 
       {/* Floating mood button — only on dashboard */}
       {!isFullView && (
-        <button onClick={() => setShowMoodPicker(v => !v)} aria-label="Change background"
+        <button onClick={() => setPanelOpen('themes')} aria-label="Change background"
           className="fixed bottom-24 right-4 z-40 w-11 h-11 rounded-full bg-black/40 backdrop-blur-lg border border-white/15 flex items-center justify-center text-white/70 hover:text-white hover:bg-black/55 transition-all shadow-lg active:scale-95">
           <Palette className="w-5 h-5" />
         </button>
@@ -291,11 +297,11 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
       />
 
       {/* Side panels */}
-      <SidePanel open={panelOpen === 'tasks'} onClose={() => setPanelOpen(null)} title="Tasks">
+      <SidePanel open={activePanel === 'tasks'} onClose={() => setPanelOpen(null)} title="Tasks">
         <Suspense fallback={null}><TasksPanelLazy /></Suspense>
       </SidePanel>
 
-      <SidePanel open={panelOpen === 'ambience'} onClose={() => setPanelOpen(null)} title="Ambience">
+      <SidePanel open={activePanel === 'ambience'} onClose={() => setPanelOpen(null)} title="Ambience">
         <AmbiencePanel ambienceUrl={ambienceUrl} onAmbienceUrlChange={setAmbienceUrl} />
       </SidePanel>
 
@@ -324,10 +330,6 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
         </div>
       )}
 
-      <SidePanel open={panelOpen === 'notepad'} onClose={() => setPanelOpen(null)} title="Notepad">
-        <Suspense fallback={null}><NotepadPanelLazy /></Suspense>
-      </SidePanel>
-
       {/* Overlays & modals */}
       <AchievementNotification achievement={activeNotification} onClose={closeNotification} />
       <Confetti active={confettiActive} />
@@ -335,7 +337,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
       <PremiumModal />
       <PanicModeUI />
 
-      <NotesPanel isOpen={panelOpen === 'notepad'} onClose={() => setPanelOpen(null)} />
+      <NotesPanel isOpen={activePanel === 'notepad'} onClose={() => setPanelOpen(null)} />
     </div>
   );
 };

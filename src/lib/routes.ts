@@ -10,6 +10,13 @@ export const ROUTES = {
   LEADERBOARD: '/leaderboard',
   SETTINGS: '/settings',
   PROFILE: (id: string) => `/profile/${id}`,
+  
+  // Timer Modes
+  FOCUS_POMODORO: '/focus/pomodoro',
+  FOCUS_STOPWATCH: '/focus/stopwatch',
+  FOCUS_DEEP: '/focus/deep',
+  FOCUS_FLOW: '/focus/flow',
+  
   // Side Panels (Nested/Context-aware)
   TASKS: '/tasks',
   FOCUS_TASKS: '/focus/tasks',
@@ -26,6 +33,11 @@ export const ROUTES = {
   
   NOTEPAD: '/notes',
   FOCUS_NOTEPAD: '/focus/notes',
+
+  // Themes
+  THEMES: '/themes',
+  FOCUS_THEMES: '/focus/themes',
+  FOCUS_THEMES_TAB: (tab: string) => `/focus/themes/${tab}`,
 } as const;
 
-export type RoutePath = typeof ROUTES[keyof Omit<typeof ROUTES, 'PROFILE'>] | string;
+export type RoutePath = typeof ROUTES[keyof Omit<typeof ROUTES, 'PROFILE' | 'FOCUS_THEMES_TAB'>] | string;

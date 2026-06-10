@@ -3,14 +3,18 @@ import { ROUTES } from '../lib/routes';
 import type { Mode } from '../components/layout/TopBar';
 import type { Section } from '../components/layout/MenuDrawer';
 
-export type Panel = 'tasks' | 'ambience' | 'notepad';
+export type Panel = 'tasks' | 'ambience' | 'notepad' | 'themes';
 export type AmbienceTab = 'sounds' | 'music' | 'playlists';
+export type ThemeTab = 'atm' | 'moods' | 'animated' | 'photos' | 'custom';
+export type TimerModeId = 'pomodoro' | 'stopwatch' | 'deep' | 'flow' | 'task-eta';
 
 interface NavigationContext {
   mode: Mode;
   section: Section;
   activePanel: Panel | null;
   ambienceTab: AmbienceTab;
+  themeTab: ThemeTab;
+  timerId: TimerModeId | null;
   profileId: string | null;
 }
 
@@ -23,6 +27,8 @@ export function useNavigationContext(): NavigationContext {
   let section: Section = 'dashboard';
   let activePanel: Panel | null = null;
   let ambienceTab: AmbienceTab = 'sounds';
+  let themeTab: ThemeTab = 'atm';
+  let timerId: TimerModeId | null = null;
   let profileId: string | null = id || null;
 
   // Determine Mode
@@ -58,9 +64,24 @@ export function useNavigationContext(): NavigationContext {
   } else if (path.includes('/notes')) {
     section = 'dashboard';
     activePanel = 'notepad';
+  } else if (path.includes('/themes')) {
+    section = 'dashboard';
+    activePanel = 'themes';
+    if (path.endsWith('/moods')) themeTab = 'moods';
+    else if (path.endsWith('/animated')) themeTab = 'animated';
+    else if (path.endsWith('/photos')) themeTab = 'photos';
+    else if (path.endsWith('/custom')) themeTab = 'custom';
+  } else if (path.includes('/pomodoro')) {
+    timerId = 'pomodoro';
+  } else if (path.includes('/stopwatch')) {
+    timerId = 'stopwatch';
+  } else if (path.includes('/deep')) {
+    timerId = 'deep';
+  } else if (path.includes('/flow')) {
+    timerId = 'flow';
   } else if (path === '/focus' || path === '/') {
     section = 'dashboard';
   }
 
-  return { mode, section, activePanel, ambienceTab, profileId };
+  return { mode, section, activePanel, ambienceTab, themeTab, timerId, profileId };
 }

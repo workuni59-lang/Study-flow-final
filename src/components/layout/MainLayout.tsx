@@ -51,7 +51,7 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { userStats, gameLevel, levelUpEvent, dismissLevelUp, activeNotification, confettiActive, closeNotification } = useStudy();
-  const { mode, section, activePanel: panelOpen, profileId: profileUserId, ambienceTab } = useNavigationContext();
+  const { mode, section, activePanel, profileId: profileUserId, ambienceTab } = useNavigationContext();
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [showLevelUp, setShowLevelUp] = useState(false);
@@ -60,6 +60,7 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
   const [feedTrigger, setFeedTrigger] = useState(0);
   const [petVisible, setPetVisible] = useState(() => storage.getPetVisible() ?? true);
   const [petSize, setPetSize] = useState(() => storage.getPetSize() ?? 140);
+
 
   const setMode = (m: Mode) => {
     navigate(m === 'focus' ? ROUTES.FOCUS : ROUTES.HOME);
@@ -202,7 +203,7 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
             <PetEngine
               onOpenPanel={() => setShowPetPanel(true)}
               feedTrigger={feedTrigger}
-              overlayOpen={panelOpen !== null}
+              overlayOpen={activePanel !== null}
               petSize={petSize}
             />
           )}
@@ -219,14 +220,13 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
       />
 
       {/* Side panels */}
-      <SidePanel open={panelOpen === 'tasks'} onClose={() => setPanelOpen(null)} title="Tasks">
+      <SidePanel open={activePanel === 'tasks'} onClose={() => setPanelOpen(null)} title="Tasks">
         <Suspense fallback={null}><TasksPanelLazy /></Suspense>
       </SidePanel>
 
-      <SidePanel open={panelOpen === 'ambience'} onClose={() => setPanelOpen(null)} title="Ambience">
+      <SidePanel open={activePanel === 'ambience'} onClose={() => setPanelOpen(null)} title="Ambience">
         <AmbiencePanel ambienceUrl={ambienceUrl} onAmbienceUrlChange={setAmbienceUrl} />
       </SidePanel>
-
       {/* Persistent ambience iframe — rendered outside SidePanel so it survives panel close */}
       {ambienceUrl && (
         <div className="fixed bottom-4 right-4 z-50 w-80 rounded-xl overflow-hidden shadow-2xl border border-white/10 bg-black/80 backdrop-blur-lg">
@@ -252,10 +252,6 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
         </div>
       )}
 
-      <SidePanel open={panelOpen === 'notepad'} onClose={() => setPanelOpen(null)} title="Notepad">
-        <Suspense fallback={null}><NotepadPanelLazy /></Suspense>
-      </SidePanel>
-
       {/* Pet panel */}
       {ENABLE_PETS && showPetPanel && (
         <PetPanel
@@ -275,7 +271,7 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
       <PremiumModal />
       <PanicModeUI />
 
-      <NotesPanel isOpen={panelOpen === 'notepad'} onClose={() => setPanelOpen(null)} />
+      <NotesPanel isOpen={activePanel === 'notepad'} onClose={() => setPanelOpen(null)} />
     </div>
   );
 };

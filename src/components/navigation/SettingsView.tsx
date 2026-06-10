@@ -32,7 +32,7 @@ import { DashboardCard } from '../dashboard/DashboardCard';
 import { storage } from '../../services/storage';
 
 export const SettingsView = () => {
-  const { user, updateProfile, signOut } = useAuth();
+  const { user, profile, updateProfile, signOut } = useAuth();
   const { 
     userStats, 
     themeConfig, 
@@ -42,10 +42,11 @@ export const SettingsView = () => {
   } = useStudy();
 
   const [name, setName] = useState(user?.displayName || '');
+  const [bio, setBio] = useState(profile?.bio || '');
   const [showSaved, setShowSaved] = useState(false);
 
   const handleSaveProfile = async () => {
-    const { error } = await updateProfile({ display_name: name });
+    const { error } = await updateProfile({ display_name: name, bio: bio || null });
     if (!error) {
       setShowSaved(true);
       setTimeout(() => setShowSaved(false), 2000);
@@ -240,10 +241,24 @@ export const SettingsView = () => {
                       className="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border-none text-sm font-bold dark:text-white focus:ring-2 ring-indigo-500 transition-all"
                     />
                  </div>
+                 <div>
+                    <label className="text-[8px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 ml-2 mb-1 block">Bio</label>
+                    <textarea
+                      value={bio}
+                      onChange={(e) => setBio(e.target.value.slice(0, 160))}
+                      maxLength={160}
+                      rows={3}
+                      placeholder="Tell the world a little about yourself..."
+                      className="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border-none text-sm font-medium dark:text-white focus:ring-2 ring-indigo-500 transition-all resize-none"
+                    />
+                    <div className="flex justify-between mt-1 px-2">
+                      <span className="text-[8px] text-slate-500">{160 - bio.length} characters remaining</span>
+                    </div>
+                 </div>
                  <button 
-                  onClick={handleSaveProfile}
-                  className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-slate-900 transition-all shadow-xl shadow-indigo-600/20"
-                 >
+                   onClick={handleSaveProfile}
+                   className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-slate-900 transition-all shadow-xl shadow-indigo-600/20"
+                  >
                     {showSaved ? <><CheckCircle2 className="w-4 h-4" /> Profile Saved</> : <><Save className="w-4 h-4" /> Update Profile</>}
                  </button>
               </div>

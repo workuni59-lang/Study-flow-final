@@ -61,13 +61,13 @@ export default function AnalyticsDashboard() {
 
   return (
     <div>
-      <div className="flex gap-1.5 mb-4 overflow-x-auto no-scrollbar">
+      <div className="flex gap-1.5 mb-4 overflow-x-auto no-scrollbar" role="tablist">
         {TABS.map(tab => {
           const Icon = tab.icon;
           const isPremiumTab = PREMIUM_TABS.includes(tab.id);
           const isLocked = !isPremium && isPremiumTab;
           return (
-            <button key={tab.id} onClick={() => !isLocked && setActiveTab(tab.id)}
+            <button key={tab.id} role="tab" aria-selected={activeTab === tab.id} aria-label={tab.label} onClick={() => !isLocked && setActiveTab(tab.id)}
               className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[7px] font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
                 activeTab === tab.id
                   ? 'bg-brand text-white shadow-sm'

@@ -110,7 +110,8 @@ export const BadgeSvg = ({ tier, size = 80, unlocked = true, animate = false }: 
   const borderColor = BORDER_COLORS[tier];
 
   const svg = (
-    <svg width={size} height={size} viewBox="0 0 100 100">
+    <svg width={size} height={size} viewBox="0 0 100 100" role="img" aria-label={`${tier} badge`}>
+      <title>{tier} badge</title>
       <defs>
         <radialGradient id={`shine-${tier}`} cx="35%" cy="30%" r="65%">
           <stop offset="0%" stopColor="#fff" stopOpacity="0.35" />

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   Play, Pause, RotateCcw, Zap, Maximize2, X,
   Palette, Crown, Timer, Rocket, Check, Upload, Settings2,
-  Clock, Flag
+  Clock, Flag, ArrowUpDown
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { DashboardCard } from './DashboardCard';
@@ -20,36 +20,6 @@ const formatTimeBase = (seconds: number) => {
   return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 };
 
-const MemoTimerDisplay = React.memo(({ timeLeft, progress, completed, tallyEmojis, sessionsCompleted, size, floating }: {
-  timeLeft: number; progress: number; completed: number; tallyEmojis: string[];
-  sessionsCompleted: number; size?: 'md' | 'lg'; floating?: boolean;
-}) => (
-  <div className="text-center">
-    <div className="timer-display text-white/90 select-none"
-      style={{
-        fontSize: floating ? 'clamp(5rem, 18vw, 12rem)' : size === 'lg' ? 'clamp(5rem, 18vw, 12rem)' : 'calc(4.5rem * var(--scale-factor, 1))',
-        textShadow: floating ? '0 4px 40px rgba(0,0,0,0.3)' : 'none',
-      }}>
-      {formatTimeBase(timeLeft)}
-    </div>
-    <div className={`mx-auto h-[2px] bg-white/5 rounded-full overflow-hidden mt-4 ${floating ? 'max-w-[140px]' : 'max-w-[160px]'}`}>
-      <div className="h-full bg-gradient-to-r from-brand/50 to-brand-light/70 rounded-full transition-transform duration-1000 ease-linear" style={{ transform: `scaleX(${progress})`, transformOrigin: 'left' }} />
-    </div>
-    <div className="flex items-center justify-center gap-2 mt-3">
-      <div className="flex items-center gap-2">
-        <div className="flex">
-          {[...Array(4)].map((_, i) => (
-            <span key={i} className={`w-5 h-5 flex items-center justify-center text-[11px] transition-all ${i < completed ? 'opacity-100 scale-110' : 'opacity-20 scale-90'}`}>
-              {tallyEmojis[i]}
-            </span>
-          ))}
-        </div>
-        <span className="text-[8px] font-medium uppercase tracking-wider text-white/30">Cycle {Math.floor(sessionsCompleted / 4) + 1}</span>
-      </div>
-    </div>
-  </div>
-));
-
 const ANIMATED_ACCENTS: Record<string, string> = {
   'none': '#64748b',
   'minimal': '#94a3b8',
@@ -61,7 +31,7 @@ const ANIMATED_ACCENTS: Record<string, string> = {
   'zen': '#c084fc',
 };
 
-type TimerMode = 'focus' | 'shortBreak' | 'longBreak' | 'taskETA' | 'countUp' | 'stopwatch';
+type TimerMode = 'focus' | 'shortBreak' | 'longBreak' | 'taskETA' | 'stopwatch';
 
 const formatElapsed = (s: number) => {
   const h = Math.floor(s / 3600);
@@ -100,6 +70,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
   const [mode, setMode] = useState<TimerMode>('focus');
   const [timeLeft, setTimeLeft] = useState(PRESETS[0].focus * 60);
   const [isActive, setIsActive] = useState(false);
+  const [direction, setDirection] = useState<'countdown' | 'countup'>('countdown');
   const [isZenMode, setIsZenMode] = useState(false);
     
   // Theme Picker State
@@ -162,7 +133,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
   const isMobileRef = useRef(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
   const cumulatedRef = useRef(0);
   const runStartRef = useRef(0);
-  const isCountUpMode = () => mode === 'countUp' || mode === 'stopwatch';
+  const isCountingUp = direction === 'countup' || mode === 'stopwatch';
   useEffect(() => {
     const handler = () => { isMobileRef.current = window.innerWidth < 768; };
     window.addEventListener('resize', handler);
@@ -213,10 +184,9 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
   // Master Timer Sync (drift-corrected via Date.now() base ref)
   useEffect(() => {
     if (!isActive) return;
-    const countingUp = isCountUpMode();
-    if (!countingUp && timeLeft <= 0) return;
+    if (!isCountingUp && timeLeft <= 0) return;
 
-    if (countingUp) {
+    if (isCountingUp) {
       runStartRef.current = Date.now();
       cumulatedRef.current = elapsedTime;
     } else {
@@ -225,9 +195,17 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
     localSaveCounterRef.current = 0;
 
     const interval = window.setInterval(() => {
-      if (countingUp) {
+      if (isCountingUp) {
         const elapsed = cumulatedRef.current + Math.floor((Date.now() - runStartRef.current) / 1000);
         setElapsedTime(elapsed);
+        if (modeRef.current === 'focus') {
+          sessionElapsed.current += 1;
+          totalFocusRef.current += 1;
+          if (sessionElapsed.current >= 60) {
+            completeFocusSession(60);
+            sessionElapsed.current = 0;
+          }
+        }
       } else {
         if (!timerBaseRef.current) return;
         const { startTimeLeft, startTimestamp } = timerBaseRef.current;
@@ -261,7 +239,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
       if (Date.now() - lastRenderRef.current < 950) return;
       lastRenderRef.current = Date.now();
     }
-    const countingUp = isCountUpMode();
+    const countingUp = isCountingUp;
     setFocusSession({ mode: countingUp ? mode : isActive ? mode : 'idle', timeLeft: countingUp ? elapsedTime : timeLeft, totalTime, isActive, sessionsCompleted });
     if (!countingUp && timeLeft <= 0 && isActive) {
       handleTimerComplete();
@@ -309,19 +287,21 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
     
     if (nextState) {
       requestWakeLock();
-      if (isCountUpMode()) {
+      if (isCountingUp) {
         runStartRef.current = Date.now();
         cumulatedRef.current = elapsedTime;
+      } else {
+        timerBaseRef.current = { startTimeLeft: timeLeft, startTimestamp: Date.now() };
       }
     } else {
       releaseWakeLock();
-      if (isCountUpMode()) {
+      if (isCountingUp) {
         cumulatedRef.current += Math.floor((Date.now() - runStartRef.current) / 1000);
         runStartRef.current = 0;
       }
     }
 
-    if (!nextState && (mode === 'focus' || mode === 'taskETA')) {
+    if (!nextState && !isCountingUp && (mode === 'focus' || mode === 'taskETA')) {
       if (sessionElapsed.current > 0) {
         completeFocusSession(sessionElapsed.current);
         sessionElapsed.current = 0;
@@ -337,6 +317,17 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
   };
 
   const resetCountUp = () => {
+    if (mode === 'focus' && sessionElapsed.current > 0) {
+      completeFocusSession(sessionElapsed.current);
+      sessionElapsed.current = 0;
+    }
+    if (mode === 'focus' && totalFocusRef.current > 0) {
+      logFocusSession(totalFocusRef.current);
+      totalFocusRef.current = 0;
+    }
+    if (sessionStartTime.current !== null) {
+      sessionStartTime.current = null;
+    }
     setIsActive(false);
     cumulatedRef.current = 0;
     runStartRef.current = 0;
@@ -404,31 +395,60 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
     )
   );
 
-  const TimerDisplay = ({ size = 'md', floating }: { size?: 'md' | 'lg'; floating?: boolean }) => {
-    if (isCountUpMode()) {
-      return (
-        <div className="text-center">
-          <div className="timer-display text-white/90 select-none"
-            style={{
-              fontSize: floating ? 'clamp(5rem, 18vw, 12rem)' : size === 'lg' ? 'clamp(5rem, 18vw, 12rem)' : 'calc(4.5rem * var(--scale-factor, 1))',
-              textShadow: floating ? '0 4px 40px rgba(0,0,0,0.3)' : 'none',
-            }}>
-            {formatElapsed(elapsedTime)}
+  const TimerProgress = React.memo(({ progress, completed, tallyEmojis, sessionsCompleted, floating }: {
+    progress: number; completed: number; tallyEmojis: string[]; sessionsCompleted: number; floating?: boolean;
+  }) => (
+    <>
+      <div className={`mx-auto h-[2px] bg-white/5 rounded-full overflow-hidden mt-4 ${floating ? 'max-w-[140px]' : 'max-w-[160px]'}`}>
+        <div className="h-full bg-gradient-to-r from-brand/50 to-brand-light/70 rounded-full transition-transform duration-1000 ease-linear" style={{ transform: `scaleX(${progress})`, transformOrigin: 'left' }} />
+      </div>
+      <div className="flex items-center justify-center gap-2 mt-3">
+        <div className="flex items-center gap-2">
+          <div className="flex">
+            {[...Array(4)].map((_, i) => (
+              <span key={i} className={`w-5 h-5 flex items-center justify-center text-[11px] transition-all ${i < completed ? 'opacity-100 scale-110' : 'opacity-20 scale-90'}`}>
+                {tallyEmojis[i]}
+              </span>
+            ))}
           </div>
+          <span className="text-[8px] font-medium uppercase tracking-wider text-white/30">Cycle {Math.floor(sessionsCompleted / 4) + 1}</span>
         </div>
-      );
-    }
+      </div>
+    </>
+  ));
+
+  const TimerDisplay = ({ size = 'md', floating }: { size?: 'md' | 'lg'; floating?: boolean }) => {
+    const displayValue = isCountingUp ? formatElapsed(elapsedTime) : formatTimeBase(timeLeft);
+    const showDirToggle = mode !== 'stopwatch' && mode !== 'taskETA';
+    const fs = floating ? 'clamp(5rem, 18vw, 12rem)' : size === 'lg' ? 'clamp(5rem, 18vw, 12rem)' : 'calc(4.5rem * var(--scale-factor, 1))';
+    const ts = floating ? '0 4px 40px rgba(0,0,0,0.3)' : 'none';
+    const toggleSize = floating ? 'w-9 h-9' : 'w-7 h-7';
+
     return (
-      <MemoTimerDisplay timeLeft={timeLeft} progress={progress} completed={completed} tallyEmojis={tallyEmojis} sessionsCompleted={sessionsCompleted} size={size} floating={floating} />
+      <div className="text-center">
+        <div className="flex items-center justify-center gap-2">
+          <div className="timer-display text-white/90 select-none" style={{ fontSize: fs, textShadow: ts }}>
+            {displayValue}
+          </div>
+          {showDirToggle && (
+            <button onClick={(e) => { e.stopPropagation(); setDirection(d => d === 'countdown' ? 'countup' : 'countdown'); }}
+              title={direction === 'countdown' ? 'Switch to count-up' : 'Switch to countdown'}
+              className={`${toggleSize} rounded-full bg-black/25 backdrop-blur-sm border border-white/15 text-white/50 hover:text-white hover:bg-black/40 transition-all shrink-0 flex items-center justify-center`}
+              style={{ fontSize: floating ? 'calc(1rem * var(--scale-factor, 1))' : '0.75rem' }}>
+              <ArrowUpDown className={floating ? 'w-4 h-4' : 'w-3.5 h-3.5'} />
+            </button>
+          )}
+        </div>
+        {!isCountingUp && <TimerProgress progress={progress} completed={completed} tallyEmojis={tallyEmojis} sessionsCompleted={sessionsCompleted} floating={floating} />}
+      </div>
     );
   };
 
   const TimerButtons = ({ glassVariant }: { glassVariant?: boolean }) => {
-    const countUp = isCountUpMode();
     return (
     <div className={glassVariant ? 'flex justify-center' : ''}>
       <div className="flex gap-2.5">
-        {countUp && mode === 'stopwatch' && (
+        {mode === 'stopwatch' && (
           <button onClick={recordLap} disabled={!isActive}
             className={`${glassVariant ? 'px-4 py-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10' : 'px-4 py-3 bg-white/[0.06] hover:bg-white/[0.10] rounded-2xl'} transition-colors ${!isActive ? 'opacity-30 cursor-not-allowed' : ''}`}
             aria-label="Record lap">
@@ -443,9 +463,9 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
             : `flex-1 py-3 rounded-2xl ${isActive ? 'bg-amber-500/90 text-white shadow-lg shadow-amber-500/20' : 'bg-white/90 text-slate-900 hover:bg-white/70 shadow-lg'}`
         }`}>
           {isActive ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current translate-x-0.5" />}
-          {isActive ? 'Pause' : countUp ? 'Start' : 'Start'}
+          {isActive ? 'Pause' : 'Start'}
         </button>
-        <button onClick={() => { if (countUp) resetCountUp(); else { setIsActive(false); setTimeLeft(activePreset.focus * 60); } }} aria-label={countUp ? 'Reset count-up' : 'Reset timer'}
+        <button onClick={() => { if (isCountingUp) resetCountUp(); else { setIsActive(false); const d = mode === 'focus' ? activePreset.focus : mode === 'shortBreak' ? activePreset.short : mode === 'longBreak' ? activePreset.long : taskTime; setTimeLeft(d * 60); } }} aria-label={isCountingUp ? 'Stop and reset' : 'Reset timer'}
           className={`transition-colors ${
             glassVariant
               ? 'px-4 py-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10'
@@ -606,10 +626,6 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
         </button>
       ))}
       <div className="h-px bg-white/5" />
-      <button onClick={() => { resetCountUp(); setMode('countUp'); setShowPresetPicker(false); }}
-        className={`w-full p-3 rounded-xl flex items-center justify-between transition-all ${mode === 'countUp' ? 'bg-brand/20 text-white' : 'bg-black/15 backdrop-blur-sm border border-white/10 text-white/50 hover:bg-black/25 hover:text-white/80'}`}>
-        <div className="flex items-center gap-2.5"><Clock className="w-3.5 h-3.5" /><span className="text-[9px] font-semibold uppercase tracking-wider">Timer (Count Up)</span></div>
-      </button>
       <button onClick={() => { resetCountUp(); setMode('stopwatch'); setShowPresetPicker(false); }}
         className={`w-full p-3 rounded-xl flex items-center justify-between transition-all ${mode === 'stopwatch' ? 'bg-brand/20 text-white' : 'bg-black/15 backdrop-blur-sm border border-white/10 text-white/50 hover:bg-black/25 hover:text-white/80'}`}>
         <div className="flex items-center gap-2.5"><Flag className="w-3.5 h-3.5" /><span className="text-[9px] font-semibold uppercase tracking-wider">Stopwatch</span></div>
@@ -627,7 +643,6 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
 
   /* ── Floating variant: no card, no container, rendered directly on environment ── */
   if (variant === 'floating') {
-    const cu = isCountUpMode();
     return (
       <div className="flex flex-col items-center gap-6 py-6">
         {renderTimerFace()}
@@ -659,7 +674,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
           </div>
         )}
 
-        {cu && mode === 'stopwatch' && laps.length > 0 && (
+        {mode === 'stopwatch' && laps.length > 0 && (
           <div className="w-full max-w-[200px] max-h-[160px] overflow-y-auto no-scrollbar space-y-1">
             {laps.map((lap, i) => (
               <div key={i} className="flex items-center justify-between px-2 py-1 rounded-lg bg-black/15 backdrop-blur-sm border border-white/5">
@@ -683,8 +698,8 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
             <motion.div key="controls" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-4">
                 <button onClick={() => { setShowPresetPicker(true); setShowThemePicker(false); }}
                   className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/15 backdrop-blur-sm border border-white/10 hover:bg-black/25 transition-colors text-[9px] font-semibold uppercase tracking-wider text-white/60">
-                  {cu ? (mode === 'stopwatch' ? <Flag className="w-3 h-3 text-brand-light" /> : <Clock className="w-3 h-3 text-brand-light" />) : <activePreset.icon className="w-3 h-3 text-brand-light" />}
-                  {cu ? (mode === 'stopwatch' ? 'Stopwatch' : 'Timer') : activePreset.name}
+                  {mode === 'stopwatch' ? <Flag className="w-3 h-3 text-brand-light" /> : <activePreset.icon className="w-3 h-3 text-brand-light" />}
+                  {mode === 'stopwatch' ? 'Stopwatch' : activePreset.name}
                 </button>
               {renderControls()}
             </motion.div>
@@ -706,8 +721,8 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
             <>
               <div className="flex items-center justify-between px-4 pt-4">
                 <button onClick={() => { setShowPresetPicker(!showPresetPicker); setShowThemePicker(false); }} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.10] transition-colors">
-                  {isCountUpMode() ? (mode === 'stopwatch' ? <Flag className="w-3 h-3 text-brand-light" /> : <Clock className="w-3 h-3 text-brand-light" />) : <activePreset.icon className="w-3 h-3 text-brand-light" />}
-                  <span className="text-[9px] font-semibold uppercase tracking-wider text-white/70">{isCountUpMode() ? (mode === 'stopwatch' ? 'Stopwatch' : 'Timer') : activePreset.name}</span>
+                  {mode === 'stopwatch' ? <Flag className="w-3 h-3 text-brand-light" /> : <activePreset.icon className="w-3 h-3 text-brand-light" />}
+                  <span className="text-[9px] font-semibold uppercase tracking-wider text-white/70">{mode === 'stopwatch' ? 'Stopwatch' : activePreset.name}</span>
                 </button>
                 <div className="flex items-center gap-1">
                   <button onClick={() => setShowThemePicker(!showThemePicker)} className={`p-2 rounded-xl transition-all ${showThemePicker ? 'bg-brand text-white shadow-lg' : 'text-white/50 hover:text-white/80 hover:bg-black/10 backdrop-blur-sm border border-white/10'}`}>
@@ -774,8 +789,8 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
             <>
               <div className="flex items-center justify-between">
                 <button onClick={() => setShowPresetPicker(!showPresetPicker)} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.10] transition-colors">
-                  {isCountUpMode() ? (mode === 'stopwatch' ? <Flag className="w-3 h-3 text-brand-light" /> : <Clock className="w-3 h-3 text-brand-light" />) : <activePreset.icon className="w-3 h-3 text-brand-light" />}
-                  <span className="text-[9px] font-semibold uppercase tracking-wider text-white/70">{isCountUpMode() ? (mode === 'stopwatch' ? 'Stopwatch' : 'Timer') : activePreset.name}</span>
+                  {mode === 'stopwatch' ? <Flag className="w-3 h-3 text-brand-light" /> : <activePreset.icon className="w-3 h-3 text-brand-light" />}
+                  <span className="text-[9px] font-semibold uppercase tracking-wider text-white/70">{mode === 'stopwatch' ? 'Stopwatch' : activePreset.name}</span>
                 </button>
                 <div className="flex items-center gap-1">
                   <button onClick={() => setShowThemePicker(!showThemePicker)} className={`p-2 rounded-xl transition-all ${showThemePicker ? 'bg-brand text-white shadow-lg' : 'text-white/50 hover:text-white/80 hover:bg-black/10 backdrop-blur-sm border border-white/10'}`}>
@@ -887,15 +902,15 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
                   fontSize: 'clamp(80px, 18vw, 140px)',
                   letterSpacing: '-0.04em',
                   textShadow: '0 0 60px rgba(0,0,0,0.9), 0 4px 16px rgba(0,0,0,0.7)',
-                  color: isCountUpMode() ? 'rgba(200,200,255,0.95)' : mode !== 'focus' ? 'rgba(160,240,200,0.95)' : '#ffffff',
+                  color: isCountingUp ? 'rgba(200,200,255,0.95)' : mode !== 'focus' ? 'rgba(160,240,200,0.95)' : '#ffffff',
                   transition: 'color 0.4s ease',
                 }}
               >
-                {isCountUpMode() ? formatElapsed(elapsedTime) : formatTimeBase(timeLeft)}
+                {isCountingUp ? formatElapsed(elapsedTime) : formatTimeBase(timeLeft)}
               </div>
 
               {/* Progress bar — hairline */}
-              {!isCountUpMode() && (
+              {!isCountingUp && (
                 <div className="w-40 h-[2px] bg-white/10 rounded-full overflow-hidden mx-auto mb-5">
                   <div
                     className="h-full bg-white/50 rounded-full transition-all duration-1000 ease-linear"
@@ -917,7 +932,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
               )}
 
               {/* Tallies */}
-              {!isCountUpMode() && (
+              {!isCountingUp && (
                 <div className="flex justify-center mb-6">
                   {renderTallies()}
                 </div>
@@ -943,7 +958,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
                 )}
 
                 <button
-                  onClick={() => { if (isCountUpMode()) resetCountUp(); else { setIsActive(false); setTimeLeft(activePreset.focus * 60); } }}
+                  onClick={() => { if (isCountingUp) resetCountUp(); else { setIsActive(false); setTimeLeft(activePreset.focus * 60); } }}
                     className="w-12 h-12 rounded-full border border-white/15 bg-black/20 backdrop-blur-sm text-white/50 hover:text-white/90 hover:border-white/30 hover:bg-black/30 transition-all flex items-center justify-center"
                   >
                     <RotateCcw className="w-5 h-5" />

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, memo } from 'react';
-import { ExternalLink, LogIn, ArrowUpDown } from 'lucide-react';
+import { ExternalLink, LogIn } from 'lucide-react';
+import LadderIcon from '../ui/LadderIcon';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -11,6 +12,7 @@ interface TopBarProps {
   onMenuOpen: () => void;
   onOpenAuth?: () => void;
   onLeaderboardOpen?: () => void;
+  onProfileOpen?: () => void;
 }
 
 const HELP_LINKS = [
@@ -19,7 +21,7 @@ const HELP_LINKS = [
   { icon: '🎮', label: 'Join Discord', url: 'https://discord.gg/tUFvKERC' },
 ];
 
-export const TopBar = memo(({ mode, onModeChange, onMenuOpen, onOpenAuth, onLeaderboardOpen }: TopBarProps) => {
+export const TopBar = memo(({ mode, onModeChange, onMenuOpen, onOpenAuth, onLeaderboardOpen, onProfileOpen }: TopBarProps) => {
   const { user } = useAuth();
   const [helpOpen, setHelpOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -105,8 +107,31 @@ export const TopBar = memo(({ mode, onModeChange, onMenuOpen, onOpenAuth, onLead
             onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; }}
           >
-            <ArrowUpDown size={12} />
+            <LadderIcon size={12} />
             Leaderboard
+          </button>
+        )}
+        {user && onProfileOpen && (
+          <button onClick={onProfileOpen} title="View your profile" aria-label="View your profile"
+            style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #6366f1, #7c3aed)',
+              border: '1px solid rgba(255,255,255,0.12)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '12px',
+              fontWeight: 700,
+              color: 'white',
+              transition: 'border-color 0.15s, transform 0.15s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; e.currentTarget.style.transform = 'scale(1.05)'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; e.currentTarget.style.transform = 'scale(1)'; }}
+          >
+            {user.displayName?.charAt(0) || '?'}
           </button>
         )}
         {!user && onOpenAuth && (

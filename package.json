@@ -10,7 +10,9 @@
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
     "server": "tsx server/index.ts",
-    "deploy": "npm run build && wrangler deploy"
+    "deploy": "npm run build && wrangler deploy",
+    "ui-audit": "playwright test ui-audit/ui-audit.spec.ts",
+    "lhci": "lhci autorun"
   },
   "dependencies": {
     "@firebase/eslint-plugin-security-rules": "^0.0.2",
@@ -34,12 +36,15 @@
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.39.2",
+    "@lhci/cli": "^0.15.1",
+    "@playwright/test": "^1.60.0",
     "@types/canvas-confetti": "^1.9.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^4.17.21",
     "@types/howler": "^2.2.13",
     "@types/node": "^22.14.0",
     "autoprefixer": "^10.4.21",
+    "cross-env": "^10.1.0",
     "esbuild": "^0.25.0",
     "puppeteer-core": "^25.1.0",
     "tailwindcss": "^4.1.14",

@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useStudy } from '../../context/StudyContext';
 import { PROGRESSION_BADGES } from '../../lib/progression';
 import { BadgeSvg, type BadgeTier } from '../progression/BadgeSvg';
-export type Section = 'dashboard' | 'subjects' | 'achievements' | 'analytics' | 'settings' | 'quests' | 'progression' | 'leaderboard';
+export type Section = 'dashboard' | 'subjects' | 'achievements' | 'analytics' | 'settings' | 'quests' | 'progression' | 'leaderboard' | 'profile';
 
 interface MenuDrawerProps {
   open: boolean;

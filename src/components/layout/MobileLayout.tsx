@@ -1,8 +1,10 @@
 import { useState, lazy, Suspense, useEffect, useMemo } from 'react';
 import { X, Palette, Check, Crown } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useAuth } from '../../context/AuthContext';
 import { useStudy } from '../../context/StudyContext';
 import { TopBar, type Mode } from './TopBar';
+import { useSectionHash } from '../../hooks/useSectionHash';
 import { BottomBar } from './BottomBar';
 import { HomeView } from './HomeView';
 const FocusEnvironmentLazy = lazy(() => import('./FocusEnvironment').then(m => ({ default: m.FocusEnvironment })));
@@ -29,6 +31,7 @@ const SettingsViewLazy = lazy(() => import('../navigation/SettingsView').then(m 
 const ProgressionViewLazy = lazy(() => import('../progression/ProgressionView').then(m => ({ default: m.ProgressionView })));
 const QuestsViewLazy = lazy(() => import('../quests/QuestsView').then(m => ({ default: m.QuestsView })));
 const LeaderboardViewLazy = lazy(() => import('../leaderboard/LeaderboardView').then(m => ({ default: m.LeaderboardView })));
+const ProfileViewLazy = lazy(() => import('../profile/ProfileView').then(m => ({ default: m.ProfileView })));
 
 const MobileSkeleton = () => (
   <div style={{ width: '100%', minHeight: '100vh', backgroundColor: '#0f0f1a', animation: 'pulse 1.5s ease-in-out infinite' }} />
@@ -41,15 +44,28 @@ interface MobileLayoutProps {
 }
 
 export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
+  const { user } = useAuth();
   const { userStats, gameLevel, levelUpEvent, dismissLevelUp, themeConfig, setThemeConfig, activeNotification, confettiActive, closeNotification, setShowPremiumModal } = useStudy();
-  const [mode, setMode] = useState<Mode>('focus');
-  const [section, setSection] = useState<Section>('dashboard');
+  const [mode, setMode] = useState<Mode>(
+    window.location.hash === '#focus' ? 'focus' : 'home'
+  );
+  const [section, setSection] = useSectionHash();
   const [menuOpen, setMenuOpen] = useState(false);
   const [panelOpen, setPanelOpen] = useState<'tasks' | 'ambience' | 'notepad' | null>(null);
   const [isNotesOpen, setIsNotesOpen] = useState(false);
   const [ambienceUrl, setAmbienceUrl] = useState<CuratedPlaylist | null>(null);
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [showMoodPicker, setShowMoodPicker] = useState(false);
+  const [profileUserId, setProfileUserId] = useState<string | null>(null);
+
+  const handleViewProfile = (userId: string) => {
+    setProfileUserId(userId);
+    setSection('profile');
+  };
+
+  const handleEditProfile = () => {
+    setSection('settings');
+  };
 
   useEffect(() => {
     if (levelUpEvent) {
@@ -60,6 +76,14 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
     const t = setTimeout(() => import('../analytics/AnalyticsDashboard'), 2000);
     return () => clearTimeout(t);
   }, []);
+
+  useEffect(() => {
+    if (section === 'profile' && !profileUserId && user) {
+      setProfileUserId(user.uid);
+    } else if (section !== 'profile') {
+      setProfileUserId(null);
+    }
+  }, [section, user]);
 
   // Prefetch commonly opened panels after idle
   useEffect(() => {
@@ -127,7 +151,12 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
                 {section === 'settings' && <SettingsViewLazy />}
                 {section === 'progression' && <ProgressionViewLazy />}
                 {section === 'quests' && <QuestsViewLazy />}
-                {section === 'leaderboard' && <LeaderboardViewLazy />}
+                {section === 'leaderboard' && <LeaderboardViewLazy onViewProfile={handleViewProfile} />}
+                {section === 'profile' && profileUserId && (
+                  <Suspense fallback={<MobileSkeleton />}>
+                    <ProfileViewLazy userId={profileUserId} onEditProfile={handleEditProfile} />
+                  </Suspense>
+                )}
               </Suspense>
             </main>
           </div>
@@ -140,6 +169,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
             onMenuOpen={() => setMenuOpen(v => !v)}
             onOpenAuth={onOpenAuth}
             onLeaderboardOpen={() => setSection('leaderboard')}
+            onProfileOpen={user ? () => handleViewProfile(user.uid) : undefined}
           />
 
           {/* Main content */}
@@ -151,6 +181,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
                   onTasksOpen={() => setPanelOpen('tasks')}
                   onMusicOpen={() => setPanelOpen('ambience')}
                   onNotepadOpen={() => setIsNotesOpen(true)}
+                  onQuestsOpen={() => setSection('quests')}
                 />
               </Suspense>
             )}

@@ -53,7 +53,7 @@ export const DesktopSidebar = ({ mode, onModeChange, activeSection, onNavigate, 
             <img src="/logo.png" alt="StudyFlow" className="w-8 h-8 object-contain" />
             <span className="text-sm font-bold dark:text-white tracking-tight">StudyFlow</span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => handleNav('profile')}>
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand to-violet-600 flex items-center justify-center text-white font-bold text-xs shadow-sm">
               {user?.displayName?.charAt(0) || 'S'}
             </div>

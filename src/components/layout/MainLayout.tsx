@@ -1,8 +1,9 @@
-import { useState, lazy, Suspense } from 'react';
+import { useState, lazy, Suspense, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { useStudy } from '../../context/StudyContext';
 import { useAuth } from '../../context/AuthContext';
 import { TopBar, type Mode } from './TopBar';
+import { useSectionHash } from '../../hooks/useSectionHash';
 import { BottomBar } from './BottomBar';
 import { HomeView } from './HomeView';
 const FocusEnvironmentLazy = lazy(() => import('./FocusEnvironment').then(m => ({ default: m.FocusEnvironment })));
@@ -23,7 +24,6 @@ import { WallpaperEngine } from '../navigation/WallpaperEngine';
 import PetEngine from '../dashboard/PetEngine';
 import PetPanel from '../dashboard/PetPanel';
 import { storage } from '../../services/storage';
-import { useEffect } from 'react';
 import { ENABLE_PETS } from '../../config/features';
 
 const AnalyticsDashboardLazy = lazy(() => import('../analytics/AnalyticsDashboard'));
@@ -33,6 +33,7 @@ const SettingsViewLazy = lazy(() => import('../navigation/SettingsView').then(m 
 const QuestsViewLazy = lazy(() => import('../quests/QuestsView').then(m => ({ default: m.QuestsView })));
 const ProgressionViewLazy = lazy(() => import('../progression/ProgressionView').then(m => ({ default: m.ProgressionView })));
 const LeaderboardViewLazy = lazy(() => import('../leaderboard/LeaderboardView').then(m => ({ default: m.LeaderboardView })));
+const ProfileViewLazy = lazy(() => import('../profile/ProfileView').then(m => ({ default: m.ProfileView })));
 
 const SimpleSpinner = () => (
   <div className="flex items-center justify-center min-h-[60vh]">
@@ -47,8 +48,10 @@ interface MainLayoutProps {
 export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
   const { user } = useAuth();
   const { userStats, gameLevel, levelUpEvent, dismissLevelUp, activeNotification, confettiActive, closeNotification } = useStudy();
-  const [mode, setMode] = useState<Mode>('focus');
-  const [section, setSection] = useState<Section>('dashboard');
+  const [mode, setMode] = useState<Mode>(
+    window.location.hash === '#focus' ? 'focus' : 'home'
+  );
+  const [section, setSection] = useSectionHash();
   const [menuOpen, setMenuOpen] = useState(false);
   const [panelOpen, setPanelOpen] = useState<'tasks' | 'ambience' | 'notepad' | null>(null);
   const [isNotesOpen, setIsNotesOpen] = useState(false);
@@ -58,12 +61,30 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
   const [feedTrigger, setFeedTrigger] = useState(0);
   const [petVisible, setPetVisible] = useState(() => storage.getPetVisible() ?? true);
   const [petSize, setPetSize] = useState(() => storage.getPetSize() ?? 140);
+  const [profileUserId, setProfileUserId] = useState<string | null>(null);
+
+  const handleViewProfile = (userId: string) => {
+    setProfileUserId(userId);
+    setSection('profile');
+  };
+
+  const handleEditProfile = () => {
+    setSection('settings');
+  };
 
   useEffect(() => {
     if (levelUpEvent) {
       setShowLevelUp(true);
     }
   }, [levelUpEvent]);
+
+  useEffect(() => {
+    if (section === 'profile' && !profileUserId && user) {
+      setProfileUserId(user.uid);
+    } else if (section !== 'profile') {
+      setProfileUserId(null);
+    }
+  }, [section, user]);
 
   // Preload analytics chunk after paint
   useEffect(() => {
@@ -115,7 +136,12 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
                 {section === 'subjects' && <SubjectsViewLazy />}
                 {section === 'achievements' && <AchievementsViewLazy />}
                 {section === 'settings' && <SettingsViewLazy />}
-                {section === 'leaderboard' && <LeaderboardViewLazy />}
+                {section === 'leaderboard' && <LeaderboardViewLazy onViewProfile={handleViewProfile} />}
+                {section === 'profile' && profileUserId && (
+                  <Suspense fallback={<SimpleSpinner />}>
+                    <ProfileViewLazy userId={profileUserId} onEditProfile={handleEditProfile} />
+                  </Suspense>
+                )}
               </Suspense>
             </main>
           </div>
@@ -128,8 +154,9 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
             onMenuOpen={() => setMenuOpen(v => !v)}
             onOpenAuth={onOpenAuth}
             onLeaderboardOpen={() => setSection('leaderboard')}
+            onProfileOpen={user ? () => handleViewProfile(user.uid) : undefined}
           />
-
+ 
           {/* Main content */}
           <main className="main-layout-content">
             {mode === 'home' && <HomeView onNotepadOpen={() => setIsNotesOpen(true)} onQuestsOpen={() => setSection('quests')} onMusicOpen={() => setPanelOpen('ambience')} onProgressionOpen={() => setSection('progression')} menuOpen={menuOpen} />}

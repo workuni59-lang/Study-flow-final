@@ -36,7 +36,7 @@ export default function AnalyticsSubjects({ subjects }: Props) {
           <p className="text-[10px] text-white/30 py-6 text-center">Add topics to subjects to see mastery breakdown</p>
         ) : (
           <div className="flex items-center gap-4">
-            <div className="w-28 h-28 flex-shrink-0">
+            <div className="w-28 h-28 flex-shrink-0" role="img" aria-label="Subject distribution chart">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie data={data} cx="50%" cy="50%" innerRadius={26} outerRadius={40} dataKey="value" stroke="none">

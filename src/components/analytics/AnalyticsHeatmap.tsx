@@ -68,7 +68,7 @@ export default function AnalyticsHeatmap({ userStats }: Props) {
                 {d.hours.map((v, hi) => {
                   const intensity = v / maxVal;
                   const bg = v === 0 ? 'bg-white/[0.02]' : intensity > 0.66 ? 'bg-brand/60' : intensity > 0.33 ? 'bg-brand/30' : 'bg-brand/12';
-                  return <div key={hi} className={`w-full aspect-square rounded-sm ${bg}`} title={`${d.day} ${hi}:00 — ${v} sessions`} />;
+                  return <div key={hi} className={`w-full aspect-square rounded-sm ${bg}`} title={`${d.day} ${hi}:00 — ${v} sessions`} aria-label={`${d.day} ${hi}:00 — ${v} sessions`} />;
                 })}
               </>
             ))}

@@ -178,6 +178,14 @@ class AudioController {
         this.notify();
       },
       onloaderror: (_: number, err: unknown) => {
+        const howl = this.pool.get(id);
+        if (howl && !(howl as any)._retried) {
+          (howl as any)._retried = true;
+          const retryUrl = asset.url + (asset.url.includes('?') ? '&' : '?') + 'retry=1';
+          howl.src(retryUrl);
+          howl.load();
+          return;
+        }
         console.warn(`[AudioController] Load error for ${asset.id}:`, err);
         this.states.set(id, 'error');
         this.activeIds.delete(id);

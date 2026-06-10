@@ -225,6 +225,7 @@ export const ProgressionView = () => {
                 animate={isMobile ? {} : { opacity: 1, y: 0 }}
                 transition={{ delay: isMobile ? 0 : 0.35 + idx * STAGGER, duration: 0.4 }}
                 whileHover={isMobile ? {} : { y: -6, scale: 1.02 }}
+                aria-label={`${b.name}${unlocked ? '' : ' (locked)'} — ${b.rarity} badge`}
                 className="flex-shrink-0 w-[130px] md:w-[160px] snap-start rounded-2xl p-4 md:p-5 flex flex-col items-center text-center relative border transition-all duration-300"
                 style={{
                   borderColor: unlocked

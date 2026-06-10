@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
 
-export type LeaderboardPeriod = 'daily' | 'weekly' | 'monthly';
+export type LeaderboardPeriod = 'daily' | 'weekly' | 'monthly' | 'allTime';
 
 export interface LeaderboardEntry {
   user_id: string;
@@ -9,6 +9,7 @@ export interface LeaderboardEntry {
   daily_focus_seconds: number;
   weekly_focus_seconds: number;
   monthly_focus_seconds: number;
+  all_time_focus_seconds: number;
   daily_date: string | null;
   weekly_date: string | null;
   monthly_date: string | null;
@@ -55,6 +56,8 @@ export async function syncFocusSession(
     ? prev.monthly_focus_seconds + durationSeconds
     : durationSeconds;
 
+  const allTimeFocus = (prev?.all_time_focus_seconds ?? 0) + durationSeconds;
+
   const { error } = await supabase
     .from('leaderboard_entries')
     .upsert({
@@ -64,6 +67,7 @@ export async function syncFocusSession(
       daily_focus_seconds: dailyFocus,
       weekly_focus_seconds: weeklyFocus,
       monthly_focus_seconds: monthlyFocus,
+      all_time_focus_seconds: allTimeFocus,
       daily_date: today,
       weekly_date: weekStr,
       monthly_date: monthStr,
@@ -75,14 +79,19 @@ export async function syncFocusSession(
   }
 }
 
+function periodColumn(period: LeaderboardPeriod): string {
+  return period === 'daily' ? 'daily_focus_seconds'
+    : period === 'weekly' ? 'weekly_focus_seconds'
+    : period === 'monthly' ? 'monthly_focus_seconds'
+    : 'all_time_focus_seconds';
+}
+
 export async function getTopUsers(
   period: LeaderboardPeriod,
   limit = 100
 ): Promise<LeaderboardEntry[]> {
   if (!supabase) return [];
-  const column = period === 'daily' ? 'daily_focus_seconds'
-    : period === 'weekly' ? 'weekly_focus_seconds'
-    : 'monthly_focus_seconds';
+  const column = periodColumn(period);
 
   const { data } = await supabase
     .from('leaderboard_entries')
@@ -99,9 +108,7 @@ export async function getUserRank(
 ): Promise<{ rank: number; entry: LeaderboardEntry | null }> {
   if (!supabase) return { rank: 0, entry: null };
 
-  const column = period === 'daily' ? 'daily_focus_seconds'
-    : period === 'weekly' ? 'weekly_focus_seconds'
-    : 'monthly_focus_seconds';
+  const column = periodColumn(period);
 
   const { data: entry } = await supabase
     .from('leaderboard_entries')
@@ -112,10 +119,8 @@ export async function getUserRank(
   if (!entry) return { rank: 0, entry: null };
 
   const userValue = (entry as LeaderboardEntry)[
-    period === 'daily' ? 'daily_focus_seconds'
-    : period === 'weekly' ? 'weekly_focus_seconds'
-    : 'monthly_focus_seconds'
-  ];
+    column as keyof LeaderboardEntry
+  ] as number;
 
   const { count } = await supabase
     .from('leaderboard_entries')

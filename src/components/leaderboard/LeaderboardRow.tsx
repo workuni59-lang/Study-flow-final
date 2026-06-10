@@ -8,6 +8,7 @@ interface LeaderboardRowProps {
   focusSeconds: number;
   topFocusSeconds: number;
   isCurrentUser?: boolean;
+  onClick?: () => void;
 }
 
 const MEDAL: Record<number, string> = {
@@ -16,16 +17,24 @@ const MEDAL: Record<number, string> = {
   3: '🥉',
 };
 
-export const LeaderboardRow = ({ entry, rank, focusSeconds, topFocusSeconds, isCurrentUser }: LeaderboardRowProps) => {
+export const LeaderboardRow = ({ entry, rank, focusSeconds, topFocusSeconds, isCurrentUser, onClick }: LeaderboardRowProps) => {
   const barWidth = topFocusSeconds > 0 ? (focusSeconds / topFocusSeconds) * 100 : 0;
   const initial = (entry.display_name ?? 'A').charAt(0).toUpperCase();
 
   return (
-    <div className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
-      isCurrentUser
-        ? 'bg-brand/10 ring-1 ring-brand/20'
-        : 'hover:bg-white/[0.03]'
-    }`}>
+    <div
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); } : undefined}
+      aria-label={onClick ? `View ${entry.display_name ?? 'Anonymous'}'s profile` : undefined}
+      className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
+        onClick ? 'cursor-pointer' : ''
+      } ${
+        isCurrentUser
+          ? 'bg-brand/10 ring-1 ring-brand/20'
+          : 'hover:bg-white/[0.06]'
+      }`}>
       {/* Rank */}
       <div className="w-8 text-center shrink-0">
         {rank <= 3 ? (

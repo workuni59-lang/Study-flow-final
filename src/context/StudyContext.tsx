@@ -5,6 +5,8 @@ import { storage } from '../services/storage';
 import { UserStats, Badge, ACHIEVEMENTS, Achievement, Quest, XP_PER_TASK, XP_PER_FOCUS_MINUTE, AtmosphereId, WallpaperId, PetState, PetFood, PET_FOODS, PET_SPECIES, PET_SKINS, INITIAL_PET_STATE, PET_HUNGER_DECAY_PER_HOUR, PET_WEAK_THRESHOLD, PET_WEAK_DURATION_MS, PET_DORMANT_DURATION_MS, PetHealth, PetEvent, PetEventType, PetMood, PetAnimation, getPetMood, getPetAnimation, GameQuest, SEED_QUESTS, calculateFormalLevel, goldForTask, goldForLevelUp, MAX_HP, HP_REGEN_PER_SESSION, INITIAL_HP, HpState, checkDailyHp as checkHpFn, regenHp, shouldResetQuests, ShopItem, SHOP_ITEMS, XP_STREAK_BONUS_PER_DAY } from '../lib/gamification';
 import { getProgress, getRankForLevel, getNextRank, getBadgesForLevel, getNewlyUnlockedBadges, getRewardsBetweenLevels, type ProgressionState, type ProgressionBadge } from '../lib/progression';
 import { syncFocusSession } from '../lib/leaderboard';
+import { syncDailyStats } from '../lib/dailyStats';
+import { supabase } from '../lib/supabase';
 import { useAuth } from './AuthContext';
 export interface FocusSessionState {
   mode: 'focus' | 'shortBreak' | 'longBreak' | 'idle' | 'taskETA';
@@ -379,6 +381,36 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => { storage.saveSessionsToday(sessionsToday); }, [sessionsToday]);
   useEffect(() => { storage.saveSessionsDate(sessionsDate); }, [sessionsDate]);
 
+  // Badge sync to Supabase (canonical source)
+  useEffect(() => {
+    if (!authUser || !supabase || authUser.uid === 'demo-user-001') return;
+    const badgeIds = unlockedBadges.map(b => b.achievementId);
+    supabase.from('user_stats').upsert({
+      user_id: authUser.uid,
+      badges_earned: badgeIds,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'user_id' });
+  }, [unlockedBadges, authUser]);
+
+  // Load badges from Supabase on auth init (replace local)
+  useEffect(() => {
+    if (!authUser || !supabase || authUser.uid === 'demo-user-001') return;
+    supabase.from('user_stats').select('badges_earned').eq('user_id', authUser.uid).single().then(({ data }) => {
+      if (data?.badges_earned) {
+        const supabaseIds = new Set(data.badges_earned as string[]);
+        setUnlockedBadges(prev => {
+          const merged = prev.filter(b => supabaseIds.has(b.achievementId));
+          const missing = (data.badges_earned as string[])
+            .filter(id => !prev.some(b => b.achievementId === id))
+            .map(id => ({ id: `supabase-${id}`, achievementId: id, unlockedAt: new Date().toISOString() }));
+          const result = [...merged, ...missing];
+          storage.saveUnlockedBadges(result);
+          return result;
+        });
+      }
+    });
+  }, [authUser ? authUser.uid : null]);
+
   // Notification Queue Processor
   useEffect(() => {
     if (!activeNotification && notificationQueue.length > 0) {
@@ -609,7 +641,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     setSubjects(subjects.map(s => s.id === subjectId ? { ...s, topics: s.topics.filter(t => t.id !== topicId) } : s));
   };
 
-  const completeFocusSession = (seconds: number) => {
+  const completeFocusSession = async (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     earnXp(minutes * XP_PER_FOCUS_MINUTE);
     updateQuestProgress('focus', seconds);
@@ -621,13 +653,38 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     setUserStats(prev => ({ ...prev, totalFocusSeconds: newTotalFocus }));
     checkAchievements({ ...userStats, totalFocusSeconds: newTotalFocus });
     firePetEvent('focus_done');
-    if (authUser) {
+    if (authUser && seconds >= 60 && authUser.uid !== 'demo-user-001') {
       syncFocusSession(
         authUser.uid,
         authProfile?.display_name ?? authUser.displayName ?? 'Anonymous',
         authProfile?.avatar_url ?? null,
         seconds,
       );
+      // Sync user_stats (lifetime accumulators)
+      if (supabase) {
+        const { data: existing } = await supabase
+          .from('user_stats')
+          .select('total_focus_seconds, total_sessions')
+          .eq('user_id', authUser.uid)
+          .single();
+        const currentStreak = userStats.currentStreak || 0;
+        const longestStreak = Math.max(userStats.bestStreak || 0, currentStreak);
+        supabase.from('user_stats').upsert({
+          user_id: authUser.uid,
+          total_focus_seconds: (existing?.total_focus_seconds ?? 0) + seconds,
+          total_sessions: (existing?.total_sessions ?? 0) + 1,
+          current_streak: currentStreak,
+          longest_streak: longestStreak,
+          game_level: gameLevel,
+          game_xp: gameXp,
+          badges_earned: unlockedBadges.map(b => b.achievementId),
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'user_id' });
+
+        // Sync daily activity
+        const today = new Date().toISOString().split('T')[0];
+        syncDailyStats(authUser.uid, today, 1, seconds, minutes * XP_PER_FOCUS_MINUTE);
+      }
     }
   };
 

@@ -10,10 +10,15 @@ const TABS: { key: Tab; label: string; disabled?: boolean }[] = [
   { key: 'daily', label: 'Daily' },
   { key: 'weekly', label: 'Weekly' },
   { key: 'monthly', label: 'Monthly' },
+  { key: 'allTime', label: 'All Time' },
   { key: 'friends', label: 'Friends', disabled: true },
 ];
 
-export const LeaderboardView = () => {
+interface LeaderboardViewProps {
+  onViewProfile?: (userId: string) => void;
+}
+
+export const LeaderboardView = ({ onViewProfile }: LeaderboardViewProps) => {
   const { user, profile } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>('daily');
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
@@ -46,7 +51,8 @@ export const LeaderboardView = () => {
     ? topEntry[
         activeTab === 'daily' ? 'daily_focus_seconds'
         : activeTab === 'weekly' ? 'weekly_focus_seconds'
-        : 'monthly_focus_seconds'
+        : activeTab === 'monthly' ? 'monthly_focus_seconds'
+        : 'all_time_focus_seconds'
       ]
     : 0;
 
@@ -54,7 +60,8 @@ export const LeaderboardView = () => {
     entry[
       activeTab === 'daily' ? 'daily_focus_seconds'
       : activeTab === 'weekly' ? 'weekly_focus_seconds'
-      : 'monthly_focus_seconds'
+      : activeTab === 'monthly' ? 'monthly_focus_seconds'
+      : 'all_time_focus_seconds'
     ];
 
   // Check if current user is already in the top list
@@ -132,6 +139,7 @@ export const LeaderboardView = () => {
                 focusSeconds={getFocusSeconds(userRank.entry)}
                 topFocusSeconds={topFocusSeconds}
                 isCurrentUser
+                onClick={() => onViewProfile?.(userRank.entry!.user_id)}
               />
             </div>
           )}
@@ -149,6 +157,7 @@ export const LeaderboardView = () => {
                   focusSeconds={getFocusSeconds(entry)}
                   topFocusSeconds={topFocusSeconds}
                   isCurrentUser={isCurrentUser}
+                  onClick={() => onViewProfile?.(entry.user_id)}
                 />
               );
             })}

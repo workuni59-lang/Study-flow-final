@@ -13,3 +13,7 @@ coverage/
 !.dev.vars.example
 reference-app
 reference-app/*
+
+# Playwright UI audit artifacts
+ui-audit/screenshots/
+ui-audit/playwright-report/

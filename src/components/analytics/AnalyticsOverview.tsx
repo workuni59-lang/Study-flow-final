@@ -71,7 +71,7 @@ export default function AnalyticsOverview({ userStats }: Props) {
             <TrendingUp className="w-3.5 h-3.5 text-brand-light" />
             <span className="text-[9px] font-bold text-white/40 uppercase tracking-wider">Weekly XP</span>
           </div>
-          <div className="h-32">
+          <div className="h-32" role="img" aria-label="Weekly XP chart">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={weekData} margin={{ top: 4, right: 0, bottom: 0, left: -20 }}>
                 <defs>

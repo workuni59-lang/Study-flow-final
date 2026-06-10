@@ -1,0 +1,42 @@
+{
+  "ci": {
+    "collect": {
+      "startServerCommand": "npx vite --port=3000 --host=0.0.0.0",
+      "startServerReadyPattern": "Local:",
+      "url": [
+        "http://localhost:3000/?demo=1",
+        "http://localhost:3000/?demo=1#focus",
+        "http://localhost:3000/?demo=1#analytics",
+        "http://localhost:3000/?demo=1#quests",
+        "http://localhost:3000/?demo=1#subjects",
+        "http://localhost:3000/?demo=1#achievements",
+        "http://localhost:3000/?demo=1#settings",
+        "http://localhost:3000/?demo=1#progression",
+        "http://localhost:3000/?demo=1#leaderboard",
+        "http://localhost:3000/?demo=1#profile"
+      ],
+      "numberOfRuns": 1,
+      "settings": {
+        "preset": "desktop",
+        "onlyCategories": ["performance", "accessibility", "best-practices", "seo"],
+        "chromeFlags": "--no-sandbox --disable-gpu --user-data-dir=/tmp/lhci/chrome-profile"
+      }
+    },
+    "assert": {
+      "preset": "lighthouse:no-pwa",
+      "assertions": {
+        "categories:performance": ["warn", { "minScore": 0.7 }],
+        "categories:accessibility": ["warn", { "minScore": 0.85 }],
+        "categories:seo": ["warn", { "minScore": 0.9 }],
+        "categories:best-practices": ["warn", { "minScore": 0.9 }],
+        "bf-cache": ["warn"],
+        "errors-in-console": ["error"],
+        "meta-description": ["error"]
+      }
+    },
+    "upload": {
+      "target": "filesystem",
+      "outputDir": "./lhci-reports"
+    }
+  }
+}

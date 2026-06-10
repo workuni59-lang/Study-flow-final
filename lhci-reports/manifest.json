@@ -1,0 +1,122 @@
+[
+  {
+    "url": "http://localhost:3000/?demo=1",
+    "isRepresentativeRun": true,
+    "htmlPath": "C:\\Users\\GAME4U-RENEWED\\Desktop\\projects\\Study-Flow-main\\lhci-reports\\localhost--2026_06_10_13_55_41.report.html",
+    "jsonPath": "C:\\Users\\GAME4U-RENEWED\\Desktop\\projects\\Study-Flow-main\\lhci-reports\\localhost--2026_06_10_13_55_41.report.json",
+    "summary": {
+      "performance": 0.52,
+      "accessibility": 0.93,
+      "best-practices": 0.96,
+      "seo": 0.92
+    }
+  },
+  {
+    "url": "http://localhost:3000/?demo=1#focus",
+    "isRepresentativeRun": true,
+    "htmlPath": "C:\\Users\\GAME4U-RENEWED\\Desktop\\projects\\Study-Flow-main\\lhci-reports\\localhost--2026_06_10_13_57_32.report.html",
+    "jsonPath": "C:\\Users\\GAME4U-RENEWED\\Desktop\\projects\\Study-Flow-main\\lhci-reports\\localhost--2026_06_10_13_57_32.report.json",
+    "summary": {
+      "performance": 0.53,
+      "accessibility": 1,
+      "best-practices": 0.96,
+      "seo": 0.92
+    }
+  },
+  {
+    "url": "http://localhost:3000/?demo=1#analytics",
+    "isRepresentativeRun": true,
+    "htmlPath": "C:\\Users\\GAME4U-RENEWED\\Desktop\\projects\\Study-Flow-main\\lhci-reports\\localhost--2026_06_10_13_59_25.report.html",
+    "jsonPath": "C:\\Users\\GAME4U-RENEWED\\Desktop\\projects\\Study-Flow-main\\lhci-reports\\localhost--2026_06_10_13_59_25.report.json",
+    "summary": {
+      "performance": 0.49,
+      "accessibility": 0.83,
+      "best-practices": 0.96,
+      "seo": 0.91
+    }
+  },
+  {
+    "url": "http://localhost:3000/?demo=1#quests",
+    "isRepresentativeRun": true,
+    "htmlPath": "C:\\Users\\GAME4U-RENEWED\\Desktop\\projects\\Study-Flow-main\\lhci-reports\\localhost--2026_06_10_14_00_21.report.html",
+    "jsonPath": "C:\\Users\\GAME4U-RENEWED\\Desktop\\projects\\Study-Flow-main\\lhci-reports\\localhost--2026_06_10_14_00_21.report.json",
+    "summary": {
+      "performance": 0.56,
+      "accessibility": 0.73,
+      "best-practices": 0.96,
+      "seo": 0.91
+    }
+  },
+  {
+    "url": "http://localhost:3000/?demo=1#subjects",
+    "isRepresentativeRun": true,
+    "htmlPath": "C:\\Users\\GAME4U-RENEWED\\Desktop\\projects\\Study-Flow-main\\lhci-reports\\localhost--2026_06_10_14_02_15.report.html",
+    "jsonPath": "C:\\Users\\GAME4U-RENEWED\\Desktop\\projects\\Study-Flow-main\\lhci-reports\\localhost--2026_06_10_14_02_15.report.json",
+    "summary": {
+      "performance": 0.57,
+      "accessibility": 0.8,
+      "best-practices": 0.96,
+      "seo": 0.92
+    }
+  },
+  {
+    "url": "http://localhost:3000/?demo=1#achievements",
+    "isRepresentativeRun": true,
+    "htmlPath": "C:\\Users\\GAME4U-RENEWED\\Desktop\\projects\\Study-Flow-main\\lhci-reports\\localhost--2026_06_10_14_04_11.report.html",
+    "jsonPath": "C:\\Users\\GAME4U-RENEWED\\Desktop\\projects\\Study-Flow-main\\lhci-reports\\localhost--2026_06_10_14_04_11.report.json",
+    "summary": {
+      "performance": 0.56,
+      "accessibility": 0.73,
+      "best-practices": 0.96,
+      "seo": 0.91
+    }
+  },
+  {
+    "url": "http://localhost:3000/?demo=1#settings",
+    "isRepresentativeRun": true,
+    "htmlPath": "C:\\Users\\GAME4U-RENEWED\\Desktop\\projects\\Study-Flow-main\\lhci-reports\\localhost--2026_06_10_14_05_20.report.html",
+    "jsonPath": "C:\\Users\\GAME4U-RENEWED\\Desktop\\projects\\Study-Flow-main\\lhci-reports\\localhost--2026_06_10_14_05_20.report.json",
+    "summary": {
+      "performance": 0.56,
+      "accessibility": 0.67,
+      "best-practices": 0.96,
+      "seo": 0.91
+    }
+  },
+  {
+    "url": "http://localhost:3000/?demo=1#progression",
+    "isRepresentativeRun": true,
+    "htmlPath": "C:\\Users\\GAME4U-RENEWED\\Desktop\\projects\\Study-Flow-main\\lhci-reports\\localhost--2026_06_10_14_06_19.report.html",
+    "jsonPath": "C:\\Users\\GAME4U-RENEWED\\Desktop\\projects\\Study-Flow-main\\lhci-reports\\localhost--2026_06_10_14_06_19.report.json",
+    "summary": {
+      "performance": 0.36,
+      "accessibility": 0.76,
+      "best-practices": 0.96,
+      "seo": 0.91
+    }
+  },
+  {
+    "url": "http://localhost:3000/?demo=1#leaderboard",
+    "isRepresentativeRun": true,
+    "htmlPath": "C:\\Users\\GAME4U-RENEWED\\Desktop\\projects\\Study-Flow-main\\lhci-reports\\localhost--2026_06_10_14_09_05.report.html",
+    "jsonPath": "C:\\Users\\GAME4U-RENEWED\\Desktop\\projects\\Study-Flow-main\\lhci-reports\\localhost--2026_06_10_14_09_05.report.json",
+    "summary": {
+      "performance": 0.55,
+      "accessibility": 0.89,
+      "best-practices": 0.96,
+      "seo": 0.91
+    }
+  },
+  {
+    "url": "http://localhost:3000/?demo=1#profile",
+    "isRepresentativeRun": true,
+    "htmlPath": "C:\\Users\\GAME4U-RENEWED\\Desktop\\projects\\Study-Flow-main\\lhci-reports\\localhost--2026_06_10_14_09_52.report.html",
+    "jsonPath": "C:\\Users\\GAME4U-RENEWED\\Desktop\\projects\\Study-Flow-main\\lhci-reports\\localhost--2026_06_10_14_09_52.report.json",
+    "summary": {
+      "performance": 0.84,
+      "accessibility": 0.86,
+      "best-practices": 0.96,
+      "seo": 0.91
+    }
+  }
+]

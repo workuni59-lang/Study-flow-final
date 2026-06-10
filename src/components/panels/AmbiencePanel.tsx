@@ -1,14 +1,15 @@
 import { useState, useMemo, useEffect, type Dispatch, type SetStateAction } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Volume2, Youtube, Music2, Headphones, Crown, Sparkles, X, Loader2, AlertCircle,
   Play, Pause, Trash2, Heart, ChevronDown, ExternalLink, Radio
 } from 'lucide-react';
 import { useStudy } from '../../context/StudyContext';
+import { useNavigationContext, type AmbienceTab } from '../../hooks/useNavigationContext';
+import { ROUTES } from '../../lib/routes';
 import { AUDIO_ASSETS, CATEGORIES } from '../../lib/audioRegistry';
 import { ALERT_SOUNDS } from '../../lib/alertSounds';
 import { storage } from '../../services/storage';
-
-type TabId = 'sounds' | 'music' | 'playlists';
 
 interface FavoriteEntry {
   name: string;
@@ -80,18 +81,26 @@ interface AmbiencePanelProps {
 }
 
 export const AmbiencePanel = ({ ambienceUrl, onAmbienceUrlChange }: AmbiencePanelProps) => {
+  const navigate = useNavigate();
   const {
     userStats, setShowPremiumModal, activeTracks, masterVolume,
     toggleTrack, setTrackVolume, stopAllTracks, setMasterVolume
   } = useStudy();
+  const { mode, ambienceTab: activeTab } = useNavigationContext();
 
-  const [activeTab, setActiveTab] = useState<TabId>('sounds');
   const [activeCategory, setCategory] = useState('All');
   const [favorites, setFavorites] = useState<FavoriteEntry[]>(loadFavorites);
   const [customUrl, setCustomUrl] = useState('');
   const [customService, setCustomService] = useState<'spotify' | 'youtube' | 'apple-music'>('spotify');
   const [alertSound, setAlertSound] = useState(() => storage.getAlertSound() || 'sparkle');
   const [alertVolume, setAlertVolume] = useState(() => storage.getAlertVolume() ?? 0.75);
+
+  const setActiveTab = (tab: AmbienceTab) => {
+    let routeKey = `AMBIENCE_${tab.toUpperCase()}` as keyof typeof ROUTES;
+    if (mode === 'focus') routeKey = `FOCUS_AMBIENCE_${tab.toUpperCase()}` as keyof typeof ROUTES;
+    const path = ROUTES[routeKey];
+    if (typeof path === 'string') navigate(path);
+  };
 
   useEffect(() => { saveFavorites(favorites); }, [favorites]);
   useEffect(() => { storage.saveAlertSound(alertSound); }, [alertSound]);
@@ -378,9 +387,9 @@ export const AmbiencePanel = ({ ambienceUrl, onAmbienceUrlChange }: AmbiencePane
       {/* Tab Navigation */}
       <div className="flex gap-1 p-1 rounded-2xl bg-slate-100 dark:bg-white/[0.03]">
         {[
-          { id: 'sounds' as TabId, label: 'Sounds', icon: Headphones },
-          { id: 'music' as TabId, label: 'My Music', icon: Music2 },
-          { id: 'playlists' as TabId, label: 'Playlists', icon: Radio },
+          { id: 'sounds' as AmbienceTab, label: 'Sounds', icon: Headphones },
+          { id: 'music' as AmbienceTab, label: 'My Music', icon: Music2 },
+          { id: 'playlists' as AmbienceTab, label: 'Playlists', icon: Radio },
         ].map(tab => (
           <button key={tab.id} onClick={() => setActiveTab(tab.id)}
             className={`flex items-center gap-1.5 flex-1 px-3 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${

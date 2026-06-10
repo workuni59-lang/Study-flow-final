@@ -13,8 +13,17 @@ export const ROUTES = {
   // Side Panels (Nested/Context-aware)
   TASKS: '/tasks',
   FOCUS_TASKS: '/focus/tasks',
+  
   AMBIENCE: '/ambience',
+  AMBIENCE_SOUNDS: '/ambience/sounds',
+  AMBIENCE_MUSIC: '/ambience/music',
+  AMBIENCE_PLAYLISTS: '/ambience/playlists',
+  
   FOCUS_AMBIENCE: '/focus/ambience',
+  FOCUS_AMBIENCE_SOUNDS: '/focus/ambience/sounds',
+  FOCUS_AMBIENCE_MUSIC: '/focus/ambience/music',
+  FOCUS_AMBIENCE_PLAYLISTS: '/focus/ambience/playlists',
+  
   NOTEPAD: '/notes',
   FOCUS_NOTEPAD: '/focus/notes',
 } as const;

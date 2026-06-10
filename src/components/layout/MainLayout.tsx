@@ -51,10 +51,9 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { userStats, gameLevel, levelUpEvent, dismissLevelUp, activeNotification, confettiActive, closeNotification } = useStudy();
-  const { mode, section, activePanel: panelOpen, profileId: profileUserId } = useNavigationContext();
+  const { mode, section, activePanel: panelOpen, profileId: profileUserId, ambienceTab } = useNavigationContext();
 
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isNotesOpen, setIsNotesOpen] = useState(false);
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [ambienceUrl, setAmbienceUrl] = useState<CuratedPlaylist | null>(null);
   const [showPetPanel, setShowPetPanel] = useState(false);
@@ -76,12 +75,15 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
     if (typeof path === 'string') navigate(path);
   };
 
-  const setPanelOpen = (p: Panel | null) => {
+  const setPanelOpen = (p: Panel | null, subTab?: string) => {
     if (!p) {
       setMode(mode);
       return;
     }
-    const routeKey = `${mode === 'focus' ? 'FOCUS_' : ''}${p.toUpperCase()}` as keyof typeof ROUTES;
+    let routeKey = `${mode === 'focus' ? 'FOCUS_' : ''}${p.toUpperCase()}` as keyof typeof ROUTES;
+    if (p === 'ambience' && subTab) {
+      routeKey = `${mode === 'focus' ? 'FOCUS_' : ''}AMBIENCE_${subTab.toUpperCase()}` as keyof typeof ROUTES;
+    }
     const path = ROUTES[routeKey];
     if (typeof path === 'string') navigate(path);
   };
@@ -173,14 +175,13 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
  
           {/* Main content */}
           <main className="main-layout-content">
-            {mode === 'home' && <HomeView onNotepadOpen={() => setIsNotesOpen(true)} onQuestsOpen={() => setSection('quests')} onMusicOpen={() => setPanelOpen('ambience')} onProgressionOpen={() => setSection('progression')} menuOpen={menuOpen} />}
+            {mode === 'home' && <HomeView onNotepadOpen={() => setPanelOpen('notepad')} onQuestsOpen={() => setSection('quests')} onMusicOpen={() => setPanelOpen('ambience')} onProgressionOpen={() => setSection('progression')} menuOpen={menuOpen} />}
             {mode === 'focus' && (
-              <Suspense fallback={null}>
-                <FocusEnvironmentLazy
+              <Suspense fallback={<SimpleSpinner />}>
+                <FocusEnvironmentLazy 
                   onTasksOpen={() => setPanelOpen('tasks')}
                   onMusicOpen={() => setPanelOpen('ambience')}
-                  onNotepadOpen={() => setIsNotesOpen(true)}
-                  onQuestsOpen={() => setSection('quests')}
+                  onNotepadOpen={() => setPanelOpen('notepad')}
                 />
               </Suspense>
             )}
@@ -192,7 +193,7 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
             onModeChange={setMode}
             onTasksOpen={() => setPanelOpen('tasks')}
             onStatsOpen={() => navigate(ROUTES.ANALYTICS)}
-            onNotepadOpen={() => setIsNotesOpen(true)}
+            onNotepadOpen={() => setPanelOpen('notepad')}
             onQuestsOpen={() => setSection('quests')}
           />
 
@@ -274,7 +275,7 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
       <PremiumModal />
       <PanicModeUI />
 
-      <NotesPanel isOpen={isNotesOpen} onClose={() => setIsNotesOpen(false)} />
+      <NotesPanel isOpen={panelOpen === 'notepad'} onClose={() => setPanelOpen(null)} />
     </div>
   );
 };

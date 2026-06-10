@@ -69,15 +69,15 @@ const UtilityButton = memo(({ onClick, children, label }: {
     <span className="hidden sm:inline">{label}</span>
   </button>
 ));
-
 export const FocusEnvironment = memo(({
   onTasksOpen, onMusicOpen, onNotepadOpen, onQuestsOpen,
 }: FocusEnvironmentProps) => {
   const dockRef = useRef<HTMLDivElement>(null);
   const [isMobile] = useState(() => window.innerWidth < 768);
   const [dockVisible, setDockVisible] = useState(true);
-  const [isNotesOpen, setIsNotesOpen] = useState(false);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  // ... (auto-hide dock effect unchanged)
 
   // Auto-hide dock when idle (desktop only — mobile always shows)
   useEffect(() => {
@@ -108,10 +108,10 @@ export const FocusEnvironment = memo(({
 
   const utilityItems = useMemo(() => [
     { id: 'tasks', label: 'Tasks', handler: onTasksOpen },
-    { id: 'notes', label: 'Notes', handler: () => setIsNotesOpen(true) },
+    { id: 'notes', label: 'Notes', handler: onNotepadOpen },
     { id: 'ambience', label: 'Ambience', handler: onMusicOpen },
     { id: 'quests', label: 'Quests', handler: onQuestsOpen },
-  ].filter(i => i.handler), [onTasksOpen, onMusicOpen, onQuestsOpen]);
+  ].filter(i => i.handler), [onTasksOpen, onNotepadOpen, onMusicOpen, onQuestsOpen]);
 
   return (
     <div className="relative flex flex-col items-center w-full min-h-[calc(100dvh-8rem)]">
@@ -145,8 +145,6 @@ export const FocusEnvironment = memo(({
           </UtilityButton>
         ))}
       </div>
-
-      <NotesPanel isOpen={isNotesOpen} onClose={() => setIsNotesOpen(false)} />
     </div>
   );
 });

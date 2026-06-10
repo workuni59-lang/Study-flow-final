@@ -4,11 +4,13 @@ import type { Mode } from '../components/layout/TopBar';
 import type { Section } from '../components/layout/MenuDrawer';
 
 export type Panel = 'tasks' | 'ambience' | 'notepad';
+export type AmbienceTab = 'sounds' | 'music' | 'playlists';
 
 interface NavigationContext {
   mode: Mode;
   section: Section;
   activePanel: Panel | null;
+  ambienceTab: AmbienceTab;
   profileId: string | null;
 }
 
@@ -20,6 +22,7 @@ export function useNavigationContext(): NavigationContext {
   let mode: Mode = 'home';
   let section: Section = 'dashboard';
   let activePanel: Panel | null = null;
+  let ambienceTab: AmbienceTab = 'sounds';
   let profileId: string | null = id || null;
 
   // Determine Mode
@@ -44,18 +47,20 @@ export function useNavigationContext(): NavigationContext {
     section = 'settings';
   } else if (path.startsWith('/profile')) {
     section = 'profile';
-  } else if (path === '/tasks' || path === '/focus/tasks') {
+  } else if (path.includes('/tasks')) {
     section = 'dashboard';
     activePanel = 'tasks';
-  } else if (path === '/ambience' || path === '/focus/ambience') {
+  } else if (path.includes('/ambience')) {
     section = 'dashboard';
     activePanel = 'ambience';
-  } else if (path === '/notes' || path === '/focus/notes') {
+    if (path.endsWith('/music')) ambienceTab = 'music';
+    else if (path.endsWith('/playlists')) ambienceTab = 'playlists';
+  } else if (path.includes('/notes')) {
     section = 'dashboard';
     activePanel = 'notepad';
   } else if (path === '/focus' || path === '/') {
     section = 'dashboard';
   }
 
-  return { mode, section, activePanel, profileId };
+  return { mode, section, activePanel, ambienceTab, profileId };
 }

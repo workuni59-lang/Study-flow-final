@@ -15,7 +15,7 @@ const TITLE_MAP: Record<string, string> = {
 };
 
 export function MetaUpdater() {
-  const { section, mode, activePanel } = useNavigationContext();
+  const { section, mode, activePanel, ambienceTab } = useNavigationContext();
   const location = useLocation();
 
   useEffect(() => {
@@ -26,7 +26,12 @@ export function MetaUpdater() {
         title = 'Focus Mode – StudyFlow';
       }
       if (activePanel) {
-        const panelName = activePanel.charAt(0).toUpperCase() + activePanel.slice(1);
+        let panelName = activePanel.charAt(0).toUpperCase() + activePanel.slice(1);
+        if (activePanel === 'ambience') {
+          panelName = ambienceTab.charAt(0).toUpperCase() + ambienceTab.slice(1);
+        } else if (activePanel === 'notepad') {
+          panelName = 'Notes';
+        }
         title = `${panelName} – StudyFlow`;
       }
     }

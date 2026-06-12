@@ -56,14 +56,14 @@ for (const route of SPA_ROUTES) {
 }
 console.log(`✓ ${count} SPA route files generated`);
 
-// 4. Read marketing landing page for Worker embedding (do NOT copy to SRC — avoids edge cache)
-const marketingSrc = join(ROOT, 'marketing', 'index.html');
-let MARKETING_HTML = '';
-if (existsSync(marketingSrc)) {
-  MARKETING_HTML = readFileSync(marketingSrc, 'utf-8');
-  console.log('✓ marketing/index.html read for Worker embedding');
+// 4. Read SPA index.html for Worker embedding at root
+let SPA_HTML = '';
+if (existsSync(appIndex)) {
+  SPA_HTML = readFileSync(appIndex, 'utf-8');
+  console.log('✓ app/index.html read for Worker embedding at root');
 } else {
-  console.warn('⚠ marketing/index.html not found');
+  console.error('✗ app/index.html not found');
+  process.exit(1);
 }
 
 // 5. Copy public/ files not handled by Vite
@@ -75,8 +75,8 @@ for (const file of ['robots.txt', 'sitemap.xml', 'logo.png']) {
   }
 }
 
-// 6. Generate Worker that serves the marketing page directly (no edge cache)
-const escapedHtml = JSON.stringify(MARKETING_HTML);
+// 6. Generate Worker that serves SPA at root (no edge cache)
+const escapedHtml = JSON.stringify(SPA_HTML);
 const workerCode = `export default {
   async fetch(request, env) {
     const url = new URL(request.url);

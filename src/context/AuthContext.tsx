@@ -164,10 +164,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithGoogle = useCallback(async () => {
     console.log('[AUTH] signInWithGoogle CLICKED');
+    // If demo is active, clear it — user explicitly chose to sign in with real account
     if (isDemo) {
-      console.log('[AUTH] DEMO BRANCH — setting DEMO_USER, returning early (signInWithOAuth NOT called)');
-      setUser(DEMO_USER);
-      return;
+      setIsDemo(false);
+      setUser(null);
+      setProfile(null);
     }
     const redirectTo = window.location.origin + '/';
     console.log('[AUTH] Calling signInWithOAuth with redirectTo:', redirectTo);

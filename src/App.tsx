@@ -1,15 +1,13 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { MotionConfig } from 'motion/react';
 import { StudyProvider, FocusProvider, useStudy } from './context/StudyContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import AuthModal from './components/auth/AuthModal';
 import { useReduceMotion } from './hooks/useReduceMotion';
 import { MetaUpdater } from './components/navigation/MetaUpdater';
 
 const MainLayout = lazy(() => import('./components/layout/MainLayout').then(m => ({ default: m.MainLayout })));
 const MobileLayout = lazy(() => import('./components/layout/MobileLayout').then(m => ({ default: m.MobileLayout })));
-const LandingPage = lazy(() => import('./components/landing/LandingPage'));
 
 const MobileSpinner = () => (
   <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0a0c10]">
@@ -33,8 +31,6 @@ const AppContent = () => {
   const { syncPremiumStatus } = useStudy();
   const isMobile = useIsMobile();
   const reduceMotion = useReduceMotion();
-  const [authModalOpen, setAuthModalOpen] = useState(false);
-  const handleOpenAuth = () => setAuthModalOpen(true);
 
   // Always apply dark mode (theming handled by atmospheres + wallpapers)
   useEffect(() => {
@@ -58,24 +54,16 @@ const AppContent = () => {
   if (authLoading) return <MobileSpinner />;
 
   if (!user) {
-    return (
-      <MotionConfig reducedMotion={reduceMotion ? 'always' : 'never'}>
-        <MetaUpdater />
-        <Suspense fallback={<MobileSpinner />}>
-          <LandingPage onOpenAuth={handleOpenAuth} />
-        </Suspense>
-        <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
-      </MotionConfig>
-    );
+    window.location.href = '/';
+    return <MobileSpinner />;
   }
 
   return (
     <MotionConfig reducedMotion={reduceMotion ? 'always' : 'never'}>
       <MetaUpdater />
       <Suspense fallback={<MobileSpinner />}>
-        {isMobile ? <MobileLayout onOpenAuth={handleOpenAuth} /> : <MainLayout onOpenAuth={handleOpenAuth} />}
+        {isMobile ? <MobileLayout /> : <MainLayout />}
       </Suspense>
-      <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
     </MotionConfig>
   );
 };

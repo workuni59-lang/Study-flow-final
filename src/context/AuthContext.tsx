@@ -43,6 +43,7 @@ interface AuthContextType {
   user: AppUser | null;
   profile: Profile | null;
   loading: boolean;
+  isDemo: boolean;
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signUp: (email: string, password: string, displayName: string) => Promise<{ error: AuthError | null; user: User | null }>;
   signInWithGoogle: () => Promise<void>;
@@ -53,17 +54,15 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Secret key for dev access: sf_admin=true
-const isDemo = window.location.search.includes('sf_admin=true');
-console.log('[AUTH] sf_admin mode:', isDemo);
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isDemo, setIsDemo] = useState(false);
+  const isOAuthCallback = window.location.hash.includes('access_token');
 
-  const fetchProfile = useCallback(async (userId: string) => {
-    if (isDemo) {
+  const fetchProfile = useCallback(async (userId: string, forceDemo?: boolean) => {
+    if (forceDemo || userId === DEMO_USER.uid) {
       setProfile({
         id: userId,
         display_name: 'Demo Student',
@@ -90,9 +89,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (isDemo) {
-      // In demo mode, start with no user so they see the landing page.
-      // They can "log in" via the AuthModal to set the DEMO_USER.
+    const urlDemo = window.location.search.includes('sf_admin=true');
+    if (urlDemo) {
+      setUser(DEMO_USER);
+      fetchProfile(DEMO_USER.uid, true);
+      setIsDemo(true);
       setLoading(false);
       return;
     }
@@ -102,39 +103,54 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const appUser = toAppUser(session.user);
         setUser(appUser);
         fetchProfile(session.user.id);
+      } else if (!isOAuthCallback) {
+        // No session and not an OAuth callback — auto-activate demo user
+        const demoUser = DEMO_USER;
+        setUser(demoUser);
+        fetchProfile(demoUser.uid, true);
+        setIsDemo(true);
       }
       setLoading(false);
-    }).catch(() => setLoading(false));
+    }).catch(() => {
+      if (!isOAuthCallback) {
+        setUser(DEMO_USER);
+        fetchProfile(DEMO_USER.uid, true);
+        setIsDemo(true);
+      }
+      setLoading(false);
+    });
 
     const { data: { subscription } } = supabase!.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         const appUser = toAppUser(session.user);
         setUser(appUser);
+        setIsDemo(false);
         fetchProfile(session.user.id);
       } else {
         setUser(null);
         setProfile(null);
+        setIsDemo(false);
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [fetchProfile]);
+  }, [fetchProfile, isOAuthCallback]);
 
   const signIn = useCallback(async (email: string, password: string) => {
     if (isDemo) {
       setUser(DEMO_USER);
-      fetchProfile(DEMO_USER.uid);
+      fetchProfile(DEMO_USER.uid, true);
       return { error: null };
     }
     const { error } = await supabase!.auth.signInWithPassword({ email, password });
     return { error };
-  }, [fetchProfile]);
+  }, [fetchProfile, isDemo]);
 
   const signUp = useCallback(async (email: string, password: string, displayName: string) => {
     if (isDemo) {
       const newUser = { ...DEMO_USER, email, displayName };
       setUser(newUser);
-      fetchProfile(newUser.uid);
+      fetchProfile(newUser.uid, true);
       return { error: null, user: null };
     }
     const { data, error } = await supabase!.auth.signUp({
@@ -143,7 +159,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       options: { data: { display_name: displayName } },
     });
     return { error, user: data?.user ?? null };
-  }, []);
+  }, [isDemo]);
 
   const signInWithGoogle = useCallback(async () => {
     console.log('[AUTH] signInWithGoogle CLICKED');
@@ -160,7 +176,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     console.log('[AUTH] signInWithOAuth response:', { data, error });
     if (error) console.error('[AUTH] OAuth error:', error.message);
-  }, []);
+  }, [isDemo]);
 
   const signOut = useCallback(async () => {
     if (!isDemo) {
@@ -168,14 +184,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     setUser(null);
     setProfile(null);
-  }, []);
+    setIsDemo(false);
+  }, [isDemo]);
 
   const resetPassword = useCallback(async (email: string) => {
     if (isDemo) return { error: null };
     const redirectTo = `${window.location.origin}/app/reset-password`;
     const { error } = await supabase!.auth.resetPasswordForEmail(email, { redirectTo });
     return { error };
-  }, []);
+  }, [isDemo]);
 
   const updateProfile = useCallback(async (data: Partial<Pick<Profile, 'display_name' | 'avatar_url' | 'bio'>>) => {
     if (!user) return { error: 'Not authenticated' };
@@ -188,11 +205,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) return { error: error.message };
     setProfile(prev => prev ? { ...prev, ...data } : null);
     return { error: null };
-  }, [user]);
+  }, [user, isDemo]);
 
   return (
     <AuthContext.Provider value={{
-      user, profile, loading,
+      user, profile, loading, isDemo,
       signIn, signUp, signInWithGoogle, signOut, resetPassword, updateProfile,
     }}>
       {children}

@@ -1,8 +1,9 @@
-import { useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { MotionConfig } from 'motion/react';
 import { StudyProvider, FocusProvider, useStudy } from './context/StudyContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import AuthModal from './components/auth/AuthModal';
 import { useReduceMotion } from './hooks/useReduceMotion';
 import { MetaUpdater } from './components/navigation/MetaUpdater';
 
@@ -31,6 +32,8 @@ const AppContent = () => {
   const { syncPremiumStatus } = useStudy();
   const isMobile = useIsMobile();
   const reduceMotion = useReduceMotion();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const handleOpenAuth = () => setAuthModalOpen(true);
 
   // Always apply dark mode (theming handled by atmospheres + wallpapers)
   useEffect(() => {
@@ -53,17 +56,13 @@ const AppContent = () => {
 
   if (authLoading) return <MobileSpinner />;
 
-  if (!user) {
-    window.location.href = '/';
-    return <MobileSpinner />;
-  }
-
   return (
     <MotionConfig reducedMotion={reduceMotion ? 'always' : 'never'}>
       <MetaUpdater />
       <Suspense fallback={<MobileSpinner />}>
-        {isMobile ? <MobileLayout /> : <MainLayout />}
+        {isMobile ? <MobileLayout onOpenAuth={handleOpenAuth} /> : <MainLayout onOpenAuth={handleOpenAuth} />}
       </Suspense>
+      <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
     </MotionConfig>
   );
 };

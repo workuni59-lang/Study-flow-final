@@ -68,7 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         id: userId,
         display_name: 'Demo Student',
         avatar_url: null,
-        is_premium: true,
+        is_premium: false,
         premium_until: null,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),

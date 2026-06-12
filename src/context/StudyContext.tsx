@@ -521,13 +521,6 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  // Force premium in demo mode for screenshot sessions
-  useEffect(() => {
-    if (authUser?.uid === 'demo-user-001') {
-      syncPremiumStatus(true);
-    }
-  }, [authUser, syncPremiumStatus]);
-
   useEffect(() => {
     if (userStats.isPremium && !userStats.hasShield) {
       setUserStats(prev => ({ ...prev, hasShield: true }));

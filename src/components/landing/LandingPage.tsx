@@ -55,7 +55,13 @@ export default function LandingPage({ onOpenAuth, onStartDemo }: LandingPageProp
             </a>
           </div>
 
-          <div className="hidden md:block" id="nav-cta">
+          <div className="hidden md:flex items-center gap-3" id="nav-cta">
+            <button
+              onClick={onOpenAuth}
+              className="text-[#9ca3af] hover:text-white px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer"
+            >
+              Sign In
+            </button>
             <button
               onClick={onStartDemo ?? onOpenAuth}
               className="bg-brand hover:bg-[#5254e3] px-5 py-2 rounded-xl text-white font-medium text-sm transition-all duration-200 hover:shadow-[0_0_20px_rgba(99,102,241,0.4)] cursor-pointer"
@@ -100,7 +106,16 @@ export default function LandingPage({ onOpenAuth, onStartDemo }: LandingPageProp
                 Pricing
               </a>
               <button
-                 onClick={() => {
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenAuth();
+                }}
+                className="w-full border border-white/[0.1] text-white py-3 rounded-xl font-medium text-base text-center transition-colors hover:bg-white/[0.04]"
+              >
+                Sign In
+              </button>
+              <button
+                onClick={() => {
                   setMobileMenuOpen(false);
                   (onStartDemo ?? onOpenAuth)();
                 }}

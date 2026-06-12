@@ -7,6 +7,7 @@ import './index.css';
 
 function SplashHider() {
   useEffect(() => {
+    localStorage.setItem('sf_returning', '1');
     const splash = document.getElementById('loading-splash');
     if (splash) {
       splash.style.opacity = '0';
@@ -20,7 +21,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <SplashHider />
     <ErrorBoundary>
-      <BrowserRouter basename="/">
+      <BrowserRouter basename="/app">
         <App />
       </BrowserRouter>
     </ErrorBoundary>

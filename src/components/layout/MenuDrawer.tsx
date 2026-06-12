@@ -5,7 +5,7 @@ import { useStudy } from '../../context/StudyContext';
 import { PROGRESSION_BADGES } from '../../lib/progression';
 import { BadgeSvg, type BadgeTier } from '../progression/BadgeSvg';
 import { ROUTES } from '../../lib/routes';
-export type Section = 'dashboard' | 'subjects' | 'achievements' | 'analytics' | 'settings' | 'quests' | 'progression' | 'leaderboard' | 'profile';
+export type Section = 'dashboard' | 'subjects' | 'achievements' | 'analytics' | 'settings' | 'quests' | 'progression' | 'leaderboard' | 'profile' | 'pomodoro';
 
 interface MenuDrawerProps {
   open: boolean;

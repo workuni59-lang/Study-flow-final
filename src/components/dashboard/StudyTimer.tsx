@@ -295,6 +295,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
     const alertVol = (() => { try { return JSON.parse(localStorage.getItem('study_flow_alert_volume') || '0.75'); } catch { return 0.75; } })();
     playAlertSound(alertId, alertVol);
 
+    setDirection('countdown');
     if (mode === 'focus' || mode === 'taskETA') {
       const newTotal = sessionsCompleted + 1;
       setSessionsCompleted(newTotal);
@@ -389,7 +390,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
       <div className="flex justify-center gap-1.5">
         {(['focus', 'shortBreak', 'longBreak'] as const).map(m => (
           <button key={m} onClick={() => {
-            setIsActive(false); setMode(m);
+            setIsActive(false); setDirection('countdown'); setMode(m);
             const d = m === 'focus' ? activePreset.focus : m === 'shortBreak' ? activePreset.short : activePreset.long; setTimeLeft(d * 60);
           }}
             className={`px-4 py-1.5 rounded-full text-[9px] font-semibold uppercase tracking-wider transition-all border ${
@@ -405,7 +406,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
       <div className="flex gap-1.5 bg-black/10 backdrop-blur-sm border border-white/[0.06] p-1 rounded-xl overflow-x-auto no-scrollbar">
         {(['focus', 'shortBreak', 'longBreak', 'taskETA'] as const).map(m => (
           <button key={m} onClick={() => {
-            setIsActive(false); setMode(m);
+            setIsActive(false); setDirection('countdown'); setMode(m);
             const d = m === 'taskETA' ? (tasks.find(t => t.id === selectedTaskId)?.estimatedMinutes ?? 25) : m === 'focus' ? activePreset.focus : m === 'shortBreak' ? activePreset.short : activePreset.long;
             setTimeLeft(d * 60);
           }}
@@ -646,7 +647,12 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
     <motion.div key="presets" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-2">
       {PRESETS.map(p => (
         <button key={p.id} onClick={() => { 
-          navigate(ROUTES[`FOCUS_${p.id.toUpperCase() as any}` as keyof typeof ROUTES] as string || ROUTES.FOCUS);
+          setActivePreset(p);
+          setDirection('countdown');
+          setMode('focus');
+          setTimeLeft(p.focus * 60);
+          setIsActive(false);
+          navigate(ROUTES.FOCUS);
           setShowPresetPicker(false); 
         }}
           className={`w-full p-3 rounded-xl flex items-center justify-between transition-all ${activePreset.id === p.id && mode === 'focus' ? 'bg-brand/20 text-white' : 'bg-black/15 backdrop-blur-sm border border-white/10 text-white/50 hover:bg-black/25 hover:text-white/80'}`}>
@@ -656,6 +662,11 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
       ))}
       <div className="h-px bg-white/5" />
       <button onClick={() => { 
+        setDirection('countdown');
+        setMode('stopwatch');
+        setElapsedTime(0);
+        setLaps([]);
+        setIsActive(false);
         navigate(ROUTES.FOCUS_STOPWATCH);
         setShowPresetPicker(false); 
       }}
@@ -912,6 +923,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
                     key={m}
                     onClick={() => {
                       setIsActive(false);
+                      setDirection('countdown');
                       setMode(m);
                       const d = m === 'focus' ? activePreset.focus : m === 'shortBreak' ? activePreset.short : activePreset.long;
                       setTimeLeft(d * 60);

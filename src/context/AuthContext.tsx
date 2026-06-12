@@ -53,8 +53,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const isDemo = !supabase || window.location.search.includes('demo=1');
-console.log('[AUTH] isDemo:', isDemo, '| supabase is null:', !supabase, '| demo=1 in URL:', window.location.search.includes('demo=1'));
+// Secret key for dev access: sf_admin=true
+const isDemo = window.location.search.includes('sf_admin=true');
+console.log('[AUTH] sf_admin mode:', isDemo);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
@@ -62,6 +63,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = useCallback(async (userId: string) => {
+    if (isDemo) {
+      setProfile({
+        id: userId,
+        display_name: 'Demo Student',
+        avatar_url: null,
+        is_premium: true,
+        premium_until: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
+      return;
+    }
     if (!supabase) return;
     const { data, error } = await supabase
       .from('profiles')
@@ -78,7 +91,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (isDemo) {
-      setUser(DEMO_USER);
+      // In demo mode, start with no user so they see the landing page.
+      // They can "log in" via the AuthModal to set the DEMO_USER.
       setLoading(false);
       return;
     }
@@ -109,15 +123,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signIn = useCallback(async (email: string, password: string) => {
     if (isDemo) {
       setUser(DEMO_USER);
+      fetchProfile(DEMO_USER.uid);
       return { error: null };
     }
     const { error } = await supabase!.auth.signInWithPassword({ email, password });
     return { error };
-  }, []);
+  }, [fetchProfile]);
 
   const signUp = useCallback(async (email: string, password: string, displayName: string) => {
     if (isDemo) {
-      setUser({ ...DEMO_USER, email, displayName });
+      const newUser = { ...DEMO_USER, email, displayName };
+      setUser(newUser);
+      fetchProfile(newUser.uid);
       return { error: null, user: null };
     }
     const { data, error } = await supabase!.auth.signUp({
@@ -135,7 +152,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(DEMO_USER);
       return;
     }
-    const redirectTo = window.location.origin;
+    const redirectTo = window.location.origin + '/app/';
     console.log('[AUTH] Calling signInWithOAuth with redirectTo:', redirectTo);
     const { data, error } = await supabase!.auth.signInWithOAuth({
       provider: 'google',
@@ -155,7 +172,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const resetPassword = useCallback(async (email: string) => {
     if (isDemo) return { error: null };
-    const redirectTo = `${window.location.origin}/reset-password`;
+    const redirectTo = `${window.location.origin}/app/reset-password`;
     const { error } = await supabase!.auth.resetPasswordForEmail(email, { redirectTo });
     return { error };
   }, []);

@@ -1,54 +1,56 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useNavigationContext } from '../../hooks/useNavigationContext';
+import { ROUTE_META } from '../../lib/metadata';
 
-const TITLE_MAP: Record<string, string> = {
-  dashboard: 'StudyFlow – Gamified Study Dashboard',
-  analytics: 'Study Analytics – StudyFlow',
-  progression: 'My Progression – StudyFlow',
-  quests: 'Daily Quests – StudyFlow',
-  subjects: 'My Subjects – StudyFlow',
-  achievements: 'Achievements – StudyFlow',
-  leaderboard: 'Community Leaderboard – StudyFlow',
-  settings: 'Settings – StudyFlow',
-  profile: 'User Profile – StudyFlow',
-};
+function ensureMetaTag(attr: string, value: string, content: string) {
+  let el = document.querySelector(`[${attr}="${value}"]`);
+  if (!el) {
+    el = document.createElement('meta');
+    el.setAttribute(attr, value);
+    document.head.appendChild(el);
+  }
+  el.setAttribute('content', content);
+}
 
 export function MetaUpdater() {
-  const { section, mode, activePanel, ambienceTab } = useNavigationContext();
+  const { section, mode, activePanel } = useNavigationContext();
   const location = useLocation();
 
   useEffect(() => {
-    let title = TITLE_MAP[section] || 'StudyFlow';
+    const meta = ROUTE_META[location.pathname] || ROUTE_META['/'];
 
-    if (section === 'dashboard') {
-      if (mode === 'focus') {
-        title = 'Focus Mode – StudyFlow';
-      }
-      if (activePanel) {
-        let panelName = activePanel.charAt(0).toUpperCase() + activePanel.slice(1);
-        if (activePanel === 'ambience') {
-          panelName = ambienceTab.charAt(0).toUpperCase() + ambienceTab.slice(1);
-        } else if (activePanel === 'notepad') {
-          panelName = 'Notes';
-        }
-        title = `${panelName} – StudyFlow`;
-      }
+    let title = meta.title;
+    let description = meta.description;
+
+    if (mode === 'focus') {
+      title = 'Focus Mode — Study Flow';
+      description = 'Enter deep work mode with a Pomodoro timer, calming ambience, and focused tools. Minimize distractions and maximize your study sessions.';
+    }
+
+    if (activePanel) {
+      const panelLabels: Record<string, string> = {
+        tasks: 'Tasks',
+        ambience: 'Ambience',
+        notepad: 'Notes',
+        themes: 'Themes',
+      };
+      const label = panelLabels[activePanel] || activePanel;
+      title = `${label} — Study Flow`;
+      description = `Manage your ${label.toLowerCase()} within Study Flow's focus workspace.`;
     }
 
     document.title = title;
 
-    // Update meta description if needed
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) {
-      if (section === 'analytics') {
-        metaDesc.setAttribute('content', 'Track your study progress and focus time with detailed analytics.');
-      } else if (mode === 'focus') {
-        metaDesc.setAttribute('content', 'Enter deep work mode with calming ambience and focused tools.');
-      } else {
-        metaDesc.setAttribute('content', 'A gamified productivity platform for students to focus, track, and level up their studies.');
-      }
-    }
+    ensureMetaTag('name', 'description', description);
+    ensureMetaTag('property', 'og:title', title);
+    ensureMetaTag('property', 'og:description', description);
+    ensureMetaTag('property', 'og:url', window.location.href);
+    ensureMetaTag('property', 'og:type', 'website');
+    ensureMetaTag('property', 'og:image', `${window.location.origin}/logo.png`);
+    ensureMetaTag('name', 'twitter:card', 'summary_large_image');
+    ensureMetaTag('name', 'twitter:title', title);
+    ensureMetaTag('name', 'twitter:description', description);
   }, [section, mode, activePanel, location.pathname]);
 
   return null;

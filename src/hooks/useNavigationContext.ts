@@ -53,6 +53,8 @@ export function useNavigationContext(): NavigationContext {
     section = 'settings';
   } else if (path.startsWith('/profile')) {
     section = 'profile';
+  } else if (path.startsWith('/pomodoro')) {
+    section = 'pomodoro';
   } else if (path.includes('/tasks')) {
     section = 'dashboard';
     activePanel = 'tasks';
@@ -71,7 +73,8 @@ export function useNavigationContext(): NavigationContext {
     else if (path.endsWith('/animated')) themeTab = 'animated';
     else if (path.endsWith('/photos')) themeTab = 'photos';
     else if (path.endsWith('/custom')) themeTab = 'custom';
-  } else if (path.includes('/pomodoro')) {
+  } else if (path === '/pomodoro') {
+    section = 'pomodoro';
     timerId = 'pomodoro';
   } else if (path.includes('/stopwatch')) {
     timerId = 'stopwatch';
@@ -79,6 +82,8 @@ export function useNavigationContext(): NavigationContext {
     timerId = 'deep';
   } else if (path.includes('/flow')) {
     timerId = 'flow';
+  } else if (path.includes('/pomodoro')) {
+    timerId = 'pomodoro';
   } else if (path === '/focus' || path === '/') {
     section = 'dashboard';
   }

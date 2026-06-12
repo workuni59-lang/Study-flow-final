@@ -34,6 +34,7 @@ const ProgressionViewLazy = lazy(() => import('../progression/ProgressionView').
 const QuestsViewLazy = lazy(() => import('../quests/QuestsView').then(m => ({ default: m.QuestsView })));
 const LeaderboardViewLazy = lazy(() => import('../leaderboard/LeaderboardView').then(m => ({ default: m.LeaderboardView })));
 const ProfileViewLazy = lazy(() => import('../profile/ProfileView').then(m => ({ default: m.ProfileView })));
+const PomodoroLandingLazy = lazy(() => import('../pomodoro/PomodoroLanding').then(m => ({ default: m.PomodoroLanding })));
 
 const MobileSkeleton = () => (
   <div style={{ width: '100%', minHeight: '100vh', backgroundColor: '#0f0f1a', animation: 'pulse 1.5s ease-in-out infinite' }} />
@@ -153,7 +154,13 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
       <div>
 
         {/* Full-view pages (analytics, subjects, achievements, settings) */}
-        {isFullView ? (
+        {section === 'pomodoro' ? (
+          <main className="p-3 md:p-4 pb-28">
+            <Suspense fallback={<MobileSkeleton />}>
+              <PomodoroLandingLazy />
+            </Suspense>
+          </main>
+        ) : isFullView ? (
           <div className="min-h-screen">
             <header className="sticky top-0 z-30 bg-white/70 dark:bg-[#0a0c10]/70 backdrop-blur-2xl border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-3 h-14 px-4">

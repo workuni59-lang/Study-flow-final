@@ -36,6 +36,7 @@ const QuestsViewLazy = lazy(() => import('../quests/QuestsView').then(m => ({ de
 const ProgressionViewLazy = lazy(() => import('../progression/ProgressionView').then(m => ({ default: m.ProgressionView })));
 const LeaderboardViewLazy = lazy(() => import('../leaderboard/LeaderboardView').then(m => ({ default: m.LeaderboardView })));
 const ProfileViewLazy = lazy(() => import('../profile/ProfileView').then(m => ({ default: m.ProfileView })));
+const PomodoroLandingLazy = lazy(() => import('../pomodoro/PomodoroLanding').then(m => ({ default: m.PomodoroLanding })));
 
 const SimpleSpinner = () => (
   <div className="flex items-center justify-center min-h-[60vh]">
@@ -133,7 +134,13 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
       <div>
 
         {/* Full-view pages (analytics, subjects, achievements, settings) */}
-        {isFullView ? (
+        {section === 'pomodoro' ? (
+          <main className="main-layout-content">
+            <Suspense fallback={<SimpleSpinner />}>
+              <PomodoroLandingLazy />
+            </Suspense>
+          </main>
+        ) : isFullView ? (
           <div className="min-h-screen">
             <header className="top-bar sticky top-0 z-30 bg-white/70 dark:bg-[#0a0c10]/70 backdrop-blur-2xl border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-3 h-14 px-4">

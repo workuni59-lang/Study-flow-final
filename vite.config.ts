@@ -7,6 +7,7 @@ import { cloudflare } from "@cloudflare/vite-plugin";
 
 export default defineConfig((): UserConfig => {
   return {
+    base: '/',
     plugins: [react(), tailwindcss(), cloudflare()],
     resolve: {
       alias: {

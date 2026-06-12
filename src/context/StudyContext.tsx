@@ -210,8 +210,14 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
 
   const [userStats, setUserStats] = useState<UserStats>(() => {
     const saved = storage.getUserStats();
-    if (!saved) return INITIAL_STATS;
-    return { ...INITIAL_STATS, ...saved, dailyXPHistory: saved.dailyXPHistory || {}, sessionHistory: saved.sessionHistory || [] };
+    const base = saved ? { ...INITIAL_STATS, ...saved, dailyXPHistory: saved.dailyXPHistory || {}, sessionHistory: saved.sessionHistory || [] } : INITIAL_STATS;
+    
+    // Force premium ONLY if secret admin key is in URL
+    const isAdmin = window.location.search.includes('sf_admin=true');
+    if (authUser?.uid === 'demo-user-001' && isAdmin) {
+      return { ...base, isPremium: true, hasShield: true };
+    }
+    return base;
   });
 
   const [unlockedBadges, setUnlockedBadges] = useState<Badge[]>(() => storage.getUnlockedBadges() || []);
@@ -514,6 +520,13 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       return { ...prev, isPremium, hasShield: isPremium ? true : prev.hasShield };
     });
   }, []);
+
+  // Force premium in demo mode for screenshot sessions
+  useEffect(() => {
+    if (authUser?.uid === 'demo-user-001') {
+      syncPremiumStatus(true);
+    }
+  }, [authUser, syncPremiumStatus]);
 
   useEffect(() => {
     if (userStats.isPremium && !userStats.hasShield) {

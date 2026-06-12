@@ -5,12 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",
-    "build": "vite build",
-    "preview": "npm run build && wrangler dev",
+    "build": "vite build && node scripts/postbuild.mjs",
+    "prebuild": "tsx scripts/generate-sitemap.ts",
+    "preview": "npm run build && wrangler dev --config dist/wrangler.json",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
     "server": "tsx server/index.ts",
-    "deploy": "npm run build && wrangler deploy",
+    "deploy": "npm run build && wrangler deploy --config dist/wrangler.json",
     "ui-audit": "playwright test ui-audit/ui-audit.spec.ts",
     "lhci": "lhci autorun"
   },

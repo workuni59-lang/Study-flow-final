@@ -10,6 +10,7 @@ export const ROUTES = {
   LEADERBOARD: '/leaderboard',
   SETTINGS: '/settings',
   PROFILE: (id: string) => `/profile/${id}`,
+  POMODORO: '/pomodoro',
   
   // Timer Modes
   FOCUS_POMODORO: '/focus/pomodoro',

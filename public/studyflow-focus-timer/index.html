@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StudyFlow Focus Timer — Free Focus Timer with Wallpapers & Ambient Sounds</title>
+    <meta name="description" content="StudyFlow is a free focus timer with beautiful wallpapers, ambient soundscapes, and gamified progress tracking. Not an AI study tool — a real focus environment." />
+    <link rel="canonical" href="https://studyflow.space/studyflow-focus-timer/" />
+
+    <meta property="og:title" content="StudyFlow Focus Timer — Free Focus Timer with Wallpapers & Ambient Sounds" />
+    <meta property="og:description" content="A free focus timer with beautiful wallpapers, ambient soundscapes, and gamified progress tracking. Start focusing in one click." />
+    <meta property="og:url" content="https://studyflow.space/studyflow-focus-timer/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://studyflow.space/logo.png" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="StudyFlow Focus Timer — Free Focus Timer with Wallpapers & Ambient Sounds" />
+    <meta name="twitter:description" content="A free focus timer with beautiful wallpapers, ambient soundscapes, and gamified progress tracking." />
+
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is the StudyFlow focus timer?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "StudyFlow is a free, browser-based focus timer with animated wallpapers, ambient sounds, and gamified progress tracking. It is designed for students who need a distraction-free study environment."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How is StudyFlow different from other focus timers?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Unlike standard timers, StudyFlow combines a Pomodoro timer with immersive wallpapers, ambient soundscapes, and gamification. It is built specifically for students, not corporate productivity."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is StudyFlow really free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. StudyFlow is completely free with no sign up required. All features including wallpapers, ambient sounds, and gamification are available without payment."
+          }
+        }
+      ]
+    }
+    </script>
+
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+      body {
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        background: #fafafa;
+        color: #1e293b;
+        line-height: 1.6;
+      }
+      h1, h2, h3, h4 {
+        font-family: 'Outfit', 'Inter', system-ui, sans-serif;
+        line-height: 1.2;
+        letter-spacing: -0.02em;
+      }
+      a { color: inherit; text-decoration: none; }
+      img { max-width: 100%; display: block; }
+
+      .container { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 24px;
+        max-width: 1120px;
+        margin: 0 auto;
+      }
+      .header-logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-family: 'Outfit', 'Inter', system-ui, sans-serif;
+        font-weight: 700;
+        font-size: 20px;
+        letter-spacing: -0.3px;
+      }
+      .header-logo img { width: 32px; height: 32px; border-radius: 8px; }
+      .header-cta {
+        padding: 8px 20px;
+        background: #6366f1;
+        color: #fff;
+        font-size: 14px;
+        font-weight: 600;
+        border-radius: 10px;
+        transition: background 0.15s;
+      }
+      .header-cta:hover { background: #5558e6; }
+
+      .hero {
+        text-align: center;
+        padding: 80px 24px 60px;
+        background: linear-gradient(180deg, #eef2ff 0%, #fafafa 100%);
+      }
+      .hero h1 {
+        font-size: clamp(32px, 5vw, 48px);
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 16px;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .hero p {
+        font-size: 17px;
+        color: #64748b;
+        max-width: 520px;
+        margin: 0 auto 32px;
+        line-height: 1.7;
+      }
+      .hero-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 14px 32px;
+        background: #6366f1;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 600;
+        border-radius: 12px;
+        box-shadow: 0 4px 24px rgba(99,102,241,0.3);
+      }
+      .hero-cta:hover { background: #5558e6; }
+
+      .section { padding: 60px 24px; }
+      .section h2 {
+        font-size: clamp(24px, 3vw, 30px);
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+      .section p, .section li {
+        font-size: 15px;
+        color: #475569;
+        line-height: 1.8;
+      }
+
+      .compare-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin: 32px 0;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+      }
+      .compare-table th {
+        background: #f1f5f9;
+        padding: 14px 16px;
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #475569;
+        text-align: left;
+        border-bottom: 1px solid #e2e8f0;
+      }
+      .compare-table td {
+        padding: 14px 16px;
+        font-size: 14px;
+        border-bottom: 1px solid #f1f5f9;
+      }
+      .compare-table tr:last-child td { border-bottom: none; }
+      .check { color: #6366f1; font-weight: 600; }
+      .dash { color: #cbd5e1; }
+
+      .features-list {
+        list-style: none;
+        display: grid;
+        gap: 20px;
+        margin-top: 24px;
+      }
+      .features-list li {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+      }
+      .features-list li::before {
+        content: "";
+        min-width: 20px;
+        height: 20px;
+        background: #eef2ff;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 2px;
+      }
+
+      .cta-section {
+        text-align: center;
+        padding: 80px 24px;
+        background: linear-gradient(180deg, #fafafa 0%, #eef2ff 100%);
+      }
+      .cta-section h2 {
+        font-size: clamp(26px, 3vw, 34px);
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 12px;
+      }
+      .cta-section p {
+        font-size: 15px;
+        color: #64748b;
+        margin-bottom: 28px;
+      }
+      .cta-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 14px 32px;
+        background: #6366f1;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 600;
+        border-radius: 12px;
+        box-shadow: 0 4px 24px rgba(99,102,241,0.3);
+      }
+      .cta-button:hover { background: #5558e6; }
+
+      .footer {
+        padding: 32px 24px;
+        text-align: center;
+        font-size: 13px;
+        color: #94a3b8;
+        border-top: 1px solid #e2e8f0;
+      }
+
+      @media (max-width: 640px) {
+        .hero { padding: 50px 24px 40px; }
+        .compare-table { font-size: 13px; }
+        .compare-table th, .compare-table td { padding: 10px 12px; }
+      }
+    </style>
+  </head>
+  <body>
+
+    <header class="header">
+      <a href="/" class="header-logo">
+        <img src="/logo.png" alt="StudyFlow" width="32" height="32" />
+        StudyFlow
+      </a>
+      <a href="/app/" class="header-cta">Open App</a>
+    </header>
+
+    <section class="hero">
+      <h1>StudyFlow Focus Timer &mdash; Not Just Another Timer</h1>
+      <p>There are a few tools called StudyFlow. This one is the wallpaper-first focus environment for students. Free focus timer, ambient sounds, and a dashboard that actually makes you want to study.</p>
+      <a href="/app/" class="hero-cta">Try the focus timer</a>
+    </section>
+
+    <section class="section container">
+      <h2>What makes this StudyFlow different?</h2>
+      <p>StudyFlow is a brand used by several products. If you are looking for the focus timer with living wallpapers, ambient soundscapes, and gamified progress tracking &mdash; this is it. The tools below share the name but not the purpose.</p>
+
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>StudyFlow.space</th>
+            <th>Other StudyFlow tools</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Animated wallpapers</td>
+            <td class="check">Yes</td>
+            <td class="dash">No</td>
+          </tr>
+          <tr>
+            <td>Ambient soundscapes</td>
+            <td class="check">Yes</td>
+            <td class="dash">No</td>
+          </tr>
+          <tr>
+            <td>Pomodoro timer</td>
+            <td class="check">Yes</td>
+            <td class="check">Varies</td>
+          </tr>
+          <tr>
+            <td>Gamified progress (XP, levels, badges)</td>
+            <td class="check">Yes</td>
+            <td class="dash">No</td>
+          </tr>
+          <tr>
+            <td>Built for students</td>
+            <td class="check">Yes</td>
+            <td class="check">Varies</td>
+          </tr>
+          <tr>
+            <td>Free, no sign up</td>
+            <td class="check">Yes</td>
+            <td class="dash">Varies</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section container">
+      <h2>Features you will not find anywhere else</h2>
+      <ul class="features-list">
+        <li><strong>Living wallpapers.</strong> Your background is not a static image. It shifts, breathes, and sets the mood before your timer even starts. Animated gradients, serene photos, and deep color atmospheres that make the app feel like a place, not a tool.</li>
+        <li><strong>Zen mode.</strong> A distraction-free environment where the timer, the wallpaper, and the ambient sound exist together. No sidebar, no tabs, no notifications. Just you and your work.</li>
+        <li><strong>Adaptive focus modes.</strong> Classic Pomodoro at 25 minutes, deep focus at 50, or Flow mode that extends your session when you are in the zone and eases up when you are not.</li>
+        <li><strong>Ambient soundscapes.</strong> Rain, fireplace, lo-fi beats, white noise &mdash; sounds designed to fade into the background so your thoughts can stay in the foreground.</li>
+        <li><strong>Gamification that makes sense.</strong> Earn XP for every completed session. Level up, unlock badges, and build streaks. The game is consistency, and the reward is seeing your progress grow.</li>
+        <li><strong>Built-in task management.</strong> Attach a task to every focus session. Check it off when you are done. Small wins stack up faster than you think.</li>
+      </ul>
+    </section>
+
+    <section class="cta-section">
+      <h2>It is free, and it takes one click</h2>
+      <p>No account. No credit card. No setup. Just open the timer and start your first session.</p>
+      <a href="/app/" class="cta-button">Open StudyFlow</a>
+    </section>
+
+    <footer class="footer">
+      <p>&copy; 2026 StudyFlow &mdash; <a href="/">Home</a></p>
+    </footer>
+
+  </body>
+</html>

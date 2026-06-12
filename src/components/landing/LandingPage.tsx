@@ -126,47 +126,43 @@ export default function LandingPage({ onOpenAuth }: LandingPageProps) {
           <div className="lg:col-span-5 flex flex-col text-left" id="hero-content">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/[0.06] w-fit mb-6" id="hero-badge">
               <Crown className="w-3.5 h-3.5 text-brand" />
-              <span className="text-xs font-semibold tracking-wider text-brand-light uppercase">
-                Captivity & Focus System
+              <span className="text-[10px] font-bold tracking-[0.2em] text-brand-light uppercase">
+                Clinical Focus System
               </span>
             </div>
 
             {/* Title with staggered words reveal */}
-            <h1 className="font-display font-extrabold text-5xl md:text-6xl tracking-tight text-white leading-[1.1] mb-6">
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70">
+            <h1 className="font-display font-black text-6xl md:text-7xl tracking-tighter text-white leading-[0.95] mb-8">
+              <span className="block text-transparent bg-clip-text bg-gradient-to-b from-white to-white/50">
                 Enter the Flow.
               </span>
               <span className="block text-brand">
-                Lock in your study.
+                Lock in.
               </span>
             </h1>
 
-            <p className="text-[#9ca3af] text-lg mb-8 max-w-lg font-normal leading-relaxed">
-              StudyFlow is a clinical space styled for pure cognitive leverage. Command your timer, adapt your calendar, customize your view, and tune spatial ambience to dominate boards and competitive exams.
+            <p className="text-[#9ca3af] text-xl mb-10 max-w-lg font-medium leading-relaxed">
+              Command your timer, adapt your queue, and tune spatial ambience to dominate boards and competitive exams.
             </p>
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4" id="hero-ctas">
               <button
                 onClick={onOpenAuth}
-                className="group relative bg-brand hover:bg-[#5254e3] text-white px-8 py-4 rounded-xl font-semibold text-base transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_25px_rgba(99,102,241,0.5)] flex items-center justify-center gap-3 cursor-pointer"
+                className="group relative bg-brand hover:bg-[#5254e3] text-white px-10 py-5 rounded-2xl font-bold text-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(99,102,241,0.4)] flex items-center justify-center gap-3 cursor-pointer"
               >
-                <span>Enter the Flow</span>
-                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                <span>Get Started Free</span>
+                <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
               </button>
-              <a
-                href="#pricing"
-                className="text-[#9ca3af] hover:text-white border border-white/[0.08] hover:border-white/[0.2] bg-white/[0.01] px-8 py-4 rounded-xl font-semibold text-base text-center transition-all duration-200 cursor-pointer"
-              >
-                View Plans
-              </a>
             </div>
           </div>
 
           {/* Hero Right / Device Screenshot */}
-          <div className="lg:col-span-7 flex justify-center w-full" id="hero-mockup-wrapper">
+          <div className="lg:col-span-7 flex justify-center w-full relative" id="hero-mockup-wrapper">
+            {/* Desktop Mockup */}
             <motion.div
-              animate={{ y: [0, -8, 0] }}
-              transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
               className="relative w-full max-w-[640px] aspect-[16/10] bg-[#1a1c24] rounded-2xl p-2 md:p-3 border border-white/[0.1] shadow-2xl shadow-brand/10 overflow-hidden"
               id="device-mockup"
             >
@@ -183,6 +179,22 @@ export default function LandingPage({ onOpenAuth }: LandingPageProps) {
                 />
               </div>
             </motion.div>
+
+            {/* Mobile Mockup Overlay */}
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+              className="absolute -bottom-10 -right-4 md:-right-8 w-[160px] md:w-[200px] aspect-[9/19.5] bg-[#1a1c24] rounded-[2.5rem] p-2 border border-white/[0.1] shadow-2xl shadow-black/50 hidden sm:block"
+            >
+              <div className="relative w-full h-full bg-[#0d0f14] rounded-[2rem] overflow-hidden border border-white/[0.04]">
+                <img
+                  src="/screenshots/dashboard-mobile.png"
+                  alt="StudyFlow Mobile"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -190,82 +202,150 @@ export default function LandingPage({ onOpenAuth }: LandingPageProps) {
       {/* 3. CORE FEATURES SECTION (Smooth scroll target) */}
       <section className="py-24 border-t border-white/[0.06] bg-[#0c0e14] relative" id="features">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center max-w-2xl mx-auto mb-16">
+          <div className="text-center max-w-2xl mx-auto mb-20">
             <span className="text-xs font-semibold uppercase tracking-widest text-brand mb-2 block">
               Architected for Performance
             </span>
-            <h2 className="text-3xl md:text-4xl font-display font-extrabold text-white tracking-tight">
-              Six tools. One continuous flow.
+            <h2 className="text-4xl md:text-5xl font-display font-extrabold text-white tracking-tight">
+              One continuous flow.
             </h2>
-            <div className="w-12 h-1 bg-brand mx-auto mt-4 rounded" />
+            <p className="text-[#9ca3af] mt-4 text-lg">Everything you need to master your competitive exams, unified in a single clinical workspace.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Feature 1 */}
-            <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-6 hover:border-brand/40 transition-all duration-300">
-              <div className="w-10 h-10 rounded-xl bg-brand/10 border border-brand/20 flex items-center justify-center mb-5">
-                <Clock className="w-5 h-5 text-brand" />
+          {/* Feature 1: Timer */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center mb-32">
+            <motion.div 
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="flex flex-col gap-6"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-brand/10 border border-brand/20 flex items-center justify-center">
+                <Clock className="w-6 h-6 text-brand" />
               </div>
-              <h3 className="text-lg font-bold text-white mb-2">Adaptive Study Timer</h3>
-              <p className="text-sm text-[#9ca3af] leading-relaxed">
-                Circular Pomodoro flow custom-engineered for heavy focus blocks. Track sessions with customized study/break intervals built into your daily curriculum.
+              <h3 className="text-3xl font-display font-extrabold text-white">The Flow State Timer</h3>
+              <p className="text-[#9ca3af] text-lg leading-relaxed">
+                Circular Pomodoro flow custom-engineered for heavy focus blocks. Adaptive durations adjust to your cognitive load, helping you maintain momentum without the burnout.
               </p>
-            </div>
+              <ul className="space-y-3">
+                {['Custom study/break intervals', 'Auto-looping sessions', 'Visual progress ring'].map((item) => (
+                  <li key={item} className="flex items-center gap-3 text-sm text-white/70">
+                    <CheckCircle2 className="w-4 h-4 text-brand" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="rounded-2xl border border-white/10 overflow-hidden shadow-2xl shadow-brand/5 bg-[#1a1c24] p-2"
+            >
+              <img src="/screenshots/timer.png" alt="Focus Timer" className="rounded-xl w-full" />
+            </motion.div>
+          </div>
 
-            {/* Feature 2 */}
-            <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-6 hover:border-brand/40 transition-all duration-300">
-              <div className="w-10 h-10 rounded-xl bg-brand/10 border border-brand/20 flex items-center justify-center mb-5">
-                <CheckCircle2 className="w-5 h-5 text-brand" />
+          {/* Feature 2: Tasks */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center mb-32">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="rounded-2xl border border-white/10 overflow-hidden shadow-2xl shadow-brand/5 bg-[#1a1c24] p-2 order-2 lg:order-1"
+            >
+              <img src="/screenshots/tasks.png" alt="Tasks Management" className="rounded-xl w-full" />
+            </motion.div>
+            <motion.div 
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="flex flex-col gap-6 order-1 lg:order-2"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-brand/10 border border-brand/20 flex items-center justify-center">
+                <CheckCircle2 className="w-6 h-6 text-brand" />
               </div>
-              <h3 className="text-lg font-bold text-white mb-2">High-Yield Queue</h3>
-              <p className="text-sm text-[#9ca3af] leading-relaxed">
-                Check off critical concepts and session milestones directly inside the visual timer interface, binding tasks immediately into scheduled cycles.
+              <h3 className="text-3xl font-display font-extrabold text-white">High-Yield Queue</h3>
+              <p className="text-[#9ca3af] text-lg leading-relaxed">
+                Don't just track tasks—conquer them. Bind your syllabus concepts directly into your focus cycles. Check off milestones without ever leaving your flow environment.
               </p>
-            </div>
+              <ul className="space-y-3">
+                {['Session-linked task lists', 'Priority level sorting', 'Drag-and-drop organization'].map((item) => (
+                  <li key={item} className="flex items-center gap-3 text-sm text-white/70">
+                    <CheckCircle2 className="w-4 h-4 text-brand" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          </div>
 
-            {/* Feature 3 */}
-            <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-6 hover:border-brand/40 transition-all duration-300">
-              <div className="w-10 h-10 rounded-xl bg-brand/10 border border-brand/20 flex items-center justify-center mb-5">
-                <Volume2 className="w-5 h-5 text-brand" />
+          {/* Feature 3: Ambience */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center mb-32">
+            <motion.div 
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="flex flex-col gap-6"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-brand/10 border border-brand/20 flex items-center justify-center">
+                <Volume2 className="w-6 h-6 text-brand" />
               </div>
-              <h3 className="text-lg font-bold text-white mb-2">Spatial Audio Lab</h3>
-              <p className="text-sm text-[#9ca3af] leading-relaxed">
-                Layer immersive background frequencies including Lofi beats, wind, heavy rain, and active libraries. Premium subscribers gain custom playlist URL support.
+              <h3 className="text-3xl font-display font-extrabold text-white">Spatial Audio Lab</h3>
+              <p className="text-[#9ca3af] text-lg leading-relaxed">
+                Tune out the world with immersive background frequencies. From lofi beats to heavy rain and active library sounds, create the perfect acoustic container for deep work.
               </p>
-            </div>
+              <ul className="space-y-3">
+                {['Curated lo-fi playlists', 'Natural soundscapes', 'Custom YouTube/Spotify URLs'].map((item) => (
+                  <li key={item} className="flex items-center gap-3 text-sm text-white/70">
+                    <CheckCircle2 className="w-4 h-4 text-brand" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="rounded-2xl border border-white/10 overflow-hidden shadow-2xl shadow-brand/5 bg-[#1a1c24] p-2"
+            >
+              <img src="/screenshots/ambience.png" alt="Spatial Audio" className="rounded-xl w-full" />
+            </motion.div>
+          </div>
 
-            {/* Feature 4 */}
-            <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-6 hover:border-brand/40 transition-all duration-300">
-              <div className="w-10 h-10 rounded-xl bg-brand/10 border border-brand/20 flex items-center justify-center mb-5">
-                <TrendingUp className="w-5 h-5 text-brand" />
+          {/* Feature 4: Analytics */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="rounded-2xl border border-white/10 overflow-hidden shadow-2xl shadow-brand/5 bg-[#1a1c24] p-2 order-2 lg:order-1"
+            >
+              <img src="/screenshots/analytics.png" alt="Study Analytics" className="rounded-xl w-full" />
+            </motion.div>
+            <motion.div 
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="flex flex-col gap-6 order-1 lg:order-2"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-brand/10 border border-brand/20 flex items-center justify-center">
+                <TrendingUp className="w-6 h-6 text-brand" />
               </div>
-              <h3 className="text-lg font-bold text-white mb-2">Spaced Analytics</h3>
-              <p className="text-sm text-[#9ca3af] leading-relaxed">
-                Earn XP, stack continuous study days, level progression, and master tracking heatmaps designed to expose weaknesses in key competitive syllabus fields.
+              <h3 className="text-3xl font-display font-extrabold text-white">Mastery Tracking</h3>
+              <p className="text-[#9ca3af] text-lg leading-relaxed">
+                Turn your effort into evidence. Track your XP, level up your focus, and view detailed heatmaps of your study sessions to identify exactly where you dominate.
               </p>
-            </div>
-
-            {/* Feature 5 */}
-            <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-6 hover:border-brand/40 transition-all duration-300">
-              <div className="w-10 h-10 rounded-xl bg-brand/10 border border-brand/20 flex items-center justify-center mb-5">
-                <Sparkles className="w-5 h-5 text-brand" />
-              </div>
-              <h3 className="text-lg font-bold text-white mb-2">Immersive Visuals</h3>
-              <p className="text-sm text-[#9ca3af] leading-relaxed">
-                Tune your visual environment. Gain full workspace customization with 7 premium design themes, 7 animated presets, and 57 immersive layouts.
-              </p>
-            </div>
-
-            {/* Feature 6 */}
-            <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-6 hover:border-brand/40 transition-all duration-300">
-              <div className="w-10 h-10 rounded-xl bg-brand/10 border border-brand/20 flex items-center justify-center mb-5">
-                <Sliders className="w-5 h-5 text-brand" />
-              </div>
-              <h3 className="text-lg font-bold text-white mb-2">13+ Clock Customizers</h3>
-              <p className="text-sm text-[#9ca3af] leading-relaxed">
-                Shape your aesthetic playground. Configure clock aesthetics across 13+ combinations of digital faces, dials, and custom serif headings.
-              </p>
-            </div>
+              <ul className="space-y-3">
+                {['Weekly session heatmaps', 'XP and Level progression', 'Subject-wise distribution'].map((item) => (
+                  <li key={item} className="flex items-center gap-3 text-sm text-white/70">
+                    <CheckCircle2 className="w-4 h-4 text-brand" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -277,60 +357,52 @@ export default function LandingPage({ onOpenAuth }: LandingPageProps) {
             <span className="text-xs font-semibold uppercase tracking-widest text-brand mb-2 block">
               Investment
             </span>
-            <h2 className="text-3xl md:text-4xl font-display font-extrabold text-white tracking-tight">
-              One focused space, scaled to your goal.
+            <h2 className="text-4xl md:text-5xl font-display font-extrabold text-white tracking-tight">
+              Scale to your goal.
             </h2>
-            <p className="text-[#9ca3af] text-sm mt-3 font-normal">
-              No hidden contracts. Seamless billing with instant calendar hooks.
+            <p className="text-[#9ca3af] text-lg mt-4 font-normal">
+              One focused space, designed for extreme visual containment. No hidden contracts.
             </p>
           </div>
 
           {/* Pricing cards side by side */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto" id="pricing-grid">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto" id="pricing-grid">
             {/* Free Card */}
-            <div className="bg-white/[0.02] border border-white/[0.06] rounded-3xl p-8 flex flex-col justify-between transition-all duration-200">
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-[2.5rem] p-10 flex flex-col justify-between transition-all duration-200">
               <div>
-                <span className="text-[#9ca3af] text-xs uppercase font-bold tracking-widest font-mono">
+                <span className="text-[#9ca3af] text-xs uppercase font-bold tracking-[0.2em] font-mono">
                   Standard Access
                 </span>
-                <h3 className="text-2xl font-display font-extrabold text-white mt-1 mb-2">
+                <h3 className="text-3xl font-display font-extrabold text-white mt-2 mb-4">
                   StudyFlow Free
                 </h3>
-                <div className="h-12 flex items-center mb-6">
-                  <span className="text-sm font-semibold text-[#9ca3af]">
+                <div className="h-12 flex items-center mb-8">
+                  <span className="text-lg font-semibold text-[#9ca3af]">
                     Core Dashboard Sandbox
                   </span>
                 </div>
-                <div className="w-full h-[1px] bg-white/[0.06] mb-6" />
+                <div className="w-full h-[1px] bg-white/[0.06] mb-8" />
 
-                <ul className="space-y-4 text-xs font-medium text-[#c0c4cc]">
-                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-4 h-4 text-[#9ca3af]" />
-                    <span>Single Active Study Plan</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-4 h-4 text-[#9ca3af]" />
-                    <span>Focus Web Dashboard</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-4 h-4 text-[#9ca3af]" />
-                    <span>Standard Focus Templates</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-4 h-4 text-[#9ca3af]" />
-                    <span>Basic Wallpapers (3 variations)</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-4 h-4 text-[#9ca3af]" />
-                    <span>Basic Clock Variants</span>
-                  </li>
+                <ul className="space-y-5 text-sm font-medium text-[#c0c4cc]">
+                  {[
+                    'Single Active Study Plan',
+                    'Focus Web Dashboard',
+                    'Standard Focus Templates',
+                    'Basic Wallpapers (3 variations)',
+                    'Basic Clock Variants'
+                  ].map((feature) => (
+                    <li key={feature} className="flex items-center gap-4">
+                      <CheckCircle2 className="w-5 h-5 text-[#9ca3af]" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
                 </ul>
               </div>
 
-              <div className="mt-8">
+              <div className="mt-12">
                 <button
                   onClick={onOpenAuth}
-                  className="w-full bg-white/[0.04] hover:bg-white/[0.08] text-white border border-white/[0.08] py-4 rounded-xl font-bold text-sm text-center transition-all cursor-pointer"
+                  className="w-full bg-white/[0.04] hover:bg-white/[0.08] text-white border border-white/[0.08] py-5 rounded-2xl font-bold text-base text-center transition-all cursor-pointer"
                 >
                   Get Started
                 </button>
@@ -338,74 +410,60 @@ export default function LandingPage({ onOpenAuth }: LandingPageProps) {
             </div>
 
             {/* Pro Card (VIsually Elevated) */}
-            <div className="relative bg-[#0c0d16] border-2 border-brand rounded-3xl p-8 flex flex-col justify-between shadow-[0_0_35px_rgba(99,102,241,0.15)] transition-all duration-200">
+            <div className="relative bg-gradient-to-b from-[#0c0d16] to-[#08090f] border-2 border-brand rounded-[2.5rem] p-10 flex flex-col justify-between shadow-[0_0_50px_rgba(99,102,241,0.1)] transition-all duration-200">
               {/* Popular badge */}
-              <div className="absolute -top-3.5 right-6 bg-brand text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-[0_0_15px_rgba(99,102,241,0.4)]">
+              <div className="absolute -top-4 right-10 bg-brand text-white text-[11px] font-bold uppercase tracking-[0.2em] px-4 py-1.5 rounded-full shadow-[0_0_20px_rgba(99,102,241,0.4)]">
                 Most Popular
               </div>
 
               <div>
-                <span className="text-brand-light text-xs uppercase font-bold tracking-widest font-mono">
+                <span className="text-brand-light text-xs uppercase font-bold tracking-[0.2em] font-mono">
                   Full Spatial Engine
                 </span>
-                <h3 className="text-2xl font-display font-extrabold text-white mt-1 mb-2">
+                <h3 className="text-3xl font-display font-extrabold text-white mt-2 mb-4">
                   StudyFlow Pro
                 </h3>
                 
                 {/* Dual price presentation inline as mandated */}
-                <div className="h-12 flex items-baseline gap-2 mb-6">
-                  <span className="text-3xl font-display font-extrabold text-white">
+                <div className="h-12 flex items-baseline gap-2 mb-8">
+                  <span className="text-4xl font-display font-extrabold text-white">
                     $7.99
                   </span>
-                  <span className="text-xs text-[#9ca3af] font-medium mr-2">
+                  <span className="text-sm text-[#9ca3af] font-medium mr-2">
                     / mo
                   </span>
-                  <span className="text-xs text-[#9ca3af] font-semibold border-l border-white/[0.1] pl-2">
+                  <span className="text-xs text-white/40 font-semibold border-l border-white/10 pl-3">
                     or <strong className="text-white">$65</strong> / yr
                   </span>
-                  <span className="text-[10px] font-bold bg-[#10b981]/20 text-[#10b981] px-1.5 py-0.5 rounded ml-1 font-mono uppercase">
+                  <span className="text-[10px] font-bold bg-[#10b981]/20 text-[#10b981] px-2 py-1 rounded-md ml-2 font-mono uppercase tracking-wider">
                     Save 32%
                   </span>
                 </div>
 
-                <div className="w-full h-[1px] bg-white/[0.06] mb-6" />
+                <div className="w-full h-[1px] bg-white/[0.1] mb-8" />
 
-                <ul className="space-y-4 text-xs font-medium text-[#c0c4cc]">
-                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-4 h-4 text-brand" />
-                    <span>All 7 Space Themes & Color Presets</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-4 h-4 text-brand" />
-                    <span>Google Calendar Auto Sync</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-4 h-4 text-brand" />
-                    <span>Full Spatial Sound Library (6+ tracks)</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-4 h-4 text-brand" />
-                    <span>Custom Ambience Playlist URLs</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-4 h-4 text-brand" />
-                    <span>7 Animated & 57 Immersive Wallpapers</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-4 h-4 text-brand" />
-                    <span>All Clock Customization Formats + Presets</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-4 h-4 text-brand" />
-                    <span>Advanced Analytics + Brain Scan Heatmap</span>
-                  </li>
+                <ul className="space-y-5 text-sm font-medium text-[#c0c4cc]">
+                  {[
+                    'All 7 Space Themes & Color Presets',
+                    'Google Calendar Auto Sync',
+                    'Full Spatial Sound Library (6+ tracks)',
+                    'Custom Ambience Playlist URLs',
+                    '7 Animated & 57 Immersive Wallpapers',
+                    'All Clock Customization Formats',
+                    'Advanced Analytics + Heatmaps'
+                  ].map((feature) => (
+                    <li key={feature} className="flex items-center gap-4">
+                      <CheckCircle2 className="w-5 h-5 text-brand" />
+                      <span className="text-white/90">{feature}</span>
+                    </li>
+                  ))}
                 </ul>
               </div>
 
-              <div className="mt-8">
+              <div className="mt-12">
                 <button
                   onClick={onOpenAuth}
-                  className="w-full bg-brand hover:bg-[#5254e3] text-white py-4 rounded-xl font-bold text-sm text-center transition-all hover:shadow-[0_0_20px_rgba(99,102,241,0.4)] cursor-pointer"
+                  className="w-full bg-brand hover:bg-[#5254e3] text-white py-5 rounded-2xl font-bold text-base text-center transition-all hover:shadow-[0_0_30px_rgba(99,102,241,0.4)] cursor-pointer"
                 >
                   Go Pro
                 </button>
@@ -416,26 +474,33 @@ export default function LandingPage({ onOpenAuth }: LandingPageProps) {
       </section>
 
       {/* 5. FOOTER */}
-      <footer className="py-12 border-t border-white/[0.06] bg-[#07090d]" id="footer">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-2" id="footer-logo">
-             <img src="/logo.png" alt="StudyFlow" className="w-6 h-6 object-contain" />
-             <span className="font-display font-bold text-sm tracking-wider text-white">
-               STUDY<span className="text-brand">FLOW</span>
-             </span>
+      <footer className="py-20 border-t border-white/[0.06] bg-[#07090d]" id="footer">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-10">
+          <div className="flex flex-col items-center md:items-start gap-4" id="footer-logo">
+             <div className="flex items-center gap-2">
+               <img src="/logo.png" alt="StudyFlow" className="w-8 h-8 object-contain" />
+               <span className="font-display font-black text-xl tracking-tight text-white">
+                 STUDY<span className="text-brand">FLOW</span>
+               </span>
+             </div>
+             <p className="text-white/40 text-xs font-medium tracking-wide">Designed for extreme visual containment.</p>
            </div>
 
-          <div className="text-xs text-[#9ca3af]" id="copyright">
-            &copy; {new Date().getFullYear()} StudyFlow. Designed for extreme visual containment. All rights reserved.
-          </div>
-
-          <div className="flex gap-4" id="footer-socials">
-            <span className="text-xs text-[#9ca3af] hover:text-white transition-colors cursor-pointer">
-              Privacy Outline
-            </span>
-            <span className="text-xs text-[#9ca3af] hover:text-white transition-colors cursor-pointer">
-              Terms of Focus
-            </span>
+          <div className="flex flex-col items-center md:items-end gap-4">
+            <div className="flex gap-8" id="footer-socials">
+              <span className="text-xs font-bold text-white/50 hover:text-white transition-colors cursor-pointer uppercase tracking-widest">
+                Privacy
+              </span>
+              <span className="text-xs font-bold text-white/50 hover:text-white transition-colors cursor-pointer uppercase tracking-widest">
+                Terms
+              </span>
+              <span className="text-xs font-bold text-white/50 hover:text-white transition-colors cursor-pointer uppercase tracking-widest">
+                Support
+              </span>
+            </div>
+            <div className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]" id="copyright">
+              &copy; {new Date().getFullYear()} StudyFlow. All rights reserved.
+            </div>
           </div>
         </div>
       </footer>

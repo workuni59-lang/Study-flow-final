@@ -9,6 +9,7 @@ import { MetaUpdater } from './components/navigation/MetaUpdater';
 
 const MainLayout = lazy(() => import('./components/layout/MainLayout').then(m => ({ default: m.MainLayout })));
 const MobileLayout = lazy(() => import('./components/layout/MobileLayout').then(m => ({ default: m.MobileLayout })));
+const LandingPage = lazy(() => import('./components/landing/LandingPage'));
 
 const MobileSpinner = () => (
   <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0a0c10]">
@@ -56,6 +57,18 @@ const AppContent = () => {
 
   if (authLoading) return <MobileSpinner />;
 
+  if (!user) {
+    return (
+      <MotionConfig reducedMotion={reduceMotion ? 'always' : 'never'}>
+        <MetaUpdater />
+        <Suspense fallback={<MobileSpinner />}>
+          <LandingPage onOpenAuth={handleOpenAuth} />
+        </Suspense>
+        <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
+      </MotionConfig>
+    );
+  }
+
   return (
     <MotionConfig reducedMotion={reduceMotion ? 'always' : 'never'}>
       <MetaUpdater />
@@ -73,7 +86,17 @@ export default function App() {
       <StudyProvider>
         <FocusProvider>
           <Routes>
+            <Route path="/" element={<AppContent />} />
             <Route path="/profile/:id" element={<AppContent />} />
+            <Route path="/analytics" element={<AppContent />} />
+            <Route path="/progress" element={<AppContent />} />
+            <Route path="/quests" element={<AppContent />} />
+            <Route path="/subjects" element={<AppContent />} />
+            <Route path="/achievements" element={<AppContent />} />
+            <Route path="/leaderboard" element={<AppContent />} />
+            <Route path="/settings" element={<AppContent />} />
+            <Route path="/themes" element={<AppContent />} />
+            <Route path="/pomodoro" element={<AppContent />} />
             <Route path="/*" element={<AppContent />} />
           </Routes>
         </FocusProvider>

@@ -20,7 +20,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <SplashHider />
     <ErrorBoundary>
-      <BrowserRouter basename="/app">
+      <BrowserRouter basename="/">
         <App />
       </BrowserRouter>
     </ErrorBoundary>

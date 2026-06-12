@@ -169,7 +169,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(DEMO_USER);
       return;
     }
-    const redirectTo = window.location.origin + '/app/';
+    const redirectTo = window.location.origin + '/';
     console.log('[AUTH] Calling signInWithOAuth with redirectTo:', redirectTo);
     const { data, error } = await supabase!.auth.signInWithOAuth({
       provider: 'google',
@@ -190,7 +190,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const resetPassword = useCallback(async (email: string) => {
     if (isDemo) return { error: null };
-    const redirectTo = `${window.location.origin}/app/reset-password`;
+    const redirectTo = `${window.location.origin}/reset-password`;
     const { error } = await supabase!.auth.resetPasswordForEmail(email, { redirectTo });
     return { error };
   }, [isDemo]);

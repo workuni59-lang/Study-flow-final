@@ -24,7 +24,7 @@ const HELP_LINKS = [
 ];
 
 export const TopBar = memo(({ mode, onModeChange, onMenuOpen, onOpenAuth, onLeaderboardOpen, onProfileOpen }: TopBarProps) => {
-  const { user, isDemo: isDemoUser } = useAuth();
+  const { user } = useAuth();
   const [helpOpen, setHelpOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -138,7 +138,7 @@ export const TopBar = memo(({ mode, onModeChange, onMenuOpen, onOpenAuth, onLead
             {user.displayName?.charAt(0) || '?'}
           </button>
         )}
-        {(!user || isDemoUser) && onOpenAuth && (
+        {!user && onOpenAuth && (
           <button onClick={onOpenAuth}
             style={{
               height: '32px',

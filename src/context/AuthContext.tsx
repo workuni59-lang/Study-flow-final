@@ -164,12 +164,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithGoogle = useCallback(async () => {
     console.log('[AUTH] signInWithGoogle CLICKED');
-    // If demo is active, clear it — user explicitly chose to sign in with real account
-    if (isDemo) {
-      setIsDemo(false);
-      setUser(null);
-      setProfile(null);
-    }
+    // Don't clear demo state here — OAuth triggers a full page redirect
+    // which naturally clears all local React state. The user returns as a
+    // real authenticated user on the next SPA load.
     const redirectTo = window.location.origin + '/';
     console.log('[AUTH] Calling signInWithOAuth with redirectTo:', redirectTo);
     const { data, error } = await supabase!.auth.signInWithOAuth({
@@ -178,7 +175,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     console.log('[AUTH] signInWithOAuth response:', { data, error });
     if (error) console.error('[AUTH] OAuth error:', error.message);
-  }, [isDemo]);
+  }, []);
 
   const signOut = useCallback(async () => {
     if (!isDemo) {

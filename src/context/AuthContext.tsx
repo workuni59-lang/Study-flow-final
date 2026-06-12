@@ -44,6 +44,7 @@ interface AuthContextType {
   profile: Profile | null;
   loading: boolean;
   isDemo: boolean;
+  activateDemo: () => void;
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signUp: (email: string, password: string, displayName: string) => Promise<{ error: AuthError | null; user: User | null }>;
   signInWithGoogle: () => Promise<void>;
@@ -88,6 +89,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(data as Profile);
   }, []);
 
+  const activateDemo = useCallback(() => {
+    setUser(DEMO_USER);
+    fetchProfile(DEMO_USER.uid, true);
+    setIsDemo(true);
+  }, [fetchProfile]);
+
   useEffect(() => {
     const urlDemo = window.location.search.includes('sf_admin=true');
     if (urlDemo) {
@@ -104,19 +111,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(appUser);
         fetchProfile(session.user.id);
       } else if (!isOAuthCallback) {
-        // No session and not an OAuth callback — auto-activate demo user
-        const demoUser = DEMO_USER;
-        setUser(demoUser);
-        fetchProfile(demoUser.uid, true);
-        setIsDemo(true);
+        // No session and not an OAuth callback — do NOT auto-activate demo
+        // Demo is activated via activateDemo() when user clicks "Get Started Free" on LandingPage
       }
       setLoading(false);
     }).catch(() => {
-      if (!isOAuthCallback) {
-        setUser(DEMO_USER);
-        fetchProfile(DEMO_USER.uid, true);
-        setIsDemo(true);
-      }
+      // No session — do NOT auto-activate demo
+      // Demo is activated via activateDemo() when user clicks "Get Started Free" on LandingPage
       setLoading(false);
     });
 
@@ -209,7 +210,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider value={{
-      user, profile, loading, isDemo,
+      user, profile, loading, isDemo, activateDemo,
       signIn, signUp, signInWithGoogle, signOut, resetPassword, updateProfile,
     }}>
       {children}

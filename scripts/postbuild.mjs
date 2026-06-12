@@ -56,12 +56,14 @@ for (const route of SPA_ROUTES) {
 }
 console.log(`✓ ${count} SPA route files generated`);
 
-// 4. Copy marketing landing page
+// 4. Read marketing landing page for Worker embedding (do NOT copy to SRC — avoids edge cache)
 const marketingSrc = join(ROOT, 'marketing', 'index.html');
-const marketingDst = join(SRC, 'index.html');
+let MARKETING_HTML = '';
 if (existsSync(marketingSrc)) {
-  cpSync(marketingSrc, marketingDst);
-  console.log('✓ marketing/index.html → index.html');
+  MARKETING_HTML = readFileSync(marketingSrc, 'utf-8');
+  console.log('✓ marketing/index.html read for Worker embedding');
+} else {
+  console.warn('⚠ marketing/index.html not found');
 }
 
 // 5. Copy public/ files not handled by Vite
@@ -72,3 +74,34 @@ for (const file of ['robots.txt', 'sitemap.xml', 'logo.png']) {
     cpSync(src, dst);
   }
 }
+
+// 6. Generate Worker that serves the marketing page directly (no edge cache)
+const escapedHtml = JSON.stringify(MARKETING_HTML);
+const workerCode = `export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+    if (url.pathname === '/' || url.pathname === '/index.html') {
+      return new Response(${escapedHtml}, {
+        headers: {
+          'content-type': 'text/html;charset=UTF-8',
+          'cache-control': 'no-cache, no-store, must-revalidate',
+          'pragma': 'no-cache',
+          'expires': '0',
+        },
+      });
+    }
+    try {
+      return await env.ASSETS.fetch(request);
+    } catch (err) {
+      return new Response('Not found', { status: 404 });
+    }
+  }
+};`;
+writeFileSync(join(SRC, '_worker.mjs'), workerCode);
+
+// 7. Add main field to wrangler.json so the Worker is used
+const wranglerPath = join(DIST, 'wrangler.json');
+const wrangler = JSON.parse(readFileSync(wranglerPath, 'utf-8'));
+wrangler.main = './_worker.mjs';
+writeFileSync(wranglerPath, JSON.stringify(wrangler));
+console.log('✓ _worker.mjs generated with no-cache headers for root');

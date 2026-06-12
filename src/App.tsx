@@ -9,6 +9,7 @@ import { MetaUpdater } from './components/navigation/MetaUpdater';
 
 const MainLayout = lazy(() => import('./components/layout/MainLayout').then(m => ({ default: m.MainLayout })));
 const MobileLayout = lazy(() => import('./components/layout/MobileLayout').then(m => ({ default: m.MobileLayout })));
+const LandingPage = lazy(() => import('./components/landing/LandingPage'));
 
 const MobileSpinner = () => (
   <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0a0c10]">
@@ -28,12 +29,13 @@ const useIsMobile = () => {
 };
 
 const AppContent = () => {
-  const { user, profile, loading: authLoading } = useAuth();
+  const { user, profile, loading: authLoading, activateDemo } = useAuth();
   const { syncPremiumStatus } = useStudy();
   const isMobile = useIsMobile();
   const reduceMotion = useReduceMotion();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const handleOpenAuth = () => setAuthModalOpen(true);
+  const handleStartDemo = () => activateDemo();
 
   // Always apply dark mode (theming handled by atmospheres + wallpapers)
   useEffect(() => {
@@ -55,6 +57,17 @@ const AppContent = () => {
   }, []);
 
   if (authLoading) return <MobileSpinner />;
+
+  if (!user) {
+    return (
+      <MotionConfig reducedMotion={reduceMotion ? 'always' : 'never'}>
+        <Suspense fallback={<MobileSpinner />}>
+          <LandingPage onOpenAuth={handleOpenAuth} onStartDemo={handleStartDemo} />
+        </Suspense>
+        <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
+      </MotionConfig>
+    );
+  }
 
   return (
     <MotionConfig reducedMotion={reduceMotion ? 'always' : 'never'}>

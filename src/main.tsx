@@ -7,7 +7,6 @@ import './index.css';
 
 function SplashHider() {
   useEffect(() => {
-    localStorage.setItem('sf_returning', '1');
     const splash = document.getElementById('loading-splash');
     if (splash) {
       splash.style.opacity = '0';

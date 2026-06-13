@@ -17,7 +17,7 @@ import { NotesPanel } from '../panels/NotesPanel';
 import { MOOD_GRADIENTS } from '../../lib/wallpapers';
 import { WALLPAPERS } from '../../lib/gamification';
 
-const TasksPanelLazy = lazy(() => import('../panels/TasksPanel').then(m => ({ default: m.TasksPanel })));
+import { TasksPanel } from '../panels/TasksPanel';
 import { PremiumModal } from '../modals/PremiumModal';
 import { DemoSignUpNudge } from '../notifications/DemoSignUpNudge';
 import { AchievementNotification } from '../notifications/AchievementNotification';
@@ -312,7 +312,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
 
       {/* Side panels */}
       <FloatingPanel open={activePanel === 'tasks'} onClose={handleClosePanel} title="Tasks" width={380}>
-        <Suspense fallback={null}><TasksPanelLazy /></Suspense>
+        <TasksPanel />
       </FloatingPanel>
 
       <FloatingPanel open={activePanel === 'ambience'} onClose={handleClosePanel} title="Ambience" width={420}>

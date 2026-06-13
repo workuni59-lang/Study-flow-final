@@ -65,8 +65,8 @@ export const TopBar = memo(({ mode, onModeChange, onMenuOpen, onOpenAuth, onLead
           <img src="/logo.png" alt="StudyFlow" className="w-6 h-6 object-contain" />
           <span className="text-xs font-bold dark:text-white tracking-tight hidden sm:block">StudyFlow</span>
         </Link>
-        <div className="w-px h-4 bg-slate-200 dark:bg-white/10 mx-1" />
-        <div className="flex gap-0.5 p-0.5 rounded-[10px] backdrop-blur-xl border border-white/[0.08] bg-black/20">
+        <div className="w-px h-4 bg-slate-200 dark:bg-white/10 mx-1 hidden lg:block" />
+        <div className="hidden lg:flex gap-0.5 p-0.5 rounded-[10px] backdrop-blur-xl border border-white/[0.08] bg-black/20">
           <NavLink to={ROUTES.HOME} end
             className={({ isActive }) => `px-3 py-1.5 rounded-[7px] text-[9px] font-semibold uppercase tracking-wider transition-all ${
               isActive

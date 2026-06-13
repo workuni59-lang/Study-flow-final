@@ -1,5 +1,5 @@
-import { useState, type ReactNode } from 'react';
-import { AnimatePresence } from 'motion/react';
+import { type ReactNode } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface SidePanelProps {
   open: boolean;
@@ -11,15 +11,26 @@ interface SidePanelProps {
 
 export const SidePanel = ({ open, onClose, title, children, side = 'right' }: SidePanelProps) => {
   const panelSide = side === 'right' ? 'right-0' : 'left-0';
-  const translateX = side === 'right' ? (open ? 'translate-x-0' : 'translate-x-full') : (open ? 'translate-x-0' : '-translate-x-full');
 
   return (
     <AnimatePresence>
       {open && (
         <>
-          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40" onClick={onClose} />
-          <div
-            className={`fixed top-0 ${panelSide} bottom-0 w-full max-w-sm bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl shadow-2xl z-50 transform transition-transform duration-300 ease-out ${translateX}`}
+          <motion.div
+            key="backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
+            onClick={onClose}
+          />
+          <motion.div
+            key="panel"
+            initial={{ x: side === 'right' ? '100%' : '-100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: side === 'right' ? '100%' : '-100%' }}
+            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+            className={`fixed top-0 ${panelSide} bottom-0 w-full max-w-sm bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl shadow-2xl z-50`}
           >
             <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-slate-100 dark:border-slate-800">
               <h2 className="text-sm font-display font-semibold dark:text-white">{title}</h2>
@@ -34,7 +45,7 @@ export const SidePanel = ({ open, onClose, title, children, side = 'right' }: Si
             <div className="overflow-y-auto h-[calc(100%-60px)] p-4 md:p-5">
               {children}
             </div>
-          </div>
+          </motion.div>
         </>
       )}
     </AnimatePresence>

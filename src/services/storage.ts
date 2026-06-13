@@ -186,10 +186,11 @@ export const storage = {
   getSessionsDate: (): string | null => safeGet(STORAGE_KEYS.GAME_SESSIONS_DATE),
   saveSessionsDate: (date: string) => safeSet(STORAGE_KEYS.GAME_SESSIONS_DATE, date),
 
-  // --- Generic ---
+  // --- Generic (scoped: only removes study_flow_* and sf_game_* keys) ---
   clearAll: () => {
     try {
-      localStorage.clear();
+      const keys = Object.values(STORAGE_KEYS) as string[];
+      keys.forEach(key => localStorage.removeItem(key));
     } catch (e) {
       console.error("Storage clear error:", e);
     }

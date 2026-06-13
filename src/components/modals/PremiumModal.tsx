@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Crown, Palette, Sparkles, Image, SwatchBook, Headphones, BarChart3, Brain, Clock, CheckCircle2 } from 'lucide-react';
+import { X, Crown, Palette, Sparkles, Image, SwatchBook, Headphones, BarChart3, Brain, Clock, CheckCircle2, LogIn } from 'lucide-react';
 import { useStudy } from '../../context/StudyContext';
 import { useAuth } from '../../context/AuthContext';
 
@@ -17,15 +17,25 @@ const features = [
   { icon: Clock,       label: 'Clock Customizer',       desc: 'All clock variants & presets' },
 ];
 
-export const PremiumModal = () => {
+interface PremiumModalProps {
+  onOpenAuth?: () => void;
+}
+
+export const PremiumModal = ({ onOpenAuth }: PremiumModalProps) => {
   const { userStats, setShowPremiumModal, showPremiumModal } = useStudy();
-  const { user } = useAuth();
+  const { user, isDemo } = useAuth();
   const [activating, setActivating] = useState(false);
   const [activated, setActivated] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [billing, setBilling] = useState<'monthly' | 'yearly'>('monthly');
 
   const handleUpgrade = async (forceDev?: boolean) => {
+    if (isDemo) {
+      setShowPremiumModal(false);
+      onOpenAuth?.();
+      return;
+    }
+
     setActivating(true);
     setError(null);
 
@@ -80,7 +90,7 @@ export const PremiumModal = () => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.2 }}
-            className="relative w-full max-w-[400px] max-h-[90vh] rounded-[20px] flex flex-col"
+            className="relative w-full max-w-[400px] max-h-[90vh] rounded-[20px] flex flex-col overflow-hidden"
             style={{ backgroundColor: '#0f0f1f', border: '1px solid rgba(255,255,255,0.08)' }}
           >
             <button
@@ -147,7 +157,26 @@ export const PremiumModal = () => {
                 </div>
               )}
 
-              {activated ? (
+              {isDemo ? (
+                <div className="w-full p-4 rounded-[14px] bg-white/[0.04] border border-white/[0.08] flex flex-col items-center gap-3 text-center">
+                  <div className="w-10 h-10 rounded-full bg-indigo-500/15 flex items-center justify-center">
+                    <LogIn className="w-5 h-5 text-indigo-400" />
+                  </div>
+                  <div>
+                    <p className="text-[14px] font-bold text-white">Sign in to purchase premium</p>
+                    <p className="text-[11px] text-white/40 mt-1 max-w-[260px]">
+                      Create a free account to unlock all features and save your progress.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => { setShowPremiumModal(false); onOpenAuth?.(); }}
+                    className="w-full h-[44px] bg-gradient-to-r from-indigo-500 to-violet-600 text-white rounded-[12px] font-bold text-[14px] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                  >
+                    <LogIn className="w-4 h-4" />
+                    Sign In
+                  </button>
+                </div>
+              ) : activated ? (
                 <div className="w-full py-4 rounded-[14px] bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                   <span className="text-[12px] font-bold text-emerald-300">Elite Scholar Activated!</span>
@@ -169,11 +198,13 @@ export const PremiumModal = () => {
                 </button>
               )}
 
-              <p className="mt-2 text-[9px] text-center text-white/20 font-medium">Secure payment via Polar</p>
+              {!isDemo && (
+                <p className="mt-2 text-[9px] text-center text-white/20 font-medium">Secure payment via Polar</p>
+              )}
             </div>
 
             {/* SECTION 4 — FEATURES */}
-            <div className="px-6 pt-4 pb-5 shrink-0">
+            <div className="flex-1 overflow-y-auto px-6 pt-4 pb-5 min-h-0">
               <div className="grid grid-cols-2 gap-x-4 gap-y-1">
                 {features.map((f) => (
                   <div key={f.label} className="flex items-start gap-2">

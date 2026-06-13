@@ -16,7 +16,7 @@ interface BottomBarProps {
 const NavTabButton = memo(({ to, icon: Icon, label, end = false }: { to: string; icon: typeof LayoutDashboard; label: string; end?: boolean }) => (
   <NavLink to={to} end={end}
     className={({ isActive }) => `flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-xl transition-colors ${
-      isActive ? 'text-brand' : 'text-slate-600 dark:text-slate-400 dark:text-slate-500'
+      isActive ? 'text-brand' : 'text-slate-600 dark:text-slate-400'
     }`}
   >
     <Icon className="w-5 h-5" />
@@ -26,7 +26,7 @@ const NavTabButton = memo(({ to, icon: Icon, label, end = false }: { to: string;
 
 const ActionTabButton = memo(({ onClick, icon: Icon, label }: { onClick: () => void; icon: typeof LayoutDashboard; label: string }) => (
   <button onClick={onClick}
-    className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-xl transition-colors text-slate-600 dark:text-slate-400 dark:text-slate-500"
+    className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-xl transition-colors text-slate-600 dark:text-slate-400"
   >
     <Icon className="w-5 h-5" />
     <span className="text-[9px] font-semibold uppercase tracking-wider">{label}</span>

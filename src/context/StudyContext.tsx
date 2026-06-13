@@ -436,7 +436,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
 
   const setPanicMode = (active: boolean) => {
     setPanicModeActive(active);
-    if (active) setThemeConfig({ ...themeConfig, atmosphere: 'slate' });
+    if (active) setThemeConfig(prev => ({ ...prev, atmosphere: 'slate' }));
   };
 
   const generateDailyQuests = useCallback(() => {
@@ -470,7 +470,31 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     completedRewards.forEach(xp => { earnXp(xp); triggerConfetti(); });
   };
 
-  const updateStreak = () => {
+  // ─── Gamification v2 ────────────────────────────────────────────
+
+  const awardGold = useCallback((amount: number) => {
+    setGameGold(prev => prev + amount);
+  }, []);
+
+  const gameXpRef = useRef(gameXp);
+  gameXpRef.current = gameXp;
+
+  const awardXp = useCallback((amount: number) => {
+    const current = gameXpRef.current;
+    const newTotal = current + amount;
+    const newLevel = calculateFormalLevel(newTotal);
+    const oldLevel = calculateFormalLevel(current);
+    setGameXp(newTotal);
+    if (newLevel > oldLevel) {
+      const goldReward = goldForLevelUp(newLevel);
+      setGameGold(g => g + goldReward);
+      setLevelUpEvent(newLevel);
+      setPetState(p => ({ ...p, lastLevelUpAt: Date.now() }));
+      setTimeout(() => firePetEvent('level_up'), 50);
+    }
+  }, []);
+
+  const updateStreak = useCallback(() => {
     const today = new Date().toISOString().split('T')[0];
     const lastActive = userStats.lastActiveDate;
     if (lastActive === today) return;
@@ -497,13 +521,13 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     } else {
       newStreak = 1;
     }
-    setUserStats(prev => ({
+      setUserStats(prev => ({
       ...prev, currentStreak: newStreak, bestStreak: Math.max(prev.bestStreak, newStreak),
       lastActiveDate: today, hasShield: shieldConsumed ? false : prev.hasShield
     }));
-  };
+  }, [userStats.lastActiveDate, userStats.currentStreak, userStats.bestStreak, userStats.hasShield, awardGold]);
 
-  const earnXp = (amount: number) => {
+  const earnXp = useCallback((amount: number) => {
     const today = new Date().toISOString().split("T")[0];
     setUserStats(prev => {
       const newHistory = { ...prev.dailyXPHistory };
@@ -511,7 +535,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       return { ...prev, xp: prev.xp + amount, dailyXPHistory: newHistory };
     });
     awardXp(amount);
-  };
+  }, [awardXp]);
 
 
   const syncPremiumStatus = useCallback((isPremium: boolean) => {
@@ -600,15 +624,17 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   const deleteExam = (id: string) => setExams(prev => prev.filter(e => e.id !== id));
 
   const recalibrateTasks = () => {
-    const today = new Date(); today.setHours(0, 0, 0, 0);
-    const overdueTasks = tasks.filter(t => !t.completed && t.dueDate && new Date(t.dueDate) < today);
-    if (overdueTasks.length === 0) return;
-    const remainingTasks = tasks.filter(t => !overdueTasks.find(ot => ot.id === t.id));
-    const updatedOverdue = overdueTasks.map((t, index) => {
-      const newDate = new Date(); newDate.setDate(newDate.getDate() + (index % 3));
-      return { ...t, dueDate: newDate.toISOString().split('T')[0] };
+    setTasks(prev => {
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      const overdueTasks = prev.filter(t => !t.completed && t.dueDate && new Date(t.dueDate) < today);
+      if (overdueTasks.length === 0) return prev;
+      const remainingTasks = prev.filter(t => !overdueTasks.find(ot => ot.id === t.id));
+      const updatedOverdue = overdueTasks.map((t, index) => {
+        const newDate = new Date(); newDate.setDate(newDate.getDate() + (index % 3));
+        return { ...t, dueDate: newDate.toISOString().split('T')[0] };
+      });
+      return [...remainingTasks, ...updatedOverdue];
     });
-    setTasks([...remainingTasks, ...updatedOverdue]);
   };
 
   const addSubject = (name: string, color?: string, initialTopics: string[] = []): string => {
@@ -620,10 +646,10 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     return id;
   };
 
-  const deleteSubject = (id: string) => setSubjects(subjects.filter(s => s.id !== id));
+  const deleteSubject = (id: string) => setSubjects(prev => prev.filter(s => s.id !== id));
 
   const addTopic = (subjectId: string, title: string) => {
-    setSubjects(subjects.map(s => s.id === subjectId ? { ...s, topics: [...s.topics, { id: Date.now().toString(), title, mastery: 'Red' }] } : s));
+    setSubjects(prev => prev.map(s => s.id === subjectId ? { ...s, topics: [...s.topics, { id: Date.now().toString(), title, mastery: 'Red' }] } : s));
   };
 
   const updateTopicMastery = (subjectId: string, topicId: string, mastery: MasteryLevel) => {
@@ -644,7 +670,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   };
 
   const deleteTopic = (subjectId: string, topicId: string) => {
-    setSubjects(subjects.map(s => s.id === subjectId ? { ...s, topics: s.topics.filter(t => t.id !== topicId) } : s));
+    setSubjects(prev => prev.map(s => s.id === subjectId ? { ...s, topics: s.topics.filter(t => t.id !== topicId) } : s));
   };
 
   const completeFocusSession = async (seconds: number) => {
@@ -709,26 +735,6 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   };
 
   const closeNotification = () => { setActiveNotification(null); };
-
-  // ─── Gamification v2 ────────────────────────────────────────────
-
-  const awardGold = useCallback((amount: number) => {
-    setGameGold(prev => prev + amount);
-  }, []);
-
-  const awardXp = useCallback((amount: number) => {
-    const newTotal = gameXp + amount;
-    const newLevel = calculateFormalLevel(newTotal);
-    const oldLevel = calculateFormalLevel(gameXp);
-    setGameXp(newTotal);
-    if (newLevel > oldLevel) {
-      const goldReward = goldForLevelUp(newLevel);
-      setGameGold(g => g + goldReward);
-      setLevelUpEvent(newLevel);
-      setPetState(p => ({ ...p, lastLevelUpAt: Date.now() }));
-      setTimeout(() => firePetEvent('level_up'), 50);
-    }
-  }, [gameXp]);
 
   const dismissLevelUp = useCallback(() => setLevelUpEvent(null), []);
   const dismissQuestComplete = useCallback(() => setQuestCompleteEvent(null), []);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Sparkles, Target, ChevronRight, Zap, ArrowUpRight, Lock, Star } from 'lucide-react';
 import { useStudy } from '../../context/StudyContext';
@@ -21,7 +21,12 @@ const RARITY_COLORS: Record<string, string> = {
 const STAGGER = 0.03;
 
 export const ProgressionView = () => {
-  const [isMobile] = useState(() => window.innerWidth < 768);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
   const { progression, progressionBadges, gameXp } = useStudy();
   const { level, totalXp, currentXp, xpForNext, percentage, rank, nextRank } = progression;
   const identity = getIdentity(rank.id);
@@ -29,8 +34,6 @@ export const ProgressionView = () => {
   const nextUnlockedBadge = PROGRESSION_BADGES.find(b => level < b.levelRequired);
   const prevBadges = PROGRESSION_BADGES.filter(b => level >= b.levelRequired);
   const milestones = PROGRESSION_BADGES;
-
-  const P = (p: { d?: number; h?: any }) => p;
 
   return (
     <div className="max-w-[1024px] mx-auto space-y-8 md:space-y-12 pb-16">

@@ -26,7 +26,7 @@ export const LeaderboardRow = ({ entry, rank, focusSeconds, topFocusSeconds, isC
       onClick={onClick}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
-      onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); } : undefined}
+      onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } } : undefined}
       aria-label={onClick ? `View ${entry.display_name ?? 'Anonymous'}'s profile` : undefined}
       className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
         onClick ? 'cursor-pointer' : ''

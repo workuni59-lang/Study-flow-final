@@ -28,16 +28,20 @@ export const LeaderboardView = ({ onViewProfile }: LeaderboardViewProps) => {
   const fetchLeaderboard = useCallback(async () => {
     if (activeTab === 'friends') return;
     setLoading(true);
-    const period = activeTab as LeaderboardPeriod;
-    const top = await getTopUsers(period, 100);
-    setEntries(top);
+    try {
+      const period = activeTab as LeaderboardPeriod;
+      const top = await getTopUsers(period, 100);
+      setEntries(top);
 
-    if (user) {
-      const rank = await getUserRank(user.uid, period);
-      setUserRank(rank);
+      if (user) {
+        const rank = await getUserRank(user.uid, period);
+        setUserRank(rank);
+      }
+    } catch (err) {
+      console.error('Failed to fetch leaderboard:', err);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   }, [activeTab, user]);
 
   useEffect(() => {

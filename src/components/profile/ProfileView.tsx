@@ -205,16 +205,19 @@ export const ProfileView = ({ userId, onEditProfile }: ProfileViewProps) => {
     setLoading(true);
     setError(null);
 
+    const lbPromise = supabase
+      ? supabase.from('leaderboard_entries').select('daily_focus_seconds, weekly_focus_seconds, monthly_focus_seconds, all_time_focus_seconds').eq('user_id', userId).single()
+      : Promise.resolve(null);
     Promise.all([
       getPublicProfile(userId),
-      supabase?.from('leaderboard_entries').select('daily_focus_seconds, weekly_focus_seconds, monthly_focus_seconds, all_time_focus_seconds').eq('user_id', userId).single(),
+      lbPromise,
     ]).then(([profile, lb]) => {
       if (cancelled) return;
       if (!profile) {
         setError('User not found');
       } else {
         setData(profile);
-        setLbEntry((lb?.data as LbEntry) ?? null);
+        setLbEntry(lb ? ((lb as any).data as LbEntry) ?? null : null);
       }
     }).catch((err) => {
       if (!cancelled) setError(err?.message || 'Failed to load profile');
@@ -237,7 +240,7 @@ export const ProfileView = ({ userId, onEditProfile }: ProfileViewProps) => {
     navigator.clipboard.writeText(url).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    });
+    }).catch(() => {});
   };
 
   if (loading) {

@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense, useEffect, useMemo } from 'react';
+import { useState, lazy, Suspense, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, Palette, Check, Crown } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -18,8 +18,8 @@ import { MOOD_GRADIENTS } from '../../lib/wallpapers';
 import { WALLPAPERS } from '../../lib/gamification';
 
 const TasksPanelLazy = lazy(() => import('../panels/TasksPanel').then(m => ({ default: m.TasksPanel })));
-const NotepadPanelLazy = lazy(() => import('../panels/NotepadPanel').then(m => ({ default: m.NotepadPanel })));
 import { PremiumModal } from '../modals/PremiumModal';
+import { DemoSignUpNudge } from '../notifications/DemoSignUpNudge';
 import { AchievementNotification } from '../notifications/AchievementNotification';
 import { Confetti } from '../notifications/Confetti';
 import { LevelUpModal } from '../modals/LevelUpModal';
@@ -93,6 +93,16 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
     navigate(ROUTES.SETTINGS);
   };
 
+  // Stable callbacks for memo'd children
+  const handleMenuOpen = useCallback(() => setMenuOpen(v => !v), []);
+  const handleLeaderboardOpen = useCallback(() => setSection('leaderboard'), []);
+  const handleProfileOpen = useCallback(() => handleViewProfile(user?.uid || 'me'), [user?.uid]);
+  const handleTasksOpen = useCallback(() => setPanelOpen('tasks'), []);
+  const handleMusicOpen = useCallback(() => setPanelOpen('ambience'), []);
+  const handleNotepadOpen = useCallback(() => setPanelOpen('notepad'), []);
+  const handleStatsOpen = useCallback(() => navigate(ROUTES.ANALYTICS), []);
+  const handleClosePanel = useCallback(() => setPanelOpen(null), []);
+
   const setShowMoodPicker = (val: boolean) => {
     if (val) navigate(mode === 'focus' ? ROUTES.FOCUS_THEMES : ROUTES.THEMES);
     else navigate(mode === 'focus' ? ROUTES.FOCUS : ROUTES.HOME);
@@ -112,7 +122,6 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
   useEffect(() => {
     const t = setTimeout(() => {
       import('../quests/QuestsView');
-      import('../panels/NotepadPanel');
     }, 2000);
     return () => clearTimeout(t);
   }, []);
@@ -131,7 +140,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
       setShowPremiumModal(true);
       return;
     }
-    setThemeConfig({ ...themeConfig, wallpaper: id });
+    setThemeConfig(prev => ({ ...prev, wallpaper: id }));
     setShowMoodPicker(false);
   };
 
@@ -195,20 +204,20 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
           <TopBar
             mode={mode}
             onModeChange={setMode}
-            onMenuOpen={() => setMenuOpen(v => !v)}
+            onMenuOpen={handleMenuOpen}
             onOpenAuth={onOpenAuth}
-            onLeaderboardOpen={() => setSection('leaderboard')}
-            onProfileOpen={user ? () => handleViewProfile(user.uid) : undefined}
+            onLeaderboardOpen={handleLeaderboardOpen}
+            onProfileOpen={user ? handleProfileOpen : undefined}
           />
 
           {/* Main content */}
-          {mode === 'home' && <HomeView onNotepadOpen={() => setPanelOpen('notepad')} menuOpen={menuOpen} />}
+          {mode === 'home' && <HomeView onNotepadOpen={handleNotepadOpen} menuOpen={menuOpen} />}
           {mode === 'focus' && (
             <Suspense fallback={<MobileSkeleton />}>
               <FocusEnvironmentLazy 
-                onTasksOpen={() => setPanelOpen('tasks')}
-                onMusicOpen={() => setPanelOpen('ambience')}
-                onNotepadOpen={() => setPanelOpen('notepad')}
+                onTasksOpen={handleTasksOpen}
+                onMusicOpen={handleMusicOpen}
+                onNotepadOpen={handleNotepadOpen}
               />
             </Suspense>
           )}
@@ -217,9 +226,9 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
           <BottomBar
             mode={mode}
             onModeChange={setMode}
-            onTasksOpen={() => setPanelOpen('tasks')}
-            onStatsOpen={() => navigate(ROUTES.ANALYTICS)}
-            onNotepadOpen={() => setPanelOpen('notepad')}
+            onTasksOpen={handleTasksOpen}
+            onStatsOpen={handleStatsOpen}
+            onNotepadOpen={handleNotepadOpen}
           />
         </>
       )}
@@ -304,11 +313,11 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
       />
 
       {/* Side panels */}
-      <SidePanel open={activePanel === 'tasks'} onClose={() => setPanelOpen(null)} title="Tasks">
+      <SidePanel open={activePanel === 'tasks'} onClose={handleClosePanel} title="Tasks">
         <Suspense fallback={null}><TasksPanelLazy /></Suspense>
       </SidePanel>
 
-      <SidePanel open={activePanel === 'ambience'} onClose={() => setPanelOpen(null)} title="Ambience">
+      <SidePanel open={activePanel === 'ambience'} onClose={handleClosePanel} title="Ambience">
         <AmbiencePanel ambienceUrl={ambienceUrl} onAmbienceUrlChange={setAmbienceUrl} />
       </SidePanel>
 
@@ -341,10 +350,11 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
       <AchievementNotification achievement={activeNotification} onClose={closeNotification} />
       <Confetti active={confettiActive} />
       <LevelUpModal level={levelUpEvent ?? gameLevel} isOpen={showLevelUp} onClose={() => { setShowLevelUp(false); dismissLevelUp(); }} />
-      <PremiumModal />
+      <PremiumModal onOpenAuth={onOpenAuth} />
+      <DemoSignUpNudge onOpenAuth={onOpenAuth} />
       <PanicModeUI />
 
-      <NotesPanel isOpen={activePanel === 'notepad'} onClose={() => setPanelOpen(null)} />
+      <NotesPanel isOpen={activePanel === 'notepad'} onClose={handleClosePanel} />
     </div>
   );
 };

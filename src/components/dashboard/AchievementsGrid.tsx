@@ -43,7 +43,7 @@ export const AchievementsGrid = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {ACHIEVEMENTS.map((achievement) => {
+        {ACHIEVEMENTS.map((achievement, index) => {
           const isUnlocked = unlockedBadges.some(b => b.achievementId === achievement.id);
           const Icon = ICON_MAP[achievement.icon] || Trophy;
 
@@ -60,7 +60,7 @@ export const AchievementsGrid = () => {
               {isUnlocked && (
                  <motion.div 
                     animate={{ x: ['-100%', '200%'] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "linear", delay: Math.random() * 5 }}
+                     transition={{ duration: 3, repeat: Infinity, ease: "linear", delay: (index * 1.3) % 5 }}
                     className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent skew-x-12 pointer-events-none"
                  />
               )}

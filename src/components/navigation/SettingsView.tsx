@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { 
   Settings, 
   Eye, 
@@ -45,6 +45,18 @@ export const SettingsView = () => {
   const [bio, setBio] = useState(profile?.bio || '');
   const [showSaved, setShowSaved] = useState(false);
 
+  // Sync local state with context updates
+  const prevDisplayName = useRef(user?.displayName);
+  const prevBio = useRef(profile?.bio);
+  if (prevDisplayName.current !== user?.displayName) {
+    prevDisplayName.current = user?.displayName;
+    setName(user?.displayName || '');
+  }
+  if (prevBio.current !== profile?.bio) {
+    prevBio.current = profile?.bio;
+    setBio(profile?.bio || '');
+  }
+
   const handleSaveProfile = async () => {
     const { error } = await updateProfile({ display_name: name, bio: bio || null });
     if (!error) {
@@ -60,8 +72,8 @@ export const SettingsView = () => {
     }
   };
 
-  const updateConfig = (key: keyof typeof themeConfig, value: any) => {
-    setThemeConfig({ ...themeConfig, [key]: value });
+  const updateConfig = <K extends keyof typeof themeConfig>(key: K, value: (typeof themeConfig)[K]) => {
+    setThemeConfig(prev => ({ ...prev, [key]: value }));
   };
 
   return (

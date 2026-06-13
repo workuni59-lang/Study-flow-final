@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Play, Pause, RotateCcw, Zap, Maximize2, X,
@@ -58,6 +58,28 @@ const TALLY_SETS: Record<string, string[]> = {
   flames: ['🔥', '🔥', '🔥', '🔥'],
   snow: ['❄', '❄', '❄', '❄'],
 };
+
+const TimerProgress = React.memo(({ progress, completed, tallyEmojis, sessionsCompleted, floating }: {
+  progress: number; completed: number; tallyEmojis: string[]; sessionsCompleted: number; floating?: boolean;
+}) => (
+  <>
+    <div className={`mx-auto h-[2px] bg-white/5 rounded-full overflow-hidden mt-4 ${floating ? 'max-w-[140px]' : 'max-w-[160px]'}`}>
+      <div className="h-full bg-gradient-to-r from-brand/50 to-brand-light/70 rounded-full transition-transform duration-1000 ease-linear" style={{ transform: `scaleX(${progress})`, transformOrigin: 'left' }} />
+    </div>
+    <div className="flex items-center justify-center gap-2 mt-3">
+      <div className="flex items-center gap-2">
+        <div className="flex">
+          {[...Array(4)].map((_, i) => (
+            <span key={i} className={`w-5 h-5 flex items-center justify-center text-[11px] transition-all ${i < completed ? 'opacity-100 scale-110' : 'opacity-20 scale-90'}`}>
+              {tallyEmojis[i]}
+            </span>
+          ))}
+        </div>
+        <span className="text-[8px] font-medium uppercase tracking-wider text-white/30">Cycle {Math.floor(sessionsCompleted / 4) + 1}</span>
+      </div>
+    </div>
+  </>
+));
 
 interface StudyTimerProps { onTick?: () => void; compact?: boolean; variant?: 'card' | 'floating'; }
 
@@ -159,7 +181,28 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
   const isMobileRef = useRef(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
   const cumulatedRef = useRef(0);
   const runStartRef = useRef(0);
+  const logFocusSession = (duration: number) => {
+    if (!sessionStartTime.current || duration <= 0) return;
+    logSession({
+      id: `sess-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      date: new Date().toISOString().split('T')[0],
+      startTime: sessionStartTime.current,
+      endTime: new Date().toISOString(),
+      duration,
+      mode: 'focus',
+      xpEarned: Math.floor(duration / 60) * 10,
+    });
+    sessionStartTime.current = null;
+  };
   const isCountingUp = direction === 'countup' || mode === 'stopwatch';
+  const completeFocusSessionRef = useRef(completeFocusSession);
+  completeFocusSessionRef.current = completeFocusSession;
+  const triggerConfettiRef = useRef(triggerConfetti);
+  triggerConfettiRef.current = triggerConfetti;
+  const logFocusSessionRef = useRef(logFocusSession);
+  logFocusSessionRef.current = logFocusSession;
+  const isCountingUpRef = useRef(isCountingUp);
+  isCountingUpRef.current = isCountingUp;
   useEffect(() => {
     const handler = () => { isMobileRef.current = window.innerWidth < 768; };
     window.addEventListener('resize', handler);
@@ -228,7 +271,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
           sessionElapsed.current += 1;
           totalFocusRef.current += 1;
           if (sessionElapsed.current >= 60) {
-            completeFocusSession(60);
+            completeFocusSessionRef.current(60);
             sessionElapsed.current = 0;
           }
         }
@@ -248,7 +291,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
           sessionElapsed.current += 1;
           totalFocusRef.current += 1;
           if (sessionElapsed.current >= 60) {
-            completeFocusSession(60);
+            completeFocusSessionRef.current(60);
             sessionElapsed.current = 0;
           }
         }
@@ -265,48 +308,39 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
       if (Date.now() - lastRenderRef.current < 950) return;
       lastRenderRef.current = Date.now();
     }
-    const countingUp = isCountingUp;
+    const countingUp = isCountingUpRef.current;
     setFocusSession({ mode: countingUp ? mode : isActive ? mode : 'idle', timeLeft: countingUp ? elapsedTime : timeLeft, totalTime, isActive, sessionsCompleted });
     if (!countingUp && timeLeft <= 0 && isActive) {
-      handleTimerComplete();
+      handleTimerCompleteRef.current?.();
     }
   }, [timeLeft, isActive, mode, totalTime, sessionsCompleted, activePreset.id, elapsedTime]);
 
-  const logFocusSession = (duration: number) => {
-    if (!sessionStartTime.current || duration <= 0) return;
-    logSession({
-      id: `sess-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-      date: new Date().toISOString().split('T')[0],
-      startTime: sessionStartTime.current,
-      endTime: new Date().toISOString(),
-      duration,
-      mode: 'focus',
-      xpEarned: Math.floor(duration / 60) * 10,
-    });
-    sessionStartTime.current = null;
-  };
-
-  const handleTimerComplete = () => {
+  const handleTimerCompleteRef = useRef<() => void>();
+  const handleTimerComplete = useCallback(() => {
     setIsActive(false);
     releaseWakeLock();
-    if (mode === 'focus' || mode === 'taskETA') logFocusSession(totalFocusRef.current); totalFocusRef.current = 0;
-    triggerConfetti();
+    if (mode === 'focus' || mode === 'taskETA') { logFocusSessionRef.current(totalFocusRef.current); }
+    totalFocusRef.current = 0;
+    triggerConfettiRef.current();
     const alertId = (() => { try { return JSON.parse(localStorage.getItem('study_flow_alert_sound') || '"sparkle"'); } catch { return 'sparkle'; } })();
     const alertVol = (() => { try { return JSON.parse(localStorage.getItem('study_flow_alert_volume') || '0.75'); } catch { return 0.75; } })();
     playAlertSound(alertId, alertVol);
 
     setDirection('countdown');
     if (mode === 'focus' || mode === 'taskETA') {
-      const newTotal = sessionsCompleted + 1;
-      setSessionsCompleted(newTotal);
-      const d = newTotal % 4 === 0 ? activePreset.long : activePreset.short;
-      setMode(newTotal % 4 === 0 ? 'longBreak' : 'shortBreak');
-      setTimeLeft(d * 60);
+      setSessionsCompleted(prev => {
+        const newTotal = prev + 1;
+        const d = newTotal % 4 === 0 ? activePreset.long : activePreset.short;
+        setMode(newTotal % 4 === 0 ? 'longBreak' : 'shortBreak');
+        setTimeLeft(d * 60);
+        return newTotal;
+      });
     } else {
       setMode('focus');
       setTimeLeft(activePreset.focus * 60);
     }
-  };
+  }, [mode, activePreset]);
+  handleTimerCompleteRef.current = handleTimerComplete;
 
   const toggleTimer = () => {
     const nextState = !isActive;
@@ -330,7 +364,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
 
     if (!nextState && !isCountingUp && (mode === 'focus' || mode === 'taskETA')) {
       if (sessionElapsed.current > 0) {
-        completeFocusSession(sessionElapsed.current);
+        completeFocusSessionRef.current(sessionElapsed.current);
         sessionElapsed.current = 0;
       }
     }
@@ -345,11 +379,11 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
 
   const resetCountUp = () => {
     if (mode === 'focus' && sessionElapsed.current > 0) {
-      completeFocusSession(sessionElapsed.current);
+      completeFocusSessionRef.current(sessionElapsed.current);
       sessionElapsed.current = 0;
     }
     if (mode === 'focus' && totalFocusRef.current > 0) {
-      logFocusSession(totalFocusRef.current);
+      logFocusSessionRef.current(totalFocusRef.current);
       totalFocusRef.current = 0;
     }
     if (sessionStartTime.current !== null) {
@@ -421,28 +455,6 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
       </div>
     )
   );
-
-  const TimerProgress = React.memo(({ progress, completed, tallyEmojis, sessionsCompleted, floating }: {
-    progress: number; completed: number; tallyEmojis: string[]; sessionsCompleted: number; floating?: boolean;
-  }) => (
-    <>
-      <div className={`mx-auto h-[2px] bg-white/5 rounded-full overflow-hidden mt-4 ${floating ? 'max-w-[140px]' : 'max-w-[160px]'}`}>
-        <div className="h-full bg-gradient-to-r from-brand/50 to-brand-light/70 rounded-full transition-transform duration-1000 ease-linear" style={{ transform: `scaleX(${progress})`, transformOrigin: 'left' }} />
-      </div>
-      <div className="flex items-center justify-center gap-2 mt-3">
-        <div className="flex items-center gap-2">
-          <div className="flex">
-            {[...Array(4)].map((_, i) => (
-              <span key={i} className={`w-5 h-5 flex items-center justify-center text-[11px] transition-all ${i < completed ? 'opacity-100 scale-110' : 'opacity-20 scale-90'}`}>
-                {tallyEmojis[i]}
-              </span>
-            ))}
-          </div>
-          <span className="text-[8px] font-medium uppercase tracking-wider text-white/30">Cycle {Math.floor(sessionsCompleted / 4) + 1}</span>
-        </div>
-      </div>
-    </>
-  ));
 
   const TimerDisplay = ({ size = 'md', floating }: { size?: 'md' | 'lg'; floating?: boolean }) => {
     const displayValue = isCountingUp ? formatElapsed(elapsedTime) : formatTimeBase(timeLeft);

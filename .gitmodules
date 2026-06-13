@@ -1,0 +1,3 @@
+[submodule "openrouter-cli"]
+	path = openrouter-cli
+	url = https://github.com/vstratful/openrouter-cli.git

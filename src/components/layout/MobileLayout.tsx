@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense, useEffect, useMemo, useCallback } from 'react';
+import { useState, lazy, Suspense, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, Palette, Check, Crown } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -11,7 +11,7 @@ import { BottomBar } from './BottomBar';
 import { HomeView } from './HomeView';
 const FocusEnvironmentLazy = lazy(() => import('./FocusEnvironment').then(m => ({ default: m.FocusEnvironment })));
 import { MenuDrawer, type Section } from './MenuDrawer';
-import { SidePanel } from '../panels/SidePanel';
+import { FloatingPanel } from '../panels/FloatingPanel';
 import { AmbiencePanel, type CuratedPlaylist } from '../panels/AmbiencePanel';
 import { NotesPanel } from '../panels/NotesPanel';
 import { MOOD_GRADIENTS } from '../../lib/wallpapers';
@@ -72,18 +72,8 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
     if (typeof path === 'string') navigate(path);
   };
 
-  const setPanelOpen = (p: Panel | null, subTab?: string) => {
-    if (!p) {
-      setMode(mode);
-      return;
-    }
-    let routeKey = `${mode === 'focus' ? 'FOCUS_' : ''}${p.toUpperCase()}` as keyof typeof ROUTES;
-    if (p === 'ambience' && subTab) {
-      routeKey = `${mode === 'focus' ? 'FOCUS_' : ''}AMBIENCE_${subTab.toUpperCase()}` as keyof typeof ROUTES;
-    }
-    const path = ROUTES[routeKey];
-    if (typeof path === 'string') navigate(path);
-  };
+  const modeRef = useRef(mode);
+  useEffect(() => { modeRef.current = mode; }, [mode]);
 
   const handleViewProfile = (userId: string) => {
     navigate(ROUTES.PROFILE(userId));
@@ -97,11 +87,19 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
   const handleMenuOpen = useCallback(() => setMenuOpen(v => !v), []);
   const handleLeaderboardOpen = useCallback(() => setSection('leaderboard'), []);
   const handleProfileOpen = useCallback(() => handleViewProfile(user?.uid || 'me'), [user?.uid]);
-  const handleTasksOpen = useCallback(() => setPanelOpen('tasks'), []);
-  const handleMusicOpen = useCallback(() => setPanelOpen('ambience'), []);
-  const handleNotepadOpen = useCallback(() => setPanelOpen('notepad'), []);
+  const handleTasksOpen = useCallback(() => {
+    navigate(modeRef.current === 'focus' ? ROUTES.FOCUS_TASKS : ROUTES.TASKS);
+  }, [navigate]);
+  const handleMusicOpen = useCallback(() => {
+    navigate(modeRef.current === 'focus' ? ROUTES.FOCUS_AMBIENCE : ROUTES.AMBIENCE);
+  }, [navigate]);
+  const handleNotepadOpen = useCallback(() => {
+    navigate(modeRef.current === 'focus' ? ROUTES.FOCUS_NOTEPAD : ROUTES.NOTEPAD);
+  }, [navigate]);
   const handleStatsOpen = useCallback(() => navigate(ROUTES.ANALYTICS), []);
-  const handleClosePanel = useCallback(() => setPanelOpen(null), []);
+  const handleClosePanel = useCallback(() => {
+    navigate(modeRef.current === 'focus' ? ROUTES.FOCUS : ROUTES.HOME);
+  }, [navigate]);
 
   const setShowMoodPicker = (val: boolean) => {
     if (val) navigate(mode === 'focus' ? ROUTES.FOCUS_THEMES : ROUTES.THEMES);
@@ -236,7 +234,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
 
       {/* Floating mood button — only on dashboard */}
       {!isFullView && (
-        <button onClick={() => setPanelOpen('themes')} aria-label="Change background"
+        <button onClick={() => navigate(modeRef.current === 'focus' ? ROUTES.FOCUS_THEMES : ROUTES.THEMES)} aria-label="Change background"
           className="fixed bottom-24 right-4 z-40 w-11 h-11 rounded-full bg-black/40 backdrop-blur-lg border border-white/15 flex items-center justify-center text-white/70 hover:text-white hover:bg-black/55 transition-all shadow-lg active:scale-95">
           <Palette className="w-5 h-5" />
         </button>
@@ -313,13 +311,13 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
       />
 
       {/* Side panels */}
-      <SidePanel open={activePanel === 'tasks'} onClose={handleClosePanel} title="Tasks">
+      <FloatingPanel open={activePanel === 'tasks'} onClose={handleClosePanel} title="Tasks" width={380}>
         <Suspense fallback={null}><TasksPanelLazy /></Suspense>
-      </SidePanel>
+      </FloatingPanel>
 
-      <SidePanel open={activePanel === 'ambience'} onClose={handleClosePanel} title="Ambience">
+      <FloatingPanel open={activePanel === 'ambience'} onClose={handleClosePanel} title="Ambience" width={420}>
         <AmbiencePanel ambienceUrl={ambienceUrl} onAmbienceUrlChange={setAmbienceUrl} />
-      </SidePanel>
+      </FloatingPanel>
 
       {/* Persistent ambience iframe — rendered outside SidePanel so it survives panel close */}
       {ambienceUrl && (

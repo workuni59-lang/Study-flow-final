@@ -3,91 +3,127 @@ import { useAuth } from '../../context/AuthContext';
 import { useStudy } from '../../context/StudyContext';
 import { storage } from '../../services/storage';
 import { Reorder } from 'motion/react';
-import { GripVertical } from 'lucide-react';
+import { CheckSquare, GripVertical, Trash2 } from 'lucide-react';
 
-const DURATIONS = [15, 25, 50, 90];
+const DURATION_OPTIONS = [
+  { value: 5, label: '5m' },
+  { value: 10, label: '10m' },
+  { value: 15, label: '15m' },
+  { value: 30, label: '30m' },
+  { value: 60, label: '1h' },
+  { value: 120, label: '2h' },
+];
 
 export const TasksPanel = () => {
-  const { tasks, addTask, toggleTask, deleteTask, setTasks } = useStudy();
-  const [input, setInput] = useState('');
-  const [duration, setDuration] = useState<number>(25);
+  const { tasks, addTask, toggleTask, deleteTask, setTasks, updateTask } = useStudy();
+  const [adding, setAdding] = useState(false);
 
-  const handleAdd = () => {
-    const text = input.trim();
-    if (!text) return;
-    addTask(text, 'General Study', 'High Yield', undefined, duration);
-    setInput('');
+  const handleAddClick = () => {
+    addTask('', 'General Study', 'High Yield', undefined, 25);
+    setAdding(true);
+  };
+
+  const handleBlur = (id: string, value: string) => {
+    if (!value.trim()) {
+      deleteTask(id);
+    } else {
+      updateTask(id, { title: value });
+    }
+    setAdding(false);
   };
 
   return (
-    <div className="space-y-3">
-      <div className="flex gap-2">
-        <input
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleAdd()}
-          placeholder="Add a task..."
-          className="flex-1 px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-sm dark:text-white placeholder:text-slate-600 dark:placeholder:text-slate-400 border-none outline-none focus:ring-2 focus:ring-brand/30"
-        />
-        <button onClick={handleAdd}
-          className="w-11 h-11 rounded-xl bg-brand text-white flex items-center justify-center shrink-0"
-        >
-          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14" /></svg>
-        </button>
+    <div className="flex flex-col">
+      <style>{`
+        .tasks-list::-webkit-scrollbar { width: 4px; }
+        .tasks-list::-webkit-scrollbar-track { border-radius: 10px; }
+        .tasks-list::-webkit-scrollbar-thumb { border-radius: 10px; background: hsla(0,0%,100%,0.55); }
+        .tasks-list::-webkit-scrollbar-thumb:hover { background: hsla(0,0%,100%,0.3); }
+      `}</style>
+
+      <div className="flex items-center gap-3 px-5 pt-4 pb-3 border-b border-white/[0.06]">
+        <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center shrink-0">
+          <CheckSquare className="w-4 h-4 text-[#7432FF]" />
+        </div>
+        <h3 className="text-base font-bold text-white/90">Tasks</h3>
       </div>
 
-      <div className="flex gap-1.5">
-        {DURATIONS.map(mins => (
-          <button
-            key={mins}
-            type="button"
-            onClick={() => setDuration(mins)}
-            className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all border ${
-              duration === mins
-                ? 'bg-brand/10 text-brand border-brand/30'
-                : 'bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 dark:text-slate-500 border-transparent hover:border-slate-200 dark:hover:border-slate-700'
-            }`}
-          >
-            {mins}m
-          </button>
-        ))}
-      </div>
-
-      <div className="space-y-1">
-        {tasks.length === 0 ? (
-          <p className="text-sm text-slate-600 dark:text-slate-400 dark:text-slate-500 text-center py-8">No tasks yet.</p>
-        ) : (
-          <Reorder.Group axis="y" values={tasks} onReorder={setTasks} className="space-y-1">
-            {tasks.map(task => (
-              <Reorder.Item key={task.id} value={task}
-                className={`flex items-center gap-2 px-3 py-2.5 rounded-xl transition-colors ${
-                  task.completed
-                    ? 'bg-slate-50 dark:bg-slate-900/50'
-                    : 'bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800'
-                }`}>
-                <div className="cursor-grab active:cursor-grabbing text-slate-300 dark:text-slate-600 hover:text-brand/50 transition-colors shrink-0">
-                  <GripVertical className="w-3.5 h-3.5" />
+      {tasks.length > 0 && (
+        <div className="tasks-list overflow-y-auto px-3 py-3 space-y-1.5" style={{ maxHeight: 'calc(70vh - 160px)' }}>
+          <Reorder.Group axis="y" values={tasks} onReorder={setTasks} className="space-y-1.5">
+            {tasks.map((task) => (
+              <Reorder.Item
+                key={task.id}
+                value={task}
+                className="flex items-center gap-2 px-3 py-2.5 rounded-[11px] bg-white/[0.04] border border-transparent transition-colors duration-150 data-[focus-within]:border-white"
+                style={{ boxShadow: '0 4px 6px -1px rgba(0,29,41,0.06), 0 2px 4px -2px rgba(0,29,41,0.06)' }}
+              >
+                <div className="cursor-grab active:cursor-grabbing text-white/20 hover:text-white/50 transition-colors shrink-0 flex items-center justify-center w-[18px]">
+                  <span className="text-sm leading-none" style={{ color: '#4b5563' }}>⠿</span>
                 </div>
-                <button onClick={() => toggleTask(task.id)}
-                  className={`w-5 h-5 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                    task.completed
-                      ? 'bg-emerald-500 text-white'
-                      : 'bg-slate-200 dark:bg-slate-700'
+                <button
+                  onClick={() => toggleTask(task.id)}
+                  className={`w-5 h-5 rounded flex items-center justify-center shrink-0 transition-colors ${
+                    task.completed ? 'bg-[#7432FF]' : 'bg-transparent border border-white/20 hover:border-[#7432FF]'
                   }`}
                 >
-                  {task.completed && <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M20 6L9 17l-5-5" /></svg>}
+                  {task.completed && (
+                    <svg className="w-3 h-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                      <path d="M20 6L9 17l-5-5" />
+                    </svg>
+                  )}
                 </button>
-                <span className={`flex-1 text-sm leading-tight ${task.completed ? 'line-through text-slate-600 dark:text-slate-400 dark:text-slate-500' : 'dark:text-white'}`}>
-                  {task.title}
-                </span>
-                <button onClick={() => deleteTask(task.id)}
-                  className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors shrink-0">
-                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2" /></svg>
+                <input
+                  defaultValue={task.title}
+                  onFocus={(e) => e.currentTarget.parentElement?.setAttribute('data-focus-within', '')}
+                  onBlur={(e) => {
+                    e.currentTarget.parentElement?.removeAttribute('data-focus-within');
+                    handleBlur(task.id, e.currentTarget.value);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') e.currentTarget.blur();
+                  }}
+                  placeholder="Type your priority"
+                  maxLength={25}
+                  className={`flex-1 text-sm font-medium bg-transparent border-none outline-none text-white placeholder-white/30 ${
+                    task.completed ? 'opacity-50 line-through' : ''
+                  }`}
+                />
+                <select
+                  defaultValue={25}
+                  className="appearance-none bg-white/[0.08] rounded-full text-white/70 text-xs px-2.5 py-1 border-none outline-none focus:outline focus:outline-1 focus:outline-[#7432FF] cursor-pointer"
+                >
+                  {DURATION_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value} className="bg-[#1a1a2e] text-white">
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  onClick={() => deleteTask(task.id)}
+                  className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center text-white/30 hover:bg-red-500 hover:text-white transition-colors shrink-0"
+                >
+                  <Trash2 className="w-2.5 h-2.5" />
                 </button>
               </Reorder.Item>
             ))}
           </Reorder.Group>
-        )}
+        </div>
+      )}
+
+      {tasks.length === 0 && !adding && (
+        <div className="px-5 py-12 text-center">
+          <p className="text-sm text-white/30 font-medium">No tasks yet.</p>
+        </div>
+      )}
+
+      <div className="mt-auto px-3 pb-3">
+        <button
+          onClick={handleAddClick}
+          className="w-full py-2.5 rounded-[11px] text-sm font-medium text-white/40 hover:text-white/70 hover:bg-white/[0.04] transition-colors border border-dashed border-white/[0.08]"
+        >
+          + Add Task
+        </button>
       </div>
     </div>
   );

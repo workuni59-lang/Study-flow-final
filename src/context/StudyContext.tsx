@@ -108,6 +108,7 @@ interface StudyContextType {
   addTask: (title: string, category: string, priority: string, dueDate?: string, estimatedMinutes?: number) => void;
   toggleTask: (id: string) => void;
   deleteTask: (id: string) => void;
+  updateTask: (id: string, updates: Partial<Task>) => void;
   addExam: (subject: string, type: string, date: string, subjectId?: string) => void;
   deleteExam: (id: string) => void;
   recalibrateTasks: () => void;
@@ -613,6 +614,10 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
 
   const deleteTask = (id: string) => setTasks(prev => prev.filter(t => t.id !== id));
 
+  const updateTask = useCallback((id: string, updates: Partial<Task>) => {
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
+  }, []);
+
   const addExam = (subject: string, type: string, date: string, subjectId?: string) => {
     const targetDate = new Date(date);
     const diffTime = targetDate.getTime() - new Date().getTime();
@@ -937,7 +942,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   const contextValue = useMemo(() => ({
     accessToken, subjects, tasks, exams, quests, themeConfig, userStats, unlockedBadges, activeNotification,
     confettiActive, panicModeActive, selectedExamForPath, petState, setThemeConfig, addSubject, deleteSubject, addTopic,
-    updateTopicMastery, deleteTopic, addTask, toggleTask, deleteTask, addExam, deleteExam, recalibrateTasks,
+    updateTopicMastery, deleteTopic, addTask, toggleTask, deleteTask, updateTask, addExam, deleteExam, recalibrateTasks,
     setTasks, earnXp, completeFocusSession, logSession, closeNotification, syncPremiumStatus, triggerConfetti, resetStreak, setPanicMode,
     setSelectedExamForPath, feedPet, petInteract, changePetSpecies, changePetSkin, purchaseSkin, setPetName, tickPet, petEvent, firePetEvent,
     showPremiumModal, setShowPremiumModal,

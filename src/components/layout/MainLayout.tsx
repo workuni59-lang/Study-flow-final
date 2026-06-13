@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense, useEffect, useCallback } from 'react';
+import { useState, lazy, Suspense, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X } from 'lucide-react';
 import { useStudy } from '../../context/StudyContext';
@@ -11,7 +11,7 @@ import { HomeView } from './HomeView';
 const FocusEnvironmentLazy = lazy(() => import('./FocusEnvironment').then(m => ({ default: m.FocusEnvironment })));
 import { MenuDrawer, type Section } from './MenuDrawer';
 import { DesktopSidebar } from './DesktopSidebar';
-import { SidePanel } from '../panels/SidePanel';
+import { FloatingPanel } from '../panels/FloatingPanel';
 import { AmbiencePanel, type CuratedPlaylist } from '../panels/AmbiencePanel';
 import { NotesPanel } from '../panels/NotesPanel';
 
@@ -77,18 +77,8 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
     if (typeof path === 'string') navigate(path);
   };
 
-  const setPanelOpen = (p: Panel | null, subTab?: string) => {
-    if (!p) {
-      setMode(mode);
-      return;
-    }
-    let routeKey = `${mode === 'focus' ? 'FOCUS_' : ''}${p.toUpperCase()}` as keyof typeof ROUTES;
-    if (p === 'ambience' && subTab) {
-      routeKey = `${mode === 'focus' ? 'FOCUS_' : ''}AMBIENCE_${subTab.toUpperCase()}` as keyof typeof ROUTES;
-    }
-    const path = ROUTES[routeKey];
-    if (typeof path === 'string') navigate(path);
-  };
+  const modeRef = useRef(mode);
+  useEffect(() => { modeRef.current = mode; }, [mode]);
 
   const handleViewProfile = (userId: string) => {
     navigate(ROUTES.PROFILE(userId));
@@ -102,12 +92,20 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
   const handleMenuOpen = useCallback(() => setMenuOpen(v => !v), []);
   const handleLeaderboardOpen = useCallback(() => setSection('leaderboard'), []);
   const handleProfileOpen = useCallback(() => handleViewProfile(user?.uid || 'me'), [user?.uid]);
-  const handleTasksOpen = useCallback(() => setPanelOpen('tasks'), []);
-  const handleMusicOpen = useCallback(() => setPanelOpen('ambience'), []);
-  const handleNotepadOpen = useCallback(() => setPanelOpen('notepad'), []);
+  const handleTasksOpen = useCallback(() => {
+    navigate(modeRef.current === 'focus' ? ROUTES.FOCUS_TASKS : ROUTES.TASKS);
+  }, [navigate]);
+  const handleMusicOpen = useCallback(() => {
+    navigate(modeRef.current === 'focus' ? ROUTES.FOCUS_AMBIENCE : ROUTES.AMBIENCE);
+  }, [navigate]);
+  const handleNotepadOpen = useCallback(() => {
+    navigate(modeRef.current === 'focus' ? ROUTES.FOCUS_NOTEPAD : ROUTES.NOTEPAD);
+  }, [navigate]);
   const handleStatsOpen = useCallback(() => navigate(ROUTES.ANALYTICS), []);
   const handleQuestsOpen = useCallback(() => setSection('quests'), []);
-  const handleClosePanel = useCallback(() => setPanelOpen(null), []);
+  const handleClosePanel = useCallback(() => {
+    navigate(modeRef.current === 'focus' ? ROUTES.FOCUS : ROUTES.HOME);
+  }, [navigate]);
 
   useEffect(() => {
     if (levelUpEvent) {
@@ -238,13 +236,13 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
       />
 
       {/* Side panels */}
-      <SidePanel open={activePanel === 'tasks'} onClose={handleClosePanel} title="Tasks">
+      <FloatingPanel open={activePanel === 'tasks'} onClose={handleClosePanel} title="Tasks" width={380}>
         <Suspense fallback={null}><TasksPanelLazy /></Suspense>
-      </SidePanel>
+      </FloatingPanel>
 
-      <SidePanel open={activePanel === 'ambience'} onClose={handleClosePanel} title="Ambience">
+      <FloatingPanel open={activePanel === 'ambience'} onClose={handleClosePanel} title="Ambience" width={420}>
         <AmbiencePanel ambienceUrl={ambienceUrl} onAmbienceUrlChange={setAmbienceUrl} />
-      </SidePanel>
+      </FloatingPanel>
       {/* Persistent ambience iframe — rendered outside SidePanel so it survives panel close */}
       {ambienceUrl && (
         <div className="fixed bottom-4 right-4 z-50 w-80 rounded-xl overflow-hidden shadow-2xl border border-white/10 bg-black/80 backdrop-blur-lg">

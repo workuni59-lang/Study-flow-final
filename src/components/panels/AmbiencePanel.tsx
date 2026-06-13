@@ -224,31 +224,29 @@ export const AmbiencePanel = ({ ambienceUrl, onAmbienceUrlChange }: AmbiencePane
               </button>
 
               {/* Sound Button (emoji) */}
-              <button onClick={() => {
-                if (asset.isPremium && !userStats.isPremium) { setShowPremiumModal(true); return; }
-                if (atMaxLayers && !isActive) return;
-                toggleTrack(asset.id);
-              }}
-                className="w-full flex flex-col items-center gap-2">
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all text-xl relative ${
-                  isActive
-                    ? 'bg-brand/20 text-brand scale-110'
-                    : 'bg-white dark:bg-white/5 shadow-sm group-hover:scale-105'
-                }`}>
-                  <span className={isActive && !isLoading && !isError ? 'animate-pulse' : ''}>{asset.emoji}</span>
-                  {isLoading && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-2xl">
-                      <Loader2 className="w-5 h-5 animate-spin text-brand" />
-                    </div>
-                  )}
-                  {isError && (
-                    <div className="absolute -top-1 -right-1 bg-rose-500 rounded-full p-0.5">
-                      <AlertCircle className="w-3 h-3 text-white" />
-                    </div>
-                  )}
-                </div>
-                <span className="text-[10px] font-bold tracking-tight text-center leading-tight dark:text-white/80">{asset.name}</span>
-              </button>
+                <button onClick={() => {
+                  if (asset.isPremium && !userStats.isPremium) { setShowPremiumModal(true); return; }
+                  if (atMaxLayers && !isActive) return;
+                  toggleTrack(asset.id);
+                }}
+                  className="w-full flex flex-col items-center gap-1.5 relative">
+                  <span className={`text-[1.875rem] leading-none transition-all relative ${
+                    isActive ? 'scale-110' : ''
+                  }`}>
+                    {asset.emoji}
+                    {isLoading && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Loader2 className="w-5 h-5 animate-spin text-[#7432FF]" />
+                      </div>
+                    )}
+                    {isError && (
+                      <div className="absolute -top-1 -right-2">
+                        <AlertCircle className="w-3.5 h-3.5 text-rose-500" />
+                      </div>
+                    )}
+                  </span>
+                  <span className="text-[0.75rem] font-semibold text-center leading-tight text-white/80">{asset.name}</span>
+                </button>
 
               {/* Per-track Volume Slider (always visible, disabled when inactive) */}
               <div className="mt-2 px-1">
@@ -363,19 +361,14 @@ export const AmbiencePanel = ({ ambienceUrl, onAmbienceUrlChange }: AmbiencePane
       <div className="grid grid-cols-2 gap-2">
         {CURATED_PLAYLISTS.map(pl => (
           <button key={pl.embedUrl} onClick={() => onAmbienceUrlChange(pl)}
-            className={`flex items-center gap-3 p-3 rounded-[20px] transition-all group text-left ${
+            className={`flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all ${
               ambienceUrl?.embedUrl === pl.embedUrl
-                ? 'bg-brand/10 ring-2 ring-brand/20'
-                : 'bg-slate-50 dark:bg-white/[0.03] border border-transparent hover:border-slate-200 dark:hover:border-white/10'
+                ? 'bg-white/[0.06] ring-1 ring-white/20'
+                : 'bg-white/[0.02] hover:bg-white/[0.06]'
             }`}>
-            <div className="w-10 h-10 rounded-xl bg-white dark:bg-white/5 flex items-center justify-center text-lg shadow-sm group-hover:scale-105 transition-transform">
-              {pl.emoji}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-[11px] font-bold truncate dark:text-white/80">{pl.name}</div>
-              <div className="text-[9px] font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wider">{pl.service}</div>
-            </div>
-            <Play className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <span className="text-[1.875rem] leading-none">{pl.emoji}</span>
+            <span className="text-[0.75rem] font-semibold text-white/80 text-center leading-tight">{pl.name}</span>
+            <span className="text-[0.625rem] font-medium text-white/30 uppercase tracking-wider">{pl.service}</span>
           </button>
         ))}
       </div>
@@ -384,20 +377,26 @@ export const AmbiencePanel = ({ ambienceUrl, onAmbienceUrlChange }: AmbiencePane
 
   return (
     <div className="space-y-5 pb-4">
+      <style>{`
+        .ambience-body::-webkit-scrollbar { width: 4px; }
+        .ambience-body::-webkit-scrollbar-track { border-radius: 10px; }
+        .ambience-body::-webkit-scrollbar-thumb { border-radius: 10px; background: hsla(0,0%,100%,0.55); }
+        .ambience-body::-webkit-scrollbar-thumb:hover { background: hsla(0,0%,100%,0.3); }
+      `}</style>
+
       {/* Tab Navigation */}
-      <div className="flex gap-1 p-1 rounded-2xl bg-slate-100 dark:bg-white/[0.03]">
+      <div className="flex items-center gap-4 pb-3 border-b border-white/[0.12]">
         {[
           { id: 'sounds' as AmbienceTab, label: 'Sounds', icon: Headphones },
           { id: 'music' as AmbienceTab, label: 'My Music', icon: Music2 },
           { id: 'playlists' as AmbienceTab, label: 'Playlists', icon: Radio },
         ].map(tab => (
           <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-1.5 flex-1 px-3 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${
+            className={`text-sm font-bold tracking-[-0.8px] transition-colors ${
               activeTab === tab.id
-                ? 'bg-white dark:bg-white/10 text-brand shadow-sm'
-                : 'text-slate-600 dark:text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
+                ? 'text-white'
+                : 'text-white/30 hover:text-white/60'
             }`}>
-            <tab.icon className="w-3 h-3" />
             {tab.label}
           </button>
         ))}

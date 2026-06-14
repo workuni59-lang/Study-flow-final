@@ -1,31 +1,3 @@
-import { NavLink, Link } from 'react-router-dom';
-import { BarChart3, BookOpen, Award, Settings, Crown, LogOut, Sparkles, Zap, Target } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
-import { useStudy } from '../../context/StudyContext';
-import { PROGRESSION_BADGES } from '../../lib/progression';
-import { BadgeSvg, type BadgeTier } from '../progression/BadgeSvg';
-import { ROUTES } from '../../lib/routes';
-export type Section = 'dashboard' | 'subjects' | 'achievements' | 'analytics' | 'settings' | 'quests' | 'progression' | 'leaderboard' | 'profile' | 'pomodoro';
-
-interface MenuDrawerProps {
-  open: boolean;
-  onClose: () => void;
-  activeSection: Section;
-  onNavigate: (s: Section) => void;
-}
-
-const BADGE_TIER: Record<string, BadgeTier> = {
-  bronze: 'bronze', silver: 'silver', gold: 'gold', platinum: 'platinum', diamond: 'diamond', legend: 'legend',
-};
-
-const MENU_ITEMS: { key: Section; icon: typeof BarChart3; label: string }[] = [
-  { key: 'analytics', icon: BarChart3, label: 'Analytics' },
-  { key: 'quests', icon: Target, label: 'Quests' },
-  { key: 'subjects', icon: BookOpen, label: 'Subjects' },
-  { key: 'achievements', icon: Award, label: 'Achievements' },
-  { key: 'settings', icon: Settings, label: 'Settings' },
-];
-
 import { motion, AnimatePresence } from 'motion/react';
 import { NavLink, Link } from 'react-router-dom';
 import { BarChart3, BookOpen, Award, Settings, Crown, LogOut, Sparkles, Zap, Target, X } from 'lucide-react';
@@ -34,6 +6,7 @@ import { useStudy } from '../../context/StudyContext';
 import { PROGRESSION_BADGES } from '../../lib/progression';
 import { BadgeSvg, type BadgeTier } from '../progression/BadgeSvg';
 import { ROUTES } from '../../lib/routes';
+
 export type Section = 'dashboard' | 'subjects' | 'achievements' | 'analytics' | 'settings' | 'quests' | 'progression' | 'leaderboard' | 'profile' | 'pomodoro';
 
 interface MenuDrawerProps {

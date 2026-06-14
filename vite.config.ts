@@ -17,7 +17,7 @@ export default defineConfig((): UserConfig => {
         registerType: 'autoUpdate',
         includeAssets: ['favicon.ico', 'logo.png', 'robots.txt'],
         manifest: {
-          name: 'StudyFlow – Focus Timer & Study Dashboard',
+          name: 'StudyFlow',
           short_name: 'StudyFlow',
           description: 'StudyFlow – your all-in-one focus timer, study dashboard, and gamified productivity companion.',
           theme_color: '#6366f1',
@@ -36,10 +36,10 @@ export default defineConfig((): UserConfig => {
               type: 'image/png'
             },
             {
-              src: 'logo.png',
+              src: 'logo-maskable.png',
               sizes: '512x512',
               type: 'image/png',
-              purpose: 'any maskable'
+              purpose: 'maskable'
             }
           ]
         },

@@ -242,7 +242,8 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
       {/* Main content area */}
       <div className="relative z-10">
 
-        {/* Full-view pages (analytics, subjects, achievements, settings) */}
+      {/* Full-view pages (analytics, subjects, achievements, settings) */}
+      <AnimatePresence>
         {showMoodPicker && (
           <>
             <motion.div

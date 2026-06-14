@@ -66,7 +66,7 @@ export default function AnalyticsOverview({ userStats }: Props) {
       </div>
 
       <div className="relative p-4 rounded-2xl bg-white/[0.04] border border-white/[0.06] overflow-hidden">
-        <div className={`${!isPremium ? 'blur-sm select-none pointer-events-none' : ''}`}>
+        <div className={`${!isPremium ? 'pointer-events-none opacity-30 saturate-50' : ''}`}>
           <div className="flex items-center gap-2 mb-3">
             <TrendingUp className="w-3.5 h-3.5 text-brand-light" />
             <span className="text-[9px] font-bold text-white/40 uppercase tracking-wider">Weekly XP</span>
@@ -92,7 +92,7 @@ export default function AnalyticsOverview({ userStats }: Props) {
           </div>
         </div>
         {!isPremium && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-2xl bg-slate-950/65 backdrop-blur-[2px]">
             <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
               <Lock className="w-4 h-4 text-amber-400" />
             </div>

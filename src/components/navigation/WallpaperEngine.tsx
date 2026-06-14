@@ -89,9 +89,9 @@ export const WallpaperEngine = ({ visible = true, staticOnly = false }: { visibl
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
     const rawUrl = themeConfig.wallpaper === 'custom' ? themeConfig.customWallpaperUrl : effectiveWallpaper.url;
     
-    // Optimize Unsplash URLs for mobile
+    // Optimize Unsplash URLs for mobile - use 1080 for clarity on Retina screens
     const finalUrl = isMobile && rawUrl?.includes('unsplash.com') 
-      ? rawUrl.replace('w=2000', 'w=600') 
+      ? rawUrl.replace('w=2000', 'w=1080') 
       : rawUrl;
 
     return (
@@ -99,6 +99,12 @@ export const WallpaperEngine = ({ visible = true, staticOnly = false }: { visibl
         {!reduceMotion && (
           <style>
             {`
+              @keyframes mobile-breathing {
+                0%, 100% { transform: scale(1.05) translate(0%, 0%); }
+                25% { transform: scale(1.08) translate(1%, 1%); }
+                50% { transform: scale(1.1) translate(-1%, 0%); }
+                75% { transform: scale(1.08) translate(0%, -1%); }
+              }
               @keyframes aurora-wave-fast {
                 0%, 100% { transform: skewX(-20deg) translateX(-10%); opacity: 0.4; }
                 50% { transform: skewX(-15deg) translateX(10%); opacity: 0.8; }
@@ -141,14 +147,14 @@ export const WallpaperEngine = ({ visible = true, staticOnly = false }: { visibl
                 >
                   <motion.div
                     style={{ 
-                      x: imageX, 
-                      y: imageY,
-                      scale: 1.1,
+                      x: isMobile ? 0 : imageX, 
+                      y: isMobile ? 0 : imageY,
+                      scale: isMobile ? 1 : 1.1,
                       backgroundImage: `url(${finalUrl})`,
                       backgroundSize: 'cover',
                       backgroundPosition: 'center',
                     }}
-                    className="absolute inset-[-5%]"
+                    className={`absolute inset-[-5%] ${isMobile && !shouldReduceMotion ? 'animate-[mobile-breathing_40s_infinite_linear]' : ''}`}
                   />
                   <div className="absolute inset-0 bg-black/5 dark:bg-black/20" />
                 </motion.div>

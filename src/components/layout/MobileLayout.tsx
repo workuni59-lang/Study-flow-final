@@ -338,7 +338,6 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
           </>
         )}
       </AnimatePresence>
-      </AnimatePresence>
 
       {/* Menu drawer (slide-in from left) */}
       <MenuDrawer

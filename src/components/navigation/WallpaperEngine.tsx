@@ -72,6 +72,10 @@ export const WallpaperEngine = ({ visible = true, staticOnly = false }: { visibl
   };
 
   const currentWallpaper = WALLPAPERS.find(w => w.id === themeConfig.wallpaper) || WALLPAPERS[0];
+  const staticFallback = WALLPAPERS.find(w => w.type === 'image' && w.id !== 'none') || currentWallpaper;
+  const effectiveWallpaper = staticOnly
+    ? (WALLPAPERS.find(w => w.type === 'image' && w.id === themeConfig.wallpaper) || staticFallback)
+    : currentWallpaper;
   const baseClass = baseBackgrounds[themeConfig.atmosphere] || baseBackgrounds.indigo;
   const currentGlow = atmosphereGlows[themeConfig.atmosphere] || atmosphereGlows.indigo;
 
@@ -81,7 +85,7 @@ export const WallpaperEngine = ({ visible = true, staticOnly = false }: { visibl
   const renderWallpaper = () => {
     const isEnabled = themeConfig.wallpaper !== 'none';
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-    const rawUrl = themeConfig.wallpaper === 'custom' ? themeConfig.customWallpaperUrl : currentWallpaper.url;
+    const rawUrl = themeConfig.wallpaper === 'custom' ? themeConfig.customWallpaperUrl : effectiveWallpaper.url;
     
     // Optimize Unsplash URLs for mobile
     const finalUrl = isMobile && rawUrl?.includes('unsplash.com') 
@@ -124,9 +128,9 @@ export const WallpaperEngine = ({ visible = true, staticOnly = false }: { visibl
           <div className="absolute inset-0 overflow-hidden" style={{ filter: filterStyle, willChange: 'filter' }}>
             {/* Image Wallpaper Layer */}
             <AnimatePresence mode="wait">
-              {(currentWallpaper.type === 'image' || themeConfig.wallpaper === 'custom') && (
+              {(effectiveWallpaper.type === 'image' || themeConfig.wallpaper === 'custom') && (
                 <motion.div
-                  key={themeConfig.wallpaper === 'custom' ? themeConfig.customWallpaperUrl : currentWallpaper.id}
+                  key={themeConfig.wallpaper === 'custom' ? themeConfig.customWallpaperUrl : effectiveWallpaper.id}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
@@ -150,7 +154,7 @@ export const WallpaperEngine = ({ visible = true, staticOnly = false }: { visibl
             </AnimatePresence>
 
             {/* Dynamic Focus Lens */}
-            {!staticOnly && !reduceMotion && currentWallpaper.type === 'animated' && (
+            {!staticOnly && !reduceMotion && effectiveWallpaper.type === 'animated' && (
               <motion.div 
                 style={{ left: lensX, top: lensY, willChange: "transform" }}
                 className={`absolute w-[40vw] h-[40vw] rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2 opacity-30 ${currentGlow}`}
@@ -241,7 +245,7 @@ export const WallpaperEngine = ({ visible = true, staticOnly = false }: { visibl
             )}
 
             {/* Clean Solid */}
-            {!reduceMotion && themeConfig.wallpaper === 'minimal' && (
+            {!shouldReduceMotion && themeConfig.wallpaper === 'minimal' && (
               <div className="absolute inset-0 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-indigo-500/8 dark:to-indigo-400/15" />
                 <div className="absolute inset-0 bg-radial-[circle_at_center] from-transparent via-transparent to-slate-950/30 dark:to-black/50" />
@@ -249,7 +253,7 @@ export const WallpaperEngine = ({ visible = true, staticOnly = false }: { visibl
             )}
 
             {/* Moods (CSS Gradient Collection) — no parallax / no mouse tracking */}
-            {currentWallpaper.category === 'Moods' && (
+            {!staticOnly && effectiveWallpaper.category === 'Moods' && (
               <div
                 className={`absolute inset-0 ${MOOD_ANIMATED.has(themeConfig.wallpaper) ? 'animate-mood-shift' : ''}`}
                 style={{

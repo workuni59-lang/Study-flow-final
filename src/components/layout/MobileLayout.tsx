@@ -24,6 +24,7 @@ import { AchievementNotification } from '../notifications/AchievementNotificatio
 import { Confetti } from '../notifications/Confetti';
 import { LevelUpModal } from '../modals/LevelUpModal';
 import { PanicModeUI } from '../dashboard/PanicModeUI';
+import { WallpaperEngine } from '../navigation/WallpaperEngine';
 import { storage } from '../../services/storage';
 
 const AnalyticsDashboardLazy = lazy(() => import('../analytics/AnalyticsDashboard'));
@@ -126,11 +127,8 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
 
   const isFullView = section !== 'dashboard';
 
-  const isMood = themeConfig.wallpaper in MOOD_GRADIENTS;
-  const moodGradient = isMood ? MOOD_GRADIENTS[themeConfig.wallpaper] : undefined;
-
-  const moodWallpapers = useMemo(() =>
-    WALLPAPERS.filter(w => w.category === 'Moods'),
+  const staticWallpapers = useMemo(() =>
+    WALLPAPERS.filter(w => w.type === 'image'),
   []);
 
   const handleMoodSelect = (id: string, isPremium: boolean) => {
@@ -158,18 +156,8 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
     <div className={`min-h-screen transition-colors duration-1000 ${baseBg[themeConfig.atmosphere] || baseBg.indigo} relative overflow-hidden`} style={{ backgroundAttachment: 'scroll' }}>
       <style>{skeletonKeyframes}</style>
       
-      {/* Background Layer with Cross-fade */}
-      <AnimatePresence mode="popLayout">
-        <motion.div
-          key={themeConfig.wallpaper}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 1 }}
-          className="fixed inset-0 pointer-events-none z-0"
-          style={{ backgroundImage: moodGradient }}
-        />
-      </AnimatePresence>
+      {/* Background Engine - Static Only on Mobile */}
+      <WallpaperEngine visible={section === 'dashboard'} staticOnly={true} />
 
       {/* Main content area */}
       <div className="relative z-10">
@@ -287,16 +275,16 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
                 </button>
               </div>
 
-              {/* Mood grid */}
-              <div className="grid grid-cols-5 gap-3 px-5 max-h-[50vh] overflow-y-auto no-scrollbar">
-                {moodWallpapers.map(w => {
+              {/* Wallpaper grid */}
+              <div className="grid grid-cols-3 gap-3 px-5 max-h-[50vh] overflow-y-auto no-scrollbar">
+                {staticWallpapers.map(w => {
                   const selected = themeConfig.wallpaper === w.id;
                   return (
                     <button key={w.id} onClick={() => handleMoodSelect(w.id, w.isPremium)}
-                      className={`relative w-full aspect-square rounded-2xl transition-all active:scale-90 ${
+                      className={`relative w-full aspect-[4/3] rounded-2xl transition-all active:scale-90 ${
                         selected ? 'ring-2 ring-white ring-offset-2 ring-offset-[#0f0f1f]' : 'ring-1 ring-white/[0.06] hover:ring-white/25'
                       }`}
-                      style={{ background: MOOD_GRADIENTS[w.id] }}
+                      style={{ backgroundImage: `url(${w.url})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
                       title={w.name}>
                       {selected && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-2xl">

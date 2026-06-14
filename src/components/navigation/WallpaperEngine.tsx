@@ -5,9 +5,10 @@ import { WALLPAPERS } from '../../lib/gamification';
 import { MOOD_GRADIENTS, MOOD_ANIMATED } from '../../lib/wallpapers';
 import { useReduceMotion } from '../../hooks/useReduceMotion';
 
-export const WallpaperEngine = ({ visible = true }: { visible?: boolean }) => {
+export const WallpaperEngine = ({ visible = true, staticOnly = false }: { visible?: boolean, staticOnly?: boolean }) => {
   const { themeConfig } = useStudy();
   const reduceMotion = useReduceMotion();
+  const shouldReduceMotion = reduceMotion || staticOnly;
 
   // Mouse Tracking for Interactive Parallax (disabled when reduceMotion is active)
   const mouseX = useMotionValue(0.5);
@@ -143,7 +144,7 @@ export const WallpaperEngine = ({ visible = true }: { visible?: boolean }) => {
             </AnimatePresence>
 
             {/* Dynamic Focus Lens */}
-            {!reduceMotion && currentWallpaper.type === 'animated' && (
+            {!staticOnly && !reduceMotion && currentWallpaper.type === 'animated' && (
               <motion.div 
                 style={{ left: lensX, top: lensY, willChange: "transform" }}
                 className={`absolute w-[40vw] h-[40vw] rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2 opacity-30 ${currentGlow}`}
@@ -151,7 +152,7 @@ export const WallpaperEngine = ({ visible = true }: { visible?: boolean }) => {
             )}
 
             {/* Animated Mesh */}
-            {!reduceMotion && themeConfig.wallpaper === 'mesh' && (
+            {!staticOnly && !reduceMotion && themeConfig.wallpaper === 'mesh' && (
               <div className="absolute inset-0 overflow-hidden opacity-80">
                 <motion.div style={{ x: meshX1, y: meshY1 }} className="absolute top-[-20%] left-[-20%] w-[80%] h-[80%] rounded-full blur-[140px] bg-indigo-500/40" />
                 <motion.div style={{ x: meshX2, y: meshY2 }} className="absolute bottom-[-10%] right-[-10%] w-[90%] h-[90%] rounded-full blur-[160px] bg-violet-600/30" />
@@ -160,7 +161,7 @@ export const WallpaperEngine = ({ visible = true }: { visible?: boolean }) => {
             )}
 
             {/* Arctic Aurora */}
-            {!reduceMotion && themeConfig.wallpaper === 'aurora' && (
+            {!staticOnly && !reduceMotion && themeConfig.wallpaper === 'aurora' && (
               <div className="absolute inset-0 overflow-hidden">
                 <motion.div style={{ x: auroraX }} className="absolute inset-x-[-20%] inset-y-0 flex justify-around opacity-60 blur-[80px]">
                     {[...Array(4)].map((_, i) => (
@@ -173,7 +174,7 @@ export const WallpaperEngine = ({ visible = true }: { visible?: boolean }) => {
             )}
 
             {/* Cyber Library */}
-            {!reduceMotion && themeConfig.wallpaper === 'cyberpunk' && (
+            {!staticOnly && !reduceMotion && themeConfig.wallpaper === 'cyberpunk' && (
               <div className="absolute inset-0 overflow-hidden">
                 <div className="absolute inset-0 opacity-[0.05] dark:opacity-[0.1]" style={{ backgroundImage: 'linear-gradient(#f0f 1px, transparent 1px), linear-gradient(90deg, #f0f 1px, transparent 1px)', backgroundSize: '100px 100px' }} />
                 {[...Array(12)].map((_, i) => (
@@ -185,7 +186,7 @@ export const WallpaperEngine = ({ visible = true }: { visible?: boolean }) => {
             )}
 
             {/* Zen Garden */}
-            {!reduceMotion && themeConfig.wallpaper === 'zen' && (
+            {!staticOnly && !reduceMotion && themeConfig.wallpaper === 'zen' && (
               <div className="absolute inset-0 overflow-hidden">
                 <svg className="absolute inset-0 w-full h-full opacity-[0.12] dark:opacity-[0.2]" viewBox="0 0 100 100" preserveAspectRatio="none">
                   {[...Array(20)].map((_, i) => (
@@ -212,7 +213,7 @@ export const WallpaperEngine = ({ visible = true }: { visible?: boolean }) => {
             )}
 
             {/* Deep Space */}
-            {!reduceMotion && themeConfig.wallpaper === 'stardust' && (
+            {!staticOnly && !reduceMotion && themeConfig.wallpaper === 'stardust' && (
               <motion.div style={{ x: starX, y: starY }} className="absolute inset-[-10%]">
                 {[...Array(40)].map((_, i) => (
                   <div key={i} className="absolute w-1.5 h-1.5 bg-white rounded-full"
@@ -227,7 +228,7 @@ export const WallpaperEngine = ({ visible = true }: { visible?: boolean }) => {
             )}
 
             {/* Focus Dots */}
-            {!reduceMotion && themeConfig.wallpaper === 'dots' && (
+            {!staticOnly && !reduceMotion && themeConfig.wallpaper === 'dots' && (
               <motion.div style={{ x: dotsX, y: dotsY, backgroundImage: `radial-gradient(circle at center, #6366f1 2px, transparent 2px)`, backgroundSize: '56px 56px' }}
                 className="absolute inset-[-20%] opacity-[0.2] dark:opacity-[0.35]" 
               />

@@ -127,8 +127,12 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
 
   const isFullView = section !== 'dashboard';
 
+  const moodWallpapers = useMemo(() =>
+    WALLPAPERS.filter(w => w.category === 'Moods'),
+  []);
+
   const staticWallpapers = useMemo(() =>
-    WALLPAPERS.filter(w => w.type === 'image'),
+    WALLPAPERS.filter(w => w.type === 'image' && w.category !== 'Moods'),
   []);
 
   const handleMoodSelect = (id: string, isPremium: boolean) => {
@@ -276,29 +280,64 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
               </div>
 
               {/* Wallpaper grid */}
-              <div className="grid grid-cols-3 gap-3 px-5 max-h-[50vh] overflow-y-auto no-scrollbar">
-                {staticWallpapers.map(w => {
-                  const selected = themeConfig.wallpaper === w.id;
-                  return (
-                    <button key={w.id} onClick={() => handleMoodSelect(w.id, w.isPremium)}
-                      className={`relative w-full aspect-[4/3] rounded-2xl transition-all active:scale-90 ${
-                        selected ? 'ring-2 ring-white ring-offset-2 ring-offset-[#0f0f1f]' : 'ring-1 ring-white/[0.06] hover:ring-white/25'
-                      }`}
-                      style={{ backgroundImage: `url(${w.url})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
-                      title={w.name}>
-                      {selected && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-2xl">
-                          <Check className="w-5 h-5 text-white drop-shadow-md" />
-                        </div>
-                      )}
-                      {!userStats.isPremium && w.isPremium && (
-                        <div className="absolute top-0.5 right-0.5">
-                          <Crown className="w-3 h-3 text-amber-400 drop-shadow-md" />
-                        </div>
-                      )}
-                    </button>
-                  );
-                })}
+              <div className="space-y-4 max-h-[50vh] overflow-y-auto no-scrollbar pb-8 px-5">
+                {/* Moods Section */}
+                <div>
+                  <h3 className="text-xs font-semibold text-white/50 mb-3 uppercase tracking-wider">Moods</h3>
+                  <div className="grid grid-cols-5 gap-3">
+                    {moodWallpapers.map(w => {
+                      const selected = themeConfig.wallpaper === w.id;
+                      return (
+                        <button key={w.id} onClick={() => handleMoodSelect(w.id, w.isPremium)}
+                          className={`relative w-full aspect-square rounded-2xl transition-all active:scale-90 ${
+                            selected ? 'ring-2 ring-white ring-offset-2 ring-offset-[#0f0f1f]' : 'ring-1 ring-white/[0.06] hover:ring-white/25'
+                          }`}
+                          style={{ background: MOOD_GRADIENTS[w.id] }}
+                          title={w.name}>
+                          {selected && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-2xl">
+                              <Check className="w-5 h-5 text-white drop-shadow-md" />
+                            </div>
+                          )}
+                          {!userStats.isPremium && w.isPremium && (
+                            <div className="absolute top-0.5 right-0.5">
+                              <Crown className="w-3 h-3 text-amber-400 drop-shadow-md" />
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Static Wallpapers Section */}
+                <div>
+                  <h3 className="text-xs font-semibold text-white/50 mb-3 uppercase tracking-wider">Photos</h3>
+                  <div className="grid grid-cols-3 gap-3">
+                    {staticWallpapers.map(w => {
+                      const selected = themeConfig.wallpaper === w.id;
+                      return (
+                        <button key={w.id} onClick={() => handleMoodSelect(w.id, w.isPremium)}
+                          className={`relative w-full aspect-[4/3] rounded-2xl transition-all active:scale-90 ${
+                            selected ? 'ring-2 ring-white ring-offset-2 ring-offset-[#0f0f1f]' : 'ring-1 ring-white/[0.06] hover:ring-white/25'
+                          }`}
+                          style={{ backgroundImage: `url(${w.url})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+                          title={w.name}>
+                          {selected && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-2xl">
+                              <Check className="w-5 h-5 text-white drop-shadow-md" />
+                            </div>
+                          )}
+                          {!userStats.isPremium && w.isPremium && (
+                            <div className="absolute top-0.5 right-0.5">
+                              <Crown className="w-3 h-3 text-amber-400 drop-shadow-md" />
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             </motion.div>
           </>

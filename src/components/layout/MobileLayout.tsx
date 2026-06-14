@@ -71,6 +71,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [ambienceUrl, setAmbienceUrl] = useState<CuratedPlaylist | null>(null);
   const [showLevelUp, setShowLevelUp] = useState(false);
+  const [themeTab, setThemeTab] = useState<'moods' | 'photos'>('moods');
 
   const showMoodPicker = activePanel === 'themes';
 
@@ -174,7 +175,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
   };
 
   return (
-    <div className={`min-h-screen transition-colors duration-1000 ${baseBg[themeConfig.atmosphere] || baseBg.indigo} relative overflow-hidden`} style={{ backgroundAttachment: 'scroll' }}>
+    <div className={`min-h-screen transition-colors duration-1000 ${section === 'dashboard' ? '' : (baseBg[themeConfig.atmosphere] || baseBg.indigo)} relative overflow-hidden`} style={{ backgroundAttachment: 'scroll' }}>
       <style>{skeletonKeyframes}</style>
       
       {/* Background Engine - Static Only on Mobile */}
@@ -281,18 +282,30 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
 
               {/* Header */}
               <div className="flex items-center justify-between px-5 py-3">
-                <span className="text-sm font-semibold text-white/90">Mood</span>
+                <span className="text-sm font-semibold text-white/90">Theme</span>
                 <button onClick={() => setShowMoodPicker(false)} aria-label="Close"
                   className="w-7 h-7 rounded-full bg-white/[0.06] flex items-center justify-center text-white/40 hover:text-white hover:bg-white/[0.12] transition-all">
                   <X className="w-3.5 h-3.5" />
                 </button>
               </div>
 
+              {/* Tabs */}
+              <div className="flex px-5 mb-4 border-b border-white/[0.05]">
+                <button onClick={() => setThemeTab('moods')}
+                  className={`pb-2 px-1 text-xs font-bold uppercase tracking-widest transition-colors relative ${themeTab === 'moods' ? 'text-indigo-400' : 'text-white/40'}`}>
+                  Moods
+                  {themeTab === 'moods' && <motion.div layoutId="activeThemeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-400" />}
+                </button>
+                <button onClick={() => setThemeTab('photos')}
+                  className={`pb-2 px-1 ml-6 text-xs font-bold uppercase tracking-widest transition-colors relative ${themeTab === 'photos' ? 'text-indigo-400' : 'text-white/40'}`}>
+                  Photos
+                  {themeTab === 'photos' && <motion.div layoutId="activeThemeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-400" />}
+                </button>
+              </div>
+
               {/* Wallpaper grid */}
-              <div className="space-y-4 max-h-[50vh] overflow-y-auto no-scrollbar pb-8 px-5">
-                {/* Moods Section */}
-                <div>
-                  <h3 className="text-xs font-semibold text-white/50 mb-3 uppercase tracking-wider">Moods</h3>
+              <div className="max-h-[50vh] overflow-y-auto no-scrollbar pb-8 px-5">
+                {themeTab === 'moods' ? (
                   <div className="grid grid-cols-5 gap-3">
                     {moodWallpapers.map(w => {
                       const selected = themeConfig.wallpaper === w.id;
@@ -317,12 +330,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
                       );
                     })}
                   </div>
-                </div>
-
-                {/* Photos Section */}
-                <div>
-                  <h3 className="text-xs font-semibold text-white/50 mb-3 uppercase tracking-wider">Photos</h3>
-                  <p className="text-[11px] text-white/45 mb-3">Static-only options for smoother mobile performance.</p>
+                ) : (
                   <div className="grid grid-cols-3 gap-3">
                     {mobilePhotoWallpapers.map(w => {
                       const selected = themeConfig.wallpaper === w.id;
@@ -347,7 +355,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
                       );
                     })}
                   </div>
-                </div>
+                )}
               </div>
             </motion.div>
           </>

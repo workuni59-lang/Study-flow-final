@@ -73,8 +73,10 @@ export const WallpaperEngine = ({ visible = true, staticOnly = false }: { visibl
 
   const currentWallpaper = WALLPAPERS.find(w => w.id === themeConfig.wallpaper) || WALLPAPERS[0];
   const staticFallback = WALLPAPERS.find(w => w.type === 'image' && w.id !== 'none') || currentWallpaper;
+  
+  // On mobile (staticOnly), we allow both Photos (type: image) and Moods (category: Moods)
   const effectiveWallpaper = staticOnly
-    ? (WALLPAPERS.find(w => w.type === 'image' && w.id === themeConfig.wallpaper) || staticFallback)
+    ? (WALLPAPERS.find(w => (w.type === 'image' || w.category === 'Moods') && w.id === themeConfig.wallpaper) || staticFallback)
     : currentWallpaper;
   const baseClass = baseBackgrounds[themeConfig.atmosphere] || baseBackgrounds.indigo;
   const currentGlow = atmosphereGlows[themeConfig.atmosphere] || atmosphereGlows.indigo;

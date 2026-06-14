@@ -253,12 +253,12 @@ export const WallpaperEngine = ({ visible = true, staticOnly = false }: { visibl
             )}
 
             {/* Moods (CSS Gradient Collection) — no parallax / no mouse tracking */}
-            {!staticOnly && effectiveWallpaper.category === 'Moods' && (
+            {effectiveWallpaper.category === 'Moods' && (
               <div
-                className={`absolute inset-0 ${MOOD_ANIMATED.has(themeConfig.wallpaper) ? 'animate-mood-shift' : ''}`}
+                className={`absolute inset-0 ${!staticOnly && MOOD_ANIMATED.has(themeConfig.wallpaper) ? 'animate-mood-shift' : ''}`}
                 style={{
                   background: MOOD_GRADIENTS[themeConfig.wallpaper] || MOOD_GRADIENTS['ember-glow'],
-                  backgroundSize: MOOD_ANIMATED.has(themeConfig.wallpaper) ? '200% 200%' : '100% 100%',
+                  backgroundSize: !staticOnly && MOOD_ANIMATED.has(themeConfig.wallpaper) ? '200% 200%' : '100% 100%',
                   animationDuration: '20s',
                   animationTimingFunction: 'ease-in-out',
                   animationIterationCount: 'infinite',

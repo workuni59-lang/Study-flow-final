@@ -239,16 +239,10 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
       )}
       </div>
 
-      {/* Floating mood button — only on dashboard */}
-      {!isFullView && (
-        <button onClick={() => navigate(modeRef.current === 'focus' ? ROUTES.FOCUS_THEMES : ROUTES.THEMES)} aria-label="Change background"
-          className="fixed bottom-24 right-4 z-40 w-11 h-11 rounded-full bg-black/40 backdrop-blur-lg border border-white/15 flex items-center justify-center text-white/70 hover:text-white hover:bg-black/55 transition-all shadow-lg active:scale-95">
-          <Palette className="w-5 h-5" />
-        </button>
-      )}
+      {/* Main content area */}
+      <div className="relative z-10">
 
-      {/* Mood picker bottom sheet */}
-      <AnimatePresence>
+        {/* Full-view pages (analytics, subjects, achievements, settings) */}
         {showMoodPicker && (
           <>
             <motion.div

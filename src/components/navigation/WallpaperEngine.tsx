@@ -80,7 +80,13 @@ export const WallpaperEngine = ({ visible = true, staticOnly = false }: { visibl
 
   const renderWallpaper = () => {
     const isEnabled = themeConfig.wallpaper !== 'none';
-    const finalUrl = themeConfig.wallpaper === 'custom' ? themeConfig.customWallpaperUrl : currentWallpaper.url;
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    const rawUrl = themeConfig.wallpaper === 'custom' ? themeConfig.customWallpaperUrl : currentWallpaper.url;
+    
+    // Optimize Unsplash URLs for mobile
+    const finalUrl = isMobile && rawUrl?.includes('unsplash.com') 
+      ? rawUrl.replace('w=2000', 'w=600') 
+      : rawUrl;
 
     return (
       <div className={`fixed inset-0 pointer-events-none -z-20 transition-colors duration-1000 ${baseClass}`} style={{ opacity: visible ? 1 : 0, transition: 'opacity 0.3s ease' }}>

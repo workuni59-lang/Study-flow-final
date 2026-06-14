@@ -55,7 +55,7 @@ export const TopBar = memo(({ mode, onModeChange, onMenuOpen, onOpenAuth, onLead
       {/* Left group: hamburger + brand + mode toggle */}
       <div className="top-bar fixed top-4 left-4 z-30 flex items-center gap-2 pt-safe pl-safe">
         <button onClick={onMenuOpen} aria-label="Open menu"
-          className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-white/40 dark:hover:bg-white/10 transition-colors"
+          className="w-9 h-9 rounded-xl hidden lg:flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-white/40 dark:hover:bg-white/10 transition-colors"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M3 12h18M3 6h18M3 18h18" />

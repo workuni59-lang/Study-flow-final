@@ -155,10 +155,24 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
   };
 
   return (
-    <div className={`min-h-screen transition-colors duration-1000 ${baseBg[themeConfig.atmosphere] || baseBg.indigo}`} style={{ backgroundAttachment: 'scroll', backgroundImage: moodGradient }}>
+    <div className={`min-h-screen transition-colors duration-1000 ${baseBg[themeConfig.atmosphere] || baseBg.indigo} relative overflow-hidden`} style={{ backgroundAttachment: 'scroll' }}>
       <style>{skeletonKeyframes}</style>
+      
+      {/* Background Layer with Cross-fade */}
+      <AnimatePresence mode="popLayout">
+        <motion.div
+          key={themeConfig.wallpaper}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1 }}
+          className="fixed inset-0 pointer-events-none z-0"
+          style={{ backgroundImage: moodGradient }}
+        />
+      </AnimatePresence>
+
       {/* Main content area */}
-      <div>
+      <div className="relative z-10">
 
         {/* Full-view pages (analytics, subjects, achievements, settings) */}
         {section === 'pomodoro' ? (
@@ -169,7 +183,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
           </main>
         ) : isFullView ? (
           <div className="min-h-screen">
-            <header className="sticky top-0 z-30 bg-white/70 dark:bg-[#0a0c10]/70 backdrop-blur-2xl border-b border-slate-100 dark:border-slate-800">
+            <header className="sticky top-0 z-30 bg-white/70 dark:bg-[#0a0c10]/70 backdrop-blur-2xl border-b border-slate-100 dark:border-slate-800 pt-safe">
               <div className="flex items-center gap-3 h-14 px-4">
                 <button onClick={() => setSection('dashboard')} aria-label="Go back"
                   className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
@@ -227,6 +241,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
             onTasksOpen={handleTasksOpen}
             onStatsOpen={handleStatsOpen}
             onNotepadOpen={handleNotepadOpen}
+            onMenuOpen={handleMenuOpen}
           />
         </>
       )}

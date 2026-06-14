@@ -55,22 +55,25 @@ export const TasksPanel = () => {
               <Reorder.Item
                 key={task.id}
                 value={task}
-                className="flex items-center gap-2 px-3 py-2.5 rounded-[11px] bg-white/[0.04] border border-transparent transition-colors duration-150 data-[focus-within]:border-white"
+                className="flex items-center gap-2 px-3 py-2 rounded-[11px] bg-white/[0.04] border border-transparent transition-colors duration-150 data-[focus-within]:border-white"
                 style={{ boxShadow: '0 4px 6px -1px rgba(0,29,41,0.06), 0 2px 4px -2px rgba(0,29,41,0.06)' }}
               >
-                <div className="cursor-grab active:cursor-grabbing text-white/20 hover:text-white/50 transition-colors shrink-0 flex items-center justify-center w-[18px]">
+                <div className="cursor-grab active:cursor-grabbing text-white/20 hover:text-white/50 transition-colors shrink-0 flex items-center justify-center w-10 h-10 -ml-1">
                   <span className="text-sm leading-none" style={{ color: '#4b5563' }}>⠿</span>
                 </div>
                 <button
                   onClick={() => toggleTask(task.id)}
-                  className={`w-5 h-5 rounded flex items-center justify-center shrink-0 transition-colors ${
+                  className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
                     task.completed ? 'bg-[#7432FF]' : 'bg-transparent border border-white/20 hover:border-[#7432FF]'
                   }`}
+                  aria-label={task.completed ? "Mark as incomplete" : "Mark as complete"}
                 >
-                  {task.completed && (
-                    <svg className="w-3 h-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                  {task.completed ? (
+                    <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                       <path d="M20 6L9 17l-5-5" />
                     </svg>
+                  ) : (
+                    <div className="w-5 h-5" />
                   )}
                 </button>
                 <input
@@ -85,13 +88,13 @@ export const TasksPanel = () => {
                   }}
                   placeholder="Type your priority"
                   maxLength={25}
-                  className={`flex-1 text-sm font-medium bg-transparent border-none outline-none text-white placeholder-white/30 ${
+                  className={`flex-1 text-sm font-medium bg-transparent border-none outline-none text-white placeholder-white/30 px-1 py-3 ${
                     task.completed ? 'opacity-50 line-through' : ''
                   }`}
                 />
                 <select
                   defaultValue={25}
-                  className="appearance-none bg-white/[0.08] rounded-full text-white/70 text-xs px-2.5 py-1 border-none outline-none focus:outline focus:outline-1 focus:outline-[#7432FF] cursor-pointer"
+                  className="appearance-none bg-white/[0.08] rounded-full text-white/70 text-xs px-3 py-2 border-none outline-none focus:outline focus:outline-1 focus:outline-[#7432FF] cursor-pointer"
                 >
                   {DURATION_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value} className="bg-[#1a1a2e] text-white">
@@ -101,9 +104,10 @@ export const TasksPanel = () => {
                 </select>
                 <button
                   onClick={() => deleteTask(task.id)}
-                  className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center text-white/30 hover:bg-red-500 hover:text-white transition-colors shrink-0"
+                  className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/30 hover:bg-red-500/20 hover:text-red-400 transition-colors shrink-0 -mr-1"
+                  aria-label="Delete task"
                 >
-                  <Trash2 className="w-2.5 h-2.5" />
+                  <Trash2 className="w-4 h-4" />
                 </button>
               </Reorder.Item>
             ))}

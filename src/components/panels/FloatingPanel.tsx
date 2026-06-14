@@ -39,20 +39,28 @@ export const FloatingPanel = ({ open, onClose, title, children, width = 320 }: F
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="fixed inset-x-0 bottom-0 z-50 rounded-t-3xl bg-[#0f0f1f] border-t border-white/[0.06] max-h-[80vh] overflow-y-auto"
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              drag="y"
+              dragConstraints={{ top: 0 }}
+              dragElastic={0.2}
+              onDragEnd={(_, info) => {
+                if (info.offset.y > 100 || info.velocity.y > 500) {
+                  onClose();
+                }
+              }}
+              className="fixed inset-x-0 bottom-0 z-50 rounded-t-[32px] bg-[#0f0f1f] border-t border-white/[0.08] max-h-[85vh] flex flex-col shadow-2xl"
             >
-              <div className="flex justify-center pt-2 pb-1">
-                <div className="w-10 h-1 rounded-full bg-white/[0.12]" />
+              <div className="flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing">
+                <div className="w-12 h-1.5 rounded-full bg-white/[0.15]" />
               </div>
-              <div className="flex items-center justify-between px-5 py-3">
-                <span className="text-sm font-semibold text-white/90">{title}</span>
+              <div className="flex items-center justify-between px-6 py-2">
+                <span className="text-base font-bold text-white/95">{title}</span>
                 <button onClick={onClose}
-                  className="w-7 h-7 rounded-full bg-white/[0.06] flex items-center justify-center text-white/40 hover:text-white hover:bg-white/[0.12] transition-all">
-                  <X className="w-3.5 h-3.5" />
+                  className="w-9 h-9 rounded-full bg-white/[0.06] flex items-center justify-center text-white/50 hover:text-white transition-all">
+                  <X className="w-5 h-5" />
                 </button>
               </div>
-              <div className="px-5 pb-6">
+              <div className="px-6 pb-10 overflow-y-auto no-scrollbar">
                 {children}
               </div>
             </motion.div>

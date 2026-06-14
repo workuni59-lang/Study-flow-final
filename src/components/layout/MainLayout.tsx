@@ -212,6 +212,7 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
             onStatsOpen={handleStatsOpen}
             onNotepadOpen={handleNotepadOpen}
             onQuestsOpen={handleQuestsOpen}
+            onMenuOpen={handleMenuOpen}
           />
 
           {/* Pet */}

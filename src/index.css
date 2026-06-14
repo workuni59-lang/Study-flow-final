@@ -51,22 +51,44 @@
     @apply antialiased text-slate-900 bg-slate-50 dark:text-slate-100 dark:bg-[#0a0c10];
     font-family: var(--font-sans);
     overflow-x: hidden;
-    /* PWA: Disable pull-to-refresh on mobile if preferred, but usually keep for web feel */
-    overscroll-behavior-y: none;
     /* PWA: Prevent user selection for a native feel */
     user-select: none;
+    -webkit-user-select: none;
     -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
     
     /* PWA: Safe Area Support */
     padding-top: env(safe-area-inset-top, 0px);
     padding-bottom: env(safe-area-inset-bottom, 0px);
     padding-left: env(safe-area-inset-left, 0px);
     padding-right: env(safe-area-inset-right, 0px);
+
+    /* Native Scrolling */
+    overscroll-behavior-y: contain;
   }
 
   /* Ensure inputs are still selectable */
   input, textarea {
     user-select: text;
+    -webkit-user-select: text;
+  }
+
+  /* Native-like active states for buttons */
+  button:active:not(:disabled) {
+    transform: scale(0.97);
+    opacity: 0.8;
+    transition: transform 0.1s var(--ease-spring);
+  }
+
+  /* Custom focus rings for keyboard users only */
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+  }
+  
+  /* Hide standard focus for touch/mouse */
+  :focus:not(:focus-visible) {
+    outline: none;
   }
 
   ::selection {

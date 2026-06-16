@@ -9,6 +9,7 @@ const DURATION_OPTIONS = [
   { value: 5, label: '5m' },
   { value: 10, label: '10m' },
   { value: 15, label: '15m' },
+  { value: 25, label: '25m' },
   { value: 30, label: '30m' },
   { value: 60, label: '1h' },
   { value: 120, label: '2h' },
@@ -93,7 +94,8 @@ export const TasksPanel = () => {
                   }`}
                 />
                 <select
-                  defaultValue={25}
+                  value={task.estimatedMinutes ?? 25}
+                  onChange={(e) => updateTask(task.id, { estimatedMinutes: Number(e.target.value) })}
                   className="appearance-none bg-white/[0.08] rounded-full text-white/70 text-xs px-3 py-2 border-none outline-none focus:outline focus:outline-1 focus:outline-[#7432FF] cursor-pointer"
                 >
                   {DURATION_OPTIONS.map((opt) => (

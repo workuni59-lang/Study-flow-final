@@ -126,21 +126,21 @@ export const RankCard = ({ rank, isCurrent, isUnlocked, userLevel }: RankCardPro
 
             {/* Subtitle */}
             {isUnlocked && (
-              <p className="text-[10px] font-medium text-white/40 mt-0.5">{identity.subtitle}</p>
+              <p className="text-[10px] font-medium text-white/70 mt-0.5">{identity.subtitle}</p>
             )}
 
-            <p className={`text-[11px] mt-1 leading-relaxed ${isCurrent ? 'text-white/65' : 'text-white/50'}`}>
+            <p className={`text-[11px] mt-1 leading-relaxed ${isCurrent ? 'text-white/65' : 'text-white/70'}`}>
               {identity.description}
             </p>
 
             <div className="flex items-center gap-3 mt-2.5">
               <span className={`text-[9px] font-bold uppercase tracking-wider ${
-                isCurrent ? 'text-indigo-400' : 'text-white/40'
+                isCurrent ? 'text-indigo-400' : 'text-white/70'
               }`}>
                 Lv {rank.minLevel}{rank.maxLevel === Infinity ? '+' : ` — ${rank.maxLevel}`}
               </span>
-              <span className="text-[7px] text-white/20">·</span>
-              <span className="text-[9px] font-medium text-white/40">
+              <span className="text-[7px] text-white/50">·</span>
+              <span className="text-[9px] font-medium text-white/70">
                 {formatXP(xpRequired)} XP
               </span>
               {isCurrent && nextLevel !== null && (

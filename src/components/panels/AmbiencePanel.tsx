@@ -310,7 +310,7 @@ export const AmbiencePanel = ({ ambienceUrl, onAmbienceUrlChange }: AmbiencePane
         <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/[0.06] text-center space-y-2">
           <Crown className="w-5 h-5 text-amber-400 mx-auto" />
           <p className="text-[11px] font-bold text-white/70">Custom Playlists</p>
-          <p className="text-[9px] text-white/40">Add any Spotify, YouTube, or Apple Music playlist. Upgrade to Elite Scholar to unlock.</p>
+          <p className="text-[9px] text-white/70">Add any Spotify, YouTube, or Apple Music playlist. Upgrade to Elite Scholar to unlock.</p>
           <button onClick={() => setShowPremiumModal(true)}
             className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 text-white text-[9px] font-black uppercase tracking-widest hover:brightness-110 transition-all">
             Upgrade to Unlock
@@ -368,7 +368,7 @@ export const AmbiencePanel = ({ ambienceUrl, onAmbienceUrlChange }: AmbiencePane
             }`}>
             <span className="text-[1.875rem] leading-none">{pl.emoji}</span>
             <span className="text-[0.75rem] font-semibold text-white/80 text-center leading-tight">{pl.name}</span>
-            <span className="text-[0.625rem] font-medium text-white/30 uppercase tracking-wider">{pl.service}</span>
+            <span className="text-[0.625rem] font-medium text-white/60 uppercase tracking-wider">{pl.service}</span>
           </button>
         ))}
       </div>
@@ -395,7 +395,7 @@ export const AmbiencePanel = ({ ambienceUrl, onAmbienceUrlChange }: AmbiencePane
             className={`text-sm font-bold tracking-[-0.8px] transition-colors ${
               activeTab === tab.id
                 ? 'text-white'
-                : 'text-white/30 hover:text-white/60'
+                : 'text-white/60 hover:text-white/80'
             }`}>
             {tab.label}
           </button>

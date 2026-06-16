@@ -3,6 +3,8 @@ import { Routes, Route } from 'react-router-dom';
 import { MotionConfig } from 'motion/react';
 import { StudyProvider, FocusProvider, useStudy } from './context/StudyContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { PetProvider } from './context/PetContext';
+import { PetManager } from './components/pet/PetManager';
 import AuthModal from './components/auth/AuthModal';
 import { useReduceMotion } from './hooks/useReduceMotion';
 import { MetaUpdater } from './components/navigation/MetaUpdater';
@@ -42,8 +44,16 @@ const AppContent = () => {
     document.documentElement.classList.add('dark');
   }, []);
 
+  // Local-only Premium Toggle (for development)
   useEffect(() => {
-    if (profile) {
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const params = new URLSearchParams(window.location.search);
+    const forcePremium = params.get('premium') === 'true';
+
+    if (isLocal && forcePremium) {
+      console.log('💎 Local Premium Mode Enabled');
+      syncPremiumStatus(true);
+    } else if (profile) {
       syncPremiumStatus(profile.is_premium);
     }
   }, [profile, syncPremiumStatus]);
@@ -72,6 +82,7 @@ const AppContent = () => {
   return (
     <MotionConfig reducedMotion={reduceMotion ? 'always' : 'never'}>
       <MetaUpdater />
+      {!isMobile && <PetManager />}
       <Suspense fallback={<MobileSpinner />}>
         {isMobile ? <MobileLayout onOpenAuth={handleOpenAuth} /> : <MainLayout onOpenAuth={handleOpenAuth} />}
       </Suspense>
@@ -85,20 +96,22 @@ export default function App() {
     <AuthProvider>
       <StudyProvider>
         <FocusProvider>
-          <Routes>
-            <Route path="/" element={<AppContent />} />
-            <Route path="/profile/:id" element={<AppContent />} />
-            <Route path="/analytics" element={<AppContent />} />
-            <Route path="/progress" element={<AppContent />} />
-            <Route path="/quests" element={<AppContent />} />
-            <Route path="/subjects" element={<AppContent />} />
-            <Route path="/achievements" element={<AppContent />} />
-            <Route path="/leaderboard" element={<AppContent />} />
-            <Route path="/settings" element={<AppContent />} />
-            <Route path="/themes" element={<AppContent />} />
-            <Route path="/pomodoro" element={<AppContent />} />
-            <Route path="/*" element={<AppContent />} />
-          </Routes>
+          <PetProvider>
+            <Routes>
+              <Route path="/" element={<AppContent />} />
+              <Route path="/profile/:id" element={<AppContent />} />
+              <Route path="/analytics" element={<AppContent />} />
+              <Route path="/progress" element={<AppContent />} />
+              <Route path="/quests" element={<AppContent />} />
+              <Route path="/subjects" element={<AppContent />} />
+              <Route path="/achievements" element={<AppContent />} />
+              <Route path="/leaderboard" element={<AppContent />} />
+              <Route path="/settings" element={<AppContent />} />
+              <Route path="/themes" element={<AppContent />} />
+              <Route path="/pomodoro" element={<AppContent />} />
+              <Route path="/*" element={<AppContent />} />
+            </Routes>
+          </PetProvider>
         </FocusProvider>
       </StudyProvider>
     </AuthProvider>

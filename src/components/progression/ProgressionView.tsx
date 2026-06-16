@@ -133,7 +133,7 @@ export const ProgressionView = () => {
                 <p className="text-[9px] font-black uppercase tracking-[0.1em] text-white/50">Badges</p>
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-lg md:text-xl font-black">{prevBadges.length}</span>
-                  <span className="text-xs text-white/40">/ {milestones.length}</span>
+                  <span className="text-xs text-white/70">/ {milestones.length}</span>
                 </div>
                 <div className="flex gap-1 mt-1.5">
                   {milestones.map((b, i) => {
@@ -160,7 +160,7 @@ export const ProgressionView = () => {
                 <div className="flex items-center gap-1.5 mt-1.5 text-sm">
                   <Zap className="w-3.5 h-3.5 text-white/60" />
                   <span className="font-bold">{formatXP(currentXp)}</span>
-                  <span className="text-white/40">/ {formatXP(xpForNext)} XP</span>
+                  <span className="text-white/70">/ {formatXP(xpForNext)} XP</span>
                 </div>
               </div>
             </div>
@@ -175,7 +175,7 @@ export const ProgressionView = () => {
               >
                 <ArrowUpRight className="w-3.5 h-3.5 text-white/50" />
                 <span className="font-semibold text-white/80">Next: {nextRank.icon} {nextRank.title}</span>
-                <ChevronRight className="w-3 h-3 text-white/30" />
+                <ChevronRight className="w-3 h-3 text-white/60" />
                 <span className="font-bold text-white/90">Level {nextRank.minLevel}</span>
               </motion.div>
             )}
@@ -251,12 +251,12 @@ export const ProgressionView = () => {
                   )}
                 </div>
 
-                <p className={`text-[11px] font-bold mt-2.5 leading-tight ${unlocked ? 'text-white/90' : 'text-white/50'}`}>
+                <p className={`text-[11px] font-bold mt-2.5 leading-tight ${unlocked ? 'text-white/90' : 'text-white/70'}`}>
                   {b.name}
                 </p>
 
                 <span className={`text-[8px] font-bold uppercase tracking-wider mt-1 ${
-                  unlocked ? RARITY_COLORS[rarity] || 'text-slate-500' : 'text-white/40'
+                  unlocked ? RARITY_COLORS[rarity] || 'text-slate-500' : 'text-white/70'
                 }`}>
                   {b.rarity}
                 </span>
@@ -264,7 +264,7 @@ export const ProgressionView = () => {
                 <span className={`mt-2 px-3 py-1 rounded-full text-[9px] font-bold ${
                   unlocked
                     ? 'bg-emerald-500/15 text-emerald-400'
-                    : 'bg-white/5 text-white/50'
+                    : 'bg-white/5 text-white/70'
                 }`}>
                   {unlocked ? 'Earned' : `Lv ${b.levelRequired}`}
                 </span>

@@ -405,10 +405,10 @@ export const ProfileView = ({ userId, onEditProfile }: ProfileViewProps) => {
                   >
                     {getRankForLevel(level).icon} {getRankForLevel(level).title}
                   </span>
-                  <span className="text-[10px] text-white/50">Level {level}</span>
+                  <span className="text-[10px] text-white/70">Level {level}</span>
                 </div>
 
-                <p className="text-[10px] text-white/40 mt-1">Member since {formatDate(profile.created_at)}</p>
+                <p className="text-[10px] text-white/70 mt-1">Member since {formatDate(profile.created_at)}</p>
 
                 {profile.bio && (
                   <p className="text-sm text-white/70 mt-3 leading-relaxed max-w-prose italic drop-shadow-sm">
@@ -444,7 +444,7 @@ export const ProfileView = ({ userId, onEditProfile }: ProfileViewProps) => {
                 <span className="text-[9px] font-semibold text-white/60">
                   {xpInCurrent.toLocaleString()} XP
                 </span>
-                <span className="text-[8px] font-medium text-white/40">
+                <span className="text-[8px] font-medium text-white/70">
                   {(totalXpForCurrent - xpInCurrent).toLocaleString()} to next level
                 </span>
               </div>

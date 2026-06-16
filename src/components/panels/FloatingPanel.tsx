@@ -100,7 +100,7 @@ export const FloatingPanel = ({ open, onClose, title, children, width = 320 }: F
             <div className="flex items-center justify-between px-4 pt-4 pb-2">
               <h3 className="text-sm font-semibold text-white/90">{title}</h3>
               <button onClick={onClose}
-                className="w-7 h-7 rounded-lg flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/[0.06] transition-colors">
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-white/70 hover:text-white hover:bg-white/[0.06] transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>

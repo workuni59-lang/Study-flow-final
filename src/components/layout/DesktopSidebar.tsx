@@ -2,6 +2,7 @@ import { Link, NavLink } from 'react-router-dom';
 import { BarChart3, BookOpen, Award, Settings, Crown, LogOut, Sparkles, LayoutDashboard, Target, Cat, Eye, EyeOff, Zap, Lock } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useStudy } from '../../context/StudyContext';
+import { usePet } from '../../context/PetContext';
 import { PROGRESSION_BADGES } from '../../lib/progression';
 import { BadgeSvg, formatXP, type BadgeTier } from '../progression/BadgeSvg';
 import { ROUTES } from '../../lib/routes';
@@ -14,9 +15,6 @@ interface DesktopSidebarProps {
   onModeChange: (m: Mode) => void;
   activeSection: Section;
   onNavigate: (s: Section) => void;
-  onPetPanelOpen?: () => void;
-  petVisible?: boolean;
-  onTogglePet?: (v: boolean) => void;
   open: boolean;
   onClose: () => void;
 }
@@ -33,9 +31,10 @@ const MENU_ITEMS: { key: Section; icon: typeof BarChart3; label: string }[] = [
   { key: 'settings', icon: Settings, label: 'Settings' },
 ];
 
-export const DesktopSidebar = ({ mode, onModeChange, activeSection, onNavigate, onPetPanelOpen, petVisible, onTogglePet, open, onClose }: DesktopSidebarProps) => {
+export const DesktopSidebar = ({ mode, onModeChange, activeSection, onNavigate, open, onClose }: DesktopSidebarProps) => {
   const { user, signOut } = useAuth();
   const { userStats, progression, setShowPremiumModal } = useStudy();
+  const { petState, setPanelOpen } = usePet(); // We could add a toggleVisible to PetContext later if needed
 
   const handleNav = (key: Section) => {
     onNavigate(key);
@@ -109,7 +108,7 @@ export const DesktopSidebar = ({ mode, onModeChange, activeSection, onNavigate, 
                       <div style={{ fontSize: '11px', fontWeight: 700, lineHeight: 1.2, color: activeSection === 'progression' ? 'rgb(99,102,241)' : undefined }}>
                         {progression.rank.icon} {progression.rank.title}
                       </div>
-                      <div style={{ fontSize: '9px', color: 'rgba(148,163,184,0.6)', marginTop: '1px' }}>
+                      <div style={{ fontSize: '9px', color: 'rgba(148,163,184,0.8)', marginTop: '1px' }}>
                         Lv. {progression.level}
                       </div>
                     </div>
@@ -117,7 +116,7 @@ export const DesktopSidebar = ({ mode, onModeChange, activeSection, onNavigate, 
                       <div style={{ width: '36px', height: '4px', background: 'rgba(148,163,184,0.15)', borderRadius: '2px', overflow: 'hidden' }}>
                         <div style={{ height: '100%', background: 'linear-gradient(90deg, rgb(99,102,241), rgb(139,92,246))', borderRadius: '2px', transform: `scaleX(${progression.percentage / 100})`, transformOrigin: 'left' }} />
                       </div>
-                      <span style={{ fontSize: '7px', fontWeight: 700, color: 'rgba(148,163,184,0.4)' }}>{progression.percentage}%</span>
+                      <span style={{ fontSize: '7px', fontWeight: 700, color: 'rgba(148,163,184,0.6)' }}>{progression.percentage}%</span>
                     </div>
                   </div>
                 );
@@ -144,17 +143,11 @@ export const DesktopSidebar = ({ mode, onModeChange, activeSection, onNavigate, 
           <div className="px-3 pb-2">
             <p className="text-[9px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 dark:text-slate-500 mb-2 px-1">Companion</p>
             <div className="flex gap-1.5">
-              <button onClick={onPetPanelOpen}
+              <button onClick={() => { setPanelOpen(true); onClose(); }}
                 className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
               >
                 <Cat className="w-3.5 h-3.5" />
                 Pet Panel
-              </button>
-              <button onClick={() => onTogglePet?.(!petVisible)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-                title={petVisible ? 'Hide pet' : 'Show pet'}
-              >
-                {petVisible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
               </button>
             </div>
           </div>

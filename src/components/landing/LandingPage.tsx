@@ -41,9 +41,9 @@ export default function LandingPage({ onOpenAuth, onStartDemo }: LandingPageProp
             <div className="flex items-center gap-2" id="nav-logo">
              <img src="/logo.png" alt="StudyFlow" className="w-8 h-8 object-contain" />
              <span className="font-display font-extrabold text-lg tracking-wider text-white">
-               STUDY<span className="text-brand">FLOW</span>
-             </span>
-           </div>
+                STUDY<span className="text-indigo-400">FLOW</span>
+              </span>
+            </div>
 
           {/* Desktop Nav Links */}
           <div className="hidden md:flex items-center gap-8 text-[#9ca3af]/90 font-medium text-sm" id="nav-links">
@@ -64,7 +64,7 @@ export default function LandingPage({ onOpenAuth, onStartDemo }: LandingPageProp
             </button>
             <button
               onClick={onStartDemo ?? onOpenAuth}
-              className="bg-brand hover:bg-[#5254e3] px-5 py-2 rounded-xl text-white font-medium text-sm transition-all duration-200 hover:shadow-[0_0_20px_rgba(99,102,241,0.4)] cursor-pointer"
+              className="bg-[#5c5ce0] hover:bg-[#5254e3] px-5 py-2 rounded-xl text-white font-medium text-sm transition-all duration-200 hover:shadow-[0_0_20px_rgba(99,102,241,0.4)] cursor-pointer"
             >
               Get Started
             </button>
@@ -119,7 +119,7 @@ export default function LandingPage({ onOpenAuth, onStartDemo }: LandingPageProp
                   setMobileMenuOpen(false);
                   (onStartDemo ?? onOpenAuth)();
                 }}
-                className="w-full bg-brand text-white py-3 rounded-xl font-medium text-base text-center transition-colors hover:bg-brand/90"
+                className="w-full bg-[#5c5ce0] text-white py-3 rounded-xl font-medium text-base text-center transition-colors hover:bg-brand/90"
               >
                 Get Started
               </button>
@@ -128,7 +128,8 @@ export default function LandingPage({ onOpenAuth, onStartDemo }: LandingPageProp
         </AnimatePresence>
       </nav>
 
-      {/* 2. HERO SECTION */}
+      <main>
+        {/* 2. HERO SECTION */}
       <section
         className="relative min-h-screen pt-32 pb-20 px-6 flex items-center justify-center overflow-hidden"
         id="hero"
@@ -164,7 +165,7 @@ export default function LandingPage({ onOpenAuth, onStartDemo }: LandingPageProp
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4" id="hero-ctas">
               <button
                 onClick={onStartDemo ?? onOpenAuth}
-                className="group relative bg-brand hover:bg-[#5254e3] text-white px-10 py-5 rounded-2xl font-bold text-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(99,102,241,0.4)] flex items-center justify-center gap-3 cursor-pointer"
+                className="group relative bg-[#5c5ce0] hover:bg-[#5254e3] text-white px-10 py-5 rounded-2xl font-bold text-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(99,102,241,0.4)] flex items-center justify-center gap-3 cursor-pointer"
               >
                 <span>Get Started Free</span>
                 <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
@@ -219,7 +220,7 @@ export default function LandingPage({ onOpenAuth, onStartDemo }: LandingPageProp
       <section className="py-24 border-t border-white/[0.06] bg-[#0c0e14] relative" id="features">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-20">
-            <span className="text-xs font-semibold uppercase tracking-widest text-brand mb-2 block">
+            <span className="text-xs font-semibold uppercase tracking-widest text-indigo-400 mb-2 block">
               Architected for Performance
             </span>
             <h2 className="text-4xl md:text-5xl font-display font-extrabold text-white tracking-tight">
@@ -370,7 +371,7 @@ export default function LandingPage({ onOpenAuth, onStartDemo }: LandingPageProp
       <section className="py-24 border-t border-white/[0.06] bg-[#0a0c10]" id="pricing">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-16">
-            <span className="text-xs font-semibold uppercase tracking-widest text-brand mb-2 block">
+            <span className="text-xs font-semibold uppercase tracking-widest text-indigo-400 mb-2 block">
               Investment
             </span>
             <h2 className="text-4xl md:text-5xl font-display font-extrabold text-white tracking-tight">
@@ -428,7 +429,7 @@ export default function LandingPage({ onOpenAuth, onStartDemo }: LandingPageProp
             {/* Pro Card (VIsually Elevated) */}
             <div className="relative bg-gradient-to-b from-[#0c0d16] to-[#08090f] border-2 border-brand rounded-[2.5rem] p-10 flex flex-col justify-between shadow-[0_0_50px_rgba(99,102,241,0.1)] transition-all duration-200">
               {/* Popular badge */}
-              <div className="absolute -top-4 right-10 bg-brand text-white text-[11px] font-bold uppercase tracking-[0.2em] px-4 py-1.5 rounded-full shadow-[0_0_20px_rgba(99,102,241,0.4)]">
+              <div className="absolute -top-4 right-10 bg-[#5c5ce0] text-white text-[11px] font-bold uppercase tracking-[0.2em] px-4 py-1.5 rounded-full shadow-[0_0_20px_rgba(99,102,241,0.4)]">
                 Most Popular
               </div>
 
@@ -479,7 +480,7 @@ export default function LandingPage({ onOpenAuth, onStartDemo }: LandingPageProp
               <div className="mt-12">
                 <button
                 onClick={onStartDemo ?? onOpenAuth}
-                className="w-full bg-brand hover:bg-[#5254e3] text-white py-5 rounded-2xl font-bold text-base text-center transition-all hover:shadow-[0_0_30px_rgba(99,102,241,0.4)] cursor-pointer"
+                className="w-full bg-[#5c5ce0] hover:bg-[#5254e3] text-white py-5 rounded-2xl font-bold text-base text-center transition-all hover:shadow-[0_0_30px_rgba(99,102,241,0.4)] cursor-pointer"
                 >
                   Go Pro
                 </button>
@@ -489,17 +490,19 @@ export default function LandingPage({ onOpenAuth, onStartDemo }: LandingPageProp
         </div>
       </section>
 
-      {/* 5. FOOTER */}
+      </main>
+
+      {/* 5. FOOTTER */}
       <footer className="py-20 border-t border-white/[0.06] bg-[#07090d]" id="footer">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-10">
           <div className="flex flex-col items-center md:items-start gap-4" id="footer-logo">
              <div className="flex items-center gap-2">
                <img src="/logo.png" alt="StudyFlow" className="w-8 h-8 object-contain" />
                <span className="font-display font-black text-xl tracking-tight text-white">
-                 STUDY<span className="text-brand">FLOW</span>
+                  STUDY<span className="text-indigo-400">FLOW</span>
                </span>
              </div>
-             <p className="text-white/40 text-xs font-medium tracking-wide">Designed for extreme visual containment.</p>
+             <p className="text-white/60 text-xs font-medium tracking-wide">Designed for extreme visual containment.</p>
            </div>
 
           <div className="flex flex-col items-center md:items-end gap-4">
@@ -514,7 +517,7 @@ export default function LandingPage({ onOpenAuth, onStartDemo }: LandingPageProp
                 Support
               </span>
             </div>
-            <div className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]" id="copyright">
+            <div className="text-[10px] font-bold text-white/50 uppercase tracking-[0.2em]" id="copyright">
               &copy; {new Date().getFullYear()} StudyFlow. All rights reserved.
             </div>
           </div>

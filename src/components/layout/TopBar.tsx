@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, memo } from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import { ExternalLink, LogIn } from 'lucide-react';
+import { ExternalLink, LayoutDashboard, LogIn, Target } from 'lucide-react';
 import LadderIcon from '../ui/LadderIcon';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../../context/AuthContext';
@@ -66,24 +66,26 @@ export const TopBar = memo(({ mode, onModeChange, onMenuOpen, onOpenAuth, onLead
           <span className="text-xs font-bold dark:text-white tracking-tight hidden sm:block">StudyFlow</span>
         </Link>
         <div className="w-px h-4 bg-slate-200 dark:bg-white/10 mx-1 hidden lg:block" />
-        <div className="hidden lg:flex gap-0.5 p-0.5 rounded-[10px] backdrop-blur-xl border border-white/[0.08] bg-black/20">
+        <div className="max-[959px]:hidden flex gap-0.5 p-0.5 rounded-[10px] backdrop-blur-xl border border-white/[0.08] bg-black/20">
           <NavLink to={ROUTES.HOME} end
-            className={({ isActive }) => `px-3 py-1.5 rounded-[7px] text-[9px] font-semibold uppercase tracking-wider transition-all ${
+            className={({ isActive }) => `flex items-center gap-1.5 px-3 py-1.5 rounded-[7px] text-[9px] font-semibold uppercase tracking-wider transition-all ${
               isActive
                 ? 'bg-white/10 text-white shadow-xs'
-                : 'text-white/40 hover:text-white/70'
+                : 'text-white/60 hover:text-white/80'
             }`}
           >
-            Home
+            <LayoutDashboard className="w-3 h-3" />
+            <span className="max-lg:hidden">Home</span>
           </NavLink>
           <NavLink to={ROUTES.FOCUS}
-            className={({ isActive }) => `px-3 py-1.5 rounded-[7px] text-[9px] font-semibold uppercase tracking-wider transition-all ${
+            className={({ isActive }) => `flex items-center gap-1.5 px-3 py-1.5 rounded-[7px] text-[9px] font-semibold uppercase tracking-wider transition-all ${
               isActive
                 ? 'bg-white/10 text-white shadow-xs'
-                : 'text-white/40 hover:text-white/70'
+                : 'text-white/60 hover:text-white/80'
             }`}
           >
-            Focus
+            <Target className="w-3 h-3" />
+            <span className="max-lg:hidden">Focus</span>
           </NavLink>
         </div>
       </div>
@@ -239,11 +241,11 @@ export const TopBar = memo(({ mode, onModeChange, onMenuOpen, onOpenAuth, onLead
                     <span>{link.icon}</span>
                     <span>{link.label}</span>
                   </span>
-                  <ExternalLink size={12} style={{ opacity: 0.5, flexShrink: 0 }} />
+                  <ExternalLink size={12} style={{ opacity: 0.7, flexShrink: 0 }} />
                 </a>
               ))}
               <div style={{ height: '1px', backgroundColor: 'rgba(255,255,255,0.06)', margin: '4px 0' }} />
-              <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', textAlign: 'center', margin: '6px 0 2px' }}>
+              <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)', textAlign: 'center', margin: '6px 0 2px' }}>
                 v1.0.0 &middot; StudyFlow
               </p>
             </motion.div>

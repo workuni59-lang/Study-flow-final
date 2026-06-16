@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useStudy } from '../../context/StudyContext';
 import { TopBar, type Mode } from './TopBar';
 import { useNavigationContext, type Panel } from '../../hooks/useNavigationContext';
+import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 import { ROUTES } from '../../lib/routes';
 import { BottomBar } from './BottomBar';
 import { HomeView } from './HomeView';
@@ -117,6 +118,13 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
   const handleClosePanel = useCallback(() => {
     navigate(modeRef.current === 'focus' ? ROUTES.FOCUS : ROUTES.HOME);
   }, [navigate]);
+
+  useKeyboardShortcuts({
+    onTasksOpen: handleTasksOpen,
+    onMusicOpen: handleMusicOpen,
+    onNotepadOpen: handleNotepadOpen,
+    onClosePanel: handleClosePanel,
+  });
 
   const setShowMoodPicker = (val: boolean) => {
     if (val) navigate(mode === 'focus' ? ROUTES.FOCUS_THEMES : ROUTES.THEMES);
@@ -233,16 +241,18 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
           />
 
           {/* Main content */}
-          {mode === 'home' && <HomeView onNotepadOpen={handleNotepadOpen} menuOpen={menuOpen} />}
-          {mode === 'focus' && (
-            <Suspense fallback={<MobileSkeleton />}>
-              <FocusEnvironmentLazy 
-                onTasksOpen={handleTasksOpen}
-                onMusicOpen={handleMusicOpen}
-                onNotepadOpen={handleNotepadOpen}
-              />
-            </Suspense>
-          )}
+          <main>
+            {mode === 'home' && <HomeView onNotepadOpen={handleNotepadOpen} menuOpen={menuOpen} />}
+            {mode === 'focus' && (
+              <Suspense fallback={<MobileSkeleton />}>
+                <FocusEnvironmentLazy 
+                  onTasksOpen={handleTasksOpen}
+                  onMusicOpen={handleMusicOpen}
+                  onNotepadOpen={handleNotepadOpen}
+                />
+              </Suspense>
+            )}
+          </main>
 
           {/* Bottom bar */}
           <BottomBar
@@ -273,10 +283,18 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              drag="y"
+              dragConstraints={{ top: 0 }}
+              dragElastic={0.2}
+              onDragEnd={(_, info) => {
+                if (info.offset.y > 100 || info.velocity.y > 500) {
+                  setShowMoodPicker(false);
+                }
+              }}
               className="fixed inset-x-0 bottom-0 z-50 rounded-t-3xl bg-[#0f0f1f] border-t border-white/[0.06] pb-8"
             >
               {/* Drag handle */}
-              <div className="flex justify-center pt-2 pb-1">
+              <div className="flex justify-center pt-2 pb-1 cursor-grab active:cursor-grabbing">
                 <div className="w-10 h-1 rounded-full bg-white/[0.12]" />
               </div>
 
@@ -284,7 +302,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
               <div className="flex items-center justify-between px-5 py-3">
                 <span className="text-sm font-semibold text-white/90">Theme</span>
                 <button onClick={() => setShowMoodPicker(false)} aria-label="Close"
-                  className="w-7 h-7 rounded-full bg-white/[0.06] flex items-center justify-center text-white/40 hover:text-white hover:bg-white/[0.12] transition-all">
+                  className="w-7 h-7 rounded-full bg-white/[0.06] flex items-center justify-center text-white/70 hover:text-white hover:bg-white/[0.12] transition-all">
                   <X className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -292,12 +310,12 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
               {/* Tabs */}
               <div className="flex px-5 mb-4 border-b border-white/[0.05]">
                 <button onClick={() => setThemeTab('moods')}
-                  className={`pb-2 px-1 text-xs font-bold uppercase tracking-widest transition-colors relative ${themeTab === 'moods' ? 'text-indigo-400' : 'text-white/40'}`}>
+                  className={`pb-2 px-1 text-xs font-bold uppercase tracking-widest transition-colors relative ${themeTab === 'moods' ? 'text-indigo-400' : 'text-white/60'}`}>
                   Moods
                   {themeTab === 'moods' && <motion.div layoutId="activeThemeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-400" />}
                 </button>
                 <button onClick={() => setThemeTab('photos')}
-                  className={`pb-2 px-1 ml-6 text-xs font-bold uppercase tracking-widest transition-colors relative ${themeTab === 'photos' ? 'text-indigo-400' : 'text-white/40'}`}>
+                  className={`pb-2 px-1 ml-6 text-xs font-bold uppercase tracking-widest transition-colors relative ${themeTab === 'photos' ? 'text-indigo-400' : 'text-white/60'}`}>
                   Photos
                   {themeTab === 'photos' && <motion.div layoutId="activeThemeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-400" />}
                 </button>
@@ -385,9 +403,9 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
           <div className="flex items-center gap-2 px-3 py-1.5 bg-white/[0.06] border-b border-white/[0.06]">
             <span className="text-sm">{ambienceUrl.emoji}</span>
             <span className="flex-1 text-[10px] font-bold truncate text-white/80">{ambienceUrl.name}</span>
-            <span className="text-[7px] font-bold uppercase tracking-wider text-white/40">{ambienceUrl.service}</span>
+            <span className="text-[7px] font-bold uppercase tracking-wider text-white/70">{ambienceUrl.service}</span>
             <button onClick={() => setAmbienceUrl(null)} aria-label="Close ambience"
-              className="p-0.5 rounded hover:bg-white/10 text-white/40 transition-colors">
+              className="p-0.5 rounded hover:bg-white/10 text-white/70 transition-colors">
               <X className="w-3 h-3" />
             </button>
           </div>

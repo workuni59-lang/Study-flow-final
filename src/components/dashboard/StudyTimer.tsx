@@ -235,11 +235,35 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
     return () => document.removeEventListener('visibilitychange', handleVisibility);
   }, [isActive]);
 
-  // Initialize
+  // Initialize — restore full timer state for section-navigation survival
   useEffect(() => {
+    try {
+      const raw = localStorage.getItem('sf_timer_state');
+      if (raw) {
+        const state = JSON.parse(raw);
+        if (state.mode === 'shortBreak' || state.mode === 'longBreak' || state.mode === 'taskETA' || state.mode === 'stopwatch' || state.mode === 'focus') {
+          setMode(state.mode);
+        }
+        if (state.direction === 'countdown' || state.direction === 'countup') setDirection(state.direction);
+        if (typeof state.sessionsCompleted === 'number') setSessionsCompleted(state.sessionsCompleted);
+        if (typeof state.elapsedTime === 'number') setElapsedTime(state.elapsedTime);
+      }
+    } catch {}
+    // timeLeft always comes from the per-second save (updated every 5s during ticking)
     const saved = storage.getTimerState();
     if (saved !== null) setTimeLeft(saved);
   }, []);
+
+  // Persist full timer state on infrequent changes (mode, direction, cycles)
+  useEffect(() => {
+    try {
+      localStorage.setItem('sf_timer_state', JSON.stringify({
+        mode, timeLeft, direction, sessionsCompleted, elapsedTime,
+      }));
+      // Sync the per-second timeLeft store so init picks up the right value
+      storage.saveTimerState(timeLeft);
+    } catch {}
+  }, [mode, direction, sessionsCompleted, elapsedTime]);
 
   // Track session start for analytics
   useEffect(() => {
@@ -394,6 +418,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
     runStartRef.current = 0;
     setElapsedTime(0);
     setLaps([]);
+    localStorage.removeItem('sf_timer_state');
   };
 
   const recordLap = () => {
@@ -504,7 +529,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
           {isActive ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current translate-x-0.5" />}
           {isActive ? 'Pause' : 'Start'}
         </button>
-        <button onClick={() => { if (isCountingUp) resetCountUp(); else { setIsActive(false); const d = mode === 'focus' ? activePreset.focus : mode === 'shortBreak' ? activePreset.short : mode === 'longBreak' ? activePreset.long : taskTime; setTimeLeft(d * 60); } }} aria-label={isCountingUp ? 'Stop and reset' : 'Reset timer'}
+        <button onClick={() => { if (isCountingUp) resetCountUp(); else { setIsActive(false); const d = mode === 'focus' ? activePreset.focus : mode === 'shortBreak' ? activePreset.short : mode === 'longBreak' ? activePreset.long : taskTime; setTimeLeft(d * 60); localStorage.removeItem('sf_timer_state'); } }} aria-label={isCountingUp ? 'Stop and reset' : 'Reset timer'}
           className={`transition-colors ${
             glassVariant
               ? 'px-4 py-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10'

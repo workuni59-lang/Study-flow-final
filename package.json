@@ -13,6 +13,10 @@
     "server": "tsx server/index.ts",
     "deploy": "npm run build && wrangler deploy --config dist/wrangler.json",
     "ui-audit": "playwright test ui-audit/ui-audit.spec.ts",
+    "ui-audit:axe": "playwright test ui-audit/ui-audit-axe.spec.ts",
+    "ui-audit:visual": "playwright test ui-audit/ui-audit-visual.spec.ts",
+    "ui-audit:visual:update": "playwright test ui-audit/ui-audit-visual.spec.ts --update-snapshots",
+    "ui-audit:all": "playwright test ui-audit/",
     "lhci": "lhci autorun"
   },
   "dependencies": {
@@ -37,6 +41,7 @@
     "vite": "^6.2.3"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.3",
     "@cloudflare/vite-plugin": "^1.39.2",
     "@lhci/cli": "^0.15.1",
     "@playwright/test": "^1.60.0",

@@ -5,6 +5,7 @@ import { useStudy } from '../../context/StudyContext';
 import { useAuth } from '../../context/AuthContext';
 import { TopBar, type Mode } from './TopBar';
 import { useNavigationContext, type Panel } from '../../hooks/useNavigationContext';
+import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 import { ROUTES } from '../../lib/routes';
 import { BottomBar } from './BottomBar';
 import { HomeView } from './HomeView';
@@ -23,8 +24,6 @@ import { Confetti } from '../notifications/Confetti';
 import { LevelUpModal } from '../modals/LevelUpModal';
 import { PanicModeUI } from '../dashboard/PanicModeUI';
 import { WallpaperEngine } from '../navigation/WallpaperEngine';
-import PetEngine from '../dashboard/PetEngine';
-import PetPanel from '../dashboard/PetPanel';
 import { storage } from '../../services/storage';
 import { ENABLE_PETS } from '../../config/features';
 
@@ -57,11 +56,6 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [ambienceUrl, setAmbienceUrl] = useState<CuratedPlaylist | null>(null);
-  const [showPetPanel, setShowPetPanel] = useState(false);
-  const [feedTrigger, setFeedTrigger] = useState(0);
-  const [petVisible, setPetVisible] = useState(() => storage.getPetVisible() ?? true);
-  const [petSize, setPetSize] = useState(() => storage.getPetSize() ?? 140);
-
 
   const setMode = (m: Mode) => {
     navigate(m === 'focus' ? ROUTES.FOCUS : ROUTES.HOME);
@@ -107,6 +101,13 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
     navigate(modeRef.current === 'focus' ? ROUTES.FOCUS : ROUTES.HOME);
   }, [navigate]);
 
+  useKeyboardShortcuts({
+    onTasksOpen: handleTasksOpen,
+    onMusicOpen: handleMusicOpen,
+    onNotepadOpen: handleNotepadOpen,
+    onClosePanel: handleClosePanel,
+  });
+
   useEffect(() => {
     if (levelUpEvent) {
       setShowLevelUp(true);
@@ -132,9 +133,6 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
         onModeChange={setMode}
         activeSection={section}
         onNavigate={setSection}
-        onPetPanelOpen={() => setShowPetPanel(true)}
-        petVisible={petVisible}
-        onTogglePet={(v) => { setPetVisible(v); storage.savePetVisible(v); }}
         open={menuOpen}
         onClose={() => setMenuOpen(false)}
       />
@@ -161,7 +159,7 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
                 <span className="text-sm font-semibold dark:text-white capitalize">{section}</span>
               </div>
             </header>
-            <main className="main-layout-content p-4 md:p-8 pb-24 lg:pb-8">
+            <main className="main-layout-content p-4 md:p-8 xl:p-10 pb-24 lg:pb-8">
               <Suspense fallback={<SimpleSpinner />}>
                 {section === 'progression' && <ProgressionViewLazy />}
                 {section === 'analytics' && <AnalyticsDashboardLazy />}
@@ -214,16 +212,6 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
             onQuestsOpen={handleQuestsOpen}
             onMenuOpen={handleMenuOpen}
           />
-
-          {/* Pet */}
-          {ENABLE_PETS && petVisible && (
-            <PetEngine
-              onOpenPanel={() => setShowPetPanel(true)}
-              feedTrigger={feedTrigger}
-              overlayOpen={activePanel !== null}
-              petSize={petSize}
-            />
-          )}
         </>
       )}
       </div>
@@ -267,18 +255,6 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
             title={ambienceUrl.name}
           />
         </div>
-      )}
-
-      {/* Pet panel */}
-      {ENABLE_PETS && showPetPanel && (
-        <PetPanel
-          onClose={() => setShowPetPanel(false)}
-          onFeed={() => setFeedTrigger(c => c + 1)}
-          petVisible={petVisible}
-          petSize={petSize}
-          onToggleVisible={(v) => { setPetVisible(v); storage.savePetVisible(v); }}
-          onChangeSize={(s) => { setPetSize(s); storage.savePetSize(s); }}
-        />
       )}
 
       {/* Overlays & modals */}

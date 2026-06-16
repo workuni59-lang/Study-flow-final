@@ -44,16 +44,16 @@ function mdToHtml(md: string): string {
 function highlightMd(md: string): string {
   let h = md
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    .replace(/(```)([\s\S]*?)(```)/g, '<span class="text-white/15">$1</span><code class="text-cyan-300">$2</code><span class="text-white/15">$3</span>')
-    .replace(/(`)([^`]+)(`)/g, '<span class="text-white/15">$1</span><code class="text-cyan-300 bg-white/5 rounded px-0.5">$2</code><span class="text-white/15">$3</span>')
-    .replace(/(^### )(.*)/gm, '<span class="text-white/15">### </span><span class="text-orange-300 font-bold">$2</span>')
-    .replace(/(^## )(.*)/gm, '<span class="text-white/15">## </span><span class="text-orange-300 font-semibold">$2</span>')
-    .replace(/(^# )(.*)/gm, '<span class="text-white/15"># </span><span class="text-orange-300 font-bold">$2</span>')
-    .replace(/(\*\*)([^*]+)(\*\*)/g, '<span class="text-white/15">$1</span><strong class="text-white">$2</strong><span class="text-white/15">$3</span>')
-    .replace(/(\*)([^*]+)(\*)/g, '<span class="text-white/15">$1</span><em class="text-white/90">$2</em><span class="text-white/15">$3</span>')
-    .replace(/(\[)([^\]]+)(\]\()([^)]+)(\))/g, '<span class="text-white/15">$1</span><span class="text-sky-300">$2</span><span class="text-white/15">$3</span><span class="text-sky-400/70 underline">$4</span><span class="text-white/15">$5</span>')
-    .replace(/(^- )(.*)/gm, '<span class="text-white/15">- </span><span>$2</span>')
-    .replace(/(^\d+\. )(.*)/gm, '<span class="text-white/15">$1</span><span>$2</span>');
+    .replace(/(```)([\s\S]*?)(```)/g, '<span class="text-white/45">$1</span><code class="text-cyan-300">$2</code><span class="text-white/45">$3</span>')
+    .replace(/(`)([^`]+)(`)/g, '<span class="text-white/45">$1</span><code class="text-cyan-300 bg-white/5 rounded px-0.5">$2</code><span class="text-white/45">$3</span>')
+    .replace(/(^### )(.*)/gm, '<span class="text-white/45">### </span><span class="text-orange-300 font-bold">$2</span>')
+    .replace(/(^## )(.*)/gm, '<span class="text-white/45">## </span><span class="text-orange-300 font-semibold">$2</span>')
+    .replace(/(^# )(.*)/gm, '<span class="text-white/45"># </span><span class="text-orange-300 font-bold">$2</span>')
+    .replace(/(\*\*)([^*]+)(\*\*)/g, '<span class="text-white/45">$1</span><strong class="text-white">$2</strong><span class="text-white/45">$3</span>')
+    .replace(/(\*)([^*]+)(\*)/g, '<span class="text-white/45">$1</span><em class="text-white/90">$2</em><span class="text-white/45">$3</span>')
+    .replace(/(\[)([^\]]+)(\]\()([^)]+)(\))/g, '<span class="text-white/45">$1</span><span class="text-sky-300">$2</span><span class="text-white/45">$3</span><span class="text-sky-400/70 underline">$4</span><span class="text-white/45">$5</span>')
+    .replace(/(^- )(.*)/gm, '<span class="text-white/45">- </span><span>$2</span>')
+    .replace(/(^\d+\. )(.*)/gm, '<span class="text-white/45">$1</span><span>$2</span>');
   return h.split('\n').join('<br>');
 }
 
@@ -199,18 +199,18 @@ export const NotepadPanel = () => {
     <div className="flex items-center gap-1 ml-auto">
       <button onClick={() => setShowHighlight(v => !v)}
         title="Show formatted markdown (not raw syntax)"
-        className={`flex items-center gap-1 px-1.5 py-1 rounded-lg text-[8px] font-bold uppercase tracking-wider transition-all ${showHighlight ? 'bg-brand/15 text-brand' : 'hover:bg-white/[0.06] text-white/30 hover:text-white/70'}`}>
+        className={`flex items-center gap-1 px-1.5 py-1 rounded-lg text-[8px] font-bold uppercase tracking-wider transition-all ${showHighlight ? 'bg-brand/15 text-brand' : 'hover:bg-white/[0.06] text-white/50 hover:text-white/70'}`}>
         <Code2 className="w-3.5 h-3.5" />
         <span>Highlight</span>
       </button>
       <button onClick={() => setShowPreview(v => !v)}
         title={showPreview ? 'Hide preview' : 'Show preview'}
-        className="p-1.5 rounded-lg hover:bg-white/[0.06] text-white/30 hover:text-white/70 transition-all">
+        className="p-1.5 rounded-lg hover:bg-white/[0.06] text-white/50 hover:text-white/70 transition-all">
         {showPreview ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
       </button>
       <button onClick={() => setFullscreen(v => !v)}
         title={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
-        className="p-1.5 rounded-lg hover:bg-white/[0.06] text-white/30 hover:text-white/70 transition-all">
+        className="p-1.5 rounded-lg hover:bg-white/[0.06] text-white/50 hover:text-white/70 transition-all">
         {fullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
       </button>
     </div>
@@ -221,7 +221,7 @@ export const NotepadPanel = () => {
       <div className="flex items-center gap-2 pb-3 border-b border-white/[0.06] shrink-0">
         {!isFullscreen && (
           <button onClick={() => { setActiveId(null); setEditingTitle(false); setShowHighlight(false); }}
-            className="p-1.5 rounded-lg hover:bg-white/[0.06] text-white/40 hover:text-white/70 transition-all">
+            className="p-1.5 rounded-lg hover:bg-white/[0.06] text-white/70 hover:text-white transition-all">
             <ChevronLeft className="w-4 h-4" />
           </button>
         )}
@@ -236,16 +236,16 @@ export const NotepadPanel = () => {
           </button>
         )}
         <button onClick={() => deleteNote(activeNote!.id)}
-          className="p-1.5 rounded-lg hover:bg-rose-500/10 text-white/30 hover:text-rose-400 transition-all">
+          className="p-1.5 rounded-lg hover:bg-rose-500/10 text-white/60 hover:text-rose-400 transition-all">
           <Trash2 className="w-3.5 h-3.5" />
         </button>
         <button onClick={createNote}
-          className="p-1.5 rounded-lg hover:bg-white/[0.06] text-white/30 hover:text-white/70 transition-all">
+          className="p-1.5 rounded-lg hover:bg-white/[0.06] text-white/50 hover:text-white/70 transition-all">
           <Plus className="w-3.5 h-3.5" />
         </button>
         {isFullscreen && (
           <button onClick={() => setFullscreen(false)}
-            className="p-1.5 rounded-lg hover:bg-white/[0.06] text-white/30 hover:text-white/70 transition-all">
+            className="p-1.5 rounded-lg hover:bg-white/[0.06] text-white/50 hover:text-white/70 transition-all">
             <Minimize2 className="w-3.5 h-3.5" />
           </button>
         )}
@@ -255,7 +255,7 @@ export const NotepadPanel = () => {
         {toolbarButtons.map(({ icon: Icon, action, label }) => (
           <button key={label} onClick={() => handleToolbar(action)}
             title={label}
-            className="p-1.5 rounded-lg hover:bg-white/[0.08] text-white/40 hover:text-white/80 transition-all">
+            className="p-1.5 rounded-lg hover:bg-white/[0.08] text-white/70 hover:text-white/80 transition-all">
             <Icon className="w-3.5 h-3.5" />
           </button>
         ))}
@@ -272,7 +272,7 @@ export const NotepadPanel = () => {
           onChange={e => handleChange(e.target.value)}
           onScroll={handleScroll}
           placeholder="Write your thoughts..."
-          className={`w-full h-full resize-none outline-none font-mono text-sm leading-relaxed p-3 ${showHighlight ? 'text-white/5 caret-white' : activeTheme.text} bg-transparent placeholder-white/20`} />
+          className={`w-full h-full resize-none outline-none font-mono text-sm leading-relaxed p-3 ${showHighlight ? 'text-white/5 caret-white' : activeTheme.text} bg-transparent placeholder-white/50`} />
       </div>
 
       {showPreview && (
@@ -287,7 +287,7 @@ export const NotepadPanel = () => {
           ) : (
             <div className="w-3 h-3 border-2 border-white/20 border-t-white rounded-full animate-spin" />
           )}
-          <span className="text-[8px] text-white/30 font-medium">{saved ? 'Saved' : 'Saving...'}</span>
+          <span className="text-[8px] text-white/50 font-medium">{saved ? 'Saved' : 'Saving...'}</span>
         </div>
         <div className="flex items-center gap-2">
           {NOTE_THEMES.map(t => (
@@ -297,8 +297,8 @@ export const NotepadPanel = () => {
           ))}
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-[8px] text-white/20">{wordCount} {wordCount === 1 ? 'word' : 'words'}</span>
-          <span className="text-[8px] text-white/20">{notes.findIndex(n => n.id === activeNote!.id) + 1} of {notes.length}</span>
+          <span className="text-[8px] text-white/50">{wordCount} {wordCount === 1 ? 'word' : 'words'}</span>
+          <span className="text-[8px] text-white/50">{notes.findIndex(n => n.id === activeNote!.id) + 1} of {notes.length}</span>
         </div>
       </div>
     </>
@@ -309,9 +309,9 @@ export const NotepadPanel = () => {
       <div className="flex flex-col h-full">
         <div className="flex-1 flex flex-col items-center justify-center text-center py-12">
           <div className="w-12 h-12 rounded-2xl bg-white/[0.04] flex items-center justify-center mb-4">
-            <Code2 className="w-5 h-5 text-white/30" />
+            <Code2 className="w-5 h-5 text-white/50" />
           </div>
-          <p className="text-white/40 text-sm font-medium mb-4">No notes yet</p>
+          <p className="text-white/70 text-sm font-medium mb-4">No notes yet</p>
           <button onClick={createNote}
             className="flex items-center gap-2 px-4 py-2.5 bg-brand text-white rounded-xl text-[10px] font-bold uppercase tracking-wider hover:opacity-90 transition-opacity">
             <Plus className="w-3.5 h-3.5" /> Create Note

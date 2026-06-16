@@ -17,3 +17,11 @@ reference-app/*
 # Playwright UI audit artifacts
 ui-audit/screenshots/
 ui-audit/playwright-report/
+ui-audit/**/__snapshots__/
+
+# Lighthouse CI artifacts
+.lighthouseci/
+lhci-reports/
+
+# Test run artifacts
+test-results/

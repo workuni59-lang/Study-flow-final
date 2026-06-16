@@ -1,1 +1,1 @@
-export const ENABLE_PETS = false;
+export const ENABLE_PETS = true;

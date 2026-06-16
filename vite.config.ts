@@ -87,9 +87,16 @@ export default defineConfig((): UserConfig => {
     build: {
       rollupOptions: {
         output: {
-          manualChunks: {
-            vendor: ['react', 'react-dom', 'motion'],
-            icons: ['lucide-react'],
+          manualChunks(id) {
+            if (id.includes('node_modules/react-dom') || id.includes('node_modules/react/')) {
+              return 'vendor';
+            }
+            if (id.includes('node_modules/motion')) {
+              return 'motion';
+            }
+            if (id.includes('node_modules/lucide-react')) {
+              return 'icons';
+            }
           },
         },
       },

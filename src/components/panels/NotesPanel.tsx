@@ -205,13 +205,13 @@ export const NotesPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () =
         <input ref={titleRef} value={activeNote?.title || ''}
           onChange={e => handleTitleChange(e.target.value)}
           placeholder="Note title"
-          className="flex-1 bg-transparent text-base font-semibold text-white outline-none placeholder-white/20 min-w-0" />
+          className="flex-1 bg-transparent text-base font-semibold text-white outline-none placeholder-white/50 min-w-0" />
         <button onClick={deleteNote}
-          className="p-1.5 rounded-lg hover:bg-rose-500/10 text-white/40 hover:text-rose-400 transition-all shrink-0" title="Delete note">
+          className="p-1.5 rounded-lg hover:bg-rose-500/10 text-white/70 hover:text-rose-400 transition-all shrink-0" title="Delete note">
           <Trash2 className="w-[18px] h-[18px]" />
         </button>
         <button onClick={createNote}
-          className="p-1.5 rounded-lg hover:bg-white/[0.08] text-white/40 hover:text-white/80 transition-all shrink-0" title="New note">
+          className="p-1.5 rounded-lg hover:bg-white/[0.08] text-white/70 hover:text-white/80 transition-all shrink-0" title="New note">
           <Plus className="w-[18px] h-[18px]" />
         </button>
       </div>
@@ -262,7 +262,7 @@ export const NotesPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () =
         <div ref={editorRef} contentEditable
           onInput={handleEditorInput}
           className="flex-1 min-h-0 overflow-y-auto outline-none text-sm text-white/80 leading-relaxed w-full
-            empty:before:content-[attr(data-placeholder)] empty:before:text-white/20 empty:before:cursor-text
+            empty:before:content-[attr(data-placeholder)] empty:before:text-white/50 empty:before:cursor-text
             [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-5 [&_ol]:pl-5"
           data-placeholder="What are you working on?"
           suppressContentEditableWarning />
@@ -275,9 +275,9 @@ export const NotesPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () =
           ) : (
             <div className="w-3 h-3 border-2 border-white/20 border-t-white rounded-full animate-spin" />
           )}
-          <span className="text-[10px] text-white/30">{saved ? 'Saved' : 'Saving...'}</span>
+          <span className="text-[10px] text-white/60">{saved ? 'Saved' : 'Saving...'}</span>
         </div>
-        <div className="flex items-center gap-3 text-[10px] text-white/20">
+        <div className="flex items-center gap-3 text-[10px] text-white/50">
           <span>{wordCount} {wordCount === 1 ? 'word' : 'words'}</span>
           {notes.length > 0 && <span>{noteIndex} of {notes.length}</span>}
         </div>
@@ -301,7 +301,7 @@ export const NotesPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () =
             <ChevronLeft className="w-5 h-5" />
           </button>
           <span className="text-base font-semibold text-white">Notes</span>
-          <span className="text-sm text-white/30 font-normal">({notes.length})</span>
+          <span className="text-sm text-white/60 font-normal">({notes.length})</span>
           <button onClick={createNote}
             className="ml-auto w-7 h-7 rounded-full bg-white/[0.08] flex items-center justify-center text-white/50 hover:text-white hover:bg-white/[0.15] transition-all">
             <Plus className="w-4 h-4" />
@@ -321,7 +321,7 @@ export const NotesPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () =
                 <div className={`text-[13px] font-semibold truncate max-w-[120px] ${activeId === note.id ? 'text-white' : 'text-white/70'}`}>
                   {note.title || 'Untitled'}
                 </div>
-                <div className="text-[10px] text-white/30 mt-0.5">{fmtTime(note.updatedAt)}</div>
+                <div className="text-[10px] text-white/60 mt-0.5">{fmtTime(note.updatedAt)}</div>
               </button>
             ))}
           </div>
@@ -330,7 +330,7 @@ export const NotesPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () =
         {/* Editor area */}
         <div className="flex-1 flex flex-col min-h-0">
           {activeNote ? editorArea : (
-            <div className="flex-1 flex items-center justify-center text-sm text-white/20">
+            <div className="flex-1 flex items-center justify-center text-sm text-white/50">
               Select or create a note to get started
             </div>
           )}
@@ -354,7 +354,7 @@ export const NotesPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () =
         <div className="w-[300px] shrink-0 flex flex-col bg-black/40">
           <div className="flex items-center gap-1.5 px-4 pt-4 pb-3">
             <span className="text-base font-semibold text-white">Notes</span>
-            <span className="text-sm text-white/30 font-normal">({notes.length})</span>
+            <span className="text-sm text-white/60 font-normal">({notes.length})</span>
             <button onClick={createNote}
               className="ml-auto w-6 h-6 rounded-full bg-white/[0.08] flex items-center justify-center text-white/50 hover:text-white hover:bg-white/[0.15] transition-all"
               title="New note">
@@ -371,8 +371,8 @@ export const NotesPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () =
                   {note.title || 'Untitled'}
                 </div>
                 <div className="flex items-center gap-2 mt-0.5">
-                  <span className="text-[11px] text-white/30 shrink-0">{fmtTime(note.updatedAt)}</span>
-                  <span className="text-[11px] text-white/20 truncate">{getFirstLine(note.content) || 'Empty note'}</span>
+                  <span className="text-[11px] text-white/60 shrink-0">{fmtTime(note.updatedAt)}</span>
+                  <span className="text-[11px] text-white/50 truncate">{getFirstLine(note.content) || 'Empty note'}</span>
                 </div>
               </button>
             ))}
@@ -387,7 +387,7 @@ export const NotesPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () =
         <div className="w-px bg-white/[0.06] shrink-0" />
         <div className="flex-1 flex flex-col min-w-0 bg-black/20">
           {activeNote ? editorArea : (
-            <div className="flex-1 flex items-center justify-center text-sm text-white/20">
+            <div className="flex-1 flex items-center justify-center text-sm text-white/50">
               Select or create a note to get started
             </div>
           )}

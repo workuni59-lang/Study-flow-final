@@ -58,7 +58,7 @@ export const TasksPanel = () => {
                 className="flex items-center gap-2 px-3 py-2 rounded-[11px] bg-white/[0.04] border border-transparent transition-colors duration-150 data-[focus-within]:border-white"
                 style={{ boxShadow: '0 4px 6px -1px rgba(0,29,41,0.06), 0 2px 4px -2px rgba(0,29,41,0.06)' }}
               >
-                <div className="cursor-grab active:cursor-grabbing text-white/20 hover:text-white/50 transition-colors shrink-0 flex items-center justify-center w-10 h-10 -ml-1">
+                <div className="cursor-grab active:cursor-grabbing text-white/50 hover:text-white/70 transition-colors shrink-0 flex items-center justify-center w-10 h-10 -ml-1">
                   <span className="text-sm leading-none" style={{ color: '#4b5563' }}>⠿</span>
                 </div>
                 <button
@@ -88,7 +88,7 @@ export const TasksPanel = () => {
                   }}
                   placeholder="Type your priority"
                   maxLength={25}
-                  className={`flex-1 text-sm font-medium bg-transparent border-none outline-none text-white placeholder-white/30 px-1 py-3 ${
+                  className={`flex-1 text-sm font-medium bg-transparent border-none outline-none text-white placeholder-white/50 px-1 py-3 ${
                     task.completed ? 'opacity-50 line-through' : ''
                   }`}
                 />
@@ -104,7 +104,7 @@ export const TasksPanel = () => {
                 </select>
                 <button
                   onClick={() => deleteTask(task.id)}
-                  className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/30 hover:bg-red-500/20 hover:text-red-400 transition-colors shrink-0 -mr-1"
+                  className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/60 hover:bg-red-500/20 hover:text-red-400 transition-colors shrink-0 -mr-1"
                   aria-label="Delete task"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -117,14 +117,14 @@ export const TasksPanel = () => {
 
       {tasks.length === 0 && !adding && (
         <div className="px-5 py-12 text-center">
-          <p className="text-sm text-white/30 font-medium">No tasks yet.</p>
+          <p className="text-sm text-white/60 font-medium">No tasks yet.</p>
         </div>
       )}
 
       <div className="mt-auto px-3 pb-3">
         <button
           onClick={handleAddClick}
-          className="w-full py-2.5 rounded-[11px] text-sm font-medium text-white/40 hover:text-white/70 hover:bg-white/[0.04] transition-colors border border-dashed border-white/[0.08]"
+          className="w-full py-2.5 rounded-[11px] text-sm font-medium text-white/70 hover:text-white/90 hover:bg-white/[0.04] transition-colors border border-dashed border-white/[0.08]"
         >
           + Add Task
         </button>

@@ -1,19 +1,24 @@
-import { useState, type FormEvent } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import { motion } from 'motion/react';
 import { useAuth } from '../../context/AuthContext';
 
 interface Props {
+  defaultEmail?: string;
   onSuccess?: () => void;
   onSwitchToSignup: () => void;
   onForgotPassword: () => void;
 }
 
-export default function LoginForm({ onSuccess, onSwitchToSignup, onForgotPassword }: Props) {
+export default function LoginForm({ defaultEmail, onSuccess, onSwitchToSignup, onForgotPassword }: Props) {
   const { signIn } = useAuth();
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(defaultEmail || '');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (defaultEmail) setEmail(defaultEmail);
+  }, [defaultEmail]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -38,6 +43,12 @@ export default function LoginForm({ onSuccess, onSwitchToSignup, onForgotPasswor
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
+      {defaultEmail && !error && (
+        <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}
+          className="text-[10px] font-medium text-emerald-400 bg-emerald-500/10 px-3 py-2 rounded-lg">
+          Account verified! Sign in with your password.
+        </motion.p>
+      )}
       {error && (
         <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}
           className="text-[10px] font-medium text-rose-400 bg-rose-500/10 px-3 py-2 rounded-lg">

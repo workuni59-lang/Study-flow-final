@@ -182,7 +182,7 @@ class AudioController {
         if (howl && !(howl as any)._retried) {
           (howl as any)._retried = true;
           const retryUrl = asset.url + (asset.url.includes('?') ? '&' : '?') + 'retry=1';
-          howl.src(retryUrl);
+          (howl as any).src(retryUrl);
           howl.load();
           return;
         }

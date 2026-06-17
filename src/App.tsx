@@ -1,11 +1,13 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, lazy, Suspense, useCallback } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { MotionConfig } from 'motion/react';
 import { StudyProvider, FocusProvider, useStudy } from './context/StudyContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { PetProvider } from './context/PetContext';
-import { PetManager } from './components/pet/PetManager';
 import AuthModal from './components/auth/AuthModal';
+import ResetPasswordForm from './components/auth/ResetPasswordForm';
+import PrivacyPage from './components/legal/PrivacyPage';
+import TermsPage from './components/legal/TermsPage';
+import { supabase } from './lib/supabase';
 import { useReduceMotion } from './hooks/useReduceMotion';
 import { MetaUpdater } from './components/navigation/MetaUpdater';
 
@@ -44,19 +46,39 @@ const AppContent = () => {
     document.documentElement.classList.add('dark');
   }, []);
 
-  // Local-only Premium Toggle (for development)
+  // Sync premium status from profile
   useEffect(() => {
-    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const params = new URLSearchParams(window.location.search);
-    const forcePremium = params.get('premium') === 'true';
-
-    if (isLocal && forcePremium) {
-      console.log('💎 Local Premium Mode Enabled');
-      syncPremiumStatus(true);
-    } else if (profile) {
-      syncPremiumStatus(profile.is_premium);
-    }
+    if (!profile) return;
+    syncPremiumStatus(profile.is_premium);
   }, [profile, syncPremiumStatus]);
+
+  // Periodic premium refresh (every 5 min + on visibility change)
+  useEffect(() => {
+    if (!user || user.uid === 'demo-user-001') return;
+
+    const refresh = async () => {
+      const { data } = await supabase!
+        .from('profiles')
+        .select('is_premium, premium_until')
+        .eq('id', user.uid)
+        .single();
+      if (data) {
+        // Check if premium_until has passed
+        const until = data.premium_until ? new Date(data.premium_until).getTime() : 0;
+        const isStillPremium = data.is_premium && (until === 0 || until > Date.now());
+        syncPremiumStatus(isStillPremium);
+      }
+    };
+
+    const interval = setInterval(refresh, 5 * 60 * 1000);
+    const onVisibility = () => { if (document.visibilityState === 'visible') refresh(); };
+    document.addEventListener('visibilitychange', onVisibility);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, [user, syncPremiumStatus]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -82,7 +104,6 @@ const AppContent = () => {
   return (
     <MotionConfig reducedMotion={reduceMotion ? 'always' : 'never'}>
       <MetaUpdater />
-      {!isMobile && <PetManager />}
       <Suspense fallback={<MobileSpinner />}>
         {isMobile ? <MobileLayout onOpenAuth={handleOpenAuth} /> : <MainLayout onOpenAuth={handleOpenAuth} />}
       </Suspense>
@@ -96,22 +117,23 @@ export default function App() {
     <AuthProvider>
       <StudyProvider>
         <FocusProvider>
-          <PetProvider>
-            <Routes>
-              <Route path="/" element={<AppContent />} />
-              <Route path="/profile/:id" element={<AppContent />} />
-              <Route path="/analytics" element={<AppContent />} />
-              <Route path="/progress" element={<AppContent />} />
-              <Route path="/quests" element={<AppContent />} />
-              <Route path="/subjects" element={<AppContent />} />
-              <Route path="/achievements" element={<AppContent />} />
-              <Route path="/leaderboard" element={<AppContent />} />
-              <Route path="/settings" element={<AppContent />} />
-              <Route path="/themes" element={<AppContent />} />
-              <Route path="/pomodoro" element={<AppContent />} />
-              <Route path="/*" element={<AppContent />} />
-            </Routes>
-          </PetProvider>
+          <Routes>
+            <Route path="/" element={<AppContent />} />
+            <Route path="/profile/:id" element={<AppContent />} />
+            <Route path="/analytics" element={<AppContent />} />
+            <Route path="/progress" element={<AppContent />} />
+            <Route path="/quests" element={<AppContent />} />
+            <Route path="/subjects" element={<AppContent />} />
+            <Route path="/achievements" element={<AppContent />} />
+            <Route path="/leaderboard" element={<AppContent />} />
+            <Route path="/settings" element={<AppContent />} />
+            <Route path="/themes" element={<AppContent />} />
+            <Route path="/pomodoro" element={<AppContent />} />
+            <Route path="/reset-password" element={<ResetPasswordForm />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/*" element={<AppContent />} />
+          </Routes>
         </FocusProvider>
       </StudyProvider>
     </AuthProvider>

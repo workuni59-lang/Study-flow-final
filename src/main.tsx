@@ -9,6 +9,15 @@ import './index.css';
 // Register PWA service worker with auto-update
 registerSW({ immediate: true });
 
+// Global error handlers
+window.onerror = (message, source, lineno, colno, error) => {
+  console.error('[Global] Uncaught error:', message, source, lineno, colno, error?.stack);
+};
+
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('[Global] Unhandled promise rejection:', event.reason?.message || event.reason, event.reason?.stack);
+});
+
 function SplashHider() {
   useEffect(() => {
     const splash = document.getElementById('loading-splash');

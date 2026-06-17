@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import {
   ArrowRight, Menu, X, Clock, Crown, Sparkles,
@@ -506,13 +507,13 @@ export default function LandingPage({ onOpenAuth, onStartDemo }: LandingPageProp
            </div>
 
           <div className="flex flex-col items-center md:items-end gap-4">
-            <div className="flex gap-8" id="footer-socials">
-              <span className="text-xs font-bold text-white/50 hover:text-white transition-colors cursor-pointer uppercase tracking-widest">
+            <div className="flex flex-wrap justify-center gap-6 md:gap-8" id="footer-socials">
+              <Link to="/privacy" className="text-xs font-bold text-white/50 hover:text-white transition-colors uppercase tracking-widest">
                 Privacy
-              </span>
-              <span className="text-xs font-bold text-white/50 hover:text-white transition-colors cursor-pointer uppercase tracking-widest">
+              </Link>
+              <Link to="/terms" className="text-xs font-bold text-white/50 hover:text-white transition-colors uppercase tracking-widest">
                 Terms
-              </span>
+              </Link>
               <span className="text-xs font-bold text-white/50 hover:text-white transition-colors cursor-pointer uppercase tracking-widest">
                 Support
               </span>

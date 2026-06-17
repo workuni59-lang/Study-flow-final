@@ -136,19 +136,6 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
       setShowLevelUp(true);
     }
   }, [levelUpEvent]);
-  useEffect(() => {
-    const t = setTimeout(() => import('../analytics/AnalyticsDashboard'), 2000);
-    return () => clearTimeout(t);
-  }, []);
-
-  // Prefetch commonly opened panels after idle
-  useEffect(() => {
-    const t = setTimeout(() => {
-      import('../quests/QuestsView');
-    }, 2000);
-    return () => clearTimeout(t);
-  }, []);
-
   const isFullView = section !== 'dashboard';
 
   const moodWallpapers = useMemo(() =>

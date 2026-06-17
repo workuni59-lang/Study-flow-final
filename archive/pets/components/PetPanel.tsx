@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Heart, Zap, Award, Eye, EyeOff } from 'lucide-react';
+import { X, Heart, Zap, Award, Eye, EyeOff, Crown } from 'lucide-react';
 import { usePet } from '../../context/PetContext';
 import { useStudy } from '../../context/StudyContext';
 import { PET_FOODS, getFoodById } from '../../lib/pets/food';
@@ -36,14 +36,14 @@ export const PetPanel = ({ isOpen, onClose }: PetPanelProps) => {
           className="fixed inset-x-4 bottom-24 lg:inset-auto lg:right-6 lg:bottom-24 w-auto lg:w-80 bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden z-[60] shadow-2xl"
         >
           {/* Header */}
-          <div className="p-6 pb-4 flex items-center justify-between">
+          <div className="relative p-6 pb-4 pr-14">
             <div>
               <h3 className="text-xl font-bold text-white leading-tight">{petState.name}</h3>
               <p className="text-xs text-white/70 uppercase tracking-widest font-bold">Level {petState.level} {species.name}</p>
             </div>
             <button 
               onClick={onClose}
-              className="p-2 hover:bg-white/10 rounded-full transition-colors"
+              className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-full transition-colors"
             >
               <X className="w-5 h-5 text-white/70" />
             </button>
@@ -142,8 +142,16 @@ export const PetPanel = ({ isOpen, onClose }: PetPanelProps) => {
                           : 'bg-white/5 border-white/5 hover:bg-white/10'
                       } ${!isUnlocked && 'opacity-40 grayscale'}`}
                     >
-                      <span className="text-xs font-bold text-white">{s.name}</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-bold text-white">{s.name}</span>
+                        {s.isPremium && <Crown className="w-3 h-3 text-amber-400 shrink-0" />}
+                      </div>
                       <p className="text-[10px] text-white/70 leading-tight">{s.vibe}</p>
+                      {s.isPremium && !isUnlocked && (
+                        <span className="text-[8px] font-bold uppercase tracking-tight text-amber-400 flex items-center gap-1">
+                          <Crown className="w-2.5 h-2.5" />Premium
+                        </span>
+                      )}
                     </button>
                   );
                 })}
@@ -194,12 +202,15 @@ export const PetPanel = ({ isOpen, onClose }: PetPanelProps) => {
                       <div className="flex flex-col">
                         <span className="text-xs font-bold text-white">{s.name}</span>
                         {lockLabel && (
-                          <span className={`text-[8px] font-bold uppercase tracking-tight ${
+                          <span className={`text-[8px] font-bold uppercase tracking-tight flex items-center gap-1 ${
                             s.unlock.type === 'gold' && hasEnoughGold ? 'text-emerald-400' :
                             s.unlock.type === 'gold' ? 'text-amber-400' :
                             s.unlock.type === 'premium' ? 'text-indigo-400' :
                             'text-amber-500'
-                          }`}>{lockLabel}</span>
+                          }`}>
+                            {s.unlock.type === 'premium' && <Crown className="w-2.5 h-2.5" />}
+                            {lockLabel}
+                          </span>
                         )}
                       </div>
                     </button>

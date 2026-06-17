@@ -266,22 +266,33 @@
 }
 
 /* ─── Clear Mode ─── */
+/* Sidebar and nav: barely visible, fully revealed on hover */
 [data-clear-mode="true"] .sidebar,
 [data-clear-mode="true"] .nav-rail {
-  @apply opacity-0 pointer-events-none transition-all duration-700;
+  @apply opacity-0 hover:opacity-100 transition-all duration-700;
 }
 
+/* Top bar: barely visible on lg screens, fully revealed on hover */
 @media (min-width: 1024px) {
   [data-clear-mode="true"] .top-bar,
   [data-clear-mode="true"] .bottom-bar {
     opacity: 0;
-    pointer-events: none;
     transition: all 0.7s;
+  }
+  [data-clear-mode="true"] .top-bar:hover,
+  [data-clear-mode="true"] .bottom-bar:hover {
+    opacity: 1;
   }
 }
 
-[data-clear-mode="true"] .dashboard-stats,
-[data-clear-mode="true"] .pet-panel {
+/* Bottom bar on mobile: barely visible, fully revealed on hover */
+@media (max-width: 1023px) {
+  [data-clear-mode="true"] .bottom-bar {
+    @apply opacity-5 hover:opacity-100 transition-all duration-700;
+  }
+}
+
+[data-clear-mode="true"] .dashboard-stats {
   @apply opacity-20 hover:opacity-100 transition-all duration-700;
 }
 

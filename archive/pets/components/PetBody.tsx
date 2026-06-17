@@ -1,6 +1,7 @@
 import React from 'react';
 import { PetMood, PetPerformanceTier, PetColors } from '../../lib/pets/types';
 import { PetEyes } from './PetEyes';
+import { NovaMascot } from './NovaMascot';
 
 interface PetBodyProps {
   speciesId: string;
@@ -67,13 +68,7 @@ export const PetBody = ({ speciesId, mood, tier, colors }: PetBodyProps) => {
         );
 
       case 'pixie':
-        return (
-          <svg viewBox="0 0 80 100" fill="none" className="w-full h-full drop-shadow-lg">
-            <ellipse cx="40" cy="52" rx="16" ry="19" fill={colors.body} opacity={isDormant ? 0.3 : 1} />
-            <path d="M40 22 L42.5 28 L49 28 L44 32 L46 38 L40 34 L34 38 L36 32 L31 28 L37.5 28 Z" fill={colors.accent} opacity={0.7} />
-            <PetEyes mood={mood} tier={tier} eyeColor={isDormant ? '#666' : '#fff'} pupilColor="#1e1b4b" position={{ x: 40, y: 47 }} />
-          </svg>
-        );
+        return <NovaMascot mood={mood} tier={tier} colors={colors} />;
 
       default:
         return (

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, type ComponentType } from 'react';
 import { motion } from 'motion/react';
 import {
   Loader2, User, Crown, Clock, CheckSquare, Flame, Award, Lock,
@@ -632,7 +632,7 @@ function StatCard({
   num,
   unit,
 }: {
-  icon: React.ComponentType<{ className?: string }>;
+  icon: ComponentType<{ className?: string }>;
   iconBg: string;
   label: string;
   num: string;

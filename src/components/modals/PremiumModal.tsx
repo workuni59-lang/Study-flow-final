@@ -46,7 +46,7 @@ export const PremiumModal = ({ onOpenAuth }: PremiumModalProps) => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId: user?.uid }),
         });
-        const devData = await devRes.json();
+        const devData: { ok?: boolean; error?: string } = await devRes.json();
         if (!devData.ok) { setError(devData.error || 'Activation failed'); setActivating(false); return; }
         window.location.href = '/settings?upgrade=success';
         return;
@@ -63,10 +63,10 @@ export const PremiumModal = ({ onOpenAuth }: PremiumModalProps) => {
         }),
       });
 
-      const data = await res.json();
+      const data: { error?: string; url?: string } = await res.json();
       if (!res.ok) { setError(data.error || 'Checkout failed'); setActivating(false); return; }
 
-      window.location.href = data.url;
+      window.location.href = data.url!;
     } catch (err: any) {
       console.error('API unreachable:', err.message);
       setError('Could not reach payment server. Please try again.');
@@ -100,24 +100,24 @@ export const PremiumModal = ({ onOpenAuth }: PremiumModalProps) => {
               <X className="w-3.5 h-3.5 text-white/50" />
             </button>
 
-            <div className="px-6 pt-8 pb-0 shrink-0">
+            <div className="px-6 pt-5 pb-0 shrink-0">
               {/* SECTION 1 — HEADER */}
               <div className="flex flex-col items-center text-center">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.06] border border-white/[0.06] mb-3">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.06] border border-white/[0.06] mb-2">
                   <Crown className="w-3 h-3 text-amber-400" />
                   <span className="text-[8px] font-black uppercase tracking-[0.15em] text-white/70">Elite Scholar Tier</span>
                 </div>
-                <h2 className="text-[28px] font-bold text-white leading-none mb-1.5">Unlock Full Potential</h2>
-                <p className="text-[13px] text-white/40 font-medium">Upgrade and unlock every feature.</p>
+                <h2 className="text-[24px] font-bold text-white leading-none mb-1">Unlock Full Potential</h2>
+                <p className="text-[12px] text-white/40 font-medium">Upgrade and unlock every feature.</p>
               </div>
             </div>
 
             {/* SECTION 2 — PRICE TOGGLE */}
-            <div className="px-6 pt-5 pb-0 shrink-0">
+            <div className="px-6 pt-3 pb-0 shrink-0">
               <div className="flex bg-white/[0.04] rounded-[10px] p-0.5 border border-white/[0.06]">
                 <button
                   onClick={() => setBilling('monthly')}
-                  className={`flex-1 py-2 rounded-[8px] text-[9px] font-bold uppercase tracking-wider transition-all ${
+                  className={`flex-1 py-1.5 rounded-[8px] text-[9px] font-bold uppercase tracking-wider transition-all ${
                     billing === 'monthly' ? 'bg-white/10 text-white' : 'text-white/30 hover:text-white/50'
                   }`}
                 >
@@ -125,7 +125,7 @@ export const PremiumModal = ({ onOpenAuth }: PremiumModalProps) => {
                 </button>
                 <button
                   onClick={() => setBilling('yearly')}
-                  className={`flex-1 py-2 rounded-[8px] text-[9px] font-bold uppercase tracking-wider transition-all relative ${
+                  className={`flex-1 py-1.5 rounded-[8px] text-[9px] font-bold uppercase tracking-wider transition-all relative ${
                     billing === 'yearly' ? 'bg-white/10 text-white' : 'text-white/30 hover:text-white/50'
                   }`}
                 >
@@ -133,11 +133,11 @@ export const PremiumModal = ({ onOpenAuth }: PremiumModalProps) => {
                 </button>
               </div>
 
-              <div className="flex items-center justify-center gap-3 mt-3 mb-1">
-                <span className="text-[32px] font-bold text-white leading-none">
+              <div className="flex items-center justify-center gap-2 mt-2">
+                <span className="text-[26px] font-bold text-white leading-none">
                   {billing === 'monthly' ? '$7.99' : '$64.99'}
                 </span>
-                <span className="text-[16px] text-white/50 font-medium leading-none">
+                <span className="text-[14px] text-white/50 font-medium leading-none">
                   /{billing === 'monthly' ? 'mo' : 'yr'}
                 </span>
                 {billing === 'yearly' && (
@@ -146,38 +146,37 @@ export const PremiumModal = ({ onOpenAuth }: PremiumModalProps) => {
                   </span>
                 )}
               </div>
-              <p className="text-[10px] text-center text-white/30 font-medium">7-day free trial · Cancel anytime</p>
+              <p className="text-[9px] text-center text-white/30 font-medium mt-1">7-day free trial · Cancel anytime</p>
             </div>
 
             {/* SECTION 3 — CTA BUTTON */}
-            <div className="px-6 pt-4 pb-0 shrink-0">
+            <div className="px-6 pt-3 pb-0 shrink-0">
               {error && (
-                <div className="mb-3 p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-[10px] text-rose-300 font-medium text-center">
+                <div className="mb-2 p-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-[10px] text-rose-300 font-medium text-center">
                   {error}
                 </div>
               )}
 
               {isDemo ? (
-                <div className="w-full p-4 rounded-[14px] bg-white/[0.04] border border-white/[0.08] flex flex-col items-center gap-3 text-center">
-                  <div className="w-10 h-10 rounded-full bg-indigo-500/15 flex items-center justify-center">
-                    <LogIn className="w-5 h-5 text-indigo-400" />
-                  </div>
-                  <div>
-                    <p className="text-[14px] font-bold text-white">Sign in to purchase premium</p>
-                    <p className="text-[11px] text-white/40 mt-1 max-w-[260px]">
-                      Create a free account to unlock all features and save your progress.
-                    </p>
+                <div className="w-full px-4 py-2.5 rounded-[12px] bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="w-7 h-7 rounded-full bg-indigo-500/20 flex items-center justify-center shrink-0">
+                      <LogIn className="w-3.5 h-3.5 text-indigo-400" />
+                    </div>
+                    <span className="text-[11px] text-white/70 font-medium leading-tight">
+                      Sign in to unlock premium
+                    </span>
                   </div>
                   <button
                     onClick={() => { setShowPremiumModal(false); onOpenAuth?.(); }}
-                    className="w-full h-[44px] bg-gradient-to-r from-indigo-500 to-violet-600 text-white rounded-[12px] font-bold text-[14px] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                    className="h-[28px] px-2.5 bg-gradient-to-r from-indigo-500 to-violet-600 text-white rounded-[8px] font-bold text-[10px] hover:brightness-110 active:scale-[0.98] transition-all whitespace-nowrap flex items-center gap-1 shrink-0"
                   >
-                    <LogIn className="w-4 h-4" />
+                    <LogIn className="w-3 h-3" />
                     Sign In
                   </button>
                 </div>
               ) : activated ? (
-                <div className="w-full py-4 rounded-[14px] bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center gap-2">
+                <div className="w-full py-3 rounded-[14px] bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                   <span className="text-[12px] font-bold text-emerald-300">Elite Scholar Activated!</span>
                 </div>
@@ -185,7 +184,7 @@ export const PremiumModal = ({ onOpenAuth }: PremiumModalProps) => {
                 <button
                   onClick={() => handleUpgrade()}
                   disabled={activating || userStats.isPremium}
-                  className="w-full h-[52px] bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-[14px] font-bold text-[16px] tracking-wide hover:brightness-110 active:scale-[0.98] transition-all shadow-lg shadow-amber-600/25 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full h-[48px] bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-[14px] font-bold text-[15px] tracking-wide hover:brightness-110 active:scale-[0.98] transition-all shadow-lg shadow-amber-600/25 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {activating ? (
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -199,20 +198,20 @@ export const PremiumModal = ({ onOpenAuth }: PremiumModalProps) => {
               )}
 
               {!isDemo && (
-                <p className="mt-2 text-[9px] text-center text-white/20 font-medium">Secure payment via Polar</p>
+                <p className="mt-1.5 text-[9px] text-center text-white/20 font-medium">Secure payment via Polar</p>
               )}
             </div>
 
             {/* SECTION 4 — FEATURES */}
-            <div className="flex-1 overflow-y-auto px-6 pt-4 pb-5 min-h-0">
-              <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+            <div className="shrink-0 px-6 pt-3 pb-4">
+              <div className="grid grid-cols-2 gap-x-4 gap-y-0.5">
                 {features.map((f) => (
                   <div key={f.label} className="flex items-start gap-2">
                     <div className="w-6 shrink-0 flex items-center justify-center pt-0.5">
                       <f.icon className="w-4 h-4 text-indigo-400/80" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[13px] font-semibold text-white/90 leading-tight">{f.label}</p>
+                      <p className="text-[12px] font-semibold text-white/90 leading-tight">{f.label}</p>
                       <p className="text-[10px] text-white/30 leading-tight">{f.desc}</p>
                     </div>
                   </div>

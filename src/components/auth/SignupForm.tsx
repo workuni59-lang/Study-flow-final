@@ -1,13 +1,29 @@
-import { useState, type FormEvent } from 'react';
-import { motion } from 'motion/react';
+import { useState, useMemo, type FormEvent } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import VerificationCodeInput from './VerificationCodeInput';
 
 interface Props {
   onSuccess?: () => void;
+  onVerificationSuccess?: (email: string) => void;
   onSwitchToLogin: () => void;
 }
 
-export default function SignupForm({ onSuccess, onSwitchToLogin }: Props) {
+type Step = 'form' | 'verify';
+
+function getPasswordStrength(pw: string): { score: number; label: string; color: string } {
+  let score = 0;
+  if (pw.length >= 8) score++;
+  if (pw.length >= 12) score++;
+  if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) score++;
+  if (/\d/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  if (score < 2) return { score, label: 'Weak', color: 'bg-rose-500' };
+  if (score < 3) return { score, label: 'Fair', color: 'bg-orange-400' };
+  if (score < 4) return { score, label: 'Good', color: 'bg-yellow-400' };
+  return { score, label: 'Strong', color: 'bg-emerald-400' };
+}
+
+export default function SignupForm({ onSuccess, onVerificationSuccess, onSwitchToLogin }: Props) {
   const { signUp } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -15,50 +31,68 @@ export default function SignupForm({ onSuccess, onSwitchToLogin }: Props) {
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [done, setDone] = useState(false);
+  const [step, setStep] = useState<Step>('form');
+  const [createdUserId, setCreatedUserId] = useState<string | null>(null);
+  const [createdEmail, setCreatedEmail] = useState('');
+
+  const strength = useMemo(() => getPasswordStrength(password), [password]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
     if (!name.trim()) { setError('Display name is required'); return; }
     if (!email.trim()) { setError('Email is required'); return; }
-    if (password.length < 6) { setError('Password must be at least 6 characters'); return; }
+
+    const missing: string[] = [];
+    if (password.length < 8) missing.push('at least 8 characters');
+    if (!/[A-Z]/.test(password)) missing.push('one uppercase letter');
+    if (!/[a-z]/.test(password)) missing.push('one lowercase letter');
+    if (!/\d/.test(password)) missing.push('one number');
+    if (!/[^A-Za-z0-9]/.test(password)) missing.push('one special character');
+    if (missing.length) {
+      setError('Password needs: ' + missing.join(', '));
+      return;
+    }
+
     if (password !== confirm) { setError('Passwords do not match'); return; }
     setSubmitting(true);
-    const { error: authError } = await signUp(email, password, name.trim());
+    const result = await signUp(email, password, name.trim());
     setSubmitting(false);
-    if (authError) {
+    if (result.error) {
       setError(
-        authError.message === 'User already registered'
+        result.error.message === 'User already registered'
           ? 'An account with this email already exists'
-          : authError.message
+          : result.error.message
       );
       return;
     }
-    setDone(true);
-    onSuccess?.();
+    if (result.user?.id) {
+      setCreatedUserId(result.user.id);
+      setCreatedEmail(email);
+      setStep('verify');
+    } else {
+      onSuccess?.();
+    }
   };
 
-  if (done) {
+    if (step === 'verify' && createdUserId) {
     return (
-      <div className="text-center py-6">
-        <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center mx-auto mb-3">
-          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 200 }}
-            className="w-6 h-6 text-emerald-400 text-lg">✓</motion.div>
-        </div>
-        <p className="text-sm font-semibold text-white/90 mb-1">Check your email</p>
-        <p className="text-[10px] text-white/40 leading-relaxed">We sent a confirmation link to <span className="text-white/60">{email}</span></p>
-      </div>
+      <VerificationCodeInput
+        userId={createdUserId}
+        email={createdEmail}
+        password={password}
+        onVerified={() => onVerificationSuccess ? onVerificationSuccess(createdEmail) : onSuccess?.()}
+        onBack={() => setStep('form')}
+      />
     );
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
       {error && (
-        <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}
-          className="text-[10px] font-medium text-rose-400 bg-rose-500/10 px-3 py-2 rounded-lg">
+        <p className="text-[10px] font-medium text-rose-400 bg-rose-500/10 px-3 py-2 rounded-lg">
           {error}
-        </motion.p>
+        </p>
       )}
       <div>
         <label className="text-[9px] font-medium text-white/40 uppercase tracking-wider block mb-1">Display Name</label>
@@ -76,8 +110,17 @@ export default function SignupForm({ onSuccess, onSwitchToLogin }: Props) {
         <div>
           <label className="text-[9px] font-medium text-white/40 uppercase tracking-wider block mb-1">Password</label>
           <input type="password" value={password} onChange={e => setPassword(e.target.value)}
-            placeholder="Min 6 chars"
+            placeholder="8+ chars, A-Z, 0-9, symbol"
             className="w-full bg-white/[0.04] border border-white/5 rounded-xl px-3.5 py-2.5 text-xs text-white/80 placeholder-white/20 focus:ring-1 ring-brand outline-none transition-all" />
+          {password.length > 0 && (
+            <div className="mt-1.5 space-y-1">
+              <div className="h-1 rounded-full bg-white/10 overflow-hidden">
+                <div className={`h-full rounded-full transition-all ${strength.color}`}
+                  style={{ width: `${(strength.score / 5) * 100}%` }} />
+              </div>
+              <p className="text-[8px] text-white/30 uppercase tracking-wider">{strength.label}</p>
+            </div>
+          )}
         </div>
         <div>
           <label className="text-[9px] font-medium text-white/40 uppercase tracking-wider block mb-1">Confirm</label>

@@ -25,7 +25,6 @@ import { LevelUpModal } from '../modals/LevelUpModal';
 import { PanicModeUI } from '../dashboard/PanicModeUI';
 import { WallpaperEngine } from '../navigation/WallpaperEngine';
 import { storage } from '../../services/storage';
-import { ENABLE_PETS } from '../../config/features';
 
 const AnalyticsDashboardLazy = lazy(() => import('../analytics/AnalyticsDashboard'));
 const SubjectsViewLazy = lazy(() => import('../subjects/SubjectsView').then(m => ({ default: m.SubjectsView })));
@@ -113,12 +112,6 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
       setShowLevelUp(true);
     }
   }, [levelUpEvent]);
-
-  // Preload analytics chunk after paint
-  useEffect(() => {
-    const t = setTimeout(() => import('../analytics/AnalyticsDashboard'), 2000);
-    return () => clearTimeout(t);
-  }, []);
 
   const isFullView = section !== 'dashboard';
   const skipWallpaper = typeof navigator !== 'undefined' && navigator.hardwareConcurrency <= 4;

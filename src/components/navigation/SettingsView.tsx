@@ -1,4 +1,5 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { 
   Settings, 
   Eye, 
@@ -24,12 +25,33 @@ import {
   CheckCircle2,
   Timer,
   LogOut,
-  Lock
+  Lock,
+  Download,
+  Key,
+  AlertTriangle,
+  ExternalLink,
+  Loader2
 } from 'lucide-react';
 import { useStudy } from '../../context/StudyContext';
 import { useAuth } from '../../context/AuthContext';
 import { DashboardCard } from '../dashboard/DashboardCard';
 import { storage } from '../../services/storage';
+import { supabase } from '../../lib/supabase';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+
+function passwordStrength(password: string): { score: number; label: string; color: string } {
+  let score = 0;
+  if (password.length >= 8) score++;
+  if (/[A-Z]/.test(password)) score++;
+  if (/[a-z]/.test(password)) score++;
+  if (/[0-9]/.test(password)) score++;
+  if (/[^A-Za-z0-9]/.test(password)) score++;
+  if (score <= 1) return { score, label: 'Weak', color: 'bg-red-500' };
+  if (score <= 2) return { score, label: 'Fair', color: 'bg-orange-500' };
+  if (score <= 3) return { score, label: 'Good', color: 'bg-yellow-500' };
+  return { score, label: 'Strong', color: 'bg-green-500' };
+}
 
 export const SettingsView = () => {
   const { user, profile, updateProfile, signOut } = useAuth();
@@ -44,6 +66,16 @@ export const SettingsView = () => {
   const [name, setName] = useState(user?.displayName || '');
   const [bio, setBio] = useState(profile?.bio || '');
   const [showSaved, setShowSaved] = useState(false);
+
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [exportLoading, setExportLoading] = useState<'json' | 'csv' | null>(null);
+  const [passwordCurrent, setPasswordCurrent] = useState('');
+  const [passwordNew, setPasswordNew] = useState('');
+  const [passwordConfirm, setPasswordConfirm] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
+  const [portalLoading, setPortalLoading] = useState(false);
 
   // Sync local state with context updates
   const prevDisplayName = useRef(user?.displayName);
@@ -69,6 +101,183 @@ export const SettingsView = () => {
     if (confirm("🚨 DANGER: This will permanently delete all your study progress, subjects, and tasks. There is no undo. Proceed?")) {
       storage.clearAll();
       window.location.reload();
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleteLoading(true);
+    try {
+      const token = (await supabase!.auth.getSession()).data.session?.access_token;
+      if (!token) throw new Error('Not authenticated');
+
+      const res = await fetch(`${API_URL}/api/delete-account`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      });
+
+      if (!res.ok) {
+        const err: any = await res.json();
+        throw new Error(err.error || 'Failed to delete account');
+      }
+
+      storage.clearAll();
+      await signOut();
+      window.location.href = '/';
+    } catch (err: any) {
+      alert(`Failed to delete account: ${err.message}`);
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const handleExportJSON = async () => {
+    setExportLoading('json');
+    try {
+      const token = (await supabase!.auth.getSession()).data.session?.access_token;
+      if (!token) throw new Error('Not authenticated');
+
+      const res = await fetch(`${API_URL}/api/export-data`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      });
+
+      if (!res.ok) {
+        const err: any = await res.json();
+        throw new Error(err.error || 'Failed to export data');
+      }
+
+      const data: any = await res.json();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `studyflow-export-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err: any) {
+      alert(`Export failed: ${err.message}`);
+    } finally {
+      setExportLoading(null);
+    }
+  };
+
+  const handleExportCSV = useCallback(async () => {
+    setExportLoading('csv');
+    try {
+      const token = (await supabase!.auth.getSession()).data.session?.access_token;
+      if (!token) throw new Error('Not authenticated');
+
+      const res = await fetch(`${API_URL}/api/export-data`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      });
+
+      if (!res.ok) {
+        const err: any = await res.json();
+        throw new Error(err.error || 'Failed to export data');
+      }
+
+      const data: any = await res.json();
+      const date = new Date().toISOString().split('T')[0];
+
+      // Generate CSVs for tasks and stats
+      const csvRows: { filename: string; content: string }[] = [];
+
+      if (data.tasks?.length) {
+        const headers = Object.keys(data.tasks[0]).join(',');
+        const rows = data.tasks.map((t: any) => Object.values(t).map(v => `"${v ?? ''}"`).join(','));
+        csvRows.push({ filename: `tasks-${date}.csv`, content: [headers, ...rows].join('\n') });
+      }
+      if (data.subjects?.length) {
+        const headers = Object.keys(data.subjects[0]).join(',');
+        const rows = data.subjects.map((s: any) => Object.values(s).map(v => `"${v ?? ''}"`).join(','));
+        csvRows.push({ filename: `subjects-${date}.csv`, content: [headers, ...rows].join('\n') });
+      }
+      if (data.daily_stats?.length) {
+        const headers = Object.keys(data.daily_stats[0]).join(',');
+        const rows = data.daily_stats.map((d: any) => Object.values(d).map(v => `"${v ?? ''}"`).join(','));
+        csvRows.push({ filename: `daily-stats-${date}.csv`, content: [headers, ...rows].join('\n') });
+      }
+
+      if (csvRows.length === 0) {
+        throw new Error('No data to export');
+      }
+
+      // Download as a zip-like combined file (for simplicity, download first 3 separately)
+      for (const csv of csvRows) {
+        const blob = new Blob([csv.content], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = csv.filename;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    } catch (err: any) {
+      alert(`CSV export failed: ${err.message}`);
+    } finally {
+      setExportLoading(null);
+    }
+  }, []);
+
+  const handleChangePassword = async () => {
+    setPasswordError('');
+    setPasswordSuccess(false);
+
+    if (passwordNew !== passwordConfirm) {
+      setPasswordError('New passwords do not match');
+      return;
+    }
+    if (passwordNew.length < 8) {
+      setPasswordError('Password must be at least 8 characters');
+      return;
+    }
+    const strength = passwordStrength(passwordNew);
+    if (strength.score < 3) {
+      setPasswordError('Password must include uppercase, lowercase, number, and special character');
+      return;
+    }
+
+    try {
+      const { error } = await supabase!.auth.updateUser({ password: passwordNew });
+      if (error) {
+        setPasswordError(error.message);
+        return;
+      }
+      setPasswordSuccess(true);
+      setPasswordCurrent('');
+      setPasswordNew('');
+      setPasswordConfirm('');
+      setTimeout(() => setPasswordSuccess(false), 3000);
+    } catch (err: any) {
+      setPasswordError(err.message);
+    }
+  };
+
+  const handleCustomerPortal = async () => {
+    setPortalLoading(true);
+    try {
+      const token = (await supabase!.auth.getSession()).data.session?.access_token;
+      if (!token) throw new Error('Not authenticated');
+
+      const res = await fetch(`${API_URL}/api/customer-portal`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      });
+
+      if (!res.ok) {
+        const err: any = await res.json();
+        throw new Error(err.error || 'Failed to open portal');
+      }
+
+      const { url } = await res.json() as { url: string };
+      window.open(url, '_blank');
+    } catch (err: any) {
+      // Fall back to upgrade modal
+      setShowPremiumModal(true);
+    } finally {
+      setPortalLoading(false);
     }
   };
 
@@ -304,14 +513,104 @@ export const SettingsView = () => {
                        </>
                     )}
                  </div>
-                 <button 
-                    onClick={() => userStats.isPremium ? setShowPremiumModal(true) : setShowPremiumModal(true)}
-                    className={`w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${userStats.isPremium ? 'bg-white/10 hover:bg-white/20 text-white' : 'bg-indigo-600 text-white shadow-xl shadow-indigo-600/20 hover:bg-slate-900'}`}
-                 >
-                    {userStats.isPremium ? 'Manage Subscription' : 'Upgrade to Pro'}
-                 </button>
+                  <button 
+                     onClick={() => userStats.isPremium ? handleCustomerPortal() : setShowPremiumModal(true)}
+                     disabled={portalLoading}
+                     className={`w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${userStats.isPremium ? 'bg-white/10 hover:bg-white/20 text-white' : 'bg-indigo-600 text-white shadow-xl shadow-indigo-600/20 hover:bg-slate-900'}`}
+                  >
+                     {portalLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                     {userStats.isPremium ? 'Manage Subscription' : 'Upgrade to Pro'}
+                     {userStats.isPremium ? <ExternalLink className="w-3 h-3" /> : null}
+                  </button>
               </div>
            </DashboardCard>
+
+             {/* Password Change */}
+            <DashboardCard className="space-y-6">
+               <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center">
+                     <Key className="w-5 h-5 dark:text-white" />
+                  </div>
+                  <h3 className="text-xl font-display font-black dark:text-white uppercase tracking-tight">Change Password</h3>
+               </div>
+
+               <div className="space-y-4">
+                  <div>
+                     <label className="text-[8px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 ml-2 mb-1 block">New Password</label>
+                     <input
+                       type="password"
+                       value={passwordNew}
+                       onChange={(e) => { setPasswordNew(e.target.value); setPasswordError(''); setPasswordSuccess(false); }}
+                       className="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border-none text-sm font-bold dark:text-white focus:ring-2 ring-indigo-500 transition-all"
+                       placeholder="Enter new password"
+                     />
+                     {passwordNew && (
+                       <div className="mt-2 space-y-1">
+                         <div className="flex gap-1">
+                           {[1,2,3,4,5].map(i => (
+                             <div key={i} className={`h-1 flex-1 rounded-full ${i <= passwordStrength(passwordNew).score ? passwordStrength(passwordNew).color : 'bg-slate-200 dark:bg-slate-700'}`} />
+                           ))}
+                         </div>
+                         <p className="text-[9px] font-bold uppercase tracking-wider" style={{ color: passwordStrength(passwordNew).score >= 3 ? '#22c55e' : '#f59e0b' }}>
+                           {passwordStrength(passwordNew).label}
+                         </p>
+                       </div>
+                     )}
+                  </div>
+                  <div>
+                     <label className="text-[8px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 ml-2 mb-1 block">Confirm New Password</label>
+                     <input
+                       type="password"
+                       value={passwordConfirm}
+                       onChange={(e) => { setPasswordConfirm(e.target.value); setPasswordError(''); setPasswordSuccess(false); }}
+                       className="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border-none text-sm font-bold dark:text-white focus:ring-2 ring-indigo-500 transition-all"
+                       placeholder="Confirm new password"
+                     />
+                  </div>
+                  {passwordError && (
+                    <p className="text-rose-500 text-[10px] font-bold">{passwordError}</p>
+                  )}
+                  {passwordSuccess && (
+                    <p className="text-green-500 text-[10px] font-bold flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Password changed successfully</p>
+                  )}
+                  <button
+                     onClick={handleChangePassword}
+                     disabled={!passwordNew || !passwordConfirm}
+                     className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-slate-900 transition-all shadow-xl shadow-indigo-600/20 disabled:opacity-40"
+                  >
+                     <Key className="w-4 h-4" /> Update Password
+                  </button>
+               </div>
+            </DashboardCard>
+
+            {/* Data Export */}
+            <DashboardCard className="space-y-6">
+               <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center">
+                     <Download className="w-5 h-5 dark:text-white" />
+                  </div>
+                  <h3 className="text-xl font-display font-black dark:text-white uppercase tracking-tight">Export Data</h3>
+               </div>
+               <p className="text-[10px] text-slate-500 font-medium leading-relaxed">Download all your study data for backup or migration.</p>
+               <div className="grid grid-cols-2 gap-3">
+                  <button
+                     onClick={handleExportJSON}
+                     disabled={exportLoading === 'json' || exportLoading === 'csv'}
+                     className="py-4 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-900 transition-all shadow-xl shadow-indigo-600/20 disabled:opacity-40 flex items-center justify-center gap-2"
+                  >
+                     {exportLoading === 'json' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                     JSON
+                  </button>
+                  <button
+                     onClick={handleExportCSV}
+                     disabled={exportLoading === 'csv' || exportLoading === 'json'}
+                     className="py-4 border-2 border-indigo-600/30 text-indigo-600 dark:text-indigo-400 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all disabled:opacity-40 flex items-center justify-center gap-2"
+                  >
+                     {exportLoading === 'csv' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                     CSV
+                  </button>
+               </div>
+            </DashboardCard>
 
             {/* Sign Out */}
             <DashboardCard>
@@ -326,30 +625,56 @@ export const SettingsView = () => {
 
             {/* Dangerous Area */}
            <DashboardCard className="border-rose-500/20 bg-rose-50/5 dark:bg-rose-900/5">
-              <div className="space-y-4">
+              <div className="space-y-5">
                  <div className="flex items-center gap-3 text-rose-600">
                     <CloudLightning className="w-5 h-5" />
                     <h4 className="font-display font-black uppercase tracking-tight">Dangerous Area</h4>
                  </div>
-                 <p className="text-[10px] text-slate-500 font-medium leading-relaxed">Resetting will purge all your study data. This action is irreversible.</p>
-                 <button 
-                    onClick={handleClearData}
-                    className="w-full py-4 border-2 border-rose-500/20 text-rose-500 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all"
-                 >
-                    Nuclear Factory Reset
-                 </button>
+
+                 <div className="space-y-3 pb-4 border-b border-rose-500/10">
+                    <p className="text-[10px] text-slate-500 font-medium leading-relaxed">Resetting will purge all your study data. This action is irreversible.</p>
+                    <button
+                       onClick={handleClearData}
+                       className="w-full py-4 border-2 border-rose-500/20 text-rose-500 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all"
+                    >
+                       Nuclear Factory Reset
+                    </button>
+                 </div>
+
+                 <div className="space-y-3">
+                    <p className="text-[10px] text-slate-500 font-medium leading-relaxed">Delete your account and all associated data permanently. This cannot be undone.</p>
+                    <input
+                      type="text"
+                      value={deleteConfirmText}
+                      onChange={(e) => setDeleteConfirmText(e.target.value)}
+                      placeholder='Type "DELETE" to confirm'
+                      className="w-full p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border-none text-xs font-bold dark:text-white focus:ring-2 ring-rose-500 transition-all"
+                    />
+                    <button
+                       onClick={handleDeleteAccount}
+                       disabled={deleteConfirmText !== 'DELETE' || deleteLoading}
+                       className="w-full py-4 bg-rose-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-rose-700 transition-all disabled:opacity-40 flex items-center justify-center gap-2"
+                    >
+                       {deleteLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <AlertTriangle className="w-4 h-4" />}
+                       {deleteLoading ? 'Deleting...' : 'Delete Account'}
+                    </button>
+                 </div>
               </div>
            </DashboardCard>
         </div>
 
       </div>
 
-      <div className="py-12 flex flex-col items-center opacity-30 text-center">
-         <div className="w-16 h-1 bg-gradient-to-r from-transparent via-slate-500 to-transparent rounded-full mb-6" />
-         <p className="text-[8px] font-black uppercase tracking-[0.5em] text-slate-500 leading-relaxed">
+      <div className="py-12 flex flex-col items-center text-center">
+         <div className="w-16 h-1 bg-gradient-to-r from-transparent via-slate-500 to-transparent rounded-full mb-6 opacity-30" />
+         <p className="text-[8px] font-black uppercase tracking-[0.5em] text-slate-500 leading-relaxed opacity-30">
             Designed for excellence. v2.5.0-elite<br/>
             StudyFlow Intelligence System
          </p>
+         <div className="mt-4 flex gap-8">
+           <Link to="/privacy" className="text-xs font-black uppercase tracking-[0.3em] text-slate-400 hover:text-indigo-400 transition-colors">Privacy</Link>
+           <Link to="/terms" className="text-xs font-black uppercase tracking-[0.3em] text-slate-400 hover:text-indigo-400 transition-colors">Terms</Link>
+         </div>
       </div>
     </div>
   );

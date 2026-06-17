@@ -3,7 +3,6 @@ import { Plus, BookOpen, ChevronRight, Trash2, ArrowLeft, Target, MoreVertical, 
 import { motion, AnimatePresence } from 'motion/react';
 import { useStudy, Subject, Topic, MasteryLevel } from '../../context/StudyContext';
 import { DashboardCard } from '../dashboard/DashboardCard';
-import { storage } from '../../services/storage';
 import { SUBJECT_TEMPLATES, SubjectTemplate } from '../../lib/templates';
 
 export const SubjectsView = () => {
@@ -115,47 +114,9 @@ export const SubjectsView = () => {
 };
 
 const SubjectDetails = ({ subject, onBack }: { subject: Subject, onBack: () => void }) => {
-  const { addTopic, updateTopicMastery, deleteTopic, addTask } = useStudy();
+  const { addTopic, updateTopicMastery, deleteTopic } = useStudy();
   const [newTopicTitle, setNewTopicTitle] = useState('');
   const [isSyncing, setIsSyncing] = useState(false);
-
-  const generateSchedule = () => {
-    const savedExams = storage.getExams() || [];
-    const relevantExam = savedExams.find((e: any) => e.subjectId === subject.id);
-    
-    if (!relevantExam) {
-      alert("Please link this subject to an exam in the Deadlines section first!");
-      return;
-    }
-
-    const toStudy = subject.topics.filter(t => t.mastery !== 'Green');
-    
-    if (toStudy.length === 0) {
-      alert("All topics are mastered! No schedule needed.");
-      return;
-    }
-
-    const daysLeft = relevantExam.daysLeft || 1;
-    const topicsPerDay = Math.ceil(toStudy.length / daysLeft);
-
-    let tasksCreated = 0;
-    toStudy.forEach((topic, index) => {
-      const dayOffset = Math.floor(index / topicsPerDay);
-      const dueDate = new Date();
-      dueDate.setDate(dueDate.getDate() + dayOffset);
-      
-      const priority = topic.mastery === 'Red' ? 'High Yield' : 'Deep Review';
-      addTask(
-        `Mastery: ${topic.title}`, 
-        subject.name, 
-        priority, 
-        dueDate.toISOString().split('T')[0]
-      );
-      tasksCreated++;
-    });
-
-    alert(`Successfully generated ${tasksCreated} study tasks leading up to your ${relevantExam.type}! Check your Dashboard.`);
-  };
 
   const masteryColors = {
     Red: 'bg-rose-500',
@@ -350,12 +311,9 @@ const SubjectDetails = ({ subject, onBack }: { subject: Subject, onBack: () => v
               <p className="text-indigo-100 text-sm leading-relaxed mb-6 font-medium">
                 Focus on the <span className="font-bold">Red</span> topics first to build base understanding, then move to <span className="font-bold">Amber</span> for deep review.
               </p>
-              <button 
-                onClick={generateSchedule}
-                className="w-full py-3 bg-white/20 hover:bg-white/30 rounded-xl font-black text-[10px] uppercase tracking-widest transition-colors"
-              >
-                Generate Revision Plan
-              </button>
+              <p className="text-indigo-100 text-sm leading-relaxed font-medium">
+                {subject.topics.filter(t => t.mastery !== 'Green').length} topics remaining — keep going!
+              </p>
            </div>
         </div>
       </div>

@@ -4,6 +4,7 @@ import { ExternalLink, LayoutDashboard, LogIn, Target } from 'lucide-react';
 import LadderIcon from '../ui/LadderIcon';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../../context/AuthContext';
+import { SyncStatus } from '../ui/SyncStatus';
 import { ROUTES } from '../../lib/routes';
 
 export type Mode = 'home' | 'focus';
@@ -95,6 +96,7 @@ export const TopBar = memo(({ mode, onModeChange, onMenuOpen, onOpenAuth, onLead
         className="pt-safe pr-safe"
         style={{ position: 'fixed', top: '16px', right: '16px', zIndex: 30, display: 'flex', alignItems: 'center', gap: '6px' }}
       >
+        <SyncStatus />
         {onLeaderboardOpen && (
           <button onClick={onLeaderboardOpen} title="Leaderboard"
             style={{

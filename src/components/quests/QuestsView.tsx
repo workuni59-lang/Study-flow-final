@@ -18,7 +18,7 @@ const TierBadge = ({ tier }: { tier: GameQuest['tier'] }) => {
   );
 };
 
-const QuestCard = ({ quest, progress }: { quest: GameQuest; progress: number }) => {
+const QuestCard = ({ quest, progress }: { key?: string | number; quest: GameQuest; progress: number }) => {
   const percentage = Math.min(100, (progress / quest.goal) * 100);
   const completed = progress >= quest.goal;
 

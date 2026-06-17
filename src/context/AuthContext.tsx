@@ -1,11 +1,15 @@
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
 import type { User, AuthError } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { sync } from '../services/sync';
+
+const INACTIVITY_TIMEOUT_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 export interface Profile {
   id: string;
   display_name: string | null;
   avatar_url: string | null;
+  bio: string | null;
   is_premium: boolean;
   premium_until: string | null;
   created_at: string;
@@ -62,6 +66,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isDemo, setIsDemo] = useState(false);
   const isOAuthCallback = window.location.hash.includes('access_token');
 
+  // ── Inactivity logout: track last user activity ──
+  const lastActivity = useRef(Date.now());
+
+  useEffect(() => {
+    if (!user || isDemo) return;
+
+    const updateActivity = () => { lastActivity.current = Date.now(); };
+    window.addEventListener('mousemove', updateActivity, { passive: true });
+    window.addEventListener('keydown', updateActivity, { passive: true });
+    window.addEventListener('scroll', updateActivity, { passive: true });
+    window.addEventListener('touchstart', updateActivity, { passive: true });
+
+    const interval = setInterval(() => {
+      const inactiveMs = Date.now() - lastActivity.current;
+      if (inactiveMs > INACTIVITY_TIMEOUT_MS) {
+        console.log('[Auth] Inactivity timeout — signing out');
+        supabase!.auth.signOut().then(() => {
+          setUser(null);
+          setProfile(null);
+          setIsDemo(false);
+          sync.init(null);
+        });
+      }
+    }, 60_000);
+
+    return () => {
+      window.removeEventListener('mousemove', updateActivity);
+      window.removeEventListener('keydown', updateActivity);
+      window.removeEventListener('scroll', updateActivity);
+      window.removeEventListener('touchstart', updateActivity);
+      clearInterval(interval);
+    };
+  }, [user, isDemo]);
+
   const fetchProfile = useCallback(async (userId: string, forceDemo?: boolean) => {
     if (forceDemo || userId === DEMO_USER.uid) {
       setProfile({
@@ -110,6 +148,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const appUser = toAppUser(session.user);
         setUser(appUser);
         fetchProfile(session.user.id);
+        sync.init(appUser.uid);
       } else if (!isOAuthCallback) {
         // No session and not an OAuth callback — do NOT auto-activate demo
         // Demo is activated via activateDemo() when user clicks "Get Started Free" on LandingPage
@@ -127,10 +166,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(appUser);
         setIsDemo(false);
         fetchProfile(session.user.id);
+        sync.init(appUser.uid);
       } else {
         setUser(null);
         setProfile(null);
         setIsDemo(false);
+        sync.init(null);
       }
     });
 
@@ -138,29 +179,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [fetchProfile, isOAuthCallback]);
 
   const signIn = useCallback(async (email: string, password: string) => {
-    if (isDemo) {
-      setUser(DEMO_USER);
-      fetchProfile(DEMO_USER.uid, true);
-      return { error: null };
-    }
     const { error } = await supabase!.auth.signInWithPassword({ email, password });
     return { error };
-  }, [fetchProfile, isDemo]);
+  }, []);
 
-  const signUp = useCallback(async (email: string, password: string, displayName: string) => {
-    if (isDemo) {
-      const newUser = { ...DEMO_USER, email, displayName };
-      setUser(newUser);
-      fetchProfile(newUser.uid, true);
-      return { error: null, user: null };
-    }
-    const { data, error } = await supabase!.auth.signUp({
+  const signUp = useCallback(async (email: string, password: string, displayName: string): Promise<{
+    error: any | null;
+    user: any | null;
+    needsEmailConfirmation: boolean;
+  }> => {
+    if (!supabase) return { error: { message: 'Supabase not configured', name: 'ConfigError' }, user: null, needsEmailConfirmation: false };
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: { data: { display_name: displayName } },
     });
-    return { error, user: data?.user ?? null };
-  }, [isDemo]);
+    return {
+      error,
+      user: data?.user ?? null,
+      needsEmailConfirmation: error === null && data?.session === null,
+    };
+  }, []);
 
   const signInWithGoogle = useCallback(async () => {
     console.log('[AUTH] signInWithGoogle CLICKED');

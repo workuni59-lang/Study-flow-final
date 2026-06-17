@@ -3,6 +3,7 @@ import type { LeaderboardEntry } from '../../lib/leaderboard';
 import { formatFocusTime } from '../../lib/leaderboard';
 
 interface LeaderboardRowProps {
+  key?: string | number;
   entry: LeaderboardEntry;
   rank: number;
   focusSeconds: number;

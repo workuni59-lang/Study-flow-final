@@ -18,7 +18,7 @@ export interface ProgressionBadge {
 
 export interface MilestoneReward {
   level: number;
-  type: 'badge' | 'title' | 'cosmetic' | 'pet' | 'feature';
+  type: 'badge' | 'title' | 'cosmetic' | 'feature';
   id: string;
   name: string;
   description: string;

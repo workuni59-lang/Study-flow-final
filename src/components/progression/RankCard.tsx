@@ -7,6 +7,7 @@ import { totalXpForLevel } from '../../lib/progression';
 import { formatXP } from './BadgeSvg';
 
 interface RankCardProps {
+  key?: string | number;
   rank: RankTier;
   isCurrent: boolean;
   isUnlocked: boolean;

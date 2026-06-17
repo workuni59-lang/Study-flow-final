@@ -42,7 +42,7 @@ export const TasksPanel = () => {
         .tasks-list::-webkit-scrollbar-thumb:hover { background: hsla(0,0%,100%,0.3); }
       `}</style>
 
-      <div className="flex items-center gap-3 px-5 pt-4 pb-3 border-b border-white/[0.06]">
+      <div className="flex items-center gap-3 px-4 pt-3 pb-2.5 border-b border-white/[0.06]">
         <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center shrink-0">
           <CheckSquare className="w-4 h-4 text-[#7432FF]" />
         </div>
@@ -56,25 +56,25 @@ export const TasksPanel = () => {
               <Reorder.Item
                 key={task.id}
                 value={task}
-                className="flex items-center gap-2 px-3 py-2 rounded-[11px] bg-white/[0.04] border border-transparent transition-colors duration-150 data-[focus-within]:border-white"
+                className="flex items-center gap-1.5 px-2 py-1.5 rounded-[11px] bg-white/[0.04] border border-transparent transition-colors duration-150 data-[focus-within]:border-white"
                 style={{ boxShadow: '0 4px 6px -1px rgba(0,29,41,0.06), 0 2px 4px -2px rgba(0,29,41,0.06)' }}
               >
-                <div className="cursor-grab active:cursor-grabbing text-white/50 hover:text-white/70 transition-colors shrink-0 flex items-center justify-center w-10 h-10 -ml-1">
+                <div className="cursor-grab active:cursor-grabbing text-white/50 hover:text-white/70 transition-colors shrink-0 flex items-center justify-center w-8 h-8">
                   <span className="text-sm leading-none" style={{ color: '#4b5563' }}>⠿</span>
                 </div>
                 <button
                   onClick={() => toggleTask(task.id)}
-                  className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                  className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
                     task.completed ? 'bg-[#7432FF]' : 'bg-transparent border border-white/20 hover:border-[#7432FF]'
                   }`}
                   aria-label={task.completed ? "Mark as incomplete" : "Mark as complete"}
                 >
                   {task.completed ? (
-                    <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                    <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                       <path d="M20 6L9 17l-5-5" />
                     </svg>
                   ) : (
-                    <div className="w-5 h-5" />
+                    <div className="w-4 h-4" />
                   )}
                 </button>
                 <input
@@ -89,14 +89,14 @@ export const TasksPanel = () => {
                   }}
                   placeholder="Type your priority"
                   maxLength={25}
-                  className={`flex-1 text-sm font-medium bg-transparent border-none outline-none text-white placeholder-white/50 px-1 py-3 ${
+                  className={`flex-1 min-w-0 text-sm font-medium bg-transparent border-none outline-none text-white placeholder-white/50 px-1 py-2 ${
                     task.completed ? 'opacity-50 line-through' : ''
                   }`}
                 />
                 <select
                   value={task.estimatedMinutes ?? 25}
                   onChange={(e) => updateTask(task.id, { estimatedMinutes: Number(e.target.value) })}
-                  className="appearance-none bg-white/[0.08] rounded-full text-white/70 text-xs px-3 py-2 border-none outline-none focus:outline focus:outline-1 focus:outline-[#7432FF] cursor-pointer"
+                  className="appearance-none bg-white/[0.08] rounded-full text-white/70 text-xs px-2.5 py-1.5 border-none outline-none focus:outline focus:outline-1 focus:outline-[#7432FF] cursor-pointer shrink-0"
                 >
                   {DURATION_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value} className="bg-[#1a1a2e] text-white">
@@ -106,10 +106,10 @@ export const TasksPanel = () => {
                 </select>
                 <button
                   onClick={() => deleteTask(task.id)}
-                  className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/60 hover:bg-red-500/20 hover:text-red-400 transition-colors shrink-0 -mr-1"
+                  className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center text-white/60 hover:bg-red-500/20 hover:text-red-400 transition-colors shrink-0"
                   aria-label="Delete task"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-3.5 h-3.5" />
                 </button>
               </Reorder.Item>
             ))}

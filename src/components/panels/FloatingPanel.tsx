@@ -1,4 +1,4 @@
-import { useState, useEffect, type ReactNode } from 'react';
+import { useState, useEffect, type ReactNode, type CSSProperties } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X } from 'lucide-react';
 import { useNavigationContext } from '../../hooks/useNavigationContext';
@@ -72,7 +72,7 @@ export const FloatingPanel = ({ open, onClose, title, children, width = 320 }: F
 
   const isFocus = mode === 'focus';
 
-  const cardStyle: React.CSSProperties = isFocus
+  const cardStyle: CSSProperties = isFocus
     ? { bottom: '7rem', left: '1.5rem', width: `${width}px` }
     : { bottom: '5rem', left: '1.5rem', width: `${width}px` };
 

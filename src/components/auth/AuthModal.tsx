@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, LogIn } from 'lucide-react';
+import { X } from 'lucide-react';
 import LoginForm from './LoginForm';
 import SignupForm from './SignupForm';
 import GoogleButton from './GoogleButton';
@@ -14,10 +14,22 @@ interface Props {
 
 export default function AuthModal({ isOpen, onClose }: Props) {
   const [view, setView] = useState<AuthView>('login');
+  const [verifiedEmail, setVerifiedEmail] = useState('');
 
   const handleSuccess = () => {
     onClose();
     setView('login');
+    setVerifiedEmail('');
+  };
+
+  const handleVerificationSuccess = (email: string) => {
+    setVerifiedEmail(email);
+    setView('login');
+  };
+
+  const handleSwitchToLogin = () => {
+    setView('login');
+    setVerifiedEmail('');
   };
 
   return (
@@ -62,6 +74,7 @@ export default function AuthModal({ isOpen, onClose }: Props) {
               )}
               {view === 'login' && (
                 <LoginForm
+                  defaultEmail={verifiedEmail}
                   onSuccess={handleSuccess}
                   onSwitchToSignup={() => setView('signup')}
                   onForgotPassword={() => setView('forgot')}
@@ -70,7 +83,8 @@ export default function AuthModal({ isOpen, onClose }: Props) {
               {view === 'signup' && (
                 <SignupForm
                   onSuccess={handleSuccess}
-                  onSwitchToLogin={() => setView('login')}
+                  onVerificationSuccess={handleVerificationSuccess}
+                  onSwitchToLogin={handleSwitchToLogin}
                 />
               )}
             </div>

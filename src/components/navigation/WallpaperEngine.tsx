@@ -52,8 +52,8 @@ export const WallpaperEngine = ({ visible = true, staticOnly = false }: { visibl
     indigo: 'bg-[#f8fafc] dark:bg-indigo-950',
     rose: 'bg-[#fff5f5] dark:bg-rose-950',
     emerald: 'bg-[#f2fcf5] dark:bg-emerald-950',
-    violet: 'bg-[#f8f5ff] dark:bg-violet-950',
-    amber: 'bg-[#fffbf2] dark:bg-amber-950',
+    violet: 'bg-[#f8f5ff] dark:bg-[#170a2e]',
+    amber: 'bg-[#fffbf2] dark:bg-[#2d1505]',
     cyan: 'bg-[#f2fbff] dark:bg-cyan-950',
     pink: 'bg-[#fff2f9] dark:bg-pink-950',
     slate: 'bg-[#f8fafc] dark:bg-slate-950',
@@ -64,8 +64,8 @@ export const WallpaperEngine = ({ visible = true, staticOnly = false }: { visibl
     indigo: 'bg-indigo-500/20',
     rose: 'bg-rose-500/20',
     emerald: 'bg-emerald-500/20',
-    violet: 'bg-violet-600/20',
-    amber: 'bg-amber-500/20',
+    violet: 'bg-purple-600/20',
+    amber: 'bg-orange-500/20',
     cyan: 'bg-cyan-400/20',
     pink: 'bg-pink-400/20',
     neon: 'bg-fuchsia-600/30',
@@ -95,7 +95,7 @@ export const WallpaperEngine = ({ visible = true, staticOnly = false }: { visibl
       : rawUrl;
 
     return (
-      <div className={`fixed inset-0 pointer-events-none -z-20 transition-colors duration-1000 ${baseClass}`} style={{ opacity: visible ? 1 : 0, transition: 'opacity 0.3s ease' }}>
+      <div className={`fixed inset-0 pointer-events-none -z-20 transition-colors duration-400 ${baseClass}`} style={{ opacity: visible ? 1 : 0, transition: 'opacity 0.3s ease' }}>
         {!reduceMotion && (
           <style>
             {`

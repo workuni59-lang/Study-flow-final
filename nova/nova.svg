@@ -1,0 +1,35 @@
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://w3.org" width="500" height="500">
+  <!-- Nova_BaseBody -->
+  <path 
+    d="M56 12 C40 16 22 42 22 68 C22 86 78 86 78 68 C78 48 62 24 56 12 Z" 
+    fill="#6366f1" 
+    opacity="1"
+  />
+  
+  <!-- Nova_BellyHighlight -->
+  <path 
+    d="M50 40 C35 40 28 48 28 65 C28 78 72 78 72 65 C72 48 65 40 50 40 Z" 
+    fill="#14b8a6" 
+    opacity="0.5"
+  />
+  
+  <!-- Nova_Mouth (Happy/Excited Version) -->
+  <path 
+    d="M46 59 Q48 61 50 59 Q52 61 54 59" 
+    stroke="#2D1A11" 
+    stroke-width="1.5" 
+    stroke-linecap="round" 
+    fill="none" 
+    opacity="0.8"
+  />
+
+  <!-- Static Eyes (Replacing the PetEyes Component at x:50, y:55) -->
+  <g id="Static_Eyes">
+    <!-- Left Eye -->
+    <circle cx="43" cy="52" r="4" fill="#ffffff" />
+    <circle cx="43" cy="52" r="2" fill="#2D1A11" />
+    <!-- Right Eye -->
+    <circle cx="57" cy="52" r="4" fill="#ffffff" />
+    <circle cx="57" cy="52" r="2" fill="#2D1A11" />
+  </g>
+</svg>

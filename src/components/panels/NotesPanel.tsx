@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, type MouseEvent } from 'react';
 import { X, Plus, Trash2, Bold, Italic, Heading, List, ListOrdered, CheckSquare, Maximize2, Minimize2, ChevronLeft, Save } from 'lucide-react';
 import { motion } from 'motion/react';
 
@@ -155,7 +155,7 @@ export const NotesPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () =
     setSaved(true);
   };
 
-  const withSel = (fn: (rng: Range | null) => void) => (e: React.MouseEvent) => {
+  const withSel = (fn: (rng: Range | null) => void) => (e: MouseEvent) => {
     const rng = capture(editorRef.current);
     e.preventDefault();
     const el = editorRef.current;

@@ -2,11 +2,12 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import confetti from 'canvas-confetti';
 import { audioController } from '../services/AudioController';
 import { storage } from '../services/storage';
-import { UserStats, Badge, ACHIEVEMENTS, Achievement, Quest, XP_PER_TASK, XP_PER_FOCUS_MINUTE, AtmosphereId, WallpaperId, PetState, PetFood, PET_FOODS, PET_SPECIES, PET_SKINS, INITIAL_PET_STATE, PET_HUNGER_DECAY_PER_HOUR, PET_WEAK_THRESHOLD, PET_WEAK_DURATION_MS, PET_DORMANT_DURATION_MS, PetHealth, PetEvent, PetEventType, PetMood, PetAnimation, getPetMood, getPetAnimation, GameQuest, SEED_QUESTS, calculateFormalLevel, goldForTask, goldForLevelUp, MAX_HP, HP_REGEN_PER_SESSION, INITIAL_HP, HpState, checkDailyHp as checkHpFn, regenHp, shouldResetQuests, ShopItem, SHOP_ITEMS, XP_STREAK_BONUS_PER_DAY } from '../lib/gamification';
+import { UserStats, Badge, ACHIEVEMENTS, Achievement, Quest, XP_PER_TASK, XP_PER_FOCUS_MINUTE, AtmosphereId, WallpaperId, GameQuest, SEED_QUESTS, calculateFormalLevel, goldForTask, goldForLevelUp, MAX_HP, HP_REGEN_PER_SESSION, INITIAL_HP, HpState, checkDailyHp as checkHpFn, regenHp, shouldResetQuests, ShopItem, SHOP_ITEMS, XP_STREAK_BONUS_PER_DAY } from '../lib/gamification';
 import { getProgress, getRankForLevel, getNextRank, getBadgesForLevel, getNewlyUnlockedBadges, getRewardsBetweenLevels, type ProgressionState, type ProgressionBadge } from '../lib/progression';
 import { syncFocusSession } from '../lib/leaderboard';
 import { syncDailyStats } from '../lib/dailyStats';
 import { supabase } from '../lib/supabase';
+import { sync } from '../services/sync';
 import { useAuth } from './AuthContext';
 export interface FocusSessionState {
   mode: 'focus' | 'shortBreak' | 'longBreak' | 'idle' | 'taskETA';
@@ -61,15 +62,6 @@ export interface Task {
   estimatedMinutes?: number;
 }
 
-export interface Exam {
-  id: string;
-  subject: string;
-  type: string;
-  date: string;
-  daysLeft: number;
-  subjectId?: string;
-}
-
 export interface ThemeConfig {
   atmosphere: AtmosphereId;
   wallpaper: WallpaperId;
@@ -89,7 +81,6 @@ interface StudyContextType {
   accessToken: string | null;
   subjects: Subject[];
   tasks: Task[];
-  exams: Exam[];
   quests: Quest[];
   themeConfig: ThemeConfig;
   userStats: UserStats;
@@ -97,8 +88,6 @@ interface StudyContextType {
   activeNotification: Achievement | null;
   confettiActive: boolean;
   panicModeActive: boolean;
-  selectedExamForPath: Exam | null;
-  petState: PetState;
   setThemeConfig: (config: ThemeConfig) => void;
   addSubject: (name: string, color?: string, initialTopics?: string[]) => string;
   deleteSubject: (id: string) => void;
@@ -109,8 +98,6 @@ interface StudyContextType {
   toggleTask: (id: string) => void;
   deleteTask: (id: string) => void;
   updateTask: (id: string, updates: Partial<Task>) => void;
-  addExam: (subject: string, type: string, date: string, subjectId?: string) => void;
-  deleteExam: (id: string) => void;
   recalibrateTasks: () => void;
   setTasks: (tasks: Task[]) => void;
   completeFocusSession: (seconds: number) => void;
@@ -119,16 +106,6 @@ interface StudyContextType {
   triggerConfetti: () => void;
   resetStreak: () => void;
   setPanicMode: (active: boolean) => void;
-  setSelectedExamForPath: (exam: Exam | null) => void;
-  feedPet: (foodId: string) => void;
-  petInteract: () => void;
-  changePetSpecies: (speciesId: string) => void;
-  changePetSkin: (skinId: string) => void;
-  purchaseSkin: (skinId: string) => boolean;
-  setPetName: (name: string) => void;
-  tickPet: () => void;
-  petEvent: PetEvent | null;
-  firePetEvent: (type: PetEventType) => void;
   syncPremiumStatus: (isPremium: boolean) => void;
   showPremiumModal: boolean;
   setShowPremiumModal: (show: boolean) => void;
@@ -147,8 +124,6 @@ interface StudyContextType {
   gameHp: HpState;
   gameQuestProgress: Record<string, number>;
   shopItems: { id: string; unlocked: boolean }[];
-  petMood: PetMood;
-  petAnimation: PetAnimation;
   sessionsToday: number;
   levelUpEvent: number | null;
   questCompleteEvent: string | null;
@@ -202,7 +177,6 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   
   const [tasks, setTasks] = useState<Task[]>(() => storage.getTasks() || []);
   const [subjects, setSubjects] = useState<Subject[]>(() => storage.getSubjects() || []);
-  const [exams, setExams] = useState<Exam[]>(() => storage.getExams() || []);
   
   const [themeConfig, setThemeConfig] = useState<ThemeConfig>(() => {
     const saved = storage.getThemeConfig();
@@ -223,22 +197,10 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
 
   const [unlockedBadges, setUnlockedBadges] = useState<Badge[]>(() => storage.getUnlockedBadges() || []);
   const [quests, setQuests] = useState<Quest[]>(() => storage.getDailyQuests() || []);
-  const [petState, setPetState] = useState<PetState>(() => {
-    const saved = storage.getPetState();
-    if (!saved) return INITIAL_PET_STATE;
-    return { ...INITIAL_PET_STATE, ...saved, foodInventory: saved.foodInventory || [], unlockedSpecies: saved.unlockedSpecies || ['pixie'], unlockedSkins: saved.unlockedSkins || ['pixie_base'] };
-  });
-  const [petEvent, setPetEvent] = useState<PetEvent | null>(null);
-  const petEventId = useRef(0);
-  const firePetEvent = useCallback((type: PetEventType) => {
-    petEventId.current++;
-    setPetEvent({ type, id: petEventId.current });
-  }, []);
   const [activeNotification, setActiveNotification] = useState<Achievement | null>(null);
   const [notificationQueue, setNotificationQueue] = useState<Achievement[]>([]);
   const [confettiActive, setConfettiActive] = useState(false);
   const [panicModeActive, setPanicModeActive] = useState(false);
-  const [selectedExamForPath, setSelectedExamForPath] = useState<Exam | null>(null);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [activeTracks, setActiveTracks] = useState<Record<string, { volume: number, isLoading: boolean, isError: boolean }>>({});
   const [masterVolume, setMasterVolumeVal] = useState(() => storage.getMasterVolume() ?? 0.5);
@@ -269,8 +231,6 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   const [playerDownEvent, setPlayerDownEvent] = useState(false);
 
   const gameLevel = useMemo(() => calculateFormalLevel(gameXp), [gameXp]);
-  const petMood: PetMood = useMemo(() => getPetMood(sessionsToday, petState.lastLevelUpAt), [sessionsToday, petState.lastLevelUpAt]);
-  const petAnimation: PetAnimation = useMemo(() => getPetAnimation(petMood), [petMood]);
   const progression = useMemo<ProgressionState>(() => {
     const { level, currentXp, xpForNext, percentage } = getProgress(gameXp);
     const rank = getRankForLevel(level);
@@ -346,25 +306,8 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     storage.saveTrackVolumes(volumes);
   }, [activeTracks]);
 
-  // Synchronization Hooks
-  useEffect(() => {
-    setExams(prev => prev.map(exam => {
-      const targetDate = new Date(exam.date);
-      if (isNaN(targetDate.getTime())) {
-         const currentYear = new Date().getFullYear();
-         const dateWithYear = `${exam.date}, ${currentYear}`;
-         const finalTarget = new Date(dateWithYear);
-         const diff = finalTarget.getTime() - new Date().getTime();
-         return { ...exam, daysLeft: Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24))) };
-      }
-      const diff = targetDate.getTime() - new Date().getTime();
-      return { ...exam, daysLeft: Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24))) };
-    }));
-  }, []);
-
   useEffect(() => { storage.saveSubjects(subjects); }, [subjects]);
   useEffect(() => { storage.saveTasks(tasks); }, [tasks]);
-  useEffect(() => { storage.saveExams(exams); }, [exams]);
   useEffect(() => {
     storage.saveThemeConfig(themeConfig);
     document.documentElement.setAttribute('data-atmosphere', themeConfig.atmosphere);
@@ -376,7 +319,6 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => { storage.saveUserStats(userStats); }, [userStats]);
   useEffect(() => { storage.saveUnlockedBadges(unlockedBadges); }, [unlockedBadges]);
   useEffect(() => { storage.saveDailyQuests(quests); }, [quests]);
-  useEffect(() => { storage.savePetState(petState); }, [petState]);
 
   // Persist gamification v2 state
   useEffect(() => { storage.saveGold(gameGold); }, [gameGold]);
@@ -388,6 +330,24 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => { storage.saveSessionsToday(sessionsToday); }, [sessionsToday]);
   useEffect(() => { storage.saveSessionsDate(sessionsDate); }, [sessionsDate]);
 
+  // Cloud sync: gamification state
+  const isRealUser = authUser && authUser.uid !== 'demo-user-001' && supabase;
+  useEffect(() => {
+    if (!isRealUser) return;
+    const payload = {
+      gold: gameGold,
+      hp: gameHp,
+      quest_progress: gameQuestProgress,
+      quest_resets: questResets,
+      shop_items: shopItems,
+      sessions_today: sessionsToday,
+      sessions_date: sessionsDate,
+      daily_quests: quests,
+    };
+    localStorage.setItem('study_flow_gamification_updated_at', new Date().toISOString());
+    sync.enqueue('gamification_state', 'upsert', payload);
+  }, [isRealUser, gameGold, gameHp, gameQuestProgress, questResets, shopItems, sessionsToday, sessionsDate, quests]);
+
   // Badge sync to Supabase (canonical source)
   useEffect(() => {
     if (!authUser || !supabase || authUser.uid === 'demo-user-001') return;
@@ -396,12 +356,17 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       user_id: authUser.uid,
       badges_earned: badgeIds,
       updated_at: new Date().toISOString(),
-    }, { onConflict: 'user_id' });
+    }, { onConflict: 'user_id' }).then(undefined, (err: any) => {
+      console.warn('[StudyContext] badge sync failed:', err?.message ?? err);
+    });
   }, [unlockedBadges, authUser]);
 
   // Load badges from Supabase on auth init (replace local)
   useEffect(() => {
     if (!authUser || !supabase || authUser.uid === 'demo-user-001') return;
+    const onBadgeErr = (err: any) => {
+      console.warn('[StudyContext] badge load failed:', err?.message ?? err);
+    };
     supabase.from('user_stats').select('badges_earned').eq('user_id', authUser.uid).single().then(({ data }) => {
       if (data?.badges_earned) {
         const supabaseIds = new Set(data.badges_earned as string[]);
@@ -415,6 +380,49 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
           return result;
         });
       }
+    }, onBadgeErr);
+  }, [authUser ? authUser.uid : null]);
+
+  // ─── Cloud Sync ─────────────────────────────────────────────────
+
+  function mergeItems<T extends Record<string, any>>(local: T[], cloud: T[], key: string): T[] {
+    const cloudMap = new Map(cloud.map(c => [c[key], c]));
+    const merged = local.map(item => {
+      const cloudItem = cloudMap.get(item[key]);
+      if (!cloudItem) return item;
+      cloudMap.delete(item[key]);
+      const localTime = item.updated_at ? new Date(item.updated_at).getTime() : 0;
+      const cloudTime = cloudItem.updated_at ? new Date(cloudItem.updated_at).getTime() : 0;
+      return cloudTime > localTime ? cloudItem : item;
+    });
+    cloudMap.forEach(item => merged.push(item));
+    return merged;
+  }
+
+  // Pull cloud data on login (skip demo)
+  useEffect(() => {
+    if (!authUser || authUser.uid === 'demo-user-001' || !supabase) return;
+    sync.pullAll(authUser.uid).then(cloud => {
+      setTasks(prev => mergeItems(prev, cloud.tasks, 'id'));
+      setSubjects(prev => mergeItems(prev, cloud.subjects, 'id'));
+      if (cloud.gamification) {
+        const g = cloud.gamification as Record<string, any>;
+        const localUpdated = localStorage.getItem('study_flow_gamification_updated_at');
+        const cloudTime = g.updated_at ? new Date(g.updated_at).getTime() : 0;
+        const localTime = localUpdated ? new Date(localUpdated).getTime() : 0;
+        if (cloudTime > localTime) {
+          if (g.gold != null) setGameGold(g.gold as number);
+          if (g.hp) setGameHp(g.hp as HpState);
+          if (g.quest_progress) setGameQuestProgress(g.quest_progress as Record<string, number>);
+          if (g.quest_resets) setQuestResets(g.quest_resets as Record<string, string>);
+          if (g.shop_items) setShopItems(g.shop_items as { id: string; unlocked: boolean }[]);
+          if (g.sessions_today != null) setSessionsToday(g.sessions_today as number);
+          if (g.sessions_date) setSessionsDate(g.sessions_date as string);
+          if (g.daily_quests) setQuests(g.daily_quests as Quest[]);
+        }
+      }
+    }).catch((err: any) => {
+      console.warn('[StudyContext] pullAll failed:', err?.message ?? err);
     });
   }, [authUser ? authUser.uid : null]);
 
@@ -433,7 +441,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     setTimeout(() => setConfettiActive(false), 500);
   };
 
-  const resetStreak = () => { setUserStats(prev => ({ ...prev, currentStreak: 0 })); firePetEvent('streak_lost'); };
+  const resetStreak = () => { setUserStats(prev => ({ ...prev, currentStreak: 0 })); };
 
   const setPanicMode = (active: boolean) => {
     setPanicModeActive(active);
@@ -490,8 +498,6 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       const goldReward = goldForLevelUp(newLevel);
       setGameGold(g => g + goldReward);
       setLevelUpEvent(newLevel);
-      setPetState(p => ({ ...p, lastLevelUpAt: Date.now() }));
-      setTimeout(() => firePetEvent('level_up'), 50);
     }
   }, []);
 
@@ -581,13 +587,13 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
         const rank = { Common: 0, Rare: 1, Epic: 2, Legendary: 3 };
         return rank[b.rarity as keyof typeof rank] > rank[a.rarity as keyof typeof rank] ? b : a;
       });
-      setTimeout(() => firePetEvent('achievement_unlocked'), 100);
     }
   };
 
   const addTask = (title: string, category: string, priority: string, dueDate?: string, estimatedMinutes?: number) => {
     const newTask: Task = { id: Date.now().toString() + Math.random().toString(36).substr(2, 9), title, category, priority, completed: false, dueDate, estimatedMinutes };
     setTasks(prev => [newTask, ...prev]);
+    if (isRealUser) sync.enqueue('tasks', 'upsert', newTask);
   };
 
   const toggleTask = (id: string) => {
@@ -596,12 +602,11 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     if (isCompleting) {
       earnXp(XP_PER_TASK);
       awardGold(goldForTask(task!.priority));
-      earnFood('task', 1);
       updateQuestProgress('tasks', 1);
       updateGameQuestProgress('tasks_completed', 1);
-      firePetEvent('task_done');
     }
     setTasks(prev => prev.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
+    if (isRealUser && task) sync.enqueue('tasks', 'upsert', { ...task, completed: !task.completed });
     if (isCompleting) {
       const newTotal = userStats.totalTasksCompleted + 1;
       setUserStats(prev => ({ ...prev, totalTasksCompleted: newTotal }));
@@ -612,21 +617,16 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const deleteTask = (id: string) => setTasks(prev => prev.filter(t => t.id !== id));
-
-  const updateTask = useCallback((id: string, updates: Partial<Task>) => {
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
-  }, []);
-
-  const addExam = (subject: string, type: string, date: string, subjectId?: string) => {
-    const targetDate = new Date(date);
-    const diffTime = targetDate.getTime() - new Date().getTime();
-    const diffDays = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
-    const newExam: Exam = { id: Date.now().toString(), subject, type, date: targetDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), daysLeft: diffDays, subjectId };
-    setExams(prev => [...prev, newExam].sort((a, b) => a.daysLeft - b.daysLeft));
+  const deleteTask = (id: string) => {
+    setTasks(prev => prev.filter(t => t.id !== id));
+    if (isRealUser) sync.enqueue('tasks', 'delete', { id });
   };
 
-  const deleteExam = (id: string) => setExams(prev => prev.filter(e => e.id !== id));
+  const updateTask = useCallback((id: string, updates: Partial<Task>) => {
+    const existing = tasks.find(t => t.id === id);
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
+    if (isRealUser && existing) sync.enqueue('tasks', 'upsert', { ...existing, ...updates });
+  }, [tasks, isRealUser]);
 
   const recalibrateTasks = () => {
     setTasks(prev => {
@@ -648,13 +648,23 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       id, name, topics: initialTopics.map(title => ({ id: Math.random().toString(36).substr(2, 9), title, mastery: 'Red' })), color: color || 'indigo'
     };
     setSubjects(prev => [...prev, newSubject]);
+    if (isRealUser) sync.enqueue('subjects', 'upsert', newSubject);
     return id;
   };
 
-  const deleteSubject = (id: string) => setSubjects(prev => prev.filter(s => s.id !== id));
+  const deleteSubject = (id: string) => {
+    setSubjects(prev => prev.filter(s => s.id !== id));
+    if (isRealUser) sync.enqueue('subjects', 'delete', { id });
+  };
 
   const addTopic = (subjectId: string, title: string) => {
-    setSubjects(prev => prev.map(s => s.id === subjectId ? { ...s, topics: [...s.topics, { id: Date.now().toString(), title, mastery: 'Red' }] } : s));
+    const newTopic = { id: Date.now().toString(), title, mastery: 'Red' as MasteryLevel };
+    setSubjects(prev => prev.map(s => s.id === subjectId ? { ...s, topics: [...s.topics, newTopic] } : s));
+    const subject = subjects.find(s => s.id === subjectId);
+    if (isRealUser && subject) {
+      const updated = { ...subject, topics: [...subject.topics, newTopic] };
+      sync.enqueue('subjects', 'upsert', updated);
+    }
   };
 
   const updateTopicMastery = (subjectId: string, topicId: string, mastery: MasteryLevel) => {
@@ -664,7 +674,6 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     if (isNewGreen) {
       updateQuestProgress('mastery', 1);
       earnXp(100);
-      earnFood('mastery', 1);
       triggerConfetti();
     }
     setSubjects(prev => prev.map(s =>
@@ -672,10 +681,19 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
         ? { ...s, topics: s.topics.map(t => t.id === topicId ? { ...t, mastery } : t) }
         : s
     ));
+    if (isRealUser && subject) {
+      const updated = { ...subject, topics: subject.topics.map(t => t.id === topicId ? { ...t, mastery } : t) };
+      sync.enqueue('subjects', 'upsert', updated);
+    }
   };
 
   const deleteTopic = (subjectId: string, topicId: string) => {
     setSubjects(prev => prev.map(s => s.id === subjectId ? { ...s, topics: s.topics.filter(t => t.id !== topicId) } : s));
+    const subject = subjects.find(s => s.id === subjectId);
+    if (isRealUser && subject) {
+      const updated = { ...subject, topics: subject.topics.filter(t => t.id !== topicId) };
+      sync.enqueue('subjects', 'upsert', updated);
+    }
   };
 
   const completeFocusSession = async (seconds: number) => {
@@ -683,20 +701,19 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     earnXp(minutes * XP_PER_FOCUS_MINUTE);
     updateQuestProgress('focus', seconds);
     updateGameQuestProgress('sessions_completed', 1);
-    earnFood('focus', seconds);
     setGameHp(prev => regenHp(prev));
-    countSessionForPet();
     const newTotalFocus = (userStats.totalFocusSeconds || 0) + seconds;
     setUserStats(prev => ({ ...prev, totalFocusSeconds: newTotalFocus }));
     checkAchievements({ ...userStats, totalFocusSeconds: newTotalFocus });
-    firePetEvent('focus_done');
     if (authUser && seconds >= 60 && authUser.uid !== 'demo-user-001') {
       syncFocusSession(
         authUser.uid,
         authProfile?.display_name ?? authUser.displayName ?? 'Anonymous',
         authProfile?.avatar_url ?? null,
         seconds,
-      );
+      ).catch((err: any) => {
+        console.warn('[StudyContext] focus session sync failed:', err?.message ?? err);
+      });
       // Sync user_stats (lifetime accumulators)
       if (supabase) {
         const { data: existing } = await supabase
@@ -716,11 +733,15 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
           game_xp: gameXp,
           badges_earned: unlockedBadges.map(b => b.achievementId),
           updated_at: new Date().toISOString(),
-        }, { onConflict: 'user_id' });
+        }, { onConflict: 'user_id' }).then(undefined, (err: any) => {
+          console.warn('[StudyContext] user_stats sync failed:', err?.message ?? err);
+        });
 
         // Sync daily activity
         const today = new Date().toISOString().split('T')[0];
-        syncDailyStats(authUser.uid, today, 1, seconds, minutes * XP_PER_FOCUS_MINUTE);
+        syncDailyStats(authUser.uid, today, 1, seconds, minutes * XP_PER_FOCUS_MINUTE).catch((err: any) => {
+          console.warn('[StudyContext] daily_stats sync failed:', err?.message ?? err);
+        });
       }
     }
   };
@@ -802,166 +823,29 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     setGameQuestProgress(nextProgress);
   }, [awardGold, questResets, gameQuestProgress]);
 
-  const countSessionForPet = useCallback(() => {
-    const today = new Date().toISOString().split('T')[0];
-    if (sessionsDate !== today) {
-      setSessionsToday(1);
-      setSessionsDate(today);
-    } else {
-      setSessionsToday(prev => prev + 1);
-    }
-  }, [sessionsDate]);
-
-  // ─── Pet Actions ───────────────────────────────────────────────
-
-  const feedPet = (foodId: string) => {
-    setPetState(prev => {
-      const idx = prev.foodInventory.findIndex(f => f.foodId === foodId);
-      if (idx === -1 || prev.foodInventory[idx].quantity <= 0) return prev;
-      const food = PET_FOODS.find(f => f.id === foodId);
-      if (!food) return prev;
-      const newInventory = prev.foodInventory.map((f, i) => i === idx ? { ...f, quantity: f.quantity - 1 } : f).filter(f => f.quantity > 0);
-      const newHunger = Math.min(100, prev.hunger + food.hungerValue);
-      const newState: PetState = {
-        ...prev,
-        hunger: newHunger,
-        health: newHunger >= 50 ? 'happy' : newHunger > 0 ? 'neutral' : 'dormant',
-        lastFedAt: new Date().toISOString(),
-        foodInventory: newInventory,
-        totalFed: prev.totalFed + 1,
-      };
-      return newState;
-    });
-    triggerConfetti();
-  };
-
-  const petInteract = () => {
-    setPetState(prev => ({ ...prev, lastInteractedAt: new Date().toISOString(), health: prev.hunger > 0 ? 'happy' : prev.health }));
-  };
-
-  const changePetSpecies = (speciesId: string) => {
-    const species = PET_SPECIES.find(s => s.id === speciesId);
-    if (!species) return;
-    if (species.isPremium && !userStats.isPremium) return;
-    // Premium users can access any premium species regardless of level/unlock
-    if (species.isPremium && userStats.isPremium) {
-      setPetState(prev => ({ ...prev, species: speciesId, name: species.name }));
-      return;
-    }
-    if (!petState.unlockedSpecies.includes(speciesId) && gameLevel < species.unlockLevel) return;
-    setPetState(prev => ({ ...prev, species: speciesId, name: species.name }));
-  };
-
-  const changePetSkin = (skinId: string) => {
-    const skin = PET_SKINS.find(s => s.id === skinId);
-    if (!skin) return;
-    // Premium users can equip premium skins even if not purchased
-    if (!petState.unlockedSkins.includes(skinId) && !(skin.isPremium && userStats.isPremium)) return;
-    if (skin.speciesId !== petState.species) return;
-    setPetState(prev => ({ ...prev, skin: skinId }));
-  };
-
-  const purchaseSkin = (skinId: string) => {
-    const skin = PET_SKINS.find(s => s.id === skinId);
-    if (!skin || petState.unlockedSkins.includes(skinId)) return false;
-    // Premium users bypass level & price checks for premium skins
-    if (skin.isPremium && userStats.isPremium) {
-      setPetState(prev => ({ ...prev, unlockedSkins: [...prev.unlockedSkins, skinId], skin: skinId }));
-      triggerConfetti();
-      firePetEvent('achievement_unlocked');
-      return true;
-    }
-    if (gameLevel < skin.unlockLevel) return false;
-    if (skin.isPremium && !userStats.isPremium && skin.price > 0) return false;
-    if (gameGold < skin.price) return false;
-    setGameGold(prev => prev - skin.price);
-    setPetState(prev => ({ ...prev, unlockedSkins: [...prev.unlockedSkins, skinId], skin: skinId }));
-    triggerConfetti();
-    firePetEvent('achievement_unlocked');
-    return true;
-  };
-
-  const setPetName = (name: string) => {
-    setPetState(prev => ({ ...prev, name }));
-  };
-
-  const tickPet = useCallback(() => {
-    setPetState(prev => {
-      const now = Date.now();
-      const lastFed = new Date(prev.lastFedAt).getTime();
-      const hoursSinceFed = (now - lastFed) / (1000 * 60 * 60);
-      const hungerDecay = Math.floor(hoursSinceFed * PET_HUNGER_DECAY_PER_HOUR);
-      if (hungerDecay <= 0) return prev;
-      const newHunger = Math.max(0, prev.hunger - hungerDecay);
-      let newHealth: PetHealth = prev.health;
-      const weakDuration = now - lastFed;
-      if (newHunger <= 0 && weakDuration >= PET_DORMANT_DURATION_MS) {
-        newHealth = 'dormant';
-      } else if (newHunger < PET_WEAK_THRESHOLD && weakDuration >= PET_WEAK_DURATION_MS) {
-        newHealth = 'weak';
-      } else if (newHunger >= 50) {
-        newHealth = 'happy';
-      } else if (newHunger > 0) {
-        newHealth = 'neutral';
-      }
-      return { ...prev, hunger: newHunger, health: newHealth };
-    });
-  }, []);
-
-  // Tick pet hunger on mount and every 60s
-  useEffect(() => { tickPet(); }, []);
-  useEffect(() => {
-    const interval = setInterval(tickPet, 60000);
-    return () => clearInterval(interval);
-  }, [tickPet]);
-
-  // Unlock pet species on level up
-  useEffect(() => {
-    setPetState(prev => {
-      const newlyUnlocked = PET_SPECIES.filter(s => !s.isPremium && gameLevel >= s.unlockLevel && !prev.unlockedSpecies.includes(s.id));
-      if (newlyUnlocked.length === 0) return prev;
-      return { ...prev, unlockedSpecies: [...prev.unlockedSpecies, ...newlyUnlocked.map(s => s.id)] };
-    });
-  }, [gameLevel]);
-
-  // Earn food hooks
-  const earnFood = useCallback((source: 'focus' | 'task' | 'mastery', amount: number) => {
-    const matching = PET_FOODS.filter(f => f.source === source && amount >= f.sourceAmount);
-    if (matching.length === 0) return;
-    const food = matching[matching.length - 1];
-    setPetState(prev => {
-      const existing = prev.foodInventory.find(f => f.foodId === food.id);
-      if (existing) {
-        return { ...prev, foodInventory: prev.foodInventory.map(f => f.foodId === food.id ? { ...f, quantity: f.quantity + 1 } : f) };
-      }
-      return { ...prev, foodInventory: [...prev.foodInventory, { foodId: food.id, quantity: 1 }] };
-    });
-  }, []);
-
   // Optimization: Memoize the Context Value
   const contextValue = useMemo(() => ({
-    accessToken, subjects, tasks, exams, quests, themeConfig, userStats, unlockedBadges, activeNotification,
-    confettiActive, panicModeActive, selectedExamForPath, petState, setThemeConfig, addSubject, deleteSubject, addTopic,
-    updateTopicMastery, deleteTopic, addTask, toggleTask, deleteTask, updateTask, addExam, deleteExam, recalibrateTasks,
+    accessToken, subjects, tasks, quests, themeConfig, userStats, unlockedBadges, activeNotification,
+    confettiActive, panicModeActive, setThemeConfig, addSubject, deleteSubject, addTopic,
+    updateTopicMastery, deleteTopic, addTask, toggleTask, deleteTask, updateTask, recalibrateTasks,
     setTasks, earnXp, completeFocusSession, logSession, closeNotification, syncPremiumStatus, triggerConfetti, resetStreak, setPanicMode,
-    setSelectedExamForPath, feedPet, petInteract, changePetSpecies, changePetSkin, purchaseSkin, setPetName, tickPet, petEvent, firePetEvent,
     showPremiumModal, setShowPremiumModal,
     activeTracks, masterVolume, toggleTrack, setTrackVolume, stopAllTracks, setMasterVolume,
     selectedTaskId, setSelectedTaskId,
     // Gamification v2
-    gameGold, gameXp, gameLevel, gameHp, gameQuestProgress, shopItems, petMood, petAnimation, sessionsToday,
+    gameGold, gameXp, gameLevel, gameHp, gameQuestProgress, shopItems, sessionsToday,
     levelUpEvent, questCompleteEvent, playerDownEvent,
     awardGold, awardXp, purchaseItem, checkDailyHp, dismissLevelUp, dismissQuestComplete, dismissPlayerDown,
     updateGameQuestProgress,
     // Progression
     progression, progressionBadges,
   }), [
-    accessToken, subjects, tasks, exams, quests, themeConfig, userStats, unlockedBadges, activeNotification,
-    confettiActive, panicModeActive, selectedExamForPath, petState, petEvent, showPremiumModal,
+    accessToken, subjects, tasks, quests, themeConfig, userStats, unlockedBadges, activeNotification,
+    confettiActive, panicModeActive, showPremiumModal,
     activeTracks, masterVolume, toggleTrack, setTrackVolume, stopAllTracks, setMasterVolume,
     selectedTaskId,
     // Gamification v2 deps
-    gameGold, gameXp, gameLevel, gameHp, gameQuestProgress, shopItems, petMood, petAnimation, sessionsToday,
+    gameGold, gameXp, gameLevel, gameHp, gameQuestProgress, shopItems, sessionsToday,
     levelUpEvent, questCompleteEvent, playerDownEvent,
     awardGold, awardXp, purchaseItem, checkDailyHp, dismissLevelUp, dismissQuestComplete, dismissPlayerDown,
     updateGameQuestProgress,

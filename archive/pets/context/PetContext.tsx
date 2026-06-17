@@ -211,7 +211,7 @@ export function PetProvider({ children }: { children: React.ReactNode }) {
     changeSkin,
     purchaseSkin,
     triggerExcited,
-    refreshMood
+    refreshMood,
   }), [petState, performanceTier, isPanelOpen, isPetVisible, setPanelOpen, togglePetVisibility, feedPet, interact, setPetName, changeSpecies, changeSkin, purchaseSkin, triggerExcited, refreshMood]);
 
   return <PetContext.Provider value={value}>{children}</PetContext.Provider>;

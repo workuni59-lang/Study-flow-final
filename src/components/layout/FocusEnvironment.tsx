@@ -1,4 +1,4 @@
-import { memo, useMemo, useState, useRef, useEffect } from 'react';
+import { memo, useMemo, useState, useRef, useEffect, type ReactNode } from 'react';
 import { StudyTimer } from '../dashboard/StudyTimer';
 import { NotesPanel } from '../panels/NotesPanel';
 
@@ -57,7 +57,7 @@ function ParticleField({ accentColor = 'rgba(99,102,241,0.3)' }: { accentColor?:
 
 const UtilityButton = memo(({ onClick, children, label }: {
   onClick: () => void;
-  children: React.ReactNode;
+  children: ReactNode;
   label: string;
 }) => (
   <button

@@ -1,14 +1,12 @@
 import { Link, NavLink } from 'react-router-dom';
-import { BarChart3, BookOpen, Award, Settings, Crown, LogOut, Sparkles, LayoutDashboard, Target, Cat, Eye, EyeOff, Zap, Lock } from 'lucide-react';
+import { BarChart3, BookOpen, Award, Settings, Crown, LogOut, Sparkles, LayoutDashboard, Target } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useStudy } from '../../context/StudyContext';
-import { usePet } from '../../context/PetContext';
 import { PROGRESSION_BADGES } from '../../lib/progression';
 import { BadgeSvg, formatXP, type BadgeTier } from '../progression/BadgeSvg';
 import { ROUTES } from '../../lib/routes';
 import type { Mode } from './TopBar';
 import type { Section } from './MenuDrawer';
-import { ENABLE_PETS } from '../../config/features';
 
 interface DesktopSidebarProps {
   mode: Mode;
@@ -34,7 +32,6 @@ const MENU_ITEMS: { key: Section; icon: typeof BarChart3; label: string }[] = [
 export const DesktopSidebar = ({ mode, onModeChange, activeSection, onNavigate, open, onClose }: DesktopSidebarProps) => {
   const { user, signOut } = useAuth();
   const { userStats, progression, setShowPremiumModal } = useStudy();
-  const { petState, setPanelOpen } = usePet(); // We could add a toggleVisible to PetContext later if needed
 
   const handleNav = (key: Section) => {
     onNavigate(key);
@@ -137,21 +134,6 @@ export const DesktopSidebar = ({ mode, onModeChange, activeSection, onNavigate, 
             ))}
           </div>
         </div>
-
-        {/* Pet */}
-        {ENABLE_PETS && (
-          <div className="px-3 pb-2">
-            <p className="text-[9px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 dark:text-slate-500 mb-2 px-1">Companion</p>
-            <div className="flex gap-1.5">
-              <button onClick={() => { setPanelOpen(true); onClose(); }}
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-              >
-                <Cat className="w-3.5 h-3.5" />
-                Pet Panel
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Spacer */}
         <div className="flex-1" />

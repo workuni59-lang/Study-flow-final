@@ -32,7 +32,7 @@ export class WorkspaceService {
     });
 
     if (!response.ok) {
-      const error = await response.json();
+      const error: { error?: { message?: string } } = await response.json();
       throw new Error(`Calendar API Error: ${error.error?.message || response.statusText}`);
     }
 
@@ -71,7 +71,7 @@ export class WorkspaceService {
     });
 
     if (!response.ok) {
-       const error = await response.json();
+       const error: { error?: { message?: string } } = await response.json();
        throw new Error(`Tasks API Error: ${error.error?.message || response.statusText}`);
     }
 

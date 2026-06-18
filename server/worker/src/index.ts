@@ -46,7 +46,7 @@ function corsHeaders(origin: string, env: Env): Record<string, string> {
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'X-Content-Type-Options': 'nosniff',
-    'X-Frame-Options': 'DENY',
+    'X-Frame-Options': 'SAMEORIGIN',
     'Referrer-Policy': 'strict-origin-when-cross-origin',
     'Strict-Transport-Security': 'max-age=15552000; includeSubDomains',
     'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',

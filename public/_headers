@@ -1,7 +1,12 @@
-# Security headers — replaces what _worker.mjs previously injected
+# SPA routes — same-origin embedding only
 /app/*
   X-Frame-Options: SAMEORIGIN
   Referrer-Policy: strict-origin-when-cross-origin
+
+# Embeddable widget — allowed on any site
+/embed/*
+  X-Frame-Options: ALLOWALL
+  Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data:; script-src 'self' 'unsafe-inline'; connect-src 'none'; form-action 'none'; frame-ancestors *; base-uri 'none'
 
 # Global headers
 /*

@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import confetti from 'canvas-confetti';
 import { audioController } from '../services/AudioController';
 import { storage } from '../services/storage';
-import { UserStats, Badge, ACHIEVEMENTS, Achievement, Quest, XP_PER_TASK, XP_PER_FOCUS_MINUTE, AtmosphereId, WallpaperId, GameQuest, SEED_QUESTS, calculateFormalLevel, goldForTask, goldForLevelUp, MAX_HP, HP_REGEN_PER_SESSION, INITIAL_HP, HpState, checkDailyHp as checkHpFn, regenHp, shouldResetQuests, ShopItem, SHOP_ITEMS, XP_STREAK_BONUS_PER_DAY } from '../lib/gamification';
+import { UserStats, Badge, ACHIEVEMENTS, Achievement, Quest, XP_PER_TASK, XP_PER_FOCUS_MINUTE, AtmosphereId, WallpaperId, GameQuest, SEED_QUESTS, calculateFormalLevel, goldForTask, goldForSubjectTask, goldForLevelUp, MAX_HP, HP_REGEN_PER_SESSION, INITIAL_HP, HpState, checkDailyHp as checkHpFn, regenHp, shouldResetQuests, ShopItem, SHOP_ITEMS, XP_STREAK_BONUS_PER_DAY } from '../lib/gamification';
 import { getProgress, getRankForLevel, getNextRank, getBadgesForLevel, getNewlyUnlockedBadges, getRewardsBetweenLevels, type ProgressionState, type ProgressionBadge } from '../lib/progression';
 import { syncFocusSession } from '../lib/leaderboard';
 import { syncDailyStats } from '../lib/dailyStats';
@@ -60,6 +60,8 @@ export interface Task {
   priority?: string;
   dueDate?: string;
   estimatedMinutes?: number;
+  subjectId?: string;
+  topicId?: string;
 }
 
 export interface ThemeConfig {
@@ -94,7 +96,7 @@ interface StudyContextType {
   addTopic: (subjectId: string, title: string) => void;
   updateTopicMastery: (subjectId: string, topicId: string, mastery: MasteryLevel) => void;
   deleteTopic: (subjectId: string, topicId: string) => void;
-  addTask: (title: string, category: string, priority: string, dueDate?: string, estimatedMinutes?: number) => void;
+  addTask: (title: string, category: string, priority: string, dueDate?: string, estimatedMinutes?: number, subjectId?: string, topicId?: string) => void;
   toggleTask: (id: string) => void;
   deleteTask: (id: string) => void;
   updateTask: (id: string, updates: Partial<Task>) => void;
@@ -136,6 +138,7 @@ interface StudyContextType {
   dismissQuestComplete: () => void;
   dismissPlayerDown: () => void;
   updateGameQuestProgress: (metric: GameQuest['metric'], amount: number) => void;
+  subjectStreaks: Record<string, string>;
   // Progression system
   progression: ProgressionState;
   progressionBadges: ProgressionBadge[];
@@ -216,6 +219,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   const [shopItems, setShopItems] = useState<{ id: string; unlocked: boolean }[]>(() => storage.getShopItems());
   const [sessionsToday, setSessionsToday] = useState(() => storage.getSessionsToday());
   const [sessionsDate, setSessionsDate] = useState(() => storage.getSessionsDate());
+  const [subjectStreaks, setSubjectStreaks] = useState<Record<string, string>>(() => storage.getSubjectStreaks() || {});
 
   const [levelUpEvent, setLevelUpEvent] = useState<number | null>(null);
   const [questCompleteEvent, setQuestCompleteEvent] = useState<string | null>(null);
@@ -329,6 +333,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => { storage.saveShopItems(shopItems); }, [shopItems]);
   useEffect(() => { storage.saveSessionsToday(sessionsToday); }, [sessionsToday]);
   useEffect(() => { storage.saveSessionsDate(sessionsDate); }, [sessionsDate]);
+  useEffect(() => { storage.saveSubjectStreaks(subjectStreaks); }, [subjectStreaks]);
 
   // Cloud sync: gamification state
   const isRealUser = authUser && authUser.uid !== 'demo-user-001' && supabase;
@@ -590,8 +595,8 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const addTask = (title: string, category: string, priority: string, dueDate?: string, estimatedMinutes?: number) => {
-    const newTask: Task = { id: Date.now().toString() + Math.random().toString(36).substr(2, 9), title, category, priority, completed: false, dueDate, estimatedMinutes };
+  const addTask = (title: string, category: string, priority: string, dueDate?: string, estimatedMinutes?: number, subjectId?: string, topicId?: string) => {
+    const newTask: Task = { id: Date.now().toString() + Math.random().toString(36).substr(2, 9), title, category, priority, completed: false, dueDate, estimatedMinutes, subjectId, topicId };
     setTasks(prev => [newTask, ...prev]);
     if (isRealUser) sync.enqueue('tasks', 'upsert', newTask);
   };
@@ -600,10 +605,32 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     const task = tasks.find(t => t.id === id);
     const isCompleting = task && !task.completed;
     if (isCompleting) {
+      const subject = subjects.find(s => s.id === task?.subjectId);
       earnXp(XP_PER_TASK);
-      awardGold(goldForTask(task!.priority));
+      awardGold(goldForSubjectTask(task!.priority, subject));
       updateQuestProgress('tasks', 1);
       updateGameQuestProgress('tasks_completed', 1);
+
+      // Automated Mastery Advancement
+      if (task?.subjectId && task?.topicId) {
+        const topic = subject?.topics.find(t => t.id === task.topicId);
+        if (topic) {
+          let nextMastery: MasteryLevel = topic.mastery;
+          if (topic.mastery === 'Red') nextMastery = 'Amber';
+          else if (topic.mastery === 'Amber') nextMastery = 'Green';
+          
+          if (nextMastery !== topic.mastery) {
+            updateTopicMastery(task.subjectId, task.topicId, nextMastery);
+          }
+        }
+
+        // Subject Streak Tracking
+        const today = new Date().toISOString().split('T')[0];
+        setSubjectStreaks(prev => ({
+          ...prev,
+          [task.subjectId!]: today
+        }));
+      }
     }
     setTasks(prev => prev.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
     if (isRealUser && task) sync.enqueue('tasks', 'upsert', { ...task, completed: !task.completed });

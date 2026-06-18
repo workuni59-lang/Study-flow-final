@@ -1,14 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, BookOpen, ChevronRight, Trash2, ArrowLeft, Target, MoreVertical, Zap, Calendar, CheckCircle2, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useStudy, Subject, Topic, MasteryLevel } from '../../context/StudyContext';
 import { DashboardCard } from '../dashboard/DashboardCard';
 import { SUBJECT_TEMPLATES, SubjectTemplate } from '../../lib/templates';
 
-export const SubjectsView = () => {
+const masteryColors: Record<MasteryLevel, string> = {
+  Red: 'bg-rose-500',
+  Amber: 'bg-amber-500',
+  Green: 'bg-emerald-500',
+};
+
+export const SubjectsView = ({ initialSubjectId }: { initialSubjectId?: string }) => {
   const { subjects, deleteSubject } = useStudy();
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
   const [isAddingSubject, setIsAddingSubject] = useState(false);
+
+  useEffect(() => {
+    if (initialSubjectId && subjects.some(s => s.id === initialSubjectId)) {
+      setSelectedSubjectId(initialSubjectId);
+    }
+  }, []);
 
   const selectedSubject = subjects.find(s => s.id === selectedSubjectId);
 
@@ -114,15 +126,12 @@ export const SubjectsView = () => {
 };
 
 const SubjectDetails = ({ subject, onBack }: { subject: Subject, onBack: () => void }) => {
-  const { addTopic, updateTopicMastery, deleteTopic } = useStudy();
+  const { addTopic, updateTopicMastery, deleteTopic, tasks, toggleTask, deleteTask, addTask } = useStudy();
   const [newTopicTitle, setNewTopicTitle] = useState('');
   const [isSyncing, setIsSyncing] = useState(false);
+  const [activeTopicId, setActiveTopicId] = useState<string | null>(null);
 
-  const masteryColors = {
-    Red: 'bg-rose-500',
-    Amber: 'bg-amber-500',
-    Green: 'bg-emerald-500'
-  };
+  const subjectTasks = tasks.filter(t => t.subjectId === subject.id);
 
   const handleAddTopic = (e: React.FormEvent) => {
     e.preventDefault();
@@ -130,6 +139,10 @@ const SubjectDetails = ({ subject, onBack }: { subject: Subject, onBack: () => v
       addTopic(subject.id, newTopicTitle.trim());
       setNewTopicTitle('');
     }
+  };
+
+  const handleQuickAddTask = (topicId?: string) => {
+    addTask('New Task', 'General Study', 'High Yield', undefined, 25, subject.id, topicId);
   };
 
   const calculateProgress = () => {

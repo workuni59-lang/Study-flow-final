@@ -8,8 +8,8 @@ import { useNavigationContext, type Panel } from '../../hooks/useNavigationConte
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 import { ROUTES } from '../../lib/routes';
 import { BottomBar } from './BottomBar';
-import { HomeView } from './HomeView';
 const FocusEnvironmentLazy = lazy(() => import('./FocusEnvironment').then(m => ({ default: m.FocusEnvironment })));
+const HomeViewLazy = lazy(() => import('./HomeView').then(m => ({ default: m.HomeView })));
 import { MenuDrawer, type Section } from './MenuDrawer';
 import { DesktopSidebar } from './DesktopSidebar';
 import { FloatingPanel } from '../panels/FloatingPanel';
@@ -55,6 +55,7 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [ambienceUrl, setAmbienceUrl] = useState<CuratedPlaylist | null>(null);
+  const [spotlightSubjectId, setSpotlightSubjectId] = useState<string | null>(null);
 
   const setMode = (m: Mode) => {
     navigate(m === 'focus' ? ROUTES.FOCUS : ROUTES.HOME);
@@ -96,6 +97,10 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
   }, [navigate]);
   const handleStatsOpen = useCallback(() => navigate(ROUTES.ANALYTICS), []);
   const handleQuestsOpen = useCallback(() => setSection('quests'), []);
+  const handleSubjectsOpen = useCallback((subjectId?: string) => {
+    if (subjectId) setSpotlightSubjectId(subjectId);
+    setSection('subjects');
+  }, []);
   const handleClosePanel = useCallback(() => {
     navigate(modeRef.current === 'focus' ? ROUTES.FOCUS : ROUTES.HOME);
   }, [navigate]);
@@ -157,7 +162,7 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
                 {section === 'progression' && <ProgressionViewLazy />}
                 {section === 'analytics' && <AnalyticsDashboardLazy />}
                 {section === 'quests' && <QuestsViewLazy />}
-                {section === 'subjects' && <SubjectsViewLazy />}
+                {section === 'subjects' && <SubjectsViewLazy key={spotlightSubjectId ?? 'default'} initialSubjectId={spotlightSubjectId ?? undefined} />}
                 {section === 'achievements' && <AchievementsViewLazy />}
                 {section === 'settings' && <SettingsViewLazy />}
                 {section === 'leaderboard' && <LeaderboardViewLazy onViewProfile={handleViewProfile} />}
@@ -183,7 +188,11 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
   
           {/* Main content */}
           <main className="main-layout-content">
-            {mode === 'home' && <HomeView onNotepadOpen={handleNotepadOpen} onQuestsOpen={handleQuestsOpen} onMusicOpen={handleMusicOpen} onProgressionOpen={() => setSection('progression')} menuOpen={menuOpen} />}
+            {mode === 'home' && (
+              <Suspense fallback={<SimpleSpinner />}>
+                <HomeViewLazy onNotepadOpen={handleNotepadOpen} onQuestsOpen={handleQuestsOpen} onMusicOpen={handleMusicOpen} onProgressionOpen={() => setSection('progression')} onSubjectsOpen={handleSubjectsOpen} menuOpen={menuOpen} />
+              </Suspense>
+            )}
             {mode === 'focus' && (
               <Suspense fallback={<SimpleSpinner />}>
                 <FocusEnvironmentLazy 

@@ -30,6 +30,7 @@ const STORAGE_KEYS = {
   TRACK_VOLUMES: 'study_flow_track_volumes',
   ALERT_SOUND: 'study_flow_alert_sound',
   ALERT_VOLUME: 'study_flow_alert_volume',
+  SUBJECT_STREAKS: 'study_flow_subject_streaks',
   // Gamification v2 (sf_game_ prefix)
   GAME_GOLD: 'sf_game_gold',
   GAME_TOTAL_XP: 'sf_game_total_xp',
@@ -135,6 +136,9 @@ export const storage = {
 
   saveAlertVolume: (vol: number) => safeSet(STORAGE_KEYS.ALERT_VOLUME, vol),
   getAlertVolume: (): number | null => safeGet(STORAGE_KEYS.ALERT_VOLUME),
+
+  saveSubjectStreaks: (streaks: Record<string, string>) => safeSet(STORAGE_KEYS.SUBJECT_STREAKS, streaks),
+  getSubjectStreaks: (): Record<string, string> | null => safeGet(STORAGE_KEYS.SUBJECT_STREAKS),
 
   // --- Gamification v2 (sf_game_ prefix) ---
   getGold: (): number => safeGet(STORAGE_KEYS.GAME_GOLD) ?? 0,

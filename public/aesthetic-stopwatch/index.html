@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Free Online Stopwatch — Aesthetic Stopwatch for Study — StudyFlow</title>
+    <meta name="description" content="Use StudyFlow's free online stopwatch with an aesthetic design. Track study time, measure focus sessions, and stay productive with a beautiful stopwatch timer." />
+    <link rel="canonical" href="https://studyflow.space/aesthetic-stopwatch/" />
+
+    <meta property="og:title" content="Free Online Stopwatch — Aesthetic Stopwatch for Study" />
+    <meta property="og:description" content="A free online stopwatch with an aesthetic design for students. Track your study sessions, measure focus time, and stay productive with a beautiful stopwatch timer." />
+    <meta property="og:url" content="https://studyflow.space/aesthetic-stopwatch/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://studyflow.space/logo.png" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Free Online Stopwatch — Aesthetic Stopwatch for Study" />
+    <meta name="twitter:description" content="A free online stopwatch with an aesthetic design for students. Track your study sessions and measure focus time." />
+
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is an aesthetic stopwatch?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "An aesthetic stopwatch is a time-tracking tool designed with visual appeal in mind. Unlike basic utilitarian stopwatches, an aesthetic version uses pleasing colors, smooth animations, and a clean interface to make timing your study sessions feel enjoyable rather than clinical."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is StudyFlow's stopwatch free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. StudyFlow's stopwatch is completely free with no sign-up required. Use it immediately in your browser."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I use the stopwatch for study sessions?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. The stopwatch integrates with StudyFlow's full focus environment including living wallpapers, ambient soundscapes, and session tracking. Every session you time earns XP and builds your streak."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How is this different from a regular stopwatch?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "StudyFlow's stopwatch is part of a complete focus environment. You get animated wallpapers, ambient sounds, gamification (XP, levels, badges), session analytics, and task integration — features no basic stopwatch offers."
+          }
+        }
+      ]
+    }
+    </script>
+
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+      body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: #fafafa; color: #1e293b; line-height: 1.6; }
+      h1, h2, h3 { font-family: 'Outfit', 'Inter', system-ui, sans-serif; line-height: 1.15; letter-spacing: -0.02em; }
+      a { color: inherit; text-decoration: none; }
+      img { max-width: 100%; display: block; }
+      .container { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+      .header { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; max-width: 1120px; margin: 0 auto; }
+      .header-logo { display: flex; align-items: center; gap: 10px; font-family: 'Outfit','Inter',sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -0.3px; }
+      .header-logo img { width: 32px; height: 32px; border-radius: 8px; }
+      .header-nav { display: flex; align-items: center; gap: 24px; }
+      .header-nav a { font-size: 14px; font-weight: 500; color: #64748b; transition: color 0.15s; }
+      .header-nav a:hover { color: #6366f1; }
+      .header-cta { padding: 8px 20px; background: #6366f1; color: #fff; font-size: 14px; font-weight: 600; border-radius: 10px; }
+      .header-cta:hover { background: #5558e6; }
+      .hero { text-align: center; padding: 80px 24px 60px; background: linear-gradient(180deg, #eef2ff 0%, #fafafa 100%); }
+      .hero h1 { font-size: clamp(32px, 5vw, 44px); font-weight: 900; color: #0f172a; margin-bottom: 16px; }
+      .hero p { font-size: 17px; color: #64748b; max-width: 520px; margin: 0 auto 32px; line-height: 1.7; }
+      .hero-cta { display: inline-flex; align-items: center; gap: 8px; padding: 14px 32px; background: #6366f1; color: #fff; font-size: 16px; font-weight: 600; border-radius: 12px; box-shadow: 0 4px 24px rgba(99,102,241,0.3); }
+      .hero-cta:hover { background: #5558e6; }
+      .section { padding: 60px 24px; }
+      .section h2 { font-size: clamp(24px, 3vw, 30px); font-weight: 700; color: #0f172a; margin-bottom: 16px; }
+      .section p, .section li { font-size: 15px; color: #475569; line-height: 1.8; }
+      .section ul { list-style: none; padding: 0; }
+      .section li { padding: 8px 0 8px 24px; position: relative; }
+      .section li::before { content: ""; position: absolute; left: 0; top: 14px; width: 6px; height: 6px; background: #6366f1; border-radius: 50%; }
+      .faq-item { padding: 20px 0; border-bottom: 1px solid #e2e8f0; }
+      .faq-item:last-child { border-bottom: none; }
+      .faq-item h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px; color: #0f172a; }
+      .faq-item p { font-size: 14px; color: #64748b; }
+      .cta-section { text-align: center; padding: 80px 24px; background: linear-gradient(180deg, #fafafa 0%, #eef2ff 100%); }
+      .cta-section h2 { font-size: clamp(26px, 3vw, 34px); margin-bottom: 12px; }
+      .cta-section p { font-size: 15px; color: #64748b; margin-bottom: 28px; }
+      .cta-button { display: inline-flex; align-items: center; gap: 8px; padding: 14px 32px; background: #6366f1; color: #fff; font-size: 16px; font-weight: 600; border-radius: 12px; box-shadow: 0 4px 24px rgba(99,102,241,0.3); }
+      .cta-button:hover { background: #5558e6; }
+      .footer { padding: 32px 24px; text-align: center; font-size: 13px; color: #94a3b8; border-top: 1px solid #e2e8f0; }
+      .footer a { color: #6366f1; font-weight: 500; }
+      .footer-links { display: flex; justify-content: center; gap: 24px; margin-bottom: 12px; flex-wrap: wrap; }
+      @media (max-width: 640px) { .hero { padding: 50px 24px 40px; } .header-nav { display: none; } }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <a href="/" class="header-logo"><img src="/logo.png" alt="StudyFlow" width="32" height="32" />StudyFlow</a>
+      <nav class="header-nav">
+        <a href="/pomodoro-timer/">Pomodoro Timer</a>
+        <a href="/study-timer/">Study Timer</a>
+        <a href="/study-planner/">Study Planner</a>
+        <a href="/app/" class="header-cta">Open App</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <h1>Free Online Aesthetic Stopwatch</h1>
+      <p>Time your study sessions with a beautiful stopwatch. StudyFlow's aesthetic stopwatch combines clean design with living wallpapers, ambient sounds, and gamified progress tracking.</p>
+      <a href="/app/" class="hero-cta">Use the Stopwatch</a>
+    </section>
+
+    <section class="section container">
+      <h2>Why use an aesthetic stopwatch?</h2>
+      <p>A stopwatch is one of the simplest productivity tools — start it, work, stop it. But most stopwatches feel like tools. An aesthetic stopwatch makes timing your work feel intentional rather than mechanical. StudyFlow wraps the stopwatch in a complete focus environment that rewards every minute you put in.</p>
+      <ul>
+        <li><strong>Track any session:</strong> Start the stopwatch whenever you begin studying — no preset durations needed</li>
+        <li><strong>Beautiful display:</strong> Clean, large typography against your choice of 50+ living wallpapers</li>
+        <li><strong>Ambient soundscapes:</strong> Rain, fireplace, lo-fi, and white noise play alongside your stopwatch</li>
+        <li><strong>Earn XP for every second:</strong> Every stopwatch session counts toward your XP, streaks, and levels</li>
+      </ul>
+    </section>
+
+    <section class="section container">
+      <h2>Stopwatch features</h2>
+      <ul>
+        <li><strong>Start, stop, and reset:</strong> Simple one-click controls for timing your study sessions</li>
+        <li><strong>Session history:</strong> Every stopwatch session is saved with date, duration, and optional task link</li>
+        <li><strong>Gamification:</strong> Earn XP, maintain streaks, level up, and unlock badges from every session</li>
+        <li><strong>Task integration:</strong> Link your stopwatch session to a specific task or subject</li>
+        <li><strong>Detailed analytics:</strong> See your total focus time, daily patterns, and subject breakdowns</li>
+        <li><strong>Cross-device sync:</strong> Your stopwatch history syncs across all your devices</li>
+      </ul>
+    </section>
+
+    <section class="section container">
+      <h2>Frequently asked questions</h2>
+      <div class="faq-item">
+        <h3>Is this stopwatch really free?</h3>
+        <p>Yes. StudyFlow's stopwatch and all core features are completely free. No account, no credit card, no hidden fees.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Can I use the stopwatch without signing up?</h3>
+        <p>Absolutely. Open StudyFlow and start the stopwatch immediately. Sign-up is optional and only needed for cross-device sync.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Does the stopwatch track multiple sessions?</h3>
+        <p>Yes. Every session is saved automatically. You can view your stopwatch history, total focus time, and daily patterns in the analytics dashboard.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Can I use it on my phone?</h3>
+        <p>Yes. StudyFlow works on any device with a browser. You can also install it as a PWA for a native-like experience on mobile.</p>
+      </div>
+    </section>
+
+    <section class="cta-section">
+      <h2>Start the stopwatch</h2>
+      <p>Free. No sign-up. Start timing your focus now.</p>
+      <a href="/app/" class="cta-button">Use the Stopwatch</a>
+    </section>
+
+    <footer class="footer">
+      <div class="footer-links">
+        <a href="/">Home</a>
+        <a href="/flip-clock/">Flip Clock</a>
+        <a href="/aesthetic-stopwatch/">Stopwatch</a>
+        <a href="/pomodoro-timer/">Pomodoro Timer</a>
+        <a href="/study-timer/">Study Timer</a>
+        <a href="/study-planner/">Study Planner</a>
+        <a href="/studyflow-focus-timer/">StudyFlow Focus Timer</a>
+      </div>
+      <p>&copy; 2026 StudyFlow</p>
+    </footer>
+  </body>
+</html>

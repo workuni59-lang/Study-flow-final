@@ -21,7 +21,7 @@ const TABS: { id: Tab; icon: typeof BarChart3; label: string }[] = [
 const PREMIUM_TABS: Tab[] = ['heatmap', 'subjects'];
 
 export default function AnalyticsDashboard() {
-  const { userStats, subjects, setShowPremiumModal } = useStudy();
+  const { userStats, subjects, tasks, setShowPremiumModal } = useStudy();
   const isPremium = userStats.isPremium;
   const [activeTab, setActiveTab] = useState<Tab>('overview');
 
@@ -54,7 +54,7 @@ export default function AnalyticsDashboard() {
       case 'overview': return <AnalyticsOverview userStats={userStats} />;
       case 'heatmap': return <AnalyticsHeatmap userStats={userStats} />;
       case 'trends': return <AnalyticsTrends userStats={userStats} />;
-      case 'subjects': return <AnalyticsSubjects subjects={subjects} />;
+      case 'subjects': return <AnalyticsSubjects subjects={subjects} tasks={tasks} />;
       case 'sessions': return <AnalyticsSessions userStats={userStats} />;
     }
   };

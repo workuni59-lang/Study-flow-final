@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StudyFlow Timer Widget</title>
+    <meta name="description" content="Embeddable Pomodoro timer widget from StudyFlow. Start focusing in one click." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap" />
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      html { -webkit-font-smoothing: antialiased; }
+      body {
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        background: #0f172a; color: #f1f5f9;
+        width: 280px; height: 180px; overflow: hidden;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        border-radius: 12px;
+      }
+
+      .timer-display {
+        font-family: 'Outfit', 'Inter', system-ui, sans-serif;
+        font-size: 40px; font-weight: 700; letter-spacing: 2px;
+        color: #e2e8f0; line-height: 1; margin-bottom: 12px;
+        font-variant-numeric: tabular-nums;
+        transition: color 0.3s;
+      }
+      .timer-display.running { color: #a5b4fc; }
+      .timer-display.break { color: #86efac; }
+
+      .controls { display: flex; gap: 8px; align-items: center; }
+      .btn {
+        padding: 6px 18px; border: none; border-radius: 8px;
+        font-family: 'Inter', system-ui, sans-serif;
+        font-size: 13px; font-weight: 600; cursor: pointer;
+        transition: all 0.15s; outline: none;
+        background: #334155; color: #cbd5e1;
+        line-height: 1;
+      }
+      .btn:hover { background: #475569; color: #f1f5f9; }
+      .btn-primary {
+        background: #6366f1; color: #fff;
+        min-width: 70px;
+      }
+      .btn-primary:hover { background: #5558e6; }
+      .btn-primary.active { background: #ef4444; }
+      .btn-primary.active:hover { background: #dc2626; }
+      .btn:disabled { opacity: 0.4; cursor: default; }
+
+      .mode-label {
+        font-size: 11px; font-weight: 500; text-transform: uppercase;
+        letter-spacing: 1px; color: #64748b; margin-bottom: 8px;
+      }
+      .mode-label.break { color: #4ade80; }
+
+      .brand {
+        position: absolute; bottom: 8px; right: 10px;
+        font-size: 10px; font-weight: 500; color: #475569;
+        font-family: 'Outfit', 'Inter', system-ui, sans-serif;
+        letter-spacing: 0.3px;
+      }
+    </style>
+  </head>
+  <body>
+
+    <div class="mode-label" id="modeLabel">FOCUS</div>
+
+    <div class="timer-display" id="timerDisplay">25:00</div>
+
+    <div class="controls">
+      <button class="btn btn-primary" id="startBtn">Start</button>
+      <button class="btn" id="resetBtn">Reset</button>
+    </div>
+
+    <span class="brand">StudyFlow</span>
+
+    <script>
+      (function() {
+        var FOCUS = 25 * 60;
+        var BREAK = 5 * 60;
+        var timeLeft = FOCUS;
+        var isRunning = false;
+        var isFocus = true;
+        var interval = null;
+
+        var display = document.getElementById('timerDisplay');
+        var startBtn = document.getElementById('startBtn');
+        var resetBtn = document.getElementById('resetBtn');
+        var modeLabel = document.getElementById('modeLabel');
+
+        function format(t) {
+          var m = Math.floor(t / 60);
+          var s = t % 60;
+          return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+        }
+
+        function updateDisplay() {
+          display.textContent = format(timeLeft);
+        }
+
+        function updateUI() {
+          display.className = 'timer-display' + (isRunning ? (isFocus ? ' running' : ' break') : '');
+          modeLabel.textContent = isFocus ? 'FOCUS' : 'BREAK';
+          modeLabel.className = 'mode-label' + (isFocus ? '' : ' break');
+          startBtn.textContent = isRunning ? 'Stop' : 'Start';
+          startBtn.className = 'btn btn-primary' + (isRunning ? ' active' : '');
+        }
+
+        function tick() {
+          if (timeLeft <= 0) {
+            isFocus = !isFocus;
+            timeLeft = isFocus ? FOCUS : BREAK;
+            updateUI();
+            updateDisplay();
+            return;
+          }
+          timeLeft--;
+          updateDisplay();
+        }
+
+        function start() {
+          if (isRunning) {
+            clearInterval(interval);
+            isRunning = false;
+            updateUI();
+            return;
+          }
+          isRunning = true;
+          updateUI();
+          interval = setInterval(tick, 1000);
+        }
+
+        function reset() {
+          clearInterval(interval);
+          isRunning = false;
+          isFocus = true;
+          timeLeft = FOCUS;
+          updateDisplay();
+          updateUI();
+        }
+
+        startBtn.addEventListener('click', start);
+        resetBtn.addEventListener('click', reset);
+
+        updateDisplay();
+        updateUI();
+      })();
+    </script>
+
+  </body>
+</html>

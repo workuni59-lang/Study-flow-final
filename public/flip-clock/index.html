@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Free Online Flip Clock — Aesthetic Flip Clock Timer — StudyFlow</title>
+    <meta name="description" content="Use StudyFlow's free online flip clock — a full-screen aesthetic flip clock timer for focus, study, and productivity. Beautiful animated flip display with Pomodoro sessions." />
+    <link rel="canonical" href="https://studyflow.space/flip-clock/" />
+
+    <meta property="og:title" content="Free Online Flip Clock — Aesthetic Flip Clock Timer" />
+    <meta property="og:description" content="A free online flip clock with an aesthetic flip-card display. Use it as a full-screen focus timer, study clock, or productivity tool. Start focusing in one click." />
+    <meta property="og:url" content="https://studyflow.space/flip-clock/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://studyflow.space/logo.png" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Free Online Flip Clock — Aesthetic Flip Clock Timer" />
+    <meta name="twitter:description" content="A free online flip clock with an aesthetic flip-card display. Use it as a full-screen focus timer, study clock, or productivity tool." />
+
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is a flip clock?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A flip clock is a digital clock that uses a split-flap display, where each digit is printed on a set of flaps that physically flip to show the time. The online version recreates this aesthetic flip animation on screen, often used as a full-screen focus timer or productivity tool."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is StudyFlow's flip clock free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. StudyFlow's flip clock is completely free with no sign-up required. Use it as a full-screen timer, Pomodoro clock, or aesthetic focus tool."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I use the flip clock as a Pomodoro timer?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. The flip clock integrates with StudyFlow's focus timer modes including classic Pomodoro (25/5), deep focus (50/10), and Flow mode. The flip-card display shows your remaining session time."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does the flip clock work full screen?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. StudyFlow has a Zen mode that gives you a full-screen flip clock experience with your chosen wallpaper and ambient sound — no tabs, no sidebar, no distractions."
+          }
+        }
+      ]
+    }
+    </script>
+
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+      body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: #fafafa; color: #1e293b; line-height: 1.6; }
+      h1, h2, h3 { font-family: 'Outfit', 'Inter', system-ui, sans-serif; line-height: 1.15; letter-spacing: -0.02em; }
+      a { color: inherit; text-decoration: none; }
+      img { max-width: 100%; display: block; }
+      .container { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+      .header { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; max-width: 1120px; margin: 0 auto; }
+      .header-logo { display: flex; align-items: center; gap: 10px; font-family: 'Outfit','Inter',sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -0.3px; }
+      .header-logo img { width: 32px; height: 32px; border-radius: 8px; }
+      .header-nav { display: flex; align-items: center; gap: 24px; }
+      .header-nav a { font-size: 14px; font-weight: 500; color: #64748b; transition: color 0.15s; }
+      .header-nav a:hover { color: #6366f1; }
+      .header-cta { padding: 8px 20px; background: #6366f1; color: #fff; font-size: 14px; font-weight: 600; border-radius: 10px; }
+      .header-cta:hover { background: #5558e6; }
+      .hero { text-align: center; padding: 80px 24px 60px; background: linear-gradient(180deg, #eef2ff 0%, #fafafa 100%); }
+      .hero h1 { font-size: clamp(32px, 5vw, 44px); font-weight: 900; color: #0f172a; margin-bottom: 16px; }
+      .hero p { font-size: 17px; color: #64748b; max-width: 520px; margin: 0 auto 32px; line-height: 1.7; }
+      .hero-cta { display: inline-flex; align-items: center; gap: 8px; padding: 14px 32px; background: #6366f1; color: #fff; font-size: 16px; font-weight: 600; border-radius: 12px; box-shadow: 0 4px 24px rgba(99,102,241,0.3); }
+      .hero-cta:hover { background: #5558e6; }
+      .section { padding: 60px 24px; }
+      .section h2 { font-size: clamp(24px, 3vw, 30px); font-weight: 700; color: #0f172a; margin-bottom: 16px; }
+      .section p, .section li { font-size: 15px; color: #475569; line-height: 1.8; }
+      .section ul { list-style: none; padding: 0; }
+      .section li { padding: 8px 0 8px 24px; position: relative; }
+      .section li::before { content: ""; position: absolute; left: 0; top: 14px; width: 6px; height: 6px; background: #6366f1; border-radius: 50%; }
+      .faq-item { padding: 20px 0; border-bottom: 1px solid #e2e8f0; }
+      .faq-item:last-child { border-bottom: none; }
+      .faq-item h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px; color: #0f172a; }
+      .faq-item p { font-size: 14px; color: #64748b; }
+      .cta-section { text-align: center; padding: 80px 24px; background: linear-gradient(180deg, #fafafa 0%, #eef2ff 100%); }
+      .cta-section h2 { font-size: clamp(26px, 3vw, 34px); margin-bottom: 12px; }
+      .cta-section p { font-size: 15px; color: #64748b; margin-bottom: 28px; }
+      .cta-button { display: inline-flex; align-items: center; gap: 8px; padding: 14px 32px; background: #6366f1; color: #fff; font-size: 16px; font-weight: 600; border-radius: 12px; box-shadow: 0 4px 24px rgba(99,102,241,0.3); }
+      .cta-button:hover { background: #5558e6; }
+      .footer { padding: 32px 24px; text-align: center; font-size: 13px; color: #94a3b8; border-top: 1px solid #e2e8f0; }
+      .footer a { color: #6366f1; font-weight: 500; }
+      .footer-links { display: flex; justify-content: center; gap: 24px; margin-bottom: 12px; flex-wrap: wrap; }
+      @media (max-width: 640px) { .hero { padding: 50px 24px 40px; } .header-nav { display: none; } }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <a href="/" class="header-logo"><img src="/logo.png" alt="StudyFlow" width="32" height="32" />StudyFlow</a>
+      <nav class="header-nav">
+        <a href="/pomodoro-timer/">Pomodoro Timer</a>
+        <a href="/study-timer/">Study Timer</a>
+        <a href="/study-planner/">Study Planner</a>
+        <a href="/app/" class="header-cta">Open App</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <h1>Free Online Flip Clock</h1>
+      <p>An aesthetic flip-card timer for focus, study, and productivity. StudyFlow's flip clock combines a beautiful split-flap display with ambient sounds, living wallpapers, and gamified progress tracking.</p>
+      <a href="/app/" class="hero-cta">Use the Flip Clock</a>
+    </section>
+
+    <section class="section container">
+      <h2>Why use a flip clock?</h2>
+      <p>A flip clock brings the tactile satisfaction of a physical split-flap display to your screen. Unlike a standard digital timer, the flipping motion creates a natural rhythm that keeps you aware of time passing without being distracting. StudyFlow enhances the flip clock experience with an immersive focus environment.</p>
+      <ul>
+        <li><strong>Full-screen display:</strong> Zen mode transforms the flip clock into a distraction-free focus tool</li>
+        <li><strong>Customizable backgrounds:</strong> 50+ wallpapers and color atmospheres behind the flip display</li>
+        <li><strong>Ambient sounds:</strong> Rain, fireplace, lo-fi, and white noise play alongside the flip clock</li>
+        <li><strong>Pomodoro ready:</strong> The flip clock works with all focus modes — Pomodoro, deep focus, and Flow</li>
+      </ul>
+    </section>
+
+    <section class="section container">
+      <h2>Flip Clock features</h2>
+      <ul>
+        <li><strong>Aesthetic flip-card animation:</strong> Smooth split-flap digits that feel satisfying to watch</li>
+        <li><strong>Focus timer modes:</strong> Classic Pomodoro (25/5), deep focus (50/10), and adaptive Flow mode</li>
+        <li><strong>Full-screen Zen mode:</strong> Just the flip clock, your wallpaper, and ambient sound — nothing else</li>
+        <li><strong>50+ living wallpapers:</strong> Animated gradients, serene photos, and deep color atmospheres</li>
+        <li><strong>Progress tracking:</strong> XP, streaks, levels, and badges earned with every completed session</li>
+        <li><strong>Cross-device sync:</strong> Your flip clock sessions and stats follow you across devices</li>
+      </ul>
+    </section>
+
+    <section class="section container">
+      <h2>Frequently asked questions</h2>
+      <div class="faq-item">
+        <h3>What is a flip clock timer?</h3>
+        <p>A flip clock timer recreates the classic split-flap display where digits physically flip to show the time. Online versions add features like full-screen mode, customizable backgrounds, and integration with focus techniques like Pomodoro.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Is the flip clock free to use?</h3>
+        <p>Yes. StudyFlow's flip clock and all core features are completely free. No account, no credit card, no hidden fees.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Can I use it without signing up?</h3>
+        <p>Absolutely. Open StudyFlow and start the flip clock immediately. Sign-up is optional and only needed for cross-device sync.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Does the flip clock work on mobile?</h3>
+        <p>Yes. StudyFlow works on any device with a browser. The flip clock display adapts to your screen size and you can install StudyFlow as a PWA for a native-like experience.</p>
+      </div>
+    </section>
+
+    <section class="cta-section">
+      <h2>Try the flip clock now</h2>
+      <p>Free. No sign-up. Open it and focus.</p>
+      <a href="/app/" class="cta-button">Use the Flip Clock</a>
+    </section>
+
+    <footer class="footer">
+      <div class="footer-links">
+        <a href="/">Home</a>
+        <a href="/flip-clock/">Flip Clock</a>
+        <a href="/aesthetic-stopwatch/">Stopwatch</a>
+        <a href="/pomodoro-timer/">Pomodoro Timer</a>
+        <a href="/study-timer/">Study Timer</a>
+        <a href="/study-planner/">Study Planner</a>
+        <a href="/studyflow-focus-timer/">StudyFlow Focus Timer</a>
+      </div>
+      <p>&copy; 2026 StudyFlow</p>
+    </footer>
+  </body>
+</html>

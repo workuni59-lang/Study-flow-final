@@ -48,7 +48,9 @@ function corsHeaders(origin: string, env: Env): Record<string, string> {
     'X-Content-Type-Options': 'nosniff',
     'X-Frame-Options': 'DENY',
     'Referrer-Policy': 'strict-origin-when-cross-origin',
+    'Strict-Transport-Security': 'max-age=15552000; includeSubDomains',
     'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+    'Content-Security-Policy': "default-src 'self'; script-src 'none'; object-src 'none'; base-uri 'none'",
   };
 }
 
@@ -202,6 +204,9 @@ async function handleCreateCheckout(
 }
 
 async function handlePolarWebhook(request: Request, env: Env): Promise<Response> {
+  const origin = request.headers.get('Origin') || '*';
+  const whHeaders = corsHeaders(origin, env);
+
   try {
     const raw = await request.text();
 
@@ -211,13 +216,13 @@ async function handlePolarWebhook(request: Request, env: Env): Promise<Response>
 
     if (!webhookId || !webhookTimestamp || !signatureHeader) {
       console.error('Missing webhook headers:', { webhookId, webhookTimestamp, signatureHeader });
-      return new Response('Unauthorized', { status: 401 });
+      return new Response('Unauthorized', { status: 401, headers: whHeaders });
     }
 
     const valid = await verifyWebhookSignature(raw, webhookId, webhookTimestamp, signatureHeader, env.POLAR_WEBHOOK_SECRET);
     if (!valid) {
       console.error('Invalid webhook signature');
-      return new Response('Unauthorized', { status: 401 });
+      return new Response('Unauthorized', { status: 401, headers: whHeaders });
     }
 
     const event = JSON.parse(raw);
@@ -270,24 +275,25 @@ async function handlePolarWebhook(request: Request, env: Env): Promise<Response>
       console.warn(`[Webhook] Unhandled event type: ${event.type}`);
     }
 
-    return new Response('OK', { status: 200 });
+    return new Response('OK', { status: 200, headers: whHeaders });
   } catch (err: any) {
     console.error('Webhook error:', err);
-    return new Response('OK', { status: 200 });
+    return new Response('OK', { status: 200, headers: whHeaders });
   }
 }
 
 async function handleCheckoutSuccess(url: URL, env: Env, origin: string): Promise<Response> {
   const frontendUrl = env.FRONTEND_URL || origin;
+  const csHeaders = corsHeaders(origin, env);
 
   // Production gate
   if (env.IS_DEV !== 'true') {
-    return new Response(JSON.stringify({ error: 'Not available in production' }), { status: 403, headers: { 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ error: 'Not available in production' }), { status: 403, headers: { 'Content-Type': 'application/json', ...csHeaders } });
   }
 
   const userId = url.searchParams.get('userId');
   if (!userId) {
-    return Response.redirect(frontendUrl, 302);
+    return new Response(null, { status: 302, headers: { Location: frontendUrl, ...csHeaders } });
   }
 
   try {
@@ -297,7 +303,7 @@ async function handleCheckoutSuccess(url: URL, env: Env, origin: string): Promis
     console.error('Failed to activate premium:', e);
   }
 
-  return Response.redirect(`${frontendUrl}/settings?upgrade=success`, 302);
+  return new Response(null, { status: 302, headers: { Location: `${frontendUrl}/settings?upgrade=success`, ...csHeaders } });
 }
 
 async function handleDevActivate(

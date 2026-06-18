@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Free Online Pomodoro Timer — StudyFlow</title>
+    <meta name="description" content="Use StudyFlow's free online Pomodoro timer with ambient sounds, living wallpapers, and gamified progress tracking. Focus better with 25-minute study sessions." />
+    <link rel="canonical" href="https://studyflow.space/pomodoro-timer/" />
+
+    <meta property="og:title" content="Free Online Pomodoro Timer — StudyFlow" />
+    <meta property="og:description" content="A free Pomodoro timer with ambient sounds, living wallpapers, and gamification. Start focusing in one click — no sign-up required." />
+    <meta property="og:url" content="https://studyflow.space/pomodoro-timer/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://studyflow.space/logo.png" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Free Online Pomodoro Timer — StudyFlow" />
+    <meta name="twitter:description" content="A free Pomodoro timer with ambient sounds, living wallpapers, and gamification." />
+
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is a Pomodoro timer?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A Pomodoro timer uses the Pomodoro Technique — 25 minutes of focused work followed by a 5-minute break. After four cycles, take a longer 15-30 minute break. It helps maintain concentration and prevent burnout."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is StudyFlow's Pomodoro timer free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. StudyFlow's Pomodoro timer is completely free with no sign-up required. Use it immediately in your browser."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I customize the timer duration?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. StudyFlow offers multiple focus modes including classic Pomodoro (25/5), deep focus (50/10), and Flow mode that adapts to your rhythm."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does the Pomodoro timer work on mobile?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. The timer works on any device with a browser. You can also install StudyFlow as a PWA for a native app experience on mobile."
+          }
+        }
+      ]
+    }
+    </script>
+
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+      body {
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        background: #fafafa; color: #1e293b; line-height: 1.6;
+      }
+      h1, h2, h3 { font-family: 'Outfit', 'Inter', system-ui, sans-serif; line-height: 1.15; letter-spacing: -0.02em; }
+      a { color: inherit; text-decoration: none; }
+      img { max-width: 100%; display: block; }
+      .container { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+
+      .header { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; max-width: 1120px; margin: 0 auto; }
+      .header-logo { display: flex; align-items: center; gap: 10px; font-family: 'Outfit','Inter',sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -0.3px; }
+      .header-logo img { width: 32px; height: 32px; border-radius: 8px; }
+      .header-nav { display: flex; align-items: center; gap: 24px; }
+      .header-nav a { font-size: 14px; font-weight: 500; color: #64748b; transition: color 0.15s; }
+      .header-nav a:hover { color: #6366f1; }
+      .header-cta { padding: 8px 20px; background: #6366f1; color: #fff; font-size: 14px; font-weight: 600; border-radius: 10px; }
+      .header-cta:hover { background: #5558e6; }
+
+      .hero { text-align: center; padding: 80px 24px 60px; background: linear-gradient(180deg, #eef2ff 0%, #fafafa 100%); }
+      .hero h1 { font-size: clamp(32px, 5vw, 44px); font-weight: 900; color: #0f172a; margin-bottom: 16px; }
+      .hero p { font-size: 17px; color: #64748b; max-width: 520px; margin: 0 auto 32px; line-height: 1.7; }
+      .hero-cta { display: inline-flex; align-items: center; gap: 8px; padding: 14px 32px; background: #6366f1; color: #fff; font-size: 16px; font-weight: 600; border-radius: 12px; box-shadow: 0 4px 24px rgba(99,102,241,0.3); }
+      .hero-cta:hover { background: #5558e6; }
+
+      .section { padding: 60px 24px; }
+      .section h2 { font-size: clamp(24px, 3vw, 30px); font-weight: 700; color: #0f172a; margin-bottom: 16px; }
+      .section p, .section li { font-size: 15px; color: #475569; line-height: 1.8; }
+      .section ul { list-style: none; padding: 0; }
+      .section li { padding: 8px 0 8px 24px; position: relative; }
+      .section li::before { content: ""; position: absolute; left: 0; top: 14px; width: 6px; height: 6px; background: #6366f1; border-radius: 50%; }
+
+      .faq-item { padding: 20px 0; border-bottom: 1px solid #e2e8f0; }
+      .faq-item:last-child { border-bottom: none; }
+      .faq-item h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px; color: #0f172a; }
+      .faq-item p { font-size: 14px; color: #64748b; }
+
+      .cta-section { text-align: center; padding: 80px 24px; background: linear-gradient(180deg, #fafafa 0%, #eef2ff 100%); }
+      .cta-section h2 { font-size: clamp(26px, 3vw, 34px); margin-bottom: 12px; }
+      .cta-section p { font-size: 15px; color: #64748b; margin-bottom: 28px; }
+      .cta-button { display: inline-flex; align-items: center; gap: 8px; padding: 14px 32px; background: #6366f1; color: #fff; font-size: 16px; font-weight: 600; border-radius: 12px; box-shadow: 0 4px 24px rgba(99,102,241,0.3); }
+      .cta-button:hover { background: #5558e6; }
+
+      .footer { padding: 32px 24px; text-align: center; font-size: 13px; color: #94a3b8; border-top: 1px solid #e2e8f0; }
+      .footer a { color: #6366f1; font-weight: 500; }
+      .footer-links { display: flex; justify-content: center; gap: 24px; margin-bottom: 12px; flex-wrap: wrap; }
+
+      @media (max-width: 640px) { .hero { padding: 50px 24px 40px; } .header-nav { display: none; } }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <a href="/" class="header-logo"><img src="/logo.png" alt="StudyFlow" width="32" height="32" />StudyFlow</a>
+      <nav class="header-nav">
+        <a href="/flip-clock/">Flip Clock</a>
+        <a href="/aesthetic-stopwatch/">Stopwatch</a>
+        <a href="/pomodoro-timer/">Pomodoro Timer</a>
+        <a href="/study-timer/">Study Timer</a>
+        <a href="/study-planner/">Study Planner</a>
+        <a href="/app/" class="header-cta">Open App</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <h1>Free Online Pomodoro Timer</h1>
+      <p>Stay focused with StudyFlow's Pomodoro timer. 25-minute sessions, ambient sounds, living wallpapers, and gamified progress tracking. Start studying in one click.</p>
+      <a href="/app/" class="hero-cta">Use the Pomodoro Timer</a>
+    </section>
+
+    <section class="section container">
+      <h2>Why use a Pomodoro timer?</h2>
+      <p>The Pomodoro Technique is one of the most effective time management methods for students. By breaking your study time into focused 25-minute intervals with short breaks, you maintain high concentration without mental fatigue.</p>
+      <p>StudyFlow enhances the classic technique with features that make each session more engaging:</p>
+      <ul>
+        <li><strong>Animated wallpapers</strong> that create a calming focus environment</li>
+        <li><strong>Ambient soundscapes</strong> — rain, lo-fi, white noise, and more</li>
+        <li><strong>XP and streaks</strong> that turn consistency into a game</li>
+        <li><strong>Task tracking</strong> so every session has a purpose</li>
+      </ul>
+    </section>
+
+    <section class="section container">
+      <h2>Pomodoro Timer features</h2>
+      <ul>
+        <li><strong>Multiple focus modes:</strong> Classic Pomodoro (25/5), deep focus (50/10), and adaptive Flow mode</li>
+        <li><strong>Customizable durations:</strong> Adjust work and break times to match your rhythm</li>
+        <li><strong>Session history:</strong> See exactly how many Pomodoros you complete each day</li>
+        <li><strong>Dark & light wallpapers:</strong> Choose from 50+ animated backgrounds, photos, and color atmospheres</li>
+        <li><strong>Zen mode:</strong> A distraction-free interface with just the timer, wallpaper, and ambient sound</li>
+        <li><strong>Cross-device sync:</strong> Your sessions and stats follow you across devices</li>
+      </ul>
+    </section>
+
+    <section class="section container">
+      <h2>Frequently asked questions</h2>
+      <div class="faq-item">
+        <h3>Is StudyFlow's Pomodoro timer really free?</h3>
+        <p>Yes. The Pomodoro timer and all core features are free. No account, no credit card, no hidden fees.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Can I use the timer without signing up?</h3>
+        <p>Absolutely. Open StudyFlow and start a timer immediately. Sign-up is optional and only needed for cross-device sync.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Does it work offline?</h3>
+        <p>Yes. StudyFlow is a PWA and works offline once loaded. The timer, tasks, and wallpapers are available without internet.</p>
+      </div>
+      <div class="faq-item">
+        <h3>What makes StudyFlow's timer different?</h3>
+        <p>Unlike basic timers, StudyFlow wraps the Pomodoro technique in a complete focus environment — wallpapers that set the mood, sounds that block distractions, and gamification that keeps you coming back.</p>
+      </div>
+    </section>
+
+    <section class="cta-section">
+      <h2>Start your first Pomodoro</h2>
+      <p>No account needed. Open the timer and begin.</p>
+      <a href="/app/" class="cta-button">Use the Pomodoro Timer</a>
+    </section>
+
+    <footer class="footer">
+      <div class="footer-links">
+        <a href="/">Home</a>
+        <a href="/flip-clock/">Flip Clock</a>
+        <a href="/aesthetic-stopwatch/">Stopwatch</a>
+        <a href="/pomodoro-timer/">Pomodoro Timer</a>
+        <a href="/study-timer/">Study Timer</a>
+        <a href="/study-planner/">Study Planner</a>
+        <a href="/studyflow-focus-timer/">StudyFlow Focus Timer</a>
+      </div>
+      <p>&copy; 2026 StudyFlow</p>
+    </footer>
+  </body>
+</html>

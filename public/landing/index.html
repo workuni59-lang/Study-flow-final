@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StudyFlow — Free Pomodoro Timer, Focus Music & Study Dashboard</title>
+    <meta name="description" content="Boost your focus with StudyFlow's free Pomodoro timer, ambient sounds, task manager, and beautiful wallpapers. Track progress with gamification. No sign-up required." />
+    <link rel="canonical" href="https://studyflow.space/" />
+
+    <meta property="og:title" content="StudyFlow — Free Pomodoro Timer, Focus Music & Study Dashboard" />
+    <meta property="og:description" content="A gamified focus environment with Pomodoro timer, ambient sounds, task management, and living wallpapers. Track streaks, earn XP, and stay consistent." />
+    <meta property="og:url" content="https://studyflow.space/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://studyflow.space/logo.png" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="StudyFlow — Free Pomodoro Timer, Focus Music & Study Dashboard" />
+    <meta name="twitter:description" content="A gamified focus environment with Pomodoro timer, ambient sounds, task management, and living wallpapers." />
+
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "StudyFlow",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "Web Browser",
+      "description": "A free gamified focus timer with ambient sounds, task management, and living wallpapers. Track your study streaks, earn XP, and build consistent habits.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "featureList": [
+        "Pomodoro Timer",
+        "Focus Music with Wallpapers",
+        "Task Management",
+        "Gamification with XP and Streaks",
+        "Study Analytics Dashboard",
+        "Cross-device Sync"
+      ]
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Is StudyFlow really free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. StudyFlow is completely free with no sign-up required. All features including the Pomodoro timer, ambient sounds, wallpapers, task management, and gamification are available without payment."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What makes StudyFlow different from other focus timers?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "StudyFlow combines a Pomodoro timer with living wallpapers, ambient soundscapes, task management, and gamification into one seamless experience. It is designed specifically for students, not corporate productivity."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does StudyFlow have a study group or leaderboard?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. StudyFlow includes a leaderboard where you can compare focus time with friends, earn XP, climb ranks, and stay motivated through friendly competition."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I use StudyFlow offline?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "StudyFlow works as a progressive web app (PWA). You can install it on your device and use the Pomodoro timer, task manager, and other core features even without an internet connection."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is Nova?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Nova is your StudyFlow companion — a virtual productivity pet that grows as you complete focus sessions. It adds a layer of engagement and accountability to your study routine."
+          }
+        }
+      ]
+    }
+    </script>
+
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+      body {
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        background: #fafafa;
+        color: #1e293b;
+        line-height: 1.6;
+      }
+      h1, h2, h3, h4 { font-family: 'Outfit', 'Inter', system-ui, sans-serif; line-height: 1.15; letter-spacing: -0.02em; }
+      a { color: inherit; text-decoration: none; }
+      img { max-width: 100%; display: block; }
+      .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+      .header {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 16px 24px; max-width: 1120px; margin: 0 auto;
+      }
+      .header-logo {
+        display: flex; align-items: center; gap: 10px;
+        font-family: 'Outfit', 'Inter', system-ui, sans-serif;
+        font-weight: 700; font-size: 20px; letter-spacing: -0.3px;
+      }
+      .header-logo img { width: 32px; height: 32px; border-radius: 8px; }
+      .header-nav { display: flex; align-items: center; gap: 24px; }
+      .header-nav a { font-size: 14px; font-weight: 500; color: #64748b; transition: color 0.15s; }
+      .header-nav a:hover { color: #6366f1; }
+      .header-cta {
+        padding: 8px 20px; background: #6366f1; color: #fff;
+        font-size: 14px; font-weight: 600; border-radius: 10px; transition: background 0.15s;
+      }
+      .header-cta:hover { background: #5558e6; }
+
+      .hero {
+        text-align: center; padding: 100px 24px 80px;
+        background: linear-gradient(180deg, #eef2ff 0%, #fafafa 100%);
+      }
+      .hero h1 {
+        font-size: clamp(36px, 5.5vw, 56px); font-weight: 900;
+        color: #0f172a; margin-bottom: 20px; max-width: 720px; margin-left: auto; margin-right: auto;
+      }
+      .hero .highlight { color: #6366f1; }
+      .hero p {
+        font-size: 18px; color: #64748b; max-width: 560px;
+        margin: 0 auto 40px; line-height: 1.7;
+      }
+      .hero-cta {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 16px 36px; background: #6366f1; color: #fff;
+        font-size: 17px; font-weight: 600; border-radius: 12px;
+        box-shadow: 0 4px 24px rgba(99,102,241,0.35); transition: all 0.15s;
+      }
+      .hero-cta:hover { background: #5558e6; transform: translateY(-1px); }
+      .hero-sub {
+        margin-top: 20px; font-size: 13px; color: #94a3b8;
+      }
+
+      .section { padding: 80px 24px; }
+      .section-alt { background: #f8fafc; }
+      .section h2 {
+        font-size: clamp(28px, 3.5vw, 36px); font-weight: 800;
+        color: #0f172a; margin-bottom: 16px; text-align: center;
+      }
+      .section .subtitle {
+        text-align: center; font-size: 16px; color: #64748b;
+        max-width: 560px; margin: 0 auto 48px;
+      }
+
+      .features-grid {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 24px; margin-top: 24px;
+      }
+      .feature-card {
+        background: #fff; border: 1px solid #e2e8f0; border-radius: 16px;
+        padding: 32px; transition: all 0.2s;
+      }
+      .feature-card:hover { border-color: #c7d2fe; box-shadow: 0 8px 32px rgba(99,102,241,0.08); }
+      .feature-icon {
+        width: 48px; height: 48px; border-radius: 12px;
+        background: #eef2ff; display: flex; align-items: center; justify-content: center;
+        margin-bottom: 16px; font-size: 22px;
+      }
+      .feature-card h3 { font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
+      .feature-card p { font-size: 14px; color: #64748b; line-height: 1.7; }
+
+      .brand-diff {
+        text-align: center; padding: 60px 24px;
+        background: linear-gradient(135deg, #eef2ff, #fafafa, #f0fdf4);
+        border-radius: 24px; max-width: 800px; margin: 0 auto;
+      }
+      .brand-diff h2 { font-size: clamp(22px, 3vw, 30px); margin-bottom: 12px; }
+      .brand-diff p { color: #64748b; max-width: 560px; margin: 0 auto; font-size: 15px; line-height: 1.7; }
+      .brand-diff strong { color: #0f172a; }
+
+      .cta-section {
+        text-align: center; padding: 100px 24px;
+        background: linear-gradient(180deg, #fafafa 0%, #eef2ff 100%);
+      }
+      .cta-section h2 { font-size: clamp(28px, 3.5vw, 38px); margin-bottom: 12px; }
+      .cta-section p { font-size: 16px; color: #64748b; margin-bottom: 32px; }
+      .cta-button {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 16px 36px; background: #6366f1; color: #fff;
+        font-size: 17px; font-weight: 600; border-radius: 12px;
+        box-shadow: 0 4px 24px rgba(99,102,241,0.35); transition: all 0.15s;
+      }
+      .cta-button:hover { background: #5558e6; transform: translateY(-1px); }
+
+      .footer {
+        padding: 40px 24px; text-align: center;
+        font-size: 13px; color: #94a3b8; border-top: 1px solid #e2e8f0;
+      }
+      .footer a { color: #6366f1; font-weight: 500; }
+      .footer a:hover { text-decoration: underline; }
+      .footer-links { display: flex; justify-content: center; gap: 24px; margin-bottom: 12px; }
+
+      @media (max-width: 640px) {
+        .hero { padding: 60px 24px 50px; }
+        .section { padding: 50px 24px; }
+        .header-nav { display: none; }
+        .features-grid { grid-template-columns: 1fr; }
+        .cta-section { padding: 60px 24px; }
+      }
+    </style>
+  </head>
+  <body>
+
+    <header class="header">
+      <a href="/" class="header-logo">
+        <img src="/logo.png" alt="StudyFlow" width="32" height="32" />
+        StudyFlow
+      </a>
+      <nav class="header-nav">
+        <a href="/flip-clock/">Flip Clock</a>
+        <a href="/aesthetic-stopwatch/">Stopwatch</a>
+        <a href="/pomodoro-timer/">Pomodoro Timer</a>
+        <a href="/study-timer/">Study Timer</a>
+        <a href="/study-planner/">Study Planner</a>
+        <a href="/app/" class="header-cta">Open App</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <h1>Your <span class="highlight">gamified focus studio</span> — timer, sounds, tasks & wallpapers</h1>
+      <p>StudyFlow is a free focus environment with a Pomodoro timer, ambient soundscapes, task manager, and living wallpapers. Track streaks, earn XP, and build study habits that stick.</p>
+      <a href="/app/" class="hero-cta">Start Focusing Free</a>
+      <p class="hero-sub">No sign-up required &bull; Free &bull; Works in your browser</p>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <h2>Everything you need to focus</h2>
+        <p class="subtitle">A complete study dashboard that makes consistency feel like a game.</p>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">&#9201;</div>
+            <h3>Pomodoro & Focus Timer</h3>
+            <p>Multiple focus modes — classic Pomodoro (25/5), deep focus (50/10), and Flow mode that adapts to your rhythm. Track every session.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">&#127925;</div>
+            <h3>Ambient Soundscapes</h3>
+            <p>Rain, fireplace, lo-fi beats, white noise, and more. Sounds designed to fade into the background so your thoughts stay in the foreground.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">&#127912;</div>
+            <h3>Living Wallpapers</h3>
+            <p>Animated gradients, serene photos, and deep color atmospheres that make your study space feel like a place, not a tool. Change them anytime.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">&#127942;</div>
+            <h3>Gamification & Streaks</h3>
+            <p>Earn XP for every completed session. Level up, unlock badges, track streaks, and compete on the leaderboard. The game is consistency.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">&#128220;</div>
+            <h3>Task Management</h3>
+            <p>Built-in task manager with priorities, due dates, and subjects. Attach a task to every focus session and check it off when done.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">&#128008;</div>
+            <h3>Nova — Your Study Pet</h3>
+            <p>A virtual productivity companion that grows as you complete focus sessions. Nova adds warmth, accountability, and a reason to keep showing up.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">&#128200;</div>
+            <h3>Study Analytics</h3>
+            <p>Detailed insights into your focus time, subject progress, task completion rates, and streaks. See your improvement over days, weeks, and months.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">&#128260;</div>
+            <h3>Cross-Device Sync</h3>
+            <p>Your sessions, tasks, and progress sync across devices. Start studying on your laptop, check stats on your phone — your data follows you.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-alt">
+      <div class="container">
+        <div class="brand-diff">
+          <h2>Not another AI study tool &mdash; a real focus environment</h2>
+          <p>StudyFlow is not an AI tutor or flashcard app. It is a <strong>focus environment</strong> — a space designed to help you start studying and stay studying. No chatbots, no generated notes, no distractions. Just you, your timer, your music, and your wallpapers.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <h2>Frequently asked questions</h2>
+        <p class="subtitle">Everything you need to know about StudyFlow.</p>
+        <div style="max-width: 680px; margin: 0 auto;">
+          <div style="padding: 20px 0; border-bottom: 1px solid #e2e8f0;">
+            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 6px;">Is StudyFlow really free?</h3>
+            <p style="font-size: 14px; color: #64748b;">Yes. StudyFlow is completely free with no sign-up required. All features including the Pomodoro timer, ambient sounds, wallpapers, task management, and gamification are available without payment.</p>
+          </div>
+          <div style="padding: 20px 0; border-bottom: 1px solid #e2e8f0;">
+            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 6px;">What makes StudyFlow different from other focus timers?</h3>
+            <p style="font-size: 14px; color: #64748b;">StudyFlow combines a Pomodoro timer with living wallpapers, ambient soundscapes, task management, and gamification into one seamless experience. It is designed specifically for students, not corporate productivity. The visual environment adapts to your mood, and the gamification system keeps you coming back.</p>
+          </div>
+          <div style="padding: 20px 0; border-bottom: 1px solid #e2e8f0;">
+            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 6px;">Does StudyFlow work on mobile?</h3>
+            <p style="font-size: 14px; color: #64748b;">Yes. StudyFlow is fully responsive and works on any device with a browser. You can also install it as a Progressive Web App (PWA) for a native-like experience on your phone or tablet.</p>
+          </div>
+          <div style="padding: 20px 0; border-bottom: 1px solid #e2e8f0;">
+            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 6px;">What is Nova?</h3>
+            <p style="font-size: 14px; color: #64748b;">Nova is your StudyFlow companion — a virtual productivity pet that responds to your focus sessions. The more you study, the more Nova grows. It adds a layer of warmth and accountability to your study routine.</p>
+          </div>
+          <div style="padding: 20px 0;">
+            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 6px;">Can I use StudyFlow with my friends?</h3>
+            <p style="font-size: 14px; color: #64748b;">Yes. StudyFlow includes a leaderboard where you can see how your focus time compares with other students. You can compete for the top spot and motivate each other to stay consistent.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-section">
+      <h2>Ready to focus?</h2>
+      <p>Open StudyFlow in your browser and start your first session. No account, no credit card, no setup.</p>
+      <a href="/app/" class="cta-button">Start Focusing Free</a>
+    </section>
+
+    <footer class="footer">
+      <div class="footer-links">
+        <a href="/flip-clock/">Flip Clock</a>
+        <a href="/aesthetic-stopwatch/">Stopwatch</a>
+        <a href="/pomodoro-timer/">Pomodoro Timer</a>
+        <a href="/study-timer/">Study Timer</a>
+        <a href="/study-planner/">Study Planner</a>
+        <a href="/studyflow-focus-timer/">StudyFlow Focus Timer</a>
+        <a href="/app/">Open App</a>
+      </div>
+      <p>&copy; 2026 StudyFlow &mdash; <a href="/">Home</a></p>
+    </footer>
+
+  </body>
+</html>

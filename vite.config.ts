@@ -8,7 +8,7 @@ import { cloudflare } from "@cloudflare/vite-plugin";
 
 export default defineConfig((): UserConfig => {
   return {
-    base: '/',
+    base: process.env.NODE_ENV === 'production' ? '/app/' : '/',
     plugins: [
       react(), 
       tailwindcss(), 
@@ -45,7 +45,7 @@ export default defineConfig((): UserConfig => {
         },
         workbox: {
           globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
-          navigateFallback: 'index.html',
+          navigateFallback: '/app/index.html',
           runtimeCaching: [
             {
               urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -85,6 +85,7 @@ export default defineConfig((): UserConfig => {
       },
     },
     build: {
+      chunkSizeWarningLimit: 300,
       rollupOptions: {
         output: {
           manualChunks(id) {
@@ -96,6 +97,18 @@ export default defineConfig((): UserConfig => {
             }
             if (id.includes('node_modules/lucide-react')) {
               return 'icons';
+            }
+            if (id.includes('node_modules/recharts')) {
+              return 'charts';
+            }
+            if (id.includes('node_modules/@supabase/supabase-js')) {
+              return 'supabase';
+            }
+            if (id.includes('node_modules/howler')) {
+              return 'audio';
+            }
+            if (id.includes('node_modules/canvas-confetti')) {
+              return 'confetti';
             }
           },
         },

@@ -234,13 +234,9 @@
       }
       .cta-button:hover { background: #5558e6; }
 
-      .footer {
-        padding: 32px 24px;
-        text-align: center;
-        font-size: 13px;
-        color: #94a3b8;
-        border-top: 1px solid #e2e8f0;
-      }
+      .footer { padding: 32px 24px; text-align: center; font-size: 13px; color: #94a3b8; border-top: 1px solid #e2e8f0; }
+      .footer a { color: #6366f1; font-weight: 500; }
+      .footer-links { display: flex; justify-content: center; gap: 24px; margin-bottom: 12px; flex-wrap: wrap; }
 
       @media (max-width: 640px) {
         .hero { padding: 50px 24px 40px; }
@@ -331,7 +327,15 @@
     </section>
 
     <footer class="footer">
-      <p>&copy; 2026 StudyFlow &mdash; <a href="/">Home</a></p>
+      <div class="footer-links">
+        <a href="/">Home</a>
+        <a href="/flip-clock/">Flip Clock</a>
+        <a href="/aesthetic-stopwatch/">Stopwatch</a>
+        <a href="/pomodoro-timer/">Pomodoro Timer</a>
+        <a href="/study-timer/">Study Timer</a>
+        <a href="/study-planner/">Study Planner</a>
+      </div>
+      <p>&copy; 2026 StudyFlow</p>
     </footer>
 
   </body>

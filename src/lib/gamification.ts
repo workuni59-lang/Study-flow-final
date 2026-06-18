@@ -462,6 +462,17 @@ export const goldForTask = (priority?: string): number => {
   return Math.round(GOLD_TASK_BASE * priorityMultiplier(priority));
 };
 
+export const goldForSubjectTask = (priority?: string, subject?: { topics: { mastery: string }[] }): number => {
+  let multiplier = priorityMultiplier(priority);
+  
+  // Bonus multiplier for subjects with unmastered (Red) topics
+  if (subject && subject.topics.some(t => t.mastery === 'Red')) {
+    multiplier += 0.5;
+  }
+  
+  return Math.round(GOLD_TASK_BASE * multiplier);
+};
+
 export const goldForLevelUp = (newLevel: number): number => {
   return GOLD_LEVEL_UP_MULTIPLIER * newLevel;
 };

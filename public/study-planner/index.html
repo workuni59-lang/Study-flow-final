@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Free Online Study Planner — Study Schedule App — StudyFlow</title>
+    <meta name="description" content="Plan your study sessions with StudyFlow's free study planner. Create subjects, track topics, schedule focus sessions, and monitor your progress with detailed analytics." />
+    <link rel="canonical" href="https://studyflow.space/study-planner/" />
+
+    <meta property="og:title" content="Free Online Study Planner — Study Schedule App" />
+    <meta property="og:description" content="A free study planner with subject tracking, Pomodoro timer, mastery levels, and analytics. Plan your study schedule and track your progress." />
+    <meta property="og:url" content="https://studyflow.space/study-planner/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://studyflow.space/logo.png" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Free Online Study Planner — Study Schedule App" />
+    <meta name="twitter:description" content="A free study planner with subject tracking, Pomodoro timer, mastery levels, and analytics." />
+
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is a study planner?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A study planner helps you organize your study schedule, track subjects and topics, and monitor your progress over time. StudyFlow combines a study planner with a Pomodoro timer, analytics, and gamification."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is StudyFlow's study planner free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. StudyFlow's study planner is completely free with no sign-up required. Create subjects, add topics, track mastery levels, and monitor your progress."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I track my progress across multiple subjects?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. You can create unlimited subjects, each with its own list of topics. Track mastery levels (Red/Amber/Green) for each topic and see your overall progress per subject."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does the study planner include a timer?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. The planner is integrated with StudyFlow's focus timer. You can start a session linked to a specific subject or task, and your focus time is automatically tracked."
+          }
+        }
+      ]
+    }
+    </script>
+
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+      body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: #fafafa; color: #1e293b; line-height: 1.6; }
+      h1, h2, h3 { font-family: 'Outfit', 'Inter', system-ui, sans-serif; line-height: 1.15; letter-spacing: -0.02em; }
+      a { color: inherit; text-decoration: none; }
+      img { max-width: 100%; display: block; }
+      .container { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+      .header { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; max-width: 1120px; margin: 0 auto; }
+      .header-logo { display: flex; align-items: center; gap: 10px; font-family: 'Outfit','Inter',sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -0.3px; }
+      .header-logo img { width: 32px; height: 32px; border-radius: 8px; }
+      .header-nav { display: flex; align-items: center; gap: 24px; }
+      .header-nav a { font-size: 14px; font-weight: 500; color: #64748b; transition: color 0.15s; }
+      .header-nav a:hover { color: #6366f1; }
+      .header-cta { padding: 8px 20px; background: #6366f1; color: #fff; font-size: 14px; font-weight: 600; border-radius: 10px; }
+      .header-cta:hover { background: #5558e6; }
+      .hero { text-align: center; padding: 80px 24px 60px; background: linear-gradient(180deg, #eef2ff 0%, #fafafa 100%); }
+      .hero h1 { font-size: clamp(32px, 5vw, 44px); font-weight: 900; color: #0f172a; margin-bottom: 16px; }
+      .hero p { font-size: 17px; color: #64748b; max-width: 520px; margin: 0 auto 32px; line-height: 1.7; }
+      .hero-cta { display: inline-flex; align-items: center; gap: 8px; padding: 14px 32px; background: #6366f1; color: #fff; font-size: 16px; font-weight: 600; border-radius: 12px; box-shadow: 0 4px 24px rgba(99,102,241,0.3); }
+      .hero-cta:hover { background: #5558e6; }
+      .section { padding: 60px 24px; }
+      .section h2 { font-size: clamp(24px, 3vw, 30px); font-weight: 700; color: #0f172a; margin-bottom: 16px; }
+      .section p, .section li { font-size: 15px; color: #475569; line-height: 1.8; }
+      .section ul { list-style: none; padding: 0; }
+      .section li { padding: 8px 0 8px 24px; position: relative; }
+      .section li::before { content: ""; position: absolute; left: 0; top: 14px; width: 6px; height: 6px; background: #6366f1; border-radius: 50%; }
+      .faq-item { padding: 20px 0; border-bottom: 1px solid #e2e8f0; }
+      .faq-item:last-child { border-bottom: none; }
+      .faq-item h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px; color: #0f172a; }
+      .faq-item p { font-size: 14px; color: #64748b; }
+      .cta-section { text-align: center; padding: 80px 24px; background: linear-gradient(180deg, #fafafa 0%, #eef2ff 100%); }
+      .cta-section h2 { font-size: clamp(26px, 3vw, 34px); margin-bottom: 12px; }
+      .cta-section p { font-size: 15px; color: #64748b; margin-bottom: 28px; }
+      .cta-button { display: inline-flex; align-items: center; gap: 8px; padding: 14px 32px; background: #6366f1; color: #fff; font-size: 16px; font-weight: 600; border-radius: 12px; box-shadow: 0 4px 24px rgba(99,102,241,0.3); }
+      .cta-button:hover { background: #5558e6; }
+      .footer { padding: 32px 24px; text-align: center; font-size: 13px; color: #94a3b8; border-top: 1px solid #e2e8f0; }
+      .footer a { color: #6366f1; font-weight: 500; }
+      .footer-links { display: flex; justify-content: center; gap: 24px; margin-bottom: 12px; flex-wrap: wrap; }
+      @media (max-width: 640px) { .hero { padding: 50px 24px 40px; } .header-nav { display: none; } }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <a href="/" class="header-logo"><img src="/logo.png" alt="StudyFlow" width="32" height="32" />StudyFlow</a>
+      <nav class="header-nav">
+        <a href="/flip-clock/">Flip Clock</a>
+        <a href="/aesthetic-stopwatch/">Stopwatch</a>
+        <a href="/pomodoro-timer/">Pomodoro Timer</a>
+        <a href="/study-timer/">Study Timer</a>
+        <a href="/study-planner/">Study Planner</a>
+        <a href="/app/" class="header-cta">Open App</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <h1>Free Online Study Planner</h1>
+      <p>Organize your subjects, track topics, schedule focus sessions, and watch your mastery grow. StudyFlow's study planner gives you a complete view of your academic progress.</p>
+      <a href="/app/" class="hero-cta">Use the Study Planner</a>
+    </section>
+
+    <section class="section container">
+      <h2>Why use a study planner?</h2>
+      <p>A study planner helps you break down your curriculum into manageable subjects and topics. Instead of wondering what to study, you open your planner and see exactly what needs attention. StudyFlow takes this further by integrating your planner with a focus timer and progress analytics.</p>
+      <ul>
+        <li><strong>Subject organization:</strong> Create subjects, add topics, and track mastery levels</li>
+        <li><strong>Mastery tracking:</strong> Mark topics as Red (starting), Amber (reviewing), or Green (mastered)</li>
+        <li><strong>Spotlight system:</strong> The dashboard highlights your weakest subject so you know where to focus</li>
+        <li><strong>Integrated timer:</strong> Start a focus session linked to any subject or task</li>
+      </ul>
+    </section>
+
+    <section class="section container">
+      <h2>Study Planner features</h2>
+      <ul>
+        <li><strong>Create subjects:</strong> Add courses like Mathematics, Biology, or History with custom colors</li>
+        <li><strong>Add topics:</strong> Break each subject into specific topics (e.g., "Organic Chemistry" under Chemistry)</li>
+        <li><strong>Three mastery levels:</strong> Track progress with Red/Amber/Green for each topic</li>
+        <li><strong>Auto-advancement:</strong> Completing a task automatically advances the linked topic's mastery level</li>
+        <li><strong>Detailed analytics:</strong> See subject-wise progress, topic breakdowns, and focus time per subject</li>
+        <li><strong>Task integration:</strong> Create tasks linked to subjects and topics for focused study sessions</li>
+      </ul>
+    </section>
+
+    <section class="section container">
+      <h2>Frequently asked questions</h2>
+      <div class="faq-item">
+        <h3>Can I create multiple subjects?</h3>
+        <p>Yes. There is no limit to the number of subjects you can create. Each subject can have its own color and list of topics.</p>
+      </div>
+      <div class="faq-item">
+        <h3>How does mastery tracking work?</h3>
+        <p>Each topic has three levels: Red (just starting), Amber (reviewing), and Green (mastered). You can update mastery manually or let it advance automatically when you complete linked tasks.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Can I link tasks to specific subjects?</h3>
+        <p>Yes. When creating a task, you can select a subject and topic. Completed tasks automatically advance the topic's mastery level from Red to Amber to Green.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Does the planner sync across devices?</h3>
+        <p>Yes. Create a free account and your subjects, topics, tasks, and progress sync automatically across all your devices.</p>
+      </div>
+    </section>
+
+    <section class="cta-section">
+      <h2>Start planning your studies</h2>
+      <p>Free. No sign-up. Start organizing your subjects now.</p>
+      <a href="/app/" class="cta-button">Use the Study Planner</a>
+    </section>
+
+    <footer class="footer">
+      <div class="footer-links">
+        <a href="/">Home</a>
+        <a href="/flip-clock/">Flip Clock</a>
+        <a href="/aesthetic-stopwatch/">Stopwatch</a>
+        <a href="/pomodoro-timer/">Pomodoro Timer</a>
+        <a href="/study-timer/">Study Timer</a>
+        <a href="/study-planner/">Study Planner</a>
+        <a href="/studyflow-focus-timer/">StudyFlow Focus Timer</a>
+      </div>
+      <p>&copy; 2026 StudyFlow</p>
+    </footer>
+  </body>
+</html>

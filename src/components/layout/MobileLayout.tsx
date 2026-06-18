@@ -9,8 +9,8 @@ import { useNavigationContext, type Panel } from '../../hooks/useNavigationConte
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 import { ROUTES } from '../../lib/routes';
 import { BottomBar } from './BottomBar';
-import { HomeView } from './HomeView';
 const FocusEnvironmentLazy = lazy(() => import('./FocusEnvironment').then(m => ({ default: m.FocusEnvironment })));
+const HomeViewLazy = lazy(() => import('./HomeView').then(m => ({ default: m.HomeView })));
 import { MenuDrawer, type Section } from './MenuDrawer';
 import { FloatingPanel } from '../panels/FloatingPanel';
 import { AmbiencePanel, type CuratedPlaylist } from '../panels/AmbiencePanel';
@@ -73,6 +73,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
   const [ambienceUrl, setAmbienceUrl] = useState<CuratedPlaylist | null>(null);
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [themeTab, setThemeTab] = useState<'moods' | 'photos'>('moods');
+  const [spotlightSubjectId, setSpotlightSubjectId] = useState<string | null>(null);
 
   const showMoodPicker = activePanel === 'themes';
 
@@ -115,6 +116,10 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
     navigate(modeRef.current === 'focus' ? ROUTES.FOCUS_NOTEPAD : ROUTES.NOTEPAD);
   }, [navigate]);
   const handleStatsOpen = useCallback(() => navigate(ROUTES.ANALYTICS), []);
+  const handleSubjectsOpen = useCallback((subjectId?: string) => {
+    if (subjectId) setSpotlightSubjectId(subjectId);
+    setSection('subjects');
+  }, []);
   const handleClosePanel = useCallback(() => {
     navigate(modeRef.current === 'focus' ? ROUTES.FOCUS : ROUTES.HOME);
   }, [navigate]);
@@ -201,7 +206,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
             <main className="p-3 md:p-4 pb-28">
               <Suspense fallback={<MobileSkeleton />}>
                 {section === 'analytics' && <AnalyticsDashboardLazy />}
-                {section === 'subjects' && <SubjectsViewLazy />}
+                {section === 'subjects' && <SubjectsViewLazy key={spotlightSubjectId ?? 'default'} initialSubjectId={spotlightSubjectId ?? undefined} />}
                 {section === 'achievements' && <AchievementsViewLazy />}
                 {section === 'settings' && <SettingsViewLazy />}
                 {section === 'progression' && <ProgressionViewLazy />}
@@ -229,7 +234,11 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
 
           {/* Main content */}
           <main>
-            {mode === 'home' && <HomeView onNotepadOpen={handleNotepadOpen} menuOpen={menuOpen} />}
+            {mode === 'home' && (
+              <Suspense fallback={<MobileSkeleton />}>
+                <HomeViewLazy onNotepadOpen={handleNotepadOpen} onSubjectsOpen={handleSubjectsOpen} menuOpen={menuOpen} />
+              </Suspense>
+            )}
             {mode === 'focus' && (
               <Suspense fallback={<MobileSkeleton />}>
                 <FocusEnvironmentLazy 

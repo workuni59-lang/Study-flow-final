@@ -3,15 +3,15 @@
   X-Frame-Options: SAMEORIGIN
   Referrer-Policy: strict-origin-when-cross-origin
 
-# Embeddable widget — allowed on any site
-/embed/*
-  X-Frame-Options: ALLOWALL
-  Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data:; script-src 'self' 'unsafe-inline'; connect-src 'none'; form-action 'none'; frame-ancestors *; base-uri 'none'
-
-# Global headers
+# Global headers (applied before per-path overrides)
 /*
   X-Content-Type-Options: nosniff
   Strict-Transport-Security: max-age=15552000; includeSubDomains
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=()
   Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: blob:; script-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co https://api.polar.sh https://*.polar.sh https://api.resend.com; form-action 'self'; frame-ancestors 'none'; base-uri 'self'
+
+# Embeddable widget — last match wins, so this overrides the global CSP for /embed/* paths
+/embed/*
+  X-Frame-Options: ALLOWALL
+  Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data:; script-src 'self' 'unsafe-inline'; connect-src 'none'; form-action 'none'; frame-ancestors *; base-uri 'none'

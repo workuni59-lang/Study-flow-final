@@ -36,7 +36,7 @@ if (existsSync(landingSrc)) {
 }
 
 // 3. Ensure public files not handled by Vite exist in dist
-for (const file of ['robots.txt', 'sitemap.xml', 'logo.png', '_redirects', '_headers']) {
+for (const file of ['robots.txt', 'sitemap.xml', 'logo.png', '_headers']) {
   const src = join(ROOT, 'public', file);
   const dst = join(SRC, file);
   if (existsSync(src) && !existsSync(dst)) {

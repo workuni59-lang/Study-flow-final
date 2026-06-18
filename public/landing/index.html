@@ -1,26 +1,28 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StudyFlow — Free Pomodoro Timer, Focus Music & Study Dashboard</title>
-    <meta name="description" content="Boost your focus with StudyFlow's free Pomodoro timer, ambient sounds, task manager, and beautiful wallpapers. Track progress with gamification. No sign-up required." />
-    <link rel="canonical" href="https://studyflow.space/" />
+    <meta name="description" content="Boost your focus with StudyFlow's free Pomodoro timer, ambient sounds, task manager, and beautiful wallpapers. Track progress with gamification. No sign-up required.">
 
-    <meta property="og:title" content="StudyFlow — Free Pomodoro Timer, Focus Music & Study Dashboard" />
-    <meta property="og:description" content="A gamified focus environment with Pomodoro timer, ambient sounds, task management, and living wallpapers. Track streaks, earn XP, and stay consistent." />
-    <meta property="og:url" content="https://studyflow.space/" />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://studyflow.space/logo.png" />
+    <meta property="og:title" content="StudyFlow — Free Pomodoro Timer, Focus Music & Study Dashboard">
+    <meta property="og:description" content="Boost your focus with StudyFlow's free Pomodoro timer, ambient sounds, task manager, and beautiful wallpapers. Track progress with gamification. No sign-up required.">
+    <meta property="og:image" content="https://studyflow.space/logo.png">
+    <meta property="og:url" content="https://studyflow.space/">
+    <meta property="og:type" content="website">
 
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="StudyFlow — Free Pomodoro Timer, Focus Music & Study Dashboard" />
-    <meta name="twitter:description" content="A gamified focus environment with Pomodoro timer, ambient sounds, task management, and living wallpapers." />
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="StudyFlow — Free Pomodoro Timer, Focus Music & Study Dashboard">
+    <meta name="twitter:description" content="Boost your focus with StudyFlow's free Pomodoro timer, ambient sounds, task manager, and beautiful wallpapers. Track progress with gamification. No sign-up required.">
 
-    <link rel="icon" type="image/png" href="/logo.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" />
+    <link rel="canonical" href="https://studyflow.space/">
+    <link rel="icon" type="image/png" href="/logo.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script type="application/ld+json">
     {
@@ -69,10 +71,10 @@
         },
         {
           "@type": "Question",
-          "name": "Does StudyFlow have a study group or leaderboard?",
+          "name": "Does StudyFlow work on mobile?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes. StudyFlow includes a leaderboard where you can compare focus time with friends, earn XP, climb ranks, and stay motivated through friendly competition."
+            "text": "Yes. StudyFlow is fully responsive and works on any device with a browser. You can also install it as a Progressive Web App (PWA) for a native-like experience on your phone or tablet."
           }
         },
         {
@@ -85,10 +87,10 @@
         },
         {
           "@type": "Question",
-          "name": "What is Nova?",
+          "name": "Can I use StudyFlow with my friends?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Nova is your StudyFlow companion — a virtual productivity pet that grows as you complete focus sessions. It adds a layer of engagement and accountability to your study routine."
+            "text": "Yes. StudyFlow includes a leaderboard where you can compare focus time with other students, earn XP, climb ranks, and stay motivated through friendly competition."
           }
         }
       ]
@@ -96,259 +98,388 @@
     </script>
 
     <style>
-      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-      html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
-      body {
-        font-family: 'Inter', system-ui, -apple-system, sans-serif;
-        background: #fafafa;
-        color: #1e293b;
-        line-height: 1.6;
-      }
-      h1, h2, h3, h4 { font-family: 'Outfit', 'Inter', system-ui, sans-serif; line-height: 1.15; letter-spacing: -0.02em; }
-      a { color: inherit; text-decoration: none; }
-      img { max-width: 100%; display: block; }
-      .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+        :root {
+            --latte-glow: #ea580c;
+            --latte-bg: #431407;
+            --accent: #fdba74;
+            --border: rgba(255, 255, 255, 0.08);
+            --serif: 'Instrument Serif', serif;
+            --sans: 'Plus Jakarta Sans', sans-serif;
+            --radius-xl: 48px;
+        }
 
-      .header {
-        display: flex; align-items: center; justify-content: space-between;
-        padding: 16px 24px; max-width: 1120px; margin: 0 auto;
-      }
-      .header-logo {
-        display: flex; align-items: center; gap: 10px;
-        font-family: 'Outfit', 'Inter', system-ui, sans-serif;
-        font-weight: 700; font-size: 20px; letter-spacing: -0.3px;
-      }
-      .header-logo img { width: 32px; height: 32px; border-radius: 8px; }
-      .header-nav { display: flex; align-items: center; gap: 24px; }
-      .header-nav a { font-size: 14px; font-weight: 500; color: #64748b; transition: color 0.15s; }
-      .header-nav a:hover { color: #6366f1; }
-      .header-cta {
-        padding: 8px 20px; background: #6366f1; color: #fff;
-        font-size: 14px; font-weight: 600; border-radius: 10px; transition: background 0.15s;
-      }
-      .header-cta:hover { background: #5558e6; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; cursor: none; }
 
-      .hero {
-        text-align: center; padding: 100px 24px 80px;
-        background: linear-gradient(180deg, #eef2ff 0%, #fafafa 100%);
-      }
-      .hero h1 {
-        font-size: clamp(36px, 5.5vw, 56px); font-weight: 900;
-        color: #0f172a; margin-bottom: 20px; max-width: 720px; margin-left: auto; margin-right: auto;
-      }
-      .hero .highlight { color: #6366f1; }
-      .hero p {
-        font-size: 18px; color: #64748b; max-width: 560px;
-        margin: 0 auto 40px; line-height: 1.7;
-      }
-      .hero-cta {
-        display: inline-flex; align-items: center; gap: 8px;
-        padding: 16px 36px; background: #6366f1; color: #fff;
-        font-size: 17px; font-weight: 600; border-radius: 12px;
-        box-shadow: 0 4px 24px rgba(99,102,241,0.35); transition: all 0.15s;
-      }
-      .hero-cta:hover { background: #5558e6; transform: translateY(-1px); }
-      .hero-sub {
-        margin-top: 20px; font-size: 13px; color: #94a3b8;
-      }
+        body {
+            background-color: var(--latte-bg);
+            color: white;
+            font-family: var(--sans);
+            line-height: 1.4;
+            overflow-x: hidden;
+            transition: background-color 1.5s ease;
+        }
 
-      .section { padding: 80px 24px; }
-      .section-alt { background: #f8fafc; }
-      .section h2 {
-        font-size: clamp(28px, 3.5vw, 36px); font-weight: 800;
-        color: #0f172a; margin-bottom: 16px; text-align: center;
-      }
-      .section .subtitle {
-        text-align: center; font-size: 16px; color: #64748b;
-        max-width: 560px; margin: 0 auto 48px;
-      }
+        #cursor {
+            position: fixed;
+            width: 8px; height: 8px;
+            background: white;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: difference;
+            transition: transform 0.05s linear;
+        }
 
-      .features-grid {
-        display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-        gap: 24px; margin-top: 24px;
-      }
-      .feature-card {
-        background: #fff; border: 1px solid #e2e8f0; border-radius: 16px;
-        padding: 32px; transition: all 0.2s;
-      }
-      .feature-card:hover { border-color: #c7d2fe; box-shadow: 0 8px 32px rgba(99,102,241,0.08); }
-      .feature-icon {
-        width: 48px; height: 48px; border-radius: 12px;
-        background: #eef2ff; display: flex; align-items: center; justify-content: center;
-        margin-bottom: 16px; font-size: 22px;
-      }
-      .feature-card h3 { font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
-      .feature-card p { font-size: 14px; color: #64748b; line-height: 1.7; }
+        #cursor-follower {
+            position: fixed;
+            width: 30px; height: 30px;
+            border: 1px solid rgba(255,255,255,0.4);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9998;
+            transition: transform 0.15s cubic-bezier(0.2, 1, 0.3, 1), width 0.3s, height 0.3s, background 0.3s;
+        }
 
-      .brand-diff {
-        text-align: center; padding: 60px 24px;
-        background: linear-gradient(135deg, #eef2ff, #fafafa, #f0fdf4);
-        border-radius: 24px; max-width: 800px; margin: 0 auto;
-      }
-      .brand-diff h2 { font-size: clamp(22px, 3vw, 30px); margin-bottom: 12px; }
-      .brand-diff p { color: #64748b; max-width: 560px; margin: 0 auto; font-size: 15px; line-height: 1.7; }
-      .brand-diff strong { color: #0f172a; }
+        .canvas-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: #431407;
+            overflow: hidden;
+        }
 
-      .cta-section {
-        text-align: center; padding: 100px 24px;
-        background: linear-gradient(180deg, #fafafa 0%, #eef2ff 100%);
-      }
-      .cta-section h2 { font-size: clamp(28px, 3.5vw, 38px); margin-bottom: 12px; }
-      .cta-section p { font-size: 16px; color: #64748b; margin-bottom: 32px; }
-      .cta-button {
-        display: inline-flex; align-items: center; gap: 8px;
-        padding: 16px 36px; background: #6366f1; color: #fff;
-        font-size: 17px; font-weight: 600; border-radius: 12px;
-        box-shadow: 0 4px 24px rgba(99,102,241,0.35); transition: all 0.15s;
-      }
-      .cta-button:hover { background: #5558e6; transform: translateY(-1px); }
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            animation: move 20s infinite alternate;
+        }
 
-      .footer {
-        padding: 40px 24px; text-align: center;
-        font-size: 13px; color: #94a3b8; border-top: 1px solid #e2e8f0;
-      }
-      .footer a { color: #6366f1; font-weight: 500; }
-      .footer a:hover { text-decoration: underline; }
-      .footer-links { display: flex; justify-content: center; gap: 24px; margin-bottom: 12px; }
+        @keyframes move {
+            from { transform: translate(0, 0) scale(1); }
+            to { transform: translate(100px, 100px) scale(1.2); }
+        }
 
-      @media (max-width: 640px) {
-        .hero { padding: 60px 24px 50px; }
-        .section { padding: 50px 24px; }
-        .header-nav { display: none; }
-        .features-grid { grid-template-columns: 1fr; }
-        .cta-section { padding: 60px 24px; }
-      }
+        .noise {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0.08;
+            z-index: 1;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+            background-size: 256px 256px;
+        }
+
+        .container { max-width: 1400px; margin: 0 auto; padding: 0 60px; position: relative; z-index: 10; }
+
+        header {
+            position: fixed;
+            top: 40px;
+            left: 0; width: 100%;
+            padding: 0 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .logo { font-family: var(--serif); font-size: 36px; font-style: italic; text-decoration: none; color: white; transition: 0.3s; }
+        .logo:hover { transform: skewX(-5deg); }
+        .logo span { color: var(--accent); }
+
+        .nav-links { display: flex; gap: 40px; }
+        .nav-links a { text-decoration: none; color: rgba(255,255,255,0.4); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.3em; transition: 0.3s; }
+        .nav-links a:hover { color: white; }
+
+        .hero { padding: 280px 0 160px; }
+        .hero h1 { font-family: var(--serif); font-size: clamp(80px, 12vw, 180px); line-height: 0.75; font-weight: 400; letter-spacing: -0.05em; margin-bottom: 60px; }
+        .hero h1 span { font-style: italic; color: var(--accent); }
+
+        .hero-footer { display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid var(--border); padding-top: 60px; }
+        .hero-desc { max-width: 500px; font-size: 22px; color: rgba(255,255,255,0.8); line-height: 1.3; }
+
+        .btn-magical {
+            background: white;
+            color: #7c2d12;
+            padding: 28px 72px;
+            border-radius: 100px;
+            text-decoration: none;
+            font-weight: 800;
+            font-size: 20px;
+            transition: 0.5s cubic-bezier(0.2, 1, 0.3, 1);
+            position: relative;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+        }
+        .btn-magical:hover { transform: scale(1.05) translateY(-10px); box-shadow: 0 50px 80px rgba(0,0,0,0.5); background: var(--accent); }
+
+        .section-label { color: var(--accent); font-weight: 800; font-size: 11px; letter-spacing: 0.4em; text-transform: uppercase; margin-bottom: 24px; display: block; }
+
+        .narrative { padding: 160px 0; }
+        .narrative-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 120px; align-items: center; }
+        .narrative-content h2 { font-family: var(--serif); font-size: 100px; line-height: 0.85; margin-bottom: 32px; }
+        .narrative-content p { font-size: 20px; color: rgba(255,255,255,0.6); max-width: 480px; }
+
+        .visual-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border);
+            aspect-ratio: 1;
+            border-radius: var(--radius-xl);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            transition: 0.6s cubic-bezier(0.2, 1, 0.3, 1);
+        }
+        .visual-card:hover { transform: scale(1.02); border-color: var(--accent); background: rgba(255,255,255,0.05); }
+
+        .grid-section { padding: 160px 0; }
+        .bento { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+        .bento-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            padding: 60px;
+            border-radius: var(--radius-xl);
+            transition: 0.5s;
+            position: relative;
+        }
+        .bento-card:hover { background: rgba(255,255,255,0.08); transform: translateY(-10px); }
+        .bento-card h3 { font-family: var(--serif); font-size: 42px; margin-bottom: 20px; color: var(--accent); }
+        .bento-card p { font-size: 16px; color: rgba(255,255,255,0.5); }
+
+        .analytics { padding: 160px 0; display: grid; grid-template-columns: 1fr 1.5fr; gap: 100px; align-items: center; }
+        .chart-box { background: rgba(0,0,0,0.2); padding: 50px; border-radius: var(--radius-xl); border: 1px solid var(--border); height: 420px; }
+
+        .philosophy { padding: 240px 0; text-align: center; position: relative; }
+        .philosophy h2 { font-family: var(--serif); font-size: 140px; font-style: italic; line-height: 0.8; margin-bottom: 60px; color: var(--accent); }
+        .philosophy p { max-width: 900px; margin: 0 auto; font-size: 26px; color: rgba(255,255,255,0.8); line-height: 1.5; }
+
+        footer { padding: 160px 0 80px; border-top: 1px solid var(--border); }
+        .footer-main { display: flex; justify-content: space-between; margin-bottom: 160px; }
+        .footer-nav { display: grid; grid-template-columns: repeat(3, 1fr); gap: 120px; }
+        .footer-nav h5 { font-size: 11px; color: rgba(255,255,255,0.3); letter-spacing: 0.3em; text-transform: uppercase; margin-bottom: 40px; }
+        .footer-nav a { display: block; text-decoration: none; color: rgba(255,255,255,0.5); font-size: 16px; margin-bottom: 20px; transition: 0.3s; }
+        .footer-nav a:hover { color: var(--accent); padding-left: 10px; }
+
+        [data-reveal] { opacity: 0; transform: translateY(50px); transition: 1.5s cubic-bezier(0.2, 1, 0.3, 1); }
+        [data-reveal].active { opacity: 1; transform: translateY(0); }
+
+        @media (max-width: 1024px) {
+            .container { padding: 0 24px; }
+            header { padding: 20px 24px; top: 20px; }
+            header .nav-links { display: none; }
+            .hero { padding: 160px 0 80px; }
+            .hero h1 { font-size: 60px; }
+            .hero-footer { flex-direction: column; align-items: flex-start; gap: 40px; }
+            .narrative-grid { grid-template-columns: 1fr; gap: 60px; }
+            .narrative-content h2 { font-size: 60px; }
+            .bento { grid-template-columns: 1fr; }
+            .bento-card { padding: 32px; }
+            .analytics { grid-template-columns: 1fr; gap: 60px; }
+            .philosophy h2 { font-size: 60px; }
+            .philosophy p { font-size: 20px; }
+            .footer-main { flex-direction: column; gap: 60px; }
+            .footer-nav { gap: 40px; }
+        }
     </style>
-  </head>
-  <body>
+</head>
+<body>
 
-    <header class="header">
-      <a href="/" class="header-logo">
-        <img src="/logo.png" alt="StudyFlow" width="32" height="32" />
-        StudyFlow
-      </a>
-      <nav class="header-nav">
-        <a href="/flip-clock/">Flip Clock</a>
-        <a href="/aesthetic-stopwatch/">Stopwatch</a>
-        <a href="/pomodoro-timer/">Pomodoro Timer</a>
-        <a href="/study-timer/">Study Timer</a>
-        <a href="/study-planner/">Study Planner</a>
-        <a href="/app/" class="header-cta">Open App</a>
-      </nav>
+    <div id="cursor"></div>
+    <div id="cursor-follower"></div>
+
+    <div class="canvas-bg">
+        <div class="blob" style="width: 600px; height: 600px; background: #ea580c; top: -10%; left: -10%;"></div>
+        <div class="blob" style="width: 500px; height: 500px; background: #9a3412; bottom: -10%; right: -10%; animation-delay: -5s;"></div>
+        <div class="blob" style="width: 400px; height: 400px; background: #7c2d12; top: 40%; left: 40%; animation-delay: -10s;"></div>
+    </div>
+    <div class="noise"></div>
+
+    <header>
+        <a href="/" class="logo">Study<span>Flow</span></a>
+        <nav class="nav-links">
+            <a href="#experience">The Rhythm</a>
+            <a href="#suite">The Suite</a>
+            <a href="#philosophy">Philosophy</a>
+        </nav>
+        <a href="/app/" class="nav-links" style="color: var(--accent);">Open App</a>
     </header>
 
-    <section class="hero">
-      <h1>Your <span class="highlight">gamified focus studio</span> — timer, sounds, tasks & wallpapers</h1>
-      <p>StudyFlow is a free focus environment with a Pomodoro timer, ambient soundscapes, task manager, and living wallpapers. Track streaks, earn XP, and build study habits that stick.</p>
-      <a href="/app/" class="hero-cta">Start Focusing Free</a>
-      <p class="hero-sub">No sign-up required &bull; Free &bull; Works in your browser</p>
-    </section>
+    <div class="container">
+        <section class="hero">
+            <h1 data-reveal>The <span>art</span> of<br>deep focus.</h1>
+            <div class="hero-footer" data-reveal>
+                <p class="hero-desc">A <b>free Pomodoro timer</b> for the digital minimalist. StudyFlow harmonizes <b>focus music</b>, living <b>focus wallpapers</b>, and <b>study tracker</b> analytics into a living sanctuary.</p>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 32px;">
+                    <a href="/app/" class="btn-magical">Start Focusing Free</a>
+                    <span style="font-size: 11px; color: rgba(255,255,255,0.3); font-weight: 800; letter-spacing: 0.2em;">PWA SUPPORTED · NO SIGNUP · CROSS-DEVICE SYNC</span>
+                </div>
+            </div>
+        </section>
 
-    <section class="section">
-      <div class="container">
-        <h2>Everything you need to focus</h2>
-        <p class="subtitle">A complete study dashboard that makes consistency feel like a game.</p>
-        <div class="features-grid">
-          <div class="feature-card">
-            <div class="feature-icon">&#9201;</div>
-            <h3>Pomodoro & Focus Timer</h3>
-            <p>Multiple focus modes — classic Pomodoro (25/5), deep focus (50/10), and Flow mode that adapts to your rhythm. Track every session.</p>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">&#127925;</div>
-            <h3>Ambient Soundscapes</h3>
-            <p>Rain, fireplace, lo-fi beats, white noise, and more. Sounds designed to fade into the background so your thoughts stay in the foreground.</p>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">&#127912;</div>
-            <h3>Living Wallpapers</h3>
-            <p>Animated gradients, serene photos, and deep color atmospheres that make your study space feel like a place, not a tool. Change them anytime.</p>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">&#127942;</div>
-            <h3>Gamification & Streaks</h3>
-            <p>Earn XP for every completed session. Level up, unlock badges, track streaks, and compete on the leaderboard. The game is consistency.</p>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">&#128220;</div>
-            <h3>Task Management</h3>
-            <p>Built-in task manager with priorities, due dates, and subjects. Attach a task to every focus session and check it off when done.</p>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">&#128008;</div>
-            <h3>Nova — Your Study Pet</h3>
-            <p>A virtual productivity companion that grows as you complete focus sessions. Nova adds warmth, accountability, and a reason to keep showing up.</p>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">&#128200;</div>
-            <h3>Study Analytics</h3>
-            <p>Detailed insights into your focus time, subject progress, task completion rates, and streaks. See your improvement over days, weeks, and months.</p>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">&#128260;</div>
-            <h3>Cross-Device Sync</h3>
-            <p>Your sessions, tasks, and progress sync across devices. Start studying on your laptop, check stats on your phone — your data follows you.</p>
-          </div>
+        <section class="narrative" id="experience">
+            <div class="narrative-grid">
+                <div class="narrative-content" data-reveal>
+                    <span class="section-label">01 / The Rhythm</span>
+                    <h2>Deep Work<br>Timer.</h2>
+                    <p>Experience time as a fluid motion. Choose between classic Pomodoro (25/5), Deep Focus (50/10), or our adaptive Flow mode. Includes a beautiful <b>online flip clock</b> and <b>aesthetic stopwatch</b>.</p>
+                </div>
+                <div class="visual-card" data-reveal>
+                    <div style="font-family: var(--serif); font-size: 140px; color: var(--accent); font-style: italic;">25:00</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="grid-section" id="suite">
+            <span class="section-label" data-reveal>02 / The Suite</span>
+            <div class="bento">
+                <div class="bento-card" data-reveal>
+                    <h3>Study Planner</h3>
+                    <p>Task management with subjects, topics, priorities, and due dates. A complete <b>productivity app for students</b>.</p>
+                </div>
+                <div class="bento-card" data-reveal>
+                    <h3>Focus Music</h3>
+                    <p>Bespoke ambient soundscapes. From Kyoto Rain and Fireplace to curated Lo-Fi beats and White Noise.</p>
+                </div>
+                <div class="bento-card" data-reveal>
+                    <h3>Gamification</h3>
+                    <p>Earn XP, level up, and track streaks. Join the <b>study with me</b> global leaderboard.</p>
+                </div>
+                <div class="bento-card" data-reveal>
+                    <h3>Zen Mode</h3>
+                    <p>A distraction-free, full-screen experience with hover-to-reveal UI for absolute clarity.</p>
+                </div>
+                <div class="bento-card" data-reveal>
+                    <h3>Sync</h3>
+                    <p>Cross-device synchronization via localStorage and Supabase. Your focus, everywhere.</p>
+                </div>
+                <div class="bento-card" data-reveal>
+                    <h3>Wallpapers</h3>
+                    <p>Living <b>focus wallpapers</b> featuring animated gradients and serene nature atmospheres.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="analytics" id="analytics">
+            <div class="narrative-content" data-reveal>
+                <span class="section-label">03 / Insights</span>
+                <h2>Study<br>Tracker.</h2>
+                <p>Detailed <b>study analytics</b> for insights into your focus time and subject mastery. Track growth with Red/Amber/Green mastery levels.</p>
+            </div>
+            <div class="chart-box" data-reveal>
+                <canvas id="focusChart"></canvas>
+            </div>
+        </section>
+
+        <section class="philosophy" id="philosophy">
+            <div data-reveal>
+                <h2>Not another AI study tool.</h2>
+                <p>StudyFlow is a focus environment designed to help you start studying and stay studying. No chatbots, no distractions. Just you, your timer, your music, and your wallpapers.</p>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-main">
+                <div class="footer-brand">
+                    <h4 style="font-family: var(--serif); font-size: 64px; font-style: italic;">StudyFlow</h4>
+                    <p style="color: rgba(255,255,255,0.3); font-size: 16px;">Crafting sanctuaries for the focused mind.</p>
+                </div>
+                <div class="footer-nav">
+                    <div>
+                        <h5>Tools</h5>
+                        <a href="/flip-clock/"><b>Online Flip Clock</b></a>
+                        <a href="/aesthetic-stopwatch/"><b>Aesthetic Stopwatch</b></a>
+                        <a href="/pomodoro-timer/"><b>Free Pomodoro Timer</b></a>
+                    </div>
+                    <div>
+                        <h5>Experience</h5>
+                        <a href="/study-timer/"><b>Study Timer</b></a>
+                        <a href="/study-planner/"><b>Study Planner</b></a>
+                        <a href="/app/"><b>Focus Music</b></a>
+                    </div>
+                    <div>
+                        <h5>Product</h5>
+                        <a href="/app/">Open App</a>
+                        <a href="/privacy">Privacy</a>
+                        <a href="https://github.com/workuni59-lang/Study-flow-final">GitHub</a>
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 80px; border-top: 1px solid var(--border);">
+                <p style="color: rgba(255,255,255,0.2); font-size: 13px;">&copy; 2026 StudyFlow. Built for deep work.</p>
+                <p style="color: rgba(255,255,255,0.2); font-size: 13px;">Designed for clarity.</p>
+            </div>
         </div>
-      </div>
-    </section>
-
-    <section class="section section-alt">
-      <div class="container">
-        <div class="brand-diff">
-          <h2>Not another AI study tool &mdash; a real focus environment</h2>
-          <p>StudyFlow is not an AI tutor or flashcard app. It is a <strong>focus environment</strong> — a space designed to help you start studying and stay studying. No chatbots, no generated notes, no distractions. Just you, your timer, your music, and your wallpapers.</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="container">
-        <h2>Frequently asked questions</h2>
-        <p class="subtitle">Everything you need to know about StudyFlow.</p>
-        <div style="max-width: 680px; margin: 0 auto;">
-          <div style="padding: 20px 0; border-bottom: 1px solid #e2e8f0;">
-            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 6px;">Is StudyFlow really free?</h3>
-            <p style="font-size: 14px; color: #64748b;">Yes. StudyFlow is completely free with no sign-up required. All features including the Pomodoro timer, ambient sounds, wallpapers, task management, and gamification are available without payment.</p>
-          </div>
-          <div style="padding: 20px 0; border-bottom: 1px solid #e2e8f0;">
-            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 6px;">What makes StudyFlow different from other focus timers?</h3>
-            <p style="font-size: 14px; color: #64748b;">StudyFlow combines a Pomodoro timer with living wallpapers, ambient soundscapes, task management, and gamification into one seamless experience. It is designed specifically for students, not corporate productivity. The visual environment adapts to your mood, and the gamification system keeps you coming back.</p>
-          </div>
-          <div style="padding: 20px 0; border-bottom: 1px solid #e2e8f0;">
-            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 6px;">Does StudyFlow work on mobile?</h3>
-            <p style="font-size: 14px; color: #64748b;">Yes. StudyFlow is fully responsive and works on any device with a browser. You can also install it as a Progressive Web App (PWA) for a native-like experience on your phone or tablet.</p>
-          </div>
-          <div style="padding: 20px 0; border-bottom: 1px solid #e2e8f0;">
-            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 6px;">What is Nova?</h3>
-            <p style="font-size: 14px; color: #64748b;">Nova is your StudyFlow companion — a virtual productivity pet that responds to your focus sessions. The more you study, the more Nova grows. It adds a layer of warmth and accountability to your study routine.</p>
-          </div>
-          <div style="padding: 20px 0;">
-            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 6px;">Can I use StudyFlow with my friends?</h3>
-            <p style="font-size: 14px; color: #64748b;">Yes. StudyFlow includes a leaderboard where you can see how your focus time compares with other students. You can compete for the top spot and motivate each other to stay consistent.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="cta-section">
-      <h2>Ready to focus?</h2>
-      <p>Open StudyFlow in your browser and start your first session. No account, no credit card, no setup.</p>
-      <a href="/app/" class="cta-button">Start Focusing Free</a>
-    </section>
-
-    <footer class="footer">
-      <div class="footer-links">
-        <a href="/flip-clock/">Flip Clock</a>
-        <a href="/aesthetic-stopwatch/">Stopwatch</a>
-        <a href="/pomodoro-timer/">Pomodoro Timer</a>
-        <a href="/study-timer/">Study Timer</a>
-        <a href="/study-planner/">Study Planner</a>
-        <a href="/studyflow-focus-timer/">StudyFlow Focus Timer</a>
-        <a href="/app/">Open App</a>
-      </div>
-      <p>&copy; 2026 StudyFlow &mdash; <a href="/">Home</a></p>
     </footer>
 
-  </body>
+    <script>
+        (function() {
+            var cursor = document.getElementById('cursor');
+            var follower = document.getElementById('cursor-follower');
+
+            document.addEventListener('mousemove', function(e) {
+                cursor.style.transform = 'translate3d(' + e.clientX + 'px, ' + e.clientY + 'px, 0)';
+                follower.style.transform = 'translate3d(' + (e.clientX - 15) + 'px, ' + (e.clientY - 15) + 'px, 0)';
+            });
+
+            document.querySelectorAll('a, .btn-magical').forEach(function(el) {
+                el.addEventListener('mouseenter', function(e) {
+                    follower.style.width = '100px';
+                    follower.style.height = '100px';
+                    follower.style.background = 'rgba(255,255,255,0.1)';
+                    follower.style.transform = 'translate3d(' + (e.clientX - 50) + 'px, ' + (e.clientY - 50) + 'px, 0)';
+                });
+                el.addEventListener('mouseleave', function() {
+                    follower.style.width = '30px';
+                    follower.style.height = '30px';
+                    follower.style.background = 'transparent';
+                });
+            });
+
+            var observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) entry.target.classList.add('active');
+                });
+            }, { threshold: 0.1 });
+            document.querySelectorAll('[data-reveal]').forEach(function(el) { observer.observe(el); });
+
+            var ctx = document.getElementById('focusChart');
+            if (ctx) {
+                ctx = ctx.getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: 'Focus Hours',
+                            data: [1.5, 2.8, 2.1, 4.2, 3.5, 1.2, 1.8],
+                            borderColor: '#fdba74',
+                            backgroundColor: 'rgba(253, 186, 116, 0.05)',
+                            borderWidth: 4,
+                            pointBackgroundColor: '#fff',
+                            pointBorderColor: '#fdba74',
+                            pointBorderWidth: 3,
+                            pointRadius: 6,
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 11 } } },
+                            x: { grid: { display: false }, ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 11 } } }
+                        }
+                    }
+                });
+            }
+        })();
+    </script>
+</body>
 </html>

@@ -254,23 +254,25 @@
       .header-nav a:hover { color: var(--text); }
       .header-cta {
         display: inline-flex; align-items: center; gap: 8px;
-        padding: 11px 30px;
-        background: #2a1f2e;
-        color: #fff; font-size: 15px; font-weight: 800;
-        border-radius: 100px; letter-spacing: 0.02em;
-        box-shadow: 0 3px 20px rgba(42, 31, 46, 0.25);
-        border: 1px solid rgba(255,255,255,0.12);
-        transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+        padding: 13px 38px;
+        background: #e8a0b4;
+        color: #2a1f2e; font-size: 16px; font-weight: 800;
+        border-radius: 100px; letter-spacing: 0.03em;
+        box-shadow: 0 4px 24px rgba(232, 160, 180, 0.35);
+        border: 1.5px solid rgba(240, 178, 122, 0.2);
+        transition: transform 0.2s, box-shadow 0.2s, background 0.2s, border-color 0.2s;
       }
-      .header-cta:hover { background: #3a2a3e; transform: translateY(-2px); box-shadow: 0 6px 30px rgba(42, 31, 46, 0.35); }
+      .header-cta:hover { background: #edb0c2; transform: translateY(-2px); box-shadow: 0 8px 36px rgba(232, 160, 180, 0.45); border-color: rgba(240, 178, 122, 0.35); }
       [data-theme="forest"] .header-cta {
-        background: #1a2e1a;
-        box-shadow: 0 3px 20px rgba(26, 46, 26, 0.25);
-        border-color: rgba(255,255,255,0.10);
+        background: #6b9e6b;
+        color: #1a2e1a;
+        box-shadow: 0 4px 24px rgba(107, 158, 107, 0.35);
+        border-color: rgba(196, 168, 78, 0.2);
       }
       [data-theme="forest"] .header-cta:hover {
-        background: #253e25;
-        box-shadow: 0 6px 30px rgba(26, 46, 26, 0.35);
+        background: #7aad7a;
+        box-shadow: 0 8px 36px rgba(107, 158, 107, 0.45);
+        border-color: rgba(196, 168, 78, 0.35);
       }
 
       .hamburger {
@@ -654,7 +656,7 @@
         <a href="/focus/pomodoro">Pomodoro</a>
         <a href="/subjects">Planner</a>
         <a href="/focus/stopwatch">Stopwatch</a>
-        <a href="/focus" class="header-cta"><span style="font-size:16px;line-height:1;">&#10024;</span> Open App</a>
+        <a href="/focus" class="header-cta">Open App</a>
         <button class="hamburger" id="hamburger" aria-label="Menu">
           <span></span><span></span><span></span>
         </button>
@@ -664,7 +666,7 @@
       <a href="/focus/pomodoro">Pomodoro</a>
       <a href="/subjects">Planner</a>
       <a href="/focus/stopwatch">Stopwatch</a>
-      <a href="/focus" style="color:#fff;background:#2a1f2e;border:1px solid rgba(255,255,255,0.12);padding:16px 48px;border-radius:100px;font-size:20px;font-weight:800;box-shadow:0 6px 32px rgba(42,31,46,0.3);letter-spacing:0.02em">Open App</a>
+      <a href="/focus" style="color:#2a1f2e;background:#e8a0b4;border:1.5px solid rgba(240,178,122,0.2);padding:16px 48px;border-radius:100px;font-size:20px;font-weight:800;box-shadow:0 6px 32px rgba(232,160,180,0.35);letter-spacing:0.03em">Open App</a>
     </div>
 
     <section class="hero">

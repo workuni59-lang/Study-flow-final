@@ -39,7 +39,7 @@ if (existsSync(landingSrc)) {
 for (const file of ['robots.txt', 'sitemap.xml', 'logo.png', '_headers', '_redirects']) {
   const src = join(ROOT, 'public', file);
   const dst = join(SRC, file);
-  if (existsSync(src) && !existsSync(dst)) {
+  if (existsSync(src)) {
     cpSync(src, dst);
     console.log(`✓ Copied ${file}`);
   }

@@ -134,15 +134,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [fetchProfile]);
 
   useEffect(() => {
-    const urlDemo = window.location.search.includes('sf_admin=true') || window.location.search.includes('demo=1');
-    if (urlDemo) {
-      setUser(DEMO_USER);
-      fetchProfile(DEMO_USER.uid, true);
-      setIsDemo(true);
-      setLoading(false);
-      return;
-    }
-
     supabase!.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         const appUser = toAppUser(session.user);
@@ -150,13 +141,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         fetchProfile(session.user.id);
         sync.init(appUser.uid);
       } else if (!isOAuthCallback) {
-        // No session and not an OAuth callback — do NOT auto-activate demo
-        // Demo is activated via activateDemo() when user clicks "Get Started Free" on LandingPage
+        setUser(DEMO_USER);
+        fetchProfile(DEMO_USER.uid, true);
+        setIsDemo(true);
       }
       setLoading(false);
     }).catch(() => {
-      // No session — do NOT auto-activate demo
-      // Demo is activated via activateDemo() when user clicks "Get Started Free" on LandingPage
+      setUser(DEMO_USER);
+      fetchProfile(DEMO_USER.uid, true);
+      setIsDemo(true);
       setLoading(false);
     });
 

@@ -1,0 +1,15 @@
+# SPA fallback — serve the React app for all app routes
+/focus/* /app/index.html 200
+/pomodoro /app/index.html 200
+/analytics /app/index.html 200
+/quests /app/index.html 200
+/progress /app/index.html 200
+/subjects /app/index.html 200
+/achievements /app/index.html 200
+/leaderboard /app/index.html 200
+/settings /app/index.html 200
+/profile* /app/index.html 200
+/notes /app/index.html 200
+/tasks /app/index.html 200
+/themes /app/index.html 200
+/ambience /app/index.html 200

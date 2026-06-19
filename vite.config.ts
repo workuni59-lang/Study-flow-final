@@ -8,7 +8,7 @@ import { cloudflare } from "@cloudflare/vite-plugin";
 
 export default defineConfig((): UserConfig => {
   return {
-    base: process.env.NODE_ENV === 'production' ? '/app/' : '/',
+    base: '/',
     plugins: [
       react(), 
       tailwindcss(), 

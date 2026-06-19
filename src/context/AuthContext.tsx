@@ -65,6 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [isDemo, setIsDemo] = useState(false);
   const isOAuthCallback = window.location.hash.includes('access_token');
+  const demoActivated = useRef(false);
 
   // ── Inactivity logout: track last user activity ──
   const lastActivity = useRef(Date.now());
@@ -141,12 +142,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         fetchProfile(session.user.id);
         sync.init(appUser.uid);
       } else if (!isOAuthCallback) {
+        demoActivated.current = true;
         setUser(DEMO_USER);
         fetchProfile(DEMO_USER.uid, true);
         setIsDemo(true);
       }
       setLoading(false);
     }).catch(() => {
+      demoActivated.current = true;
       setUser(DEMO_USER);
       fetchProfile(DEMO_USER.uid, true);
       setIsDemo(true);
@@ -155,12 +158,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const { data: { subscription } } = supabase!.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
+        demoActivated.current = false;
         const appUser = toAppUser(session.user);
         setUser(appUser);
         setIsDemo(false);
         fetchProfile(session.user.id);
         sync.init(appUser.uid);
-      } else {
+      } else if (!demoActivated.current) {
         setUser(null);
         setProfile(null);
         setIsDemo(false);

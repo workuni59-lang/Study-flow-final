@@ -3,24 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Free Online Pomodoro Timer — StudyFlow</title>
-    <meta name="description" content="Use StudyFlow's free online Pomodoro timer with ambient sounds, living wallpapers, and gamified progress tracking. Focus better with 25-minute study sessions." />
+    <title>Free Online Pomodoro Timer — Aesthetic Study Timer — StudyFlow</title>
+    <meta name="description" content="A detailed look at online Pomodoro timers — focus techniques, the best timer apps, and how to build a sustainable study habit. Try our free working Pomodoro timer with 25/5 cycles, ambient sounds, and living wallpapers." />
     <link rel="canonical" href="https://studyflow.space/pomodoro-timer/" />
 
-    <meta property="og:title" content="Free Online Pomodoro Timer — StudyFlow" />
-    <meta property="og:description" content="A free Pomodoro timer with ambient sounds, living wallpapers, and gamification. Start focusing in one click — no sign-up required." />
+    <meta property="og:title" content="Free Online Pomodoro Timer — Aesthetic Study Timer" />
+    <meta property="og:description" content="A detailed look at online Pomodoro timers — focus techniques, the best timer apps, and how to build a sustainable study habit. Try our free working Pomodoro timer demo with 25/5 cycles." />
     <meta property="og:url" content="https://studyflow.space/pomodoro-timer/" />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="https://studyflow.space/logo.png" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Free Online Pomodoro Timer — StudyFlow" />
-    <meta name="twitter:description" content="A free Pomodoro timer with ambient sounds, living wallpapers, and gamification." />
+    <meta name="twitter:title" content="Free Online Pomodoro Timer — Aesthetic Study Timer" />
+    <meta name="twitter:description" content="A detailed look at online Pomodoro timers — focus techniques, the best timer apps, and how to build a sustainable study habit. Try the free working Pomodoro timer demo." />
 
     <link rel="icon" type="image/png" href="/logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" />
+    <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" />
 
     <script type="application/ld+json">
     {
@@ -40,7 +40,7 @@
           "name": "Is StudyFlow's Pomodoro timer free?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes. StudyFlow's Pomodoro timer is completely free with no sign-up required. Use it immediately in your browser."
+            "text": "Yes. StudyFlow's Pomodoro timer is completely free with no sign-up required. Use it immediately in your browser with ambient sounds, living wallpapers, and session tracking."
           }
         },
         {
@@ -48,7 +48,7 @@
           "name": "Can I customize the timer duration?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes. StudyFlow offers multiple focus modes including classic Pomodoro (25/5), deep focus (50/10), and Flow mode that adapts to your rhythm."
+            "text": "Yes. StudyFlow offers multiple focus modes including classic Pomodoro (25/5), deep focus (50/10), and Flow mode that adapts to your rhythm. You can also set custom durations."
           }
         },
         {
@@ -64,124 +64,411 @@
     </script>
 
     <style>
+      :root {
+        --bg: #431407;
+        --accent: #fdba74;
+        --border: rgba(255, 255, 255, 0.08);
+        --text: rgba(255, 255, 255, 0.88);
+        --text-muted: rgba(255, 255, 255, 0.6);
+        --serif: 'Instrument Serif', serif;
+        --sans: 'Plus Jakarta Sans', sans-serif;
+        --radius: 48px;
+      }
       *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
       html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
       body {
-        font-family: 'Inter', system-ui, -apple-system, sans-serif;
-        background: #fafafa; color: #1e293b; line-height: 1.6;
+        font-family: var(--sans); background: var(--bg); color: var(--text);
+        line-height: 1.7; cursor: none; overflow-x: hidden;
       }
-      h1, h2, h3 { font-family: 'Outfit', 'Inter', system-ui, sans-serif; line-height: 1.15; letter-spacing: -0.02em; }
+      h1, h2, h3 { font-family: var(--serif); line-height: 1.15; font-weight: 400; color: white; }
+      h2 { font-size: clamp(32px, 4vw, 44px); margin-bottom: 20px; }
       a { color: inherit; text-decoration: none; }
       img { max-width: 100%; display: block; }
-      .container { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+      b { color: white; font-weight: 600; }
 
-      .header { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; max-width: 1120px; margin: 0 auto; }
-      .header-logo { display: flex; align-items: center; gap: 10px; font-family: 'Outfit','Inter',sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -0.3px; }
-      .header-logo img { width: 32px; height: 32px; border-radius: 8px; }
-      .header-nav { display: flex; align-items: center; gap: 24px; }
-      .header-nav a { font-size: 14px; font-weight: 500; color: #64748b; transition: color 0.15s; }
-      .header-nav a:hover { color: #6366f1; }
-      .header-cta { padding: 8px 20px; background: #6366f1; color: #fff; font-size: 14px; font-weight: 600; border-radius: 10px; }
-      .header-cta:hover { background: #5558e6; }
+      #cursor {
+        position: fixed; width: 8px; height: 8px;
+        background: white; border-radius: 50%;
+        pointer-events: none; z-index: 9999;
+        mix-blend-mode: difference; will-change: transform;
+      }
+      #cursor-follower {
+        position: fixed; width: 30px; height: 30px;
+        border: 1px solid rgba(255,255,255,0.4);
+        border-radius: 50%; pointer-events: none; z-index: 9998;
+        will-change: transform;
+        transition: width 0.3s, height 0.3s, background 0.3s;
+      }
 
-      .hero { text-align: center; padding: 80px 24px 60px; background: linear-gradient(180deg, #eef2ff 0%, #fafafa 100%); }
-      .hero h1 { font-size: clamp(32px, 5vw, 44px); font-weight: 900; color: #0f172a; margin-bottom: 16px; }
-      .hero p { font-size: 17px; color: #64748b; max-width: 520px; margin: 0 auto 32px; line-height: 1.7; }
-      .hero-cta { display: inline-flex; align-items: center; gap: 8px; padding: 14px 32px; background: #6366f1; color: #fff; font-size: 16px; font-weight: 600; border-radius: 12px; box-shadow: 0 4px 24px rgba(99,102,241,0.3); }
-      .hero-cta:hover { background: #5558e6; }
+      .canvas-bg {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        z-index: -1; background: var(--bg); overflow: hidden;
+      }
+      .blob {
+        position: absolute; border-radius: 50%;
+        filter: blur(60px); opacity: 0.25;
+        animation: move 20s infinite alternate;
+        will-change: transform;
+      }
+      @keyframes move {
+        from { transform: translate(0, 0) scale(1); }
+        to { transform: translate(100px, 100px) scale(1.2); }
+      }
+      .noise {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        opacity: 0.05; z-index: 1; pointer-events: none;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+        background-repeat: repeat; background-size: 256px 256px;
+      }
 
-      .section { padding: 60px 24px; }
-      .section h2 { font-size: clamp(24px, 3vw, 30px); font-weight: 700; color: #0f172a; margin-bottom: 16px; }
-      .section p, .section li { font-size: 15px; color: #475569; line-height: 1.8; }
-      .section ul { list-style: none; padding: 0; }
-      .section li { padding: 8px 0 8px 24px; position: relative; }
-      .section li::before { content: ""; position: absolute; left: 0; top: 14px; width: 6px; height: 6px; background: #6366f1; border-radius: 50%; }
+      .container { max-width: 720px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 10; }
 
-      .faq-item { padding: 20px 0; border-bottom: 1px solid #e2e8f0; }
+      .header {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 24px 32px; max-width: 1120px; margin: 0 auto; position: relative; z-index: 100;
+      }
+      .header-logo { font-family: var(--serif); font-size: 26px; font-style: italic; color: white; }
+      .header-logo span { color: var(--accent); }
+      .header-nav { display: flex; align-items: center; gap: 32px; }
+      .header-nav a {
+        font-size: 12px; font-weight: 800; color: var(--text-muted);
+        text-transform: uppercase; letter-spacing: 0.25em; transition: color 0.3s;
+      }
+      .header-nav a:hover { color: white; }
+      .header-cta {
+        padding: 10px 24px; background: white; color: #431407 !important;
+        font-size: 11px; font-weight: 800; border-radius: 100px; letter-spacing: 0.05em; transition: 0.3s;
+      }
+      .header-cta:hover { background: var(--accent) !important; color: #431407 !important; }
+
+      .hero {
+        text-align: center; padding: 120px 24px 70px; position: relative; z-index: 10;
+      }
+      .hero h1 {
+        font-size: clamp(44px, 7vw, 80px); margin-bottom: 20px;
+        letter-spacing: -0.04em; line-height: 0.9;
+      }
+      .hero h1 i { font-style: italic; color: var(--accent); }
+      .hero p {
+        font-size: 20px; color: var(--text-muted); max-width: 600px;
+        margin: 0 auto 36px; line-height: 1.7;
+      }
+      .hero-cta {
+        display: inline-flex; align-items: center; gap: 10px;
+        padding: 18px 48px; background: white; color: #431407;
+        font-size: 17px; font-weight: 700; border-radius: 100px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+        transition: 0.5s cubic-bezier(0.2, 1, 0.3, 1);
+      }
+      .hero-cta:hover { transform: scale(1.06) translateY(-4px); background: var(--accent); box-shadow: 0 30px 60px rgba(0,0,0,0.5); }
+
+      .hero-timer {
+        margin: 50px auto 0; display: inline-flex; flex-direction: column;
+        align-items: center; gap: 24px;
+      }
+      .pomo-ring-wrap { position: relative; width: 260px; height: 260px; }
+      .pomo-ring-wrap svg { transform: rotate(-90deg); width: 100%; height: 100%; }
+      .pomo-ring-bg { fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 4; }
+      .pomo-ring-fg {
+        fill: none; stroke: var(--accent); stroke-width: 4;
+        stroke-linecap: round; transition: stroke-dashoffset 0.4s ease;
+        filter: drop-shadow(0 0 8px rgba(253,186,116,0.15));
+      }
+      .pomo-inner {
+        position: absolute; inset: 0; display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+      }
+      .pomo-time {
+        font-size: 56px; font-weight: 700; color: white;
+        font-family: var(--sans); letter-spacing: 2px;
+        text-shadow: 0 0 40px rgba(253,186,116,0.08);
+      }
+      .pomo-label {
+        font-size: 12px; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 0.2em; color: var(--text-muted); margin-top: 4px;
+      }
+      .pomo-controls { display: flex; gap: 12px; }
+      .pomo-btn {
+        padding: 12px 32px; border: none; border-radius: 100px;
+        font-family: var(--sans); font-size: 13px; font-weight: 700;
+        cursor: none; transition: 0.3s; letter-spacing: 0.05em;
+      }
+      .pomo-btn-primary {
+        background: var(--accent); color: #431407;
+        box-shadow: 0 8px 24px rgba(253,186,116,0.2);
+      }
+      .pomo-btn-primary:hover { transform: scale(1.06); box-shadow: 0 12px 32px rgba(253,186,116,0.3); }
+      .pomo-btn-primary.running { background: #ef4444; color: white; box-shadow: 0 8px 24px rgba(239,68,68,0.2); }
+      .pomo-btn-primary.running:hover { background: #dc2626; }
+      .pomo-btn-secondary {
+        background: rgba(255,255,255,0.06); color: var(--text-muted);
+        border: 1px solid var(--border);
+      }
+      .pomo-btn-secondary:hover { background: rgba(255,255,255,0.1); color: white; }
+      .pomo-sessions {
+        font-size: 13px; color: var(--text-muted); letter-spacing: 0.05em;
+      }
+      .pomo-sessions b { color: var(--accent); font-weight: 700; }
+
+      .section { padding: 80px 24px; }
+      .section p { font-size: 18px; color: var(--text); margin-bottom: 18px; line-height: 1.8; }
+      .section p:last-child { margin-bottom: 0; }
+
+      .competitor-list { list-style: none; display: grid; gap: 20px; margin: 24px 0; }
+      .competitor-item {
+        background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+        border-radius: 20px; padding: 24px;
+        transition: 0.3s;
+      }
+      .competitor-item { border-left: 3px solid transparent; }
+      .competitor-item:hover { border-color: rgba(253,186,116,0.15); }
+      .competitor-item[data-brand="studyflow"] { border-left-color: #fdba74; }
+      .competitor-item[data-brand="flocus"] { border-left-color: #14B8A6; }
+      .competitor-item[data-brand="tomatotimers"] { border-left-color: #60A5FA; }
+      .competitor-item[data-brand="pomofocus"] { border-left-color: #F87171; }
+      .competitor-item[data-brand="marinara"] { border-left-color: #22D3EE; }
+      .competitor-item h4 { font-family: var(--serif); font-size: 20px; color: var(--accent); margin-bottom: 4px; }
+      .competitor-item .comp-desc { font-size: 16px; color: var(--text-muted); margin-bottom: 8px; line-height: 1.7; }
+      .competitor-item .comp-tag {
+        display: inline-block; font-size: 12px; font-weight: 700; padding: 4px 12px;
+        border-radius: 100px; margin-top: 6px; letter-spacing: 0.05em;
+      }
+      .comp-good { background: rgba(253,186,116,0.1); color: var(--accent); }
+      .comp-best { background: rgba(253,186,116,0.2); color: var(--accent); border: 1px solid rgba(253,186,116,0.3); }
+      .competitor-item[data-brand="flocus"] .comp-tag { background: rgba(20,184,166,0.15); color: #5EEAD4; }
+      .competitor-item[data-brand="tomatotimers"] .comp-tag { background: rgba(96,165,250,0.15); color: #93C5FD; }
+      .competitor-item[data-brand="pomofocus"] .comp-tag { background: rgba(248,113,113,0.15); color: #FCA5A5; }
+      .competitor-item[data-brand="marinara"] .comp-tag { background: rgba(34,211,238,0.15); color: #67E8F9; }
+
+      .showcase {
+        background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+        border-radius: var(--radius); overflow: hidden; margin: 40px 0;
+        display: grid; grid-template-columns: 1fr 1fr;
+      }
+      .showcase-visual {
+        background: linear-gradient(135deg, rgba(234,88,12,0.15), rgba(253,186,116,0.05));
+        display: flex; align-items: center; justify-content: center; padding: 40px;
+        position: relative; overflow: hidden; min-height: 260px;
+      }
+      .showcase-visual::before {
+        content: ''; position: absolute; width: 200px; height: 200px;
+        background: radial-gradient(circle, rgba(253,186,116,0.08), transparent);
+        border-radius: 50%;
+        animation: showcaseGlow 4s ease-in-out infinite alternate;
+      }
+      @keyframes showcaseGlow { from { transform: scale(1); opacity: 0.5; } to { transform: scale(1.5); opacity: 1; } }
+      .showcase-content { padding: 40px; }
+      .showcase-content h3 { margin-bottom: 12px; }
+      .showcase-content p { font-size: 16px; color: var(--text-muted); margin: 0; line-height: 1.7; }
+
+      .pro-list { list-style: none; display: grid; gap: 14px; margin: 20px 0; }
+      .pro-list li { padding-left: 28px; position: relative; font-size: 17px; color: var(--text); line-height: 1.8; }
+      .pro-list li::before {
+        content: "\2192"; position: absolute; left: 0; top: 0;
+        color: var(--accent); font-weight: 700;
+      }
+
+      .faq-section { padding: 80px 24px; }
+      .faq-item { padding: 24px 0; border-bottom: 1px solid var(--border); }
       .faq-item:last-child { border-bottom: none; }
-      .faq-item h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px; color: #0f172a; }
-      .faq-item p { font-size: 14px; color: #64748b; }
+      .faq-item h3 { font-size: 18px; font-weight: 600; font-family: var(--sans); margin-bottom: 8px; color: white; }
+      .faq-item p { font-size: 16px; color: var(--text-muted); line-height: 1.7; }
 
-      .cta-section { text-align: center; padding: 80px 24px; background: linear-gradient(180deg, #fafafa 0%, #eef2ff 100%); }
-      .cta-section h2 { font-size: clamp(26px, 3vw, 34px); margin-bottom: 12px; }
-      .cta-section p { font-size: 15px; color: #64748b; margin-bottom: 28px; }
-      .cta-button { display: inline-flex; align-items: center; gap: 8px; padding: 14px 32px; background: #6366f1; color: #fff; font-size: 16px; font-weight: 600; border-radius: 12px; box-shadow: 0 4px 24px rgba(99,102,241,0.3); }
-      .cta-button:hover { background: #5558e6; }
+      .cta-section { text-align: center; padding: 100px 24px; position: relative; z-index: 10; }
+      .cta-section h2 { font-size: clamp(36px, 5vw, 56px); margin-bottom: 14px; }
+      .cta-section p { font-size: 18px; color: var(--text-muted); margin-bottom: 36px; }
+      .cta-button {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 18px 48px; background: white; color: #431407;
+        font-size: 17px; font-weight: 700; border-radius: 100px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+        transition: 0.5s cubic-bezier(0.2, 1, 0.3, 1);
+      }
+      .cta-button:hover { transform: scale(1.06) translateY(-4px); background: var(--accent); box-shadow: 0 30px 60px rgba(0,0,0,0.5); }
 
-      .footer { padding: 32px 24px; text-align: center; font-size: 13px; color: #94a3b8; border-top: 1px solid #e2e8f0; }
-      .footer a { color: #6366f1; font-weight: 500; }
-      .footer-links { display: flex; justify-content: center; gap: 24px; margin-bottom: 12px; flex-wrap: wrap; }
+      .footer {
+        padding: 48px 24px; text-align: center; font-size: 14px;
+        color: var(--text-muted); border-top: 1px solid var(--border);
+      }
+      .footer-links { display: flex; justify-content: center; gap: 24px; margin-bottom: 14px; flex-wrap: wrap; }
+      .footer-links a { color: rgba(255,255,255,0.45); transition: color 0.3s; font-size: 14px; }
+      .footer-links a:hover { color: var(--accent); }
 
-      @media (max-width: 640px) { .hero { padding: 50px 24px 40px; } .header-nav { display: none; } }
+      [data-reveal] { opacity: 0; transform: translateY(40px); transition: 1s cubic-bezier(0.2, 1, 0.3, 1); }
+      [data-reveal].active { opacity: 1; transform: translateY(0); }
+      [data-reveal-delay="1"] { transition-delay: 0.1s; }
+      [data-reveal-delay="2"] { transition-delay: 0.2s; }
+      [data-reveal-delay="3"] { transition-delay: 0.3s; }
+
+      @media (max-width: 1024px) { .showcase { grid-template-columns: 1fr; } }
+      @media (max-width: 640px) {
+        .hero { padding: 90px 24px 50px; }
+        .header-nav { display: none; }
+        .pomo-ring-wrap { width: 200px; height: 200px; }
+        .pomo-time { font-size: 42px; }
+        .pomo-btn { padding: 10px 24px; font-size: 12px; }
+        .showcase { border-radius: 32px; }
+        .showcase-visual { padding: 24px; min-height: 180px; }
+        .showcase-content { padding: 24px; }
+      }
     </style>
   </head>
   <body>
+
+    <div id="cursor"></div>
+    <div id="cursor-follower"></div>
+
+    <div class="canvas-bg">
+      <div class="blob" style="width: 600px; height: 600px; background: #ea580c; top: -10%; left: -10%;"></div>
+      <div class="blob" style="width: 500px; height: 500px; background: #9a3412; bottom: -10%; right: -10%; animation-delay: -5s;"></div>
+      <div class="blob" style="width: 400px; height: 400px; background: #7c2d12; top: 40%; left: 40%; animation-delay: -10s;"></div>
+    </div>
+    <div class="noise"></div>
+
     <header class="header">
-      <a href="/" class="header-logo"><img src="/logo.png" alt="StudyFlow" width="32" height="32" />StudyFlow</a>
+      <a href="/" class="header-logo">Study<span>Flow</span></a>
       <nav class="header-nav">
-        <a href="/flip-clock/">Flip Clock</a>
-        <a href="/aesthetic-stopwatch/">Stopwatch</a>
-        <a href="/pomodoro-timer/">Pomodoro Timer</a>
-        <a href="/study-timer/">Study Timer</a>
-        <a href="/study-planner/">Study Planner</a>
+        <a href="/focus/pomodoro">Pomodoro</a>
+        <a href="/focus">Timer</a>
+        <a href="/focus/stopwatch">Stopwatch</a>
+        <a href="/subjects">Planner</a>
         <a href="/app/" class="header-cta">Open App</a>
       </nav>
     </header>
 
     <section class="hero">
-      <h1>Free Online Pomodoro Timer</h1>
-      <p>Stay focused with StudyFlow's Pomodoro timer. 25-minute sessions, ambient sounds, living wallpapers, and gamified progress tracking. Start studying in one click.</p>
-      <a href="/app/" class="hero-cta">Use the Pomodoro Timer</a>
+      <h1 data-reveal>The best <i>Pomodoro timer</i><br>for focused students.</h1>
+      <p data-reveal data-reveal-delay="1">A free working Pomodoro timer with 25/5 cycles, ambient soundscapes, and living wallpapers. From the classic technique to modern focus tools — here is everything you need to master the Pomodoro method.</p>
+      <div data-reveal data-reveal-delay="2">
+        <a href="/app/" class="hero-cta">Use the Pomodoro Timer</a>
+      </div>
+      <div class="hero-timer" data-reveal data-reveal-delay="3">
+        <div class="pomo-ring-wrap">
+          <svg viewBox="0 0 120 120">
+            <circle class="pomo-ring-bg" cx="60" cy="60" r="52" />
+            <circle class="pomo-ring-fg" id="pomoRing" cx="60" cy="60" r="52" stroke-dasharray="326.73" stroke-dashoffset="0" />
+          </svg>
+          <div class="pomo-inner">
+            <div class="pomo-time" id="pomoTime">25:00</div>
+            <div class="pomo-label" id="pomoLabel">Focus</div>
+          </div>
+        </div>
+        <div class="pomo-controls">
+          <button class="pomo-btn pomo-btn-primary" id="pomoStart">Start</button>
+          <button class="pomo-btn pomo-btn-secondary" id="pomoReset">Reset</button>
+        </div>
+        <div class="pomo-sessions" id="pomoSessions">Pomodoros completed: <b>0</b></div>
+      </div>
     </section>
 
-    <section class="section container">
-      <h2>Why use a Pomodoro timer?</h2>
-      <p>The Pomodoro Technique is one of the most effective time management methods for students. By breaking your study time into focused 25-minute intervals with short breaks, you maintain high concentration without mental fatigue.</p>
-      <p>StudyFlow enhances the classic technique with features that make each session more engaging:</p>
-      <ul>
-        <li><strong>Animated wallpapers</strong> that create a calming focus environment</li>
-        <li><strong>Ambient soundscapes</strong> — rain, lo-fi, white noise, and more</li>
-        <li><strong>XP and streaks</strong> that turn consistency into a game</li>
-        <li><strong>Task tracking</strong> so every session has a purpose</li>
+    <section class="section container" data-reveal>
+      <h2>Why the Pomodoro technique works</h2>
+      <p>The Pomodoro Technique is deceptively simple — 25 minutes of focused work, 5 minutes of rest, repeat. But beneath that simplicity lies a well-researched approach to attention management. Each interval gives your brain a clear finish line, which makes starting easier and quitting less tempting.</p>
+      <p>After four cycles, you take a longer 15-30 minute break. This structure matches how our brains naturally process information: in bursts of high focus followed by rest. The timer is not a constraint — it is a permission slip to focus fully, knowing a break is always coming.</p>
+    </section>
+
+    <section class="section container" data-reveal>
+      <h2>Top 5 Pomodoro apps worth trying</h2>
+      <p>There are plenty of Pomodoro timers out there, but not all of them do more than just count down. Here is an honest look at the best options and what makes each one unique:</p>
+      <ul class="competitor-list">
+        <li class="competitor-item" data-brand="studyflow">
+          <h4>StudyFlow</h4>
+          <p class="comp-desc">The only Pomodoro timer built inside a complete focus environment. Beyond 25/5 cycles you get 50+ living wallpapers, ambient soundscapes (rain, lo-fi, white noise), gamified XP and streaks, task tracking, session analytics, and a Zen mode that strips the interface down to just the timer and your wallpaper. Free with no sign-up for core features.</p>
+          <span class="comp-tag comp-best">Most features · Free · Wallpapers · Sounds · Gamification</span>
+        </li>
+        <li class="competitor-item" data-brand="flocus">
+          <h4><a href="https://flocus.com" rel="nofollow">Flocus</a></h4>
+          <p class="comp-desc">A beautifully designed focus timer with a clean Pomodoro interface. Flocus does the basics well — start a session, pick a wallpaper, play some ambient sounds. The interface is polished and the full-screen mode looks great on any monitor.</p>
+          <span class="comp-tag comp-good">Great design · Full-screen focus</span>
+        </li>
+        <li class="competitor-item" data-brand="tomatotimers">
+          <h4><a href="https://tomatotimers.com" rel="nofollow">TomatoTimers</a></h4>
+          <p class="comp-desc">A straightforward Pomodoro timer that focuses on the essentials. No accounts, no extra features — just set your work and break durations and go. Perfect if you want a no-nonsense timer that gets out of your way.</p>
+          <span class="comp-tag comp-good">Simple · No account · Custom durations</span>
+        </li>
+        <li class="competitor-item" data-brand="pomofocus">
+          <h4><a href="https://pomofocus.io" rel="nofollow">Pomofocus</a></h4>
+          <p class="comp-desc">A popular browser-based Pomodoro timer with a task list built in. You can add tasks, track how many Pomodoros each one takes, and see daily stats. The task-integrated approach makes it a good choice for anyone who wants to pair time tracking with to-do management.</p>
+          <span class="comp-tag comp-good">Task lists · Daily stats</span>
+        </li>
+        <li class="competitor-item" data-brand="marinara">
+          <h4><a href="https://marinara.so" rel="nofollow">Marinara</a></h4>
+          <p class="comp-desc">A minimal, customisable Pomodoro timer with team features. Marinara supports custom presets, shared timers for remote teams, and a distraction-free full-screen mode. The team sync feature is unique among Pomodoro tools.</p>
+          <span class="comp-tag comp-good">Team support · Custom presets</span>
+        </li>
+      </ul>
+      <p>Each app serves a different kind of user. <b>Flocus</b> and <b>Pomofocus</b> are great if you want a clean, focused timer. If you want a Pomodoro timer integrated with wallpapers, sounds, gamification, and session analytics — all at no cost — <b>StudyFlow</b> is the most complete option available.</p>
+    </section>
+
+    <section class="section container" data-reveal>
+      <h2>What makes a great Pomodoro timer?</h2>
+      <p>Not all Pomodoro timers are created equal. If you plan to use one daily, here are the features that make the difference between a timer you try once and one you stick with:</p>
+      <ul class="pro-list">
+        <li><b>Customisable intervals.</b> The classic 25/5 works for most people, but some tasks need longer focus windows. A great timer lets you adjust both work and break durations freely.</li>
+        <li><b>Ambient environment.</b> A timer alone is just a countdown. Pairing it with wallpapers, soundscapes, and a full-screen mode creates a focus atmosphere that a bare timer cannot match.</li>
+        <li><b>Session tracking.</b> Seeing how many Pomodoros you complete each day turns an abstract goal into a visible streak. Done well, this is what keeps people coming back.</li>
+        <li><b>Distraction-free design.</b> When you are in a focus session, the last thing you need is a busy interface. Zen mode or full-screen should be one click away.</li>
+        <li><b>Cross-device sync.</b> If you study on both your laptop and phone, your session history should follow you. This is rare among free timers but invaluable for consistent use.</li>
       </ul>
     </section>
 
-    <section class="section container">
-      <h2>Pomodoro Timer features</h2>
-      <ul>
-        <li><strong>Multiple focus modes:</strong> Classic Pomodoro (25/5), deep focus (50/10), and adaptive Flow mode</li>
-        <li><strong>Customizable durations:</strong> Adjust work and break times to match your rhythm</li>
-        <li><strong>Session history:</strong> See exactly how many Pomodoros you complete each day</li>
-        <li><strong>Dark & light wallpapers:</strong> Choose from 50+ animated backgrounds, photos, and color atmospheres</li>
-        <li><strong>Zen mode:</strong> A distraction-free interface with just the timer, wallpaper, and ambient sound</li>
-        <li><strong>Cross-device sync:</strong> Your sessions and stats follow you across devices</li>
-      </ul>
+    <section class="section container" data-reveal>
+      <h2>Meet StudyFlow's Pomodoro timer</h2>
+      <div class="showcase">
+        <div class="showcase-visual">
+          <div style="position: relative; z-index: 2; display: flex; gap: 8px; align-items: center;">
+            <div style="width: 52px; height: 64px; background: rgba(20,8,3,0.9); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 700; color: var(--accent); font-family: var(--sans); box-shadow: 0 4px 16px rgba(0,0,0,0.4);">1</div>
+            <div style="width: 52px; height: 64px; background: rgba(20,8,3,0.9); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 700; color: var(--accent); font-family: var(--sans); box-shadow: 0 4px 16px rgba(0,0,0,0.4);">8</div>
+            <span style="font-size: 28px; color: var(--accent); opacity: 0.4; margin: 0 2px;">:</span>
+            <div style="width: 52px; height: 64px; background: rgba(20,8,3,0.9); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 700; color: var(--accent); font-family: var(--sans); box-shadow: 0 4px 16px rgba(0,0,0,0.4);">3</div>
+            <div style="width: 52px; height: 64px; background: rgba(20,8,3,0.9); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 700; color: var(--accent); font-family: var(--sans); box-shadow: 0 4px 16px rgba(0,0,0,0.4);">7</div>
+          </div>
+        </div>
+        <div class="showcase-content">
+          <h3>More than just a countdown</h3>
+          <p>StudyFlow's Pomodoro timer is part of a complete focus ecosystem. Run 25/5 cycles or switch to deep focus (50/10) or adaptive Flow mode. Each session is tracked with XP, streaks, and levels while living wallpapers and ambient sounds keep you in the zone.</p>
+          <br>
+          <p><b>Zen mode</b> hides everything except the timer, your chosen wallpaper, and ambient sound. Perfect for libraries, late-night study sessions, or anywhere you need absolute focus.</p>
+          <br>
+          <a href="/app/" class="hero-cta" style="display: inline-flex; font-size: 14px; padding: 12px 32px;">Try It Free</a>
+        </div>
+      </div>
     </section>
 
-    <section class="section container">
+    <section class="faq-section container" data-reveal>
       <h2>Frequently asked questions</h2>
       <div class="faq-item">
+        <h3>What is a Pomodoro timer?</h3>
+        <p>A Pomodoro timer implements the Pomodoro Technique: 25 minutes of focused work followed by a 5-minute break. After four cycles, take a longer 15-30 minute break. The timer structure helps maintain concentration and prevents mental fatigue.</p>
+      </div>
+      <div class="faq-item">
         <h3>Is StudyFlow's Pomodoro timer really free?</h3>
-        <p>Yes. The Pomodoro timer and all core features are free. No account, no credit card, no hidden fees.</p>
+        <p>Yes. The Pomodoro timer and all core features — including wallpapers, ambient sounds, and session tracking — are completely free. No account, no credit card, no hidden fees.</p>
       </div>
       <div class="faq-item">
         <h3>Can I use the timer without signing up?</h3>
-        <p>Absolutely. Open StudyFlow and start a timer immediately. Sign-up is optional and only needed for cross-device sync.</p>
+        <p>Absolutely. Open StudyFlow and start a Pomodoro immediately. Sign-up is optional and only needed if you want your session history and stats synced across devices.</p>
       </div>
       <div class="faq-item">
-        <h3>Does it work offline?</h3>
-        <p>Yes. StudyFlow is a PWA and works offline once loaded. The timer, tasks, and wallpapers are available without internet.</p>
+        <h3>Can I customise the work and break durations?</h3>
+        <p>Yes. StudyFlow offers classic Pomodoro (25/5), deep focus (50/10), and Flow mode. You can also set fully custom durations for both work and break intervals.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Does the timer work on mobile?</h3>
+        <p>Yes. The timer works on any device with a browser. StudyFlow is also a PWA, so you can install it on your phone or tablet for a native-like app experience.</p>
       </div>
       <div class="faq-item">
         <h3>What makes StudyFlow's timer different?</h3>
-        <p>Unlike basic timers, StudyFlow wraps the Pomodoro technique in a complete focus environment — wallpapers that set the mood, sounds that block distractions, and gamification that keeps you coming back.</p>
+        <p>Unlike basic timers, StudyFlow wraps the Pomodoro technique in a complete focus environment — living wallpapers that set the mood, ambient sounds that block distractions, gamification that makes consistency rewarding, and session analytics that show your progress over time.</p>
       </div>
     </section>
 
     <section class="cta-section">
-      <h2>Start your first Pomodoro</h2>
-      <p>No account needed. Open the timer and begin.</p>
-      <a href="/app/" class="cta-button">Use the Pomodoro Timer</a>
+      <h2 data-reveal>Start your first Pomodoro</h2>
+      <p data-reveal data-reveal-delay="1">No account. No setup. Just open it and start focusing.</p>
+      <div data-reveal data-reveal-delay="2">
+        <a href="/app/" class="cta-button">Use the Pomodoro Timer</a>
+      </div>
     </section>
 
     <footer class="footer">
@@ -196,5 +483,119 @@
       </div>
       <p>&copy; 2026 StudyFlow</p>
     </footer>
+
+    <script>
+      (function() {
+        /* ── Cursor ── */
+        var cursor = document.getElementById('cursor');
+        var follower = document.getElementById('cursor-follower');
+        var rafId = null;
+        document.addEventListener('mousemove', function(e) {
+          if (rafId) return;
+          rafId = requestAnimationFrame(function() {
+            cursor.style.transform = 'translate3d(' + e.clientX + 'px, ' + e.clientY + 'px, 0)';
+            follower.style.transform = 'translate3d(' + (e.clientX - 15) + 'px, ' + (e.clientY - 15) + 'px, 0)';
+            rafId = null;
+          });
+        });
+        document.querySelectorAll('a, button').forEach(function(el) {
+          el.addEventListener('mouseenter', function() {
+            follower.style.width = '100px'; follower.style.height = '100px';
+            follower.style.background = 'rgba(255,255,255,0.1)';
+          });
+          el.addEventListener('mouseleave', function() {
+            follower.style.width = '30px'; follower.style.height = '30px';
+            follower.style.background = 'transparent';
+          });
+        });
+
+        /* ── Scroll Reveal ── */
+        var observer = new IntersectionObserver(function(entries) {
+          entries.forEach(function(e) { if (e.isIntersecting) e.target.classList.add('active'); });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('[data-reveal]').forEach(function(el) { observer.observe(el); });
+
+        /* ── Working Pomodoro Timer ── */
+        var WORK = 25 * 60, BREAK = 5 * 60;
+        var timeLeft = WORK;
+        var isRunning = false;
+        var isFocus = true;
+        var completed = 0;
+        var interval = null;
+
+        var timeEl = document.getElementById('pomoTime');
+        var labelEl = document.getElementById('pomoLabel');
+        var startBtn = document.getElementById('pomoStart');
+        var resetBtn = document.getElementById('pomoReset');
+        var sessionsEl = document.getElementById('pomoSessions');
+        var ringEl = document.getElementById('pomoRing');
+
+        var circumference = 2 * Math.PI * 52;
+
+        function formatTime(sec) {
+          var m = Math.floor(sec / 60);
+          var s = sec % 60;
+          return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+        }
+
+        function updateRing() {
+          var total = isFocus ? WORK : BREAK;
+          var offset = circumference * (1 - timeLeft / total);
+          ringEl.setAttribute('stroke-dashoffset', offset);
+        }
+
+        function updateDisplay() {
+          timeEl.textContent = formatTime(timeLeft);
+          labelEl.textContent = isFocus ? 'Focus' : 'Break';
+          updateRing();
+        }
+
+        function tick() {
+          if (timeLeft <= 0) {
+            if (isFocus) {
+              completed++;
+              sessionsEl.innerHTML = 'Pomodoros completed: <b>' + completed + '</b>';
+              isFocus = false;
+              timeLeft = BREAK;
+            } else {
+              isFocus = true;
+              timeLeft = WORK;
+            }
+            updateDisplay();
+            return;
+          }
+          timeLeft--;
+          updateDisplay();
+        }
+
+        function startTimer() {
+          if (isRunning) {
+            clearInterval(interval);
+            isRunning = false;
+            startBtn.textContent = 'Resume';
+            startBtn.classList.remove('running');
+            return;
+          }
+          isRunning = true;
+          startBtn.textContent = 'Pause';
+          startBtn.classList.add('running');
+          interval = setInterval(tick, 1000);
+        }
+
+        function resetTimer() {
+          clearInterval(interval);
+          isRunning = false;
+          isFocus = true;
+          timeLeft = WORK;
+          startBtn.textContent = 'Start';
+          startBtn.classList.remove('running');
+          updateDisplay();
+        }
+
+        startBtn.addEventListener('click', startTimer);
+        resetBtn.addEventListener('click', resetTimer);
+        updateDisplay();
+      })();
+    </script>
   </body>
 </html>

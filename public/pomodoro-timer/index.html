@@ -92,10 +92,10 @@
       .header-nav a { font-size: 13px; font-weight: 600; color: #666; transition: color 0.15s; }
       .header-nav a:hover { color: #000; }
       .header-cta {
-        padding: 10px 24px; background: #000; color: #fff;
+        padding: 10px 24px; background: #f33; color: #fff;
         font-size: 13px; font-weight: 700; transition: 0.15s;
       }
-      .header-cta:hover { background: #f33; }
+      .header-cta:hover { background: #e00; }
 
       .hero {
         min-height: 100vh; display: flex; align-items: center;
@@ -116,22 +116,50 @@
       }
       .hero-cta {
         display: inline-flex; align-items: center; gap: 8px;
-        padding: 16px 36px; background: #000; color: #fff;
+        padding: 16px 36px; background: #f33; color: #fff;
         font-size: 15px; font-weight: 700; transition: 0.15s;
       }
-      .hero-cta:hover { background: #f33; }
-      .hero-img-wrap {
+      .hero-cta:hover { background: #e00; }
+
+      .hero-timer-wrap {
         display: flex; align-items: center; justify-content: center;
-      }
-      .hero-img-wrap img {
-        width: 100%; max-width: 540px; height: auto;
-        filter: drop-shadow(0 25px 25px rgba(0,0,0,0.15));
         animation: float 6s ease-in-out infinite;
       }
       @keyframes float {
         0%, 100% { transform: translateY(0); }
         50% { transform: translateY(-15px); }
       }
+      .hero-timer {
+        position: relative; width: 300px; height: 300px;
+      }
+      .hero-timer svg { transform: rotate(-90deg); width: 100%; height: 100%; }
+      .hero-timer .ring-bg { fill: none; stroke: #f0f0f0; stroke-width: 6; }
+      .hero-timer .ring-fg {
+        fill: none; stroke: #f33; stroke-width: 6;
+        stroke-linecap: round; transition: stroke-dashoffset 0.5s ease;
+      }
+      .hero-timer-inner {
+        position: absolute; inset: 0; display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+      }
+      .hero-timer-time {
+        font-size: 64px; font-weight: 900; color: #000; letter-spacing: -3px;
+      }
+      .hero-timer-label {
+        font-size: 13px; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 0.15em; color: #999; margin-top: 4px;
+      }
+      .hero-timer-ctrls { display: flex; gap: 10px; margin-top: 18px; }
+      .hero-timer-ctrls button {
+        padding: 10px 24px; border: none; font-family: inherit;
+        font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.15s;
+      }
+      .hero-timer-ctrls .btn-start { background: #f33; color: #fff; }
+      .hero-timer-ctrls .btn-start:hover { background: #e00; }
+      .hero-timer-ctrls .btn-start.is-running { background: #000; }
+      .hero-timer-ctrls .btn-start.is-running:hover { background: #f33; }
+      .hero-timer-ctrls .btn-reset { background: #f5f5f5; color: #666; border: 1px solid #e0e0e0; }
+      .hero-timer-ctrls .btn-reset:hover { background: #eee; color: #000; }
 
       .section { padding: 100px 24px; max-width: 1120px; margin: 0 auto; }
       .section-label {
@@ -149,23 +177,36 @@
         max-width: 600px; font-weight: 300;
       }
 
-      .features-grid {
-        display: grid; grid-template-columns: 1fr 1fr 1fr;
-        gap: 2px; margin-top: 60px; background: #e0e0e0; border: 1px solid #e0e0e0;
+      .layers-nav {
+        display: flex; gap: 2px; margin-top: 48px; background: #e0e0e0;
+        border: 1px solid #e0e0e0; border-bottom: none;
       }
-      .feature-card {
-        background: #fff; padding: 40px 32px;
-        transition: 0.2s;
+      .layers-nav button {
+        flex: 1; padding: 20px 24px; border: none; background: #fff;
+        font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer;
+        transition: 0.2s; text-align: left; display: flex; align-items: center; gap: 14px;
+        color: #999;
       }
-      .feature-card:hover { background: #fafafa; }
-      .feature-card .fc-num {
-        font-size: 48px; font-weight: 900; color: #eee;
-        margin-bottom: 16px; transition: color 0.3s;
+      .layers-nav button .ln-num {
+        font-size: 36px; font-weight: 900; color: #eee;
+        transition: color 0.2s; line-height: 1;
       }
-      .feature-card:hover .fc-num { color: #f33; }
-      .feature-card .fc-icon { width: 32px; height: 32px; margin-bottom: 16px; color: #f33; }
-      .feature-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
-      .feature-card p { font-size: 14px; color: #666; line-height: 1.7; }
+      .layers-nav button:hover { background: #fafafa; }
+      .layers-nav button.is-active { background: #fff; color: #000; }
+      .layers-nav button.is-active .ln-num { color: #f33; }
+      .layers-nav button .ln-arrow {
+        margin-left: auto; font-size: 20px; color: #ddd; transition: 0.2s;
+      }
+      .layers-nav button.is-active .ln-arrow { color: #f33; }
+      .layers-panels { border: 1px solid #e0e0e0; border-top: none; background: #fff; }
+      .layer-panel { display: none; padding: 48px 40px; }
+      .layer-panel.is-active { display: block; }
+      .layer-panel h3 { font-size: 26px; font-weight: 900; margin-bottom: 12px; }
+      .layer-panel p { font-size: 15px; color: #666; line-height: 1.8; margin-bottom: 20px; max-width: 600px; }
+      .layer-panel .lp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: #e0e0e0; border: 1px solid #e0e0e0; }
+      .layer-panel .lp-card { background: #fff; padding: 24px; }
+      .layer-panel .lp-card h4 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+      .layer-panel .lp-card p { font-size: 13px; color: #999; margin: 0; max-width: none; }
 
       .comparison-table {
         width: 100%; border-collapse: collapse; margin-top: 48px;
@@ -254,12 +295,15 @@
       [data-reveal-delay="4"] { transition-delay: 0.4s; }
 
       @media (max-width: 900px) {
-        .features-grid { grid-template-columns: 1fr; }
+        .layers-nav { flex-direction: column; border-bottom: 1px solid #e0e0e0; }
+        .layers-nav button { border-bottom: 1px solid #f0f0f0; }
+        .layer-panel .lp-grid { grid-template-columns: 1fr; }
       }
       @media (max-width: 768px) {
         .hero-grid { grid-template-columns: 1fr; gap: 40px; text-align: center; }
         .hero p { margin: 24px auto 32px; }
-        .hero-img-wrap img { max-width: 380px; }
+        .hero-timer-wrap .hero-timer { width: 240px; height: 240px; }
+        .hero-timer-time { font-size: 48px; }
         .header-nav { display: none; }
         .comparison-table { font-size: 13px; }
         .comparison-table th, .comparison-table td { padding: 12px 10px; }
@@ -292,8 +336,21 @@
           <p>A free working Pomodoro timer with 25/5 cycles, ambient soundscapes, and living wallpapers. Everything you need to master focus.</p>
           <a href="/app/" class="hero-cta">Try the Pomodoro Timer</a>
         </div>
-        <div class="hero-img-wrap" data-reveal data-reveal-delay="2">
-          <img src="/screenshots/hero-timer-3d.webp" alt="3D Pomodoro Timer" loading="eager" />
+        <div class="hero-timer-wrap" data-reveal data-reveal-delay="2">
+          <div class="hero-timer">
+            <svg viewBox="0 0 120 120">
+              <circle class="ring-bg" cx="60" cy="60" r="52" />
+              <circle class="ring-fg" id="heroRing" cx="60" cy="60" r="52" stroke-dasharray="326.73" stroke-dashoffset="0" />
+            </svg>
+            <div class="hero-timer-inner">
+              <div class="hero-timer-time" id="heroTime">25:00</div>
+              <div class="hero-timer-label" id="heroLabel">Focus</div>
+              <div class="hero-timer-ctrls">
+                <button class="btn-start" id="heroStart">Start</button>
+                <button class="btn-reset" id="heroReset">Reset</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -303,21 +360,89 @@
       <h2>Three layers.<br><span class="hl">Master your attention.</span></h2>
       <p class="lead">The foundation of StudyFlow is a Pomodoro timer engineered for rapid, cost-efficient focus production at below-average distraction.</p>
 
-      <div class="features-grid">
-        <div class="feature-card">
-          <div class="fc-num">01</div>
-          <h3>Ambient Soundscapes</h3>
-          <p>Leverage access to next-generation ambient audio — rain, lo-fi, white noise, and more — to maintain optimal concentration levels across extended study sessions.</p>
+      <div class="layers-nav">
+        <button class="is-active" data-layer="0">
+          <span class="ln-num">01</span>
+          Ambient Soundscapes
+          <span class="ln-arrow">&rarr;</span>
+        </button>
+        <button data-layer="1">
+          <span class="ln-num">02</span>
+          Living Wallpapers
+          <span class="ln-arrow">&rarr;</span>
+        </button>
+        <button data-layer="2">
+          <span class="ln-num">03</span>
+          Gamified Progress
+          <span class="ln-arrow">&rarr;</span>
+        </button>
+      </div>
+      <div class="layers-panels">
+        <div class="layer-panel is-active">
+          <h3>Next-generation ambient audio</h3>
+          <p>Rain on windows, crackling fire, deep white noise, lo-fi beats — 20+ soundscapes engineered to mask distractions and anchor your focus. Each sound is a full stereo recording optimized for extended wear.</p>
+          <div class="lp-grid">
+            <div class="lp-card">
+              <h4>Rain &amp; Thunder</h4>
+              <p>Deep, rumbling低频 with intermittent crackles — proven to improve cognitive performance during repetitive study tasks.</p>
+            </div>
+            <div class="lp-card">
+              <h4>Lo-fi Focus Beats</h4>
+              <p>Curated playlists at 60-80 BPM designed to synchronize with your brain's natural concentration rhythms.</p>
+            </div>
+            <div class="lp-card">
+              <h4>White Noise</h4>
+              <p>Full-spectrum audio that masks sudden environmental sounds. Ideal for libraries, coffee shops, and shared workspaces.</p>
+            </div>
+            <div class="lp-card">
+              <h4>Nature Soundscapes</h4>
+              <p>Forest streams, ocean waves, wind through pines — biophilic sounds that reduce stress and improve sustained attention.</p>
+            </div>
+          </div>
         </div>
-        <div class="feature-card">
-          <div class="fc-num">02</div>
-          <h3>Living Wallpapers</h3>
-          <p>Deploy 50+ animated wallpapers that transform your browser into a focus environment. From serene landscapes to dynamic abstract visuals.</p>
+        <div class="layer-panel">
+          <h3>Environments that adapt to you</h3>
+          <p>50+ living wallpapers that transform your browser into a focus environment. Each wallpaper is fully animated and optimized for performance — no battery drain, no fan noise.</p>
+          <div class="lp-grid">
+            <div class="lp-card">
+              <h4>Serene Landscapes</h4>
+              <p>Mountain vistas, coastal sunsets, forest canopies — photorealistic scenes with subtle parallax motion.</p>
+            </div>
+            <div class="lp-card">
+              <h4>Abstract Dynamics</h4>
+              <p>Generative art that shifts and evolves throughout your session. Every Pomodoro feels different.</p>
+            </div>
+            <div class="lp-card">
+              <h4>Dark Mode Atmospheres</h4>
+              <p>Low-light wallpapers optimized for late-night study. Reduced blue light, deeper blacks, minimal eye strain.</p>
+            </div>
+            <div class="lp-card">
+              <h4>Seasonal Themes</h4>
+              <p>Wallpapers that change with the calendar — autumn leaves, winter snowfall, spring blooms, summer golden hour.</p>
+            </div>
+          </div>
         </div>
-        <div class="feature-card">
-          <div class="fc-num">03</div>
-          <h3>Gamified Progress</h3>
-          <p>Every session earns XP. Build streaks, level up, unlock achievements. StudyFlow turns consistency into a game where showing up is how you win.</p>
+        <div class="layer-panel">
+          <h3>Where consistency becomes a game</h3>
+          <p>Every completed Pomodoro earns XP. Build daily streaks, level up, unlock achievements, and compete on the leaderboard. StudyFlow turns showing up into something you want to do.</p>
+          <div class="lp-grid">
+            <div class="lp-card">
+              <h4>XP &amp; Levels</h4>
+              <p>Earn 10 XP per Pomodoro, 50 XP per streak day. Level up from Novice to Grandmaster as your focus compounds.</p>
+            </div>
+            <div class="lp-card">
+              <h4>Streak System</h4>
+              <p>Consecutive study days build your streak. Miss a day and it resets. The only person you are competing with is yesterday's you.</p>
+            </div>
+            <div class="lp-card">
+              <h4>Achievements</h4>
+              <p>Unlock badges for milestones — 100 Pomodoros, 7-day streak, 30-day streak, midnight study sessions, and more.</p>
+            </div>
+            <div class="lp-card">
+              <h4>Leaderboard</h4>
+              <p>Compare your weekly XP with friends or the global community. Friendly competition that keeps you accountable.</p>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -463,6 +588,47 @@
         document.querySelectorAll('.faq-item').forEach(function(item) {
           item.addEventListener('click', function() {
             this.classList.toggle('open');
+          });
+        });
+
+        var WORK = 25 * 60, BREAK = 5 * 60;
+        var timeLeft = WORK, isRunning = false, isFocus = true, completed = 0, interval = null;
+        var timeEl = document.getElementById('heroTime');
+        var labelEl = document.getElementById('heroLabel');
+        var startBtn = document.getElementById('heroStart');
+        var resetBtn = document.getElementById('heroReset');
+        var ringEl = document.getElementById('heroRing');
+        var circumference = 2 * Math.PI * 52;
+
+        function fmt(s) { var m = Math.floor(s / 60), sec = s % 60; return String(m).padStart(2, '0') + ':' + String(sec).padStart(2, '0'); }
+        function updateRing() { var total = isFocus ? WORK : BREAK; ringEl.setAttribute('stroke-dashoffset', circumference * (1 - timeLeft / total)); }
+        function updateDisplay() { timeEl.textContent = fmt(timeLeft); labelEl.textContent = isFocus ? 'Focus' : 'Break'; updateRing(); }
+        function tick() {
+          if (timeLeft <= 0) {
+            if (isFocus) { completed++; isFocus = false; timeLeft = BREAK; }
+            else { isFocus = true; timeLeft = WORK; }
+            updateDisplay(); return;
+          }
+          timeLeft--; updateDisplay();
+        }
+        function startTimer() {
+          if (isRunning) { clearInterval(interval); isRunning = false; startBtn.textContent = 'Resume'; startBtn.classList.remove('is-running'); return; }
+          isRunning = true; startBtn.textContent = 'Pause'; startBtn.classList.add('is-running');
+          interval = setInterval(tick, 1000);
+        }
+        function resetTimer() { clearInterval(interval); isRunning = false; isFocus = true; timeLeft = WORK; startBtn.textContent = 'Start'; startBtn.classList.remove('is-running'); updateDisplay(); }
+        startBtn.addEventListener('click', startTimer);
+        resetBtn.addEventListener('click', resetTimer);
+        updateDisplay();
+
+        var navBtns = document.querySelectorAll('.layers-nav button');
+        var panels = document.querySelectorAll('.layer-panel');
+        navBtns.forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            navBtns.forEach(function(b) { b.classList.remove('is-active'); });
+            panels.forEach(function(p) { p.classList.remove('is-active'); });
+            this.classList.add('is-active');
+            panels[parseInt(this.getAttribute('data-layer'))].classList.add('is-active');
           });
         });
       })();

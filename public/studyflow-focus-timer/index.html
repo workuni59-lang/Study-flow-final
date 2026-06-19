@@ -4,8 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>StudyFlow Focus Timer — Free Focus Timer with Wallpapers & Ambient Sounds</title>
-    <meta name="description" content="StudyFlow is a free focus timer with beautiful wallpapers, ambient soundscapes, and gamified progress tracking. Not an AI study tool — a real focus environment." />
+    <meta name="description" content="A free focus timer with living wallpapers, ambient soundscapes, Pomodoro and deep focus modes, and gamified progress tracking. Not an AI tool — a real study environment." />
     <link rel="canonical" href="https://studyflow.space/studyflow-focus-timer/" />
+    <meta name="dateModified" content="2026-06-19" />
 
     <meta property="og:title" content="StudyFlow Focus Timer — Free Focus Timer with Wallpapers & Ambient Sounds" />
     <meta property="og:description" content="A free focus timer with beautiful wallpapers, ambient soundscapes, and gamified progress tracking. Start focusing in one click." />
@@ -25,31 +26,50 @@
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
+      "@graph": [
         {
-          "@type": "Question",
-          "name": "What is the StudyFlow focus timer?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "StudyFlow is a free, browser-based focus timer with animated wallpapers, ambient sounds, and gamified progress tracking. It is designed for students who need a distraction-free study environment."
-          }
+          "@type": "WebPage",
+          "name": "StudyFlow Focus Timer — Free Focus Timer",
+          "description": "A free focus timer with living wallpapers, ambient soundscapes, Pomodoro and deep focus modes, and gamified progress tracking.",
+          "url": "https://studyflow.space/studyflow-focus-timer/",
+          "datePublished": "2026-06-01",
+          "dateModified": "2026-06-19"
         },
         {
-          "@type": "Question",
-          "name": "How is StudyFlow different from other focus timers?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Unlike standard timers, StudyFlow combines a Pomodoro timer with immersive wallpapers, ambient soundscapes, and gamification. It is built specifically for students, not corporate productivity."
-          }
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://studyflow.space/" },
+            { "@type": "ListItem", "position": 2, "name": "Focus Timer", "item": "https://studyflow.space/studyflow-focus-timer/" }
+          ]
         },
         {
-          "@type": "Question",
-          "name": "Is StudyFlow really free?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. StudyFlow is completely free with no sign up required. All features including wallpapers, ambient sounds, and gamification are available without payment."
-          }
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What is the StudyFlow focus timer?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "StudyFlow is a free, browser-based focus timer with animated wallpapers, ambient sounds, and gamified progress tracking. It is designed for students who need a distraction-free study environment."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How is StudyFlow different from other focus timers?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Unlike standard timers, StudyFlow combines a Pomodoro timer with immersive wallpapers, ambient soundscapes, and gamification. It is built specifically for students, not corporate productivity."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Is StudyFlow really free?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. StudyFlow is completely free with no sign up required. All features including wallpapers, ambient sounds, and gamification are available without payment."
+              }
+            }
+          ]
         }
       ]
     }
@@ -92,6 +112,8 @@
         letter-spacing: -0.3px;
       }
       .header-logo img { width: 32px; height: 32px; border-radius: 8px; }
+      .header-nav a { font-size: 13px; font-weight: 500; color: #64748b; transition: color 0.2s; }
+      .header-nav a:hover { color: #0f172a; }
       .header-cta {
         padding: 8px 20px;
         background: #6366f1;
@@ -252,7 +274,12 @@
         <img src="/logo.png" alt="StudyFlow" width="32" height="32" />
         StudyFlow
       </a>
-      <a href="/app/" class="header-cta">Open App</a>
+      <nav class="header-nav" style="display:flex;align-items:center;gap:20px;">
+        <a href="/focus/pomodoro" style="font-size:13px;font-weight:500;color:#64748b;transition:color 0.2s;">Pomodoro</a>
+        <a href="/subjects" style="font-size:13px;font-weight:500;color:#64748b;transition:color 0.2s;">Planner</a>
+        <a href="/focus/stopwatch" style="font-size:13px;font-weight:500;color:#64748b;transition:color 0.2s;">Stopwatch</a>
+        <a href="/focus" class="header-cta">Open App</a>
+      </nav>
     </header>
 
     <section class="hero">

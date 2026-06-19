@@ -1,0 +1,815 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Study With Me · Free Pomodoro Timer · Aesthetic Focus Space — StudyFlow</title>
+    <meta name="description" content="A cozy study-with-me Pomodoro timer with aesthetic wallpapers, ambient sounds, and progress tracking. Your virtual focus corner — free, no sign-up." />
+    <link rel="canonical" href="https://studyflow.space/study-with-me/" />
+    <meta name="dateModified" content="2026-06-19" />
+
+    <meta property="og:title" content="Study With Me · Free Pomodoro Timer · Aesthetic Focus Space — StudyFlow" />
+    <meta property="og:description" content="A cozy study-with-me Pomodoro timer with aesthetic wallpapers, ambient sounds, and progress tracking. Your virtual focus corner." />
+    <meta property="og:url" content="https://studyflow.space/study-with-me/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://studyflow.space/logo.png" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Study With Me · Free Pomodoro Timer · Aesthetic Focus Space — StudyFlow" />
+    <meta name="twitter:description" content="A cozy study-with-me Pomodoro timer with aesthetic wallpapers, ambient sounds, and progress tracking." />
+
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&family=Nunito:wght@300;400;500;600;700&display=swap" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebPage",
+          "name": "Study With Me — Free Pomodoro Timer — StudyFlow",
+          "description": "A cozy study-with-me Pomodoro timer with aesthetic wallpapers, ambient sounds, and gamified progress tracking. Your virtual focus corner.",
+          "url": "https://studyflow.space/study-with-me/",
+          "datePublished": "2026-06-19",
+          "dateModified": "2026-06-19"
+        },
+        {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://studyflow.space/" },
+            { "@type": "ListItem", "position": 2, "name": "Study With Me", "item": "https://studyflow.space/study-with-me/" }
+          ]
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What is a study with me timer?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "A study-with-me timer recreates the cozy, focused atmosphere of popular study-with-me YouTube videos. StudyFlow adds aesthetic wallpapers, ambient soundscapes, and Pomodoro timing so you feel like you are studying alongside a friend."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can I use this without signing up?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Everything works immediately with no account. Create an account only if you want your progress and stats to sync across devices."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Does it work on mobile?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. StudyFlow works on any device with a browser. Install it as a PWA for a native app experience on your phone or tablet."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can I study with friends?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "While StudyFlow does not have live video co-working yet, you can share your session stats, compare streaks, and motivate each other through leaderboards and achievements."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What focus modes are available?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "StudyFlow offers classic Pomodoro (25 minutes work, 5 break), deep focus (50 minutes work, 10 break), and Flow mode that adapts to your concentration level. Perfect for study-with-me sessions of any length."
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
+
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+        html { scroll-behavior: auto; }
+        [data-reveal] { opacity: 1 !important; transform: none !important; }
+      }
+
+      html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+
+      :root {
+        --cream: #fdf8f4;
+        --cream-dark: #f5ede5;
+        --rose: #e8a0b4;
+        --rose-light: #f5d5e0;
+        --rose-glow: rgba(232, 160, 180, 0.15);
+        --lavender: #c4b5fd;
+        --lavender-light: #e8e2ff;
+        --gold: #f0b27a;
+        --gold-light: #fce4cc;
+        --text: #3d2c2e;
+        --text-muted: #8a7a7c;
+        --text-light: #b5a5a7;
+        --card-bg: rgba(255, 247, 240, 0.7);
+        --card-border: rgba(232, 160, 180, 0.15);
+      }
+
+      body {
+        font-family: 'Nunito', system-ui, -apple-system, sans-serif;
+        background: var(--cream);
+        color: var(--text);
+        line-height: 1.7;
+        overflow-x: hidden;
+      }
+
+      h1, h2, h3, h4 {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-weight: 700;
+        line-height: 1.15;
+        letter-spacing: -0.01em;
+      }
+
+      a { color: inherit; text-decoration: none; }
+      img { max-width: 100%; display: block; }
+
+      #progress-bar {
+        position: fixed; top: 0; left: 0; right: 0; z-index: 101;
+        height: 3px;
+        background: linear-gradient(90deg, var(--rose), var(--lavender), var(--gold));
+        transform-origin: left; transform: scaleX(0);
+        transition: transform 0.1s linear;
+        border-radius: 0 2px 2px 0;
+      }
+
+      .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+
+      .header {
+        position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 14px 24px; max-width: 1120px; margin: 0 auto;
+        background: rgba(253, 248, 244, 0.75);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(232, 160, 180, 0.1);
+      }
+      .header-logo {
+        display: flex; align-items: center; gap: 10px;
+        font-family: 'Playfair Display', Georgia, serif;
+        font-weight: 700; font-size: 20px; color: var(--text);
+      }
+      .header-logo img { width: 32px; height: 32px; border-radius: 8px; }
+      .header-nav { display: flex; align-items: center; gap: 24px; }
+      .header-nav a { font-size: 14px; font-weight: 500; color: var(--text-muted); transition: color 0.2s; }
+      .header-nav a:hover { color: var(--text); }
+      .header-cta {
+        padding: 8px 22px; background: var(--rose);
+        color: #fff; font-size: 14px; font-weight: 600;
+        border-radius: 10px; transition: background 0.2s, transform 0.2s;
+      }
+      .header-cta:hover { background: #dc8ca2; transform: translateY(-1px); }
+
+      .hamburger {
+        display: none; flex-direction: column; gap: 5px;
+        background: none; border: none; cursor: pointer;
+        padding: 4px; z-index: 102;
+      }
+      .hamburger span {
+        display: block; width: 22px; height: 2px;
+        background: var(--text); border-radius: 2px;
+        transition: 0.3s;
+      }
+      .hamburger.is-open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+      .hamburger.is-open span:nth-child(2) { opacity: 0; }
+      .hamburger.is-open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+      .mobile-menu {
+        display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        z-index: 99; background: rgba(253, 248, 244, 0.97);
+        backdrop-filter: blur(30px);
+        flex-direction: column; align-items: center; justify-content: center;
+        gap: 32px; opacity: 0; transition: opacity 0.3s;
+        pointer-events: none;
+      }
+      .mobile-menu.is-open { opacity: 1; pointer-events: all; }
+      .mobile-menu a {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 24px; font-weight: 600; color: var(--text);
+      }
+
+      .hero {
+        min-height: 100vh; display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        text-align: center; padding: 120px 24px 80px;
+        position: relative;
+        background: linear-gradient(
+          180deg,
+          var(--lavender-light) 0%,
+          var(--cream) 30%,
+          var(--cream-dark) 100%
+        );
+      }
+      .hero::before {
+        content: ''; position: absolute; top: 0; left: 0; right: 0;
+        height: 100%; pointer-events: none;
+        background: radial-gradient(ellipse at 50% 0%, rgba(232,160,180,0.12) 0%, transparent 60%);
+      }
+      .hero h1 {
+        font-size: clamp(40px, 7vw, 72px); font-weight: 800;
+        color: var(--text); margin-bottom: 12px;
+        letter-spacing: -0.02em; position: relative;
+      }
+      .hero h1 .hl { font-style: italic; color: var(--rose); }
+      .hero-sub {
+        font-size: 17px; color: var(--text-muted);
+        margin-bottom: 40px; font-weight: 400;
+        max-width: 440px; line-height: 1.7;
+      }
+
+      .timer-demo {
+        background: var(--card-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--card-border);
+        border-radius: 24px; padding: 48px 40px;
+        margin-bottom: 32px; width: 100%; max-width: 420px;
+        position: relative;
+        box-shadow: 0 8px 40px rgba(232, 160, 180, 0.08);
+        transition: transform 0.3s, box-shadow 0.3s;
+      }
+      .timer-demo:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 60px rgba(232, 160, 180, 0.12);
+      }
+
+      .timer-accent {
+        position: absolute; top: -18px; right: -12px;
+        width: 48px; height: 48px;
+        opacity: 0.7;
+      }
+
+      .timer-display {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: clamp(60px, 10vw, 88px); font-weight: 800;
+        letter-spacing: -0.03em; line-height: 1;
+        color: var(--text); margin-bottom: 6px;
+      }
+      .timer-phase {
+        font-size: 13px; color: var(--text-light);
+        font-weight: 500;
+        letter-spacing: 0.12em; text-transform: uppercase;
+        margin-bottom: 28px; font-family: 'Nunito', sans-serif;
+      }
+      .timer-modes {
+        display: flex; gap: 6px; justify-content: center; margin-bottom: 28px;
+      }
+      .timer-mode {
+        padding: 8px 18px; font-size: 13px; font-weight: 600;
+        border-radius: 10px; border: 1px solid var(--card-border);
+        background: transparent; color: var(--text-muted); cursor: pointer;
+        font-family: 'Nunito', sans-serif; transition: 0.2s;
+      }
+      .timer-mode:hover { border-color: var(--rose); color: var(--text); }
+      .timer-mode.is-active {
+        background: var(--rose-light); border-color: var(--rose); color: var(--rose);
+      }
+      .timer-btn {
+        padding: 16px 48px; font-size: 16px; font-weight: 700;
+        border: none; border-radius: 14px; cursor: pointer;
+        background: linear-gradient(135deg, var(--rose), #dc8ca2);
+        color: #fff; font-family: 'Nunito', sans-serif;
+        box-shadow: 0 4px 24px rgba(232, 160, 180, 0.3);
+        transition: 0.2s;
+      }
+      .timer-btn:hover { transform: scale(1.03); box-shadow: 0 6px 32px rgba(232, 160, 180, 0.4); }
+      .timer-btn.is-running { background: linear-gradient(135deg, var(--gold), #e09860); box-shadow: 0 4px 24px rgba(240, 178, 122, 0.3); }
+      .timer-btn.is-paused { background: linear-gradient(135deg, var(--text-muted), #9a8a8c); box-shadow: none; }
+
+      .hero-cta {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 12px 28px; font-size: 14px; font-weight: 600;
+        background: transparent; color: var(--rose);
+        border: 1px solid rgba(232, 160, 180, 0.25); border-radius: 12px;
+        font-family: 'Nunito', sans-serif; cursor: pointer; transition: 0.2s;
+      }
+      .hero-cta:hover { background: var(--rose-light); border-color: var(--rose); }
+
+      .section { padding: 100px 24px; position: relative; }
+      .section-label {
+        font-size: 11px; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 0.2em; color: var(--rose); margin-bottom: 12px; display: block;
+        font-family: 'Nunito', sans-serif;
+      }
+      .section h2 {
+        font-size: clamp(32px, 4.5vw, 48px); font-weight: 700;
+        line-height: 1.1; margin-bottom: 16px;
+        color: var(--text);
+      }
+      .section h2 .hl { font-style: italic; color: var(--rose); }
+      .section p.lead {
+        font-size: 16px; color: var(--text-muted);
+        line-height: 1.8; max-width: 520px; font-weight: 400;
+      }
+
+      .glass-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--card-border);
+        border-radius: 20px; padding: 36px 28px;
+        transition: transform 0.3s, box-shadow 0.3s;
+        will-change: transform;
+      }
+      .glass-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 40px rgba(232, 160, 180, 0.08);
+        border-color: rgba(232, 160, 180, 0.25);
+      }
+
+      .features-grid {
+        display: grid; grid-template-columns: repeat(3, 1fr);
+        gap: 20px; margin-top: 40px;
+      }
+      .features-grid .glass-card { text-align: center; }
+      .features-grid .icon-wrap {
+        width: 56px; height: 56px; margin: 0 auto 18px;
+        background: var(--rose-light); border-radius: 16px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 24px;
+      }
+      .features-grid h3 {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 20px; font-weight: 700; margin-bottom: 8px;
+      }
+      .features-grid p { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
+
+      .steps-grid {
+        display: grid; grid-template-columns: repeat(3, 1fr);
+        gap: 24px; margin-top: 40px;
+      }
+      .step-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--card-border);
+        border-radius: 20px; padding: 36px 28px;
+        text-align: center; transition: transform 0.3s;
+      }
+      .step-card:hover { transform: translateY(-2px); }
+      .step-num {
+        width: 48px; height: 48px; margin: 0 auto 16px;
+        background: var(--rose-light); border-radius: 100%;
+        display: flex; align-items: center; justify-content: center;
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 20px; font-weight: 800; color: var(--rose);
+      }
+      .step-card h3 {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 18px; font-weight: 700; margin-bottom: 6px;
+      }
+      .step-card p { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
+
+      .glass-table-wrap {
+        background: var(--card-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--card-border);
+        border-radius: 20px; overflow: hidden; margin-top: 40px;
+      }
+      .glass-table { width: 100%; border-collapse: collapse; }
+      .glass-table th {
+        text-align: left; padding: 16px 24px;
+        font-size: 11px; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 0.1em; color: var(--text-light);
+        border-bottom: 1px solid var(--card-border);
+        background: rgba(232, 160, 180, 0.04);
+        font-family: 'Nunito', sans-serif;
+      }
+      .glass-table th:not(:first-child) { text-align: center; }
+      .glass-table td {
+        padding: 14px 24px; font-size: 14px;
+        border-bottom: 1px solid rgba(232, 160, 180, 0.06);
+        color: var(--text-muted);
+      }
+      .glass-table td:not(:first-child) { text-align: center; }
+      .glass-table tr:last-child td { border-bottom: none; }
+      .glass-table tr:hover td { background: rgba(232, 160, 180, 0.03); }
+      .check { color: var(--rose); font-weight: 700; font-size: 18px; }
+      .dash { color: var(--text-light); }
+      .amber-check { color: var(--gold); }
+
+      .stats-bar {
+        display: grid; grid-template-columns: repeat(3, 1fr);
+        gap: 20px; margin-top: 40px; max-width: 600px;
+      }
+      .stat-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--card-border);
+        border-radius: 16px; padding: 28px 20px; text-align: center;
+      }
+      .stat-num {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 28px; font-weight: 800; color: var(--rose);
+        margin-bottom: 4px;
+      }
+      .stat-label { font-size: 13px; color: var(--text-muted); }
+
+      .faq-list { margin-top: 40px; max-width: 640px; }
+      .faq-item {
+        background: var(--card-bg);
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--card-border);
+        border-radius: 16px; margin-bottom: 8px; overflow: hidden; cursor: pointer;
+        transition: border-color 0.2s;
+      }
+      .faq-item:hover { border-color: rgba(232, 160, 180, 0.3); }
+      .faq-item.open { border-color: rgba(232, 160, 180, 0.3); }
+      .faq-q {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 18px 22px; font-size: 15px; font-weight: 600; gap: 16px;
+        color: var(--text); user-select: none;
+        font-family: 'Nunito', sans-serif;
+      }
+      .faq-q .arrow {
+        font-size: 24px; color: var(--rose); flex-shrink: 0;
+        transition: transform 0.3s; font-weight: 300;
+      }
+      .faq-item.open .faq-q .arrow { transform: rotate(45deg); }
+      .faq-a {
+        max-height: 0; overflow: hidden;
+        transition: max-height 0.35s ease, padding 0.35s ease;
+        font-size: 14px; color: var(--text-muted); line-height: 1.8; padding: 0 22px;
+      }
+      .faq-item.open .faq-a { max-height: 300px; padding: 0 22px 18px; }
+
+      .cta-section {
+        padding: 100px 24px; text-align: center;
+        position: relative;
+        background: linear-gradient(180deg, var(--cream) 0%, var(--lavender-light) 100%);
+      }
+      .cta-section h2 {
+        font-size: clamp(36px, 5vw, 56px); font-weight: 800;
+        line-height: 1.05; margin-bottom: 12px;
+      }
+      .cta-section h2 .hl { font-style: italic; color: var(--rose); }
+      .cta-section p {
+        font-size: 16px; color: var(--text-muted);
+        margin-bottom: 32px; font-weight: 400;
+      }
+      .cta-button {
+        display: inline-flex; align-items: center; gap: 10px;
+        padding: 18px 48px; font-size: 16px; font-weight: 700;
+        border: none; border-radius: 14px; cursor: pointer;
+        background: linear-gradient(135deg, var(--rose), #dc8ca2);
+        color: #fff; font-family: 'Nunito', sans-serif;
+        box-shadow: 0 6px 32px rgba(232, 160, 180, 0.3);
+        transition: 0.2s;
+      }
+      .cta-button:hover { transform: scale(1.04); box-shadow: 0 8px 48px rgba(232, 160, 180, 0.4); }
+
+      .footer {
+        padding: 40px 24px; text-align: center;
+        border-top: 1px solid var(--card-border);
+        position: relative;
+      }
+      .footer p { font-size: 13px; color: var(--text-light); }
+      .footer-links { display: flex; justify-content: center; gap: 20px; margin-bottom: 12px; flex-wrap: wrap; }
+      .footer-links a { font-size: 13px; color: var(--text-muted); transition: color 0.2s; }
+      .footer-links a:hover { color: var(--text); }
+
+      [data-reveal] { opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease, transform 0.8s ease; }
+      [data-reveal].is-visible { opacity: 1; transform: translateY(0); }
+
+      @media (max-width: 768px) {
+        .header-nav a:not(.header-cta) { display: none; }
+        .hamburger { display: flex; }
+        .mobile-menu { display: flex; }
+        .features-grid { grid-template-columns: 1fr; }
+        .steps-grid { grid-template-columns: 1fr; }
+        .stats-bar { grid-template-columns: 1fr; }
+        .hero h1 { font-size: clamp(32px, 8vw, 44px); }
+        .timer-demo { padding: 36px 24px; }
+        .glass-table { font-size: 13px; }
+        .glass-table th, .glass-table td { padding: 12px 14px; }
+        .section { padding: 72px 24px; }
+        .timer-accent { width: 36px; height: 36px; top: -14px; right: -8px; }
+      }
+    </style>
+  </head>
+  <body>
+
+    <div id="progress-bar"></div>
+
+    <header class="header">
+      <a href="/" class="header-logo"><img src="/logo.png" alt="StudyFlow" width="32" height="32" />StudyFlow</a>
+      <nav class="header-nav">
+        <a href="/focus/pomodoro">Pomodoro</a>
+        <a href="/subjects">Planner</a>
+        <a href="/focus/stopwatch">Stopwatch</a>
+        <a href="/focus" class="header-cta">Open App</a>
+        <button class="hamburger" id="hamburger" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </nav>
+    </header>
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="/focus/pomodoro">Pomodoro</a>
+      <a href="/subjects">Planner</a>
+      <a href="/focus/stopwatch">Stopwatch</a>
+      <a href="/focus" style="color:var(--rose);border:1px solid rgba(232,160,180,0.3);padding:12px 32px;border-radius:8px;font-size:18px">Open App</a>
+    </div>
+
+    <section class="hero">
+      <div class="container" style="display:flex;flex-direction:column;align-items:center;">
+        <h1>study with me,<br><span class="hl">one Pomodoro at a time.</span></h1>
+        <p class="hero-sub">A cozy focus corner with aesthetic wallpapers, soft sounds, and a timer that makes studying feel less like work.</p>
+        <div class="timer-demo" id="timerDemo">
+          <svg class="timer-accent" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M16 8c-4 0-6 4-6 8 0 6 6 10 6 10s6-4 6-10c0-4-2-8-6-8z" stroke="#e8a0b4" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+            <path d="M14 12h4" stroke="#e8a0b4" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M3 28h26" stroke="#e8a0b4" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M8 32h16" stroke="#e8a0b4" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M12 36h8" stroke="#e8a0b4" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="m14 22 3-6" stroke="#e8a0b4" stroke-width="1.2" stroke-linecap="round" opacity="0.5"/>
+            <circle cx="29" cy="20" r="2" fill="#c4b5fd" opacity="0.6"/>
+            <circle cx="35" cy="16" r="1.5" fill="#f0b27a" opacity="0.5"/>
+            <circle cx="38" cy="24" r="1.2" fill="#e8a0b4" opacity="0.4"/>
+          </svg>
+          <div class="timer-display" id="timerDisplay">25:00</div>
+          <div class="timer-phase" id="timerPhase">FOCUS</div>
+          <div class="timer-modes">
+            <button class="timer-mode is-active" data-mode="pomodoro">Pomodoro</button>
+            <button class="timer-mode" data-mode="deep">Deep Focus</button>
+            <button class="timer-mode" data-mode="flow">Flow</button>
+          </div>
+          <button class="timer-btn" id="timerBtn">Start Focus</button>
+        </div>
+        <a href="/app/" class="hero-cta">Open full StudyFlow app &rarr;</a>
+      </div>
+    </section>
+
+    <section class="section container" data-reveal id="features">
+      <h2><span class="section-label">What you get</span><br>Everything you need<br>for a <span class="hl">cozy focus session.</span></h2>
+      <div class="features-grid">
+        <div class="glass-card">
+          <div class="icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e8a0b4" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="12" cy="12" r="4"/><path d="M3 9h18"/></svg>
+          </div>
+          <h3>Aesthetic Wallpapers</h3>
+          <p>50+ living wallpapers that shift and breathe. Pastel gradients, serene nature scenes, and cozy room vibes that make your study space feel like home.</p>
+        </div>
+        <div class="glass-card">
+          <div class="icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e8a0b4" stroke-width="2" stroke-linecap="round"><path d="M9 18V5l12-2v13"/><circle cx="5" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>
+          </div>
+          <h3>Soft Soundscapes</h3>
+          <p>Lo-fi beats, gentle rain, fireplace crackle, and white noise. Sounds that fade into the background so your thoughts stay in the foreground.</p>
+        </div>
+        <div class="glass-card">
+          <div class="icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f0b27a" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <h3>Gentle Progress</h3>
+          <p>Earn XP for every session. Build streaks, level up at your own pace, and watch your focus time grow. Consistency over perfection.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section container" data-reveal id="how-it-works">
+      <h2><span class="section-label">How it works</span><br>Three simple steps to<br>your <span class="hl">focus flow.</span></h2>
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <h3>Pick your vibe</h3>
+          <p>Choose a wallpaper and sound that match your mood. Pomodoro for quick sessions, deep focus for serious work, or Flow to go at your own pace.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <h3>Start the timer</h3>
+          <p>One click and you are in your session. The wallpaper breathes, the sounds play softly, and the timer keeps you gently on track.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <h3>Watch yourself grow</h3>
+          <p>Every completed session earns XP. Streaks build, levels increase, and your personal focus history becomes a story of small wins compounding.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section container" data-reveal id="comparison">
+      <h2><span class="section-label">Comparison</span><br>See what makes<br><span class="hl">StudyFlow different.</span></h2>
+      <div class="glass-table-wrap">
+        <table class="glass-table">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>StudyFlow</th>
+              <th>Regular Timer</th>
+              <th>Other Apps</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Pomodoro / Deep Focus / Flow</td><td class="check">&#10003;</td><td class="dash">&mdash;</td><td class="check">&#10003;</td></tr>
+            <tr><td>Aesthetic wallpapers (50+)</td><td class="check">&#10003;</td><td class="dash">&mdash;</td><td class="dash">&mdash;</td></tr>
+            <tr><td>Ambient soundscapes</td><td class="check">&#10003;</td><td class="dash">&mdash;</td><td class="amber-check">Limited</td></tr>
+            <tr><td>Gamification (XP, streaks, levels)</td><td class="check">&#10003;</td><td class="dash">&mdash;</td><td class="dash">&mdash;</td></tr>
+            <tr><td>Session analytics</td><td class="check">&#10003;</td><td class="dash">&mdash;</td><td class="amber-check">Basic</td></tr>
+            <tr><td>Completely free, no sign-up</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="dash">&mdash;</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section container" data-reveal>
+      <h2><span class="section-label">Loved by students</span><br>Join thousands of<br><span class="hl">cozy focus seekers.</span></h2>
+      <div class="stats-bar">
+        <div class="stat-card">
+          <div class="stat-num">10K+</div>
+          <div class="stat-label">active students</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">50+</div>
+          <div class="stat-label">aesthetic wallpapers</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">4.9</div>
+          <div class="stat-label">average rating</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section container" data-reveal id="faq">
+      <h2><span class="section-label">FAQ</span><br>Your questions,<br><span class="hl">answered softly.</span></h2>
+      <div class="faq-list">
+        <div class="faq-item">
+          <div class="faq-q">What is a study with me timer?<span class="arrow">+</span></div>
+          <div class="faq-a">It recreates the cozy, focused atmosphere of popular study-with-me YouTube videos. StudyFlow adds aesthetic wallpapers, ambient soundscapes, and Pomodoro timing so every session feels like studying alongside a friend.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">Can I use this without signing up?<span class="arrow">+</span></div>
+          <div class="faq-a">Yes. Everything works immediately with no account. Create an account only if you want your progress and stats to sync across devices.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">Does it work on my phone?<span class="arrow">+</span></div>
+          <div class="faq-a">Yes. StudyFlow works on any device with a browser. You can install it as a PWA for a native app experience on your phone or tablet.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">Can I study with friends?<span class="arrow">+</span></div>
+          <div class="faq-a">While live co-working is coming soon, you can already share session stats, compare streaks, and motivate each other through leaderboards and achievements.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">What focus modes are there?<span class="arrow">+</span></div>
+          <div class="faq-a">Classic Pomodoro (25 minutes work, 5 break), deep focus (50 minutes work, 10 break), and Flow mode that adapts to your concentration level. Perfect for study-with-me sessions of any length.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-section" data-reveal>
+      <h2>Ready to <span class="hl">study together?</span></h2>
+      <p>Free. No sign-up. Your cozy focus corner is one click away.</p>
+      <a href="/app/" class="cta-button">Start your session &rarr;</a>
+    </section>
+
+    <footer class="footer">
+      <div class="footer-links">
+        <a href="/">Home</a>
+        <a href="/flip-clock/">Flip Clock</a>
+        <a href="/aesthetic-stopwatch/">Stopwatch</a>
+        <a href="/pomodoro-timer/">Pomodoro</a>
+        <a href="/study-timer/">Study Timer</a>
+        <a href="/study-planner/">Planner</a>
+      </div>
+      <p>&copy; 2026 StudyFlow</p>
+    </footer>
+
+    <script>
+      var timerSeconds = 1500;
+      var timerInterval = null;
+      var isRunning = false;
+      var currentMode = 'pomodoro';
+      var modes = {
+        pomodoro: { work: 1500, break: 300, label: 'Pomodoro' },
+        deep: { work: 3000, break: 600, label: 'Deep Focus' },
+        flow: { work: 3600, break: 0, label: 'Flow' },
+      };
+      var isBreak = false;
+
+      function formatTime(s) {
+        var m = Math.floor(s / 60);
+        var sec = s % 60;
+        return (m < 10 ? '0' : '') + m + ':' + (sec < 10 ? '0' : '') + sec;
+      }
+
+      function updateTimerDisplay() {
+        document.getElementById('timerDisplay').textContent = formatTime(timerSeconds);
+        document.getElementById('timerPhase').textContent = isBreak ? 'BREAK' : 'FOCUS';
+      }
+
+      function switchMode(mode) {
+        if (isRunning) {
+          clearInterval(timerInterval);
+          isRunning = false;
+          document.getElementById('timerBtn').textContent = 'Start Focus';
+          document.getElementById('timerBtn').classList.remove('is-running', 'is-paused');
+        }
+        currentMode = mode;
+        isBreak = false;
+        timerSeconds = modes[mode].work;
+        updateTimerDisplay();
+        document.querySelectorAll('.timer-mode').forEach(function(b) {
+          b.classList.toggle('is-active', b.dataset.mode === mode);
+        });
+      }
+
+      document.querySelectorAll('.timer-mode').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          switchMode(this.dataset.mode);
+        });
+      });
+
+      document.getElementById('timerBtn').addEventListener('click', function() {
+        if (isRunning) {
+          clearInterval(timerInterval);
+          isRunning = false;
+          this.textContent = 'Resume';
+          this.classList.remove('is-running');
+          this.classList.add('is-paused');
+        } else {
+          isRunning = true;
+          this.textContent = 'Pause';
+          this.classList.remove('is-paused');
+          this.classList.add('is-running');
+          timerInterval = setInterval(function() {
+            timerSeconds--;
+            if (timerSeconds <= 0) {
+              if (!isBreak && modes[currentMode].break > 0) {
+                isBreak = true;
+                timerSeconds = modes[currentMode].break;
+                document.getElementById('timerPhase').textContent = 'BREAK';
+              } else {
+                clearInterval(timerInterval);
+                isRunning = false;
+                document.getElementById('timerBtn').textContent = 'Done!';
+                document.getElementById('timerBtn').classList.remove('is-running');
+                document.getElementById('timerPhase').textContent = 'SESSION COMPLETE';
+                return;
+              }
+            }
+            updateTimerDisplay();
+          }, 1000);
+        }
+      });
+
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+          }
+        });
+      }, { threshold: 0.15 });
+
+      document.querySelectorAll('[data-reveal]').forEach(function(el) {
+        observer.observe(el);
+      });
+
+      document.querySelectorAll('.faq-item').forEach(function(item) {
+        item.addEventListener('click', function() {
+          this.classList.toggle('open');
+        });
+      });
+
+      var progressBar = document.getElementById('progress-bar');
+      window.addEventListener('scroll', function() {
+        var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        var progress = docHeight > 0 ? scrollTop / docHeight : 0;
+        progressBar.style.transform = 'scaleX(' + progress + ')';
+      });
+
+      var hamburger = document.getElementById('hamburger');
+      var mobileMenu = document.getElementById('mobileMenu');
+      if (hamburger) {
+        hamburger.addEventListener('click', function() {
+          var isOpen = this.classList.toggle('is-open');
+          mobileMenu.classList.toggle('is-open', isOpen);
+          document.body.style.overflow = isOpen ? 'hidden' : '';
+        });
+        mobileMenu.querySelectorAll('a').forEach(function(link) {
+          link.addEventListener('click', function() {
+            hamburger.classList.remove('is-open');
+            mobileMenu.classList.remove('is-open');
+            document.body.style.overflow = '';
+          });
+        });
+      }
+
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.querySelectorAll('[data-reveal]').forEach(function(el) { el.classList.add('is-visible'); });
+      }
+    </script>
+  </body>
+</html>

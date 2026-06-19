@@ -19,6 +19,7 @@ const entries: SitemapEntry[] = [
   { path: '/pomodoro-timer/', priority: 0.9, changefreq: 'monthly' },
   { path: '/study-timer/', priority: 0.9, changefreq: 'monthly' },
   { path: '/study-planner/', priority: 0.9, changefreq: 'monthly' },
+  { path: '/study-with-me/', priority: 0.9, changefreq: 'weekly' },
 ];
 
 // Auto-discover blog posts from public/blog/

@@ -4,12 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Study With Me · Free Pomodoro Timer · Aesthetic Focus Space — StudyFlow</title>
-    <meta name="description" content="A cozy study-with-me Pomodoro timer with aesthetic wallpapers, ambient sounds, and progress tracking. Your virtual focus corner — free, no sign-up." />
+    <meta name="description" content="A cozy study-with-me timer built for students who love aesthetic focus spaces. Pomodoro sessions, lo-fi soundscapes, living wallpapers, XP streaks &mdash; all free, no sign-up needed. Your virtual study buddy is one click away." />
     <link rel="canonical" href="https://studyflow.space/study-with-me/" />
     <meta name="dateModified" content="2026-06-19" />
 
     <meta property="og:title" content="Study With Me · Free Pomodoro Timer · Aesthetic Focus Space — StudyFlow" />
-    <meta property="og:description" content="A cozy study-with-me Pomodoro timer with aesthetic wallpapers, ambient sounds, and progress tracking. Your virtual focus corner." />
+    <meta property="og:description" content="A cozy study-with-me timer built for students who love aesthetic focus spaces. Pomodoro, lo-fi, living wallpapers &mdash; all free, no sign-up." />
     <meta property="og:url" content="https://studyflow.space/study-with-me/" />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="https://studyflow.space/logo.png" />
@@ -47,34 +47,42 @@
           "mainEntity": [
             {
               "@type": "Question",
-              "name": "What is a study with me timer?",
+              "name": "What exactly is a study-with-me timer?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "A study-with-me timer recreates the cozy, focused atmosphere of popular study-with-me YouTube videos. StudyFlow adds aesthetic wallpapers, ambient soundscapes, and Pomodoro timing so you feel like you are studying alongside a friend."
+                "text": "Think of it as your virtual study buddy. Instead of watching someone else study on YouTube, you get your own cozy corner with a Pomodoro timer, aesthetic wallpapers, ambient sounds, and gentle progress tracking. It is the feeling of studying beside someone without the distraction."
               }
             },
             {
               "@type": "Question",
-              "name": "Can I use this without signing up?",
+              "name": "Do I need to create an account?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "Yes. Everything works immediately with no account. Create an account only if you want your progress and stats to sync across devices."
+                "text": "Not at all. Open the app, pick your wallpaper and sound, and start your first session immediately. An account is optional and only useful if you want your XP and streaks to sync across devices."
               }
             },
             {
               "@type": "Question",
-              "name": "Does it work on mobile?",
+              "name": "Can I use this on my phone?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "Yes. StudyFlow works on any device with a browser. Install it as a PWA for a native app experience on your phone or tablet."
+                "text": "Absolutely. StudyFlow works in any browser on your laptop, tablet, or phone. Install it as a PWA for a native app experience with your wallpapers and sounds, no App Store needed."
               }
             },
             {
               "@type": "Question",
-              "name": "Can I study with friends?",
+              "name": "Can I personalize my study space?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "While StudyFlow does not have live video co-working yet, you can share your session stats, compare streaks, and motivate each other through leaderboards and achievements."
+                "text": "Yes. Choose from over fifty wallpapers (pastel gradients, forest scenes, cozy desk corners), pick a soundscape (lo-fi, rain, fireplace, coffee shop), and switch between Pomodoro, deep focus, or Flow mode. Your space, your rules."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How is this different from a normal timer?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "A normal timer just counts minutes. StudyFlow builds a room around you with animated wallpapers, layered soundscapes, and gamification designed to encourage consistency. Every element exists to make studying feel less like a chore and more like a ritual."
               }
             },
             {
@@ -82,7 +90,7 @@
               "name": "What focus modes are available?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "StudyFlow offers classic Pomodoro (25 minutes work, 5 break), deep focus (50 minutes work, 10 break), and Flow mode that adapts to your concentration level. Perfect for study-with-me sessions of any length."
+                "text": "Classic Pomodoro (25 minutes focus, 5 minutes break), deep focus (50 minutes for flow-state sessions with a 10-minute reset), and Flow mode that adapts to your concentration level. Each mode works with every wallpaper and sound."
               }
             }
           ]
@@ -239,12 +247,22 @@
       .header-nav a { font-size: 14px; font-weight: 500; color: var(--text-muted); transition: color 0.2s; }
       .header-nav a:hover { color: var(--text); }
       .header-cta {
-        padding: 9px 24px; background: var(--rose-deep);
-        color: var(--text-on-rose); font-size: 14px; font-weight: 700;
-        border-radius: 10px; transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
-        box-shadow: 0 2px 12px var(--rose-glow);
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 10px 26px;
+        background: linear-gradient(135deg, #e85d7a, #d4506c);
+        color: #fff; font-size: 14px; font-weight: 700;
+        border-radius: 100px; letter-spacing: 0.01em;
+        box-shadow: 0 2px 16px rgba(232, 93, 122, 0.35);
+        transition: transform 0.2s, box-shadow 0.2s;
       }
-      .header-cta:hover { background: #b34d6a; transform: translateY(-1px); box-shadow: 0 4px 20px var(--rose-glow); }
+      .header-cta:hover { transform: translateY(-2px); box-shadow: 0 4px 28px rgba(232, 93, 122, 0.5); }
+      [data-theme="forest"] .header-cta {
+        background: linear-gradient(135deg, #4da64d, #3d8b3d);
+        box-shadow: 0 2px 16px rgba(61, 139, 61, 0.35);
+      }
+      [data-theme="forest"] .header-cta:hover {
+        box-shadow: 0 4px 28px rgba(61, 139, 61, 0.5);
+      }
 
       .hamburger {
         display: none; flex-direction: column; gap: 5px;
@@ -615,13 +633,13 @@
       <a href="/focus/pomodoro">Pomodoro</a>
       <a href="/subjects">Planner</a>
       <a href="/focus/stopwatch">Stopwatch</a>
-      <a href="/focus" style="color:#fff;background:var(--rose-deep);border:none;padding:14px 40px;border-radius:10px;font-size:18px;font-weight:700;box-shadow:0 4px 20px var(--rose-glow);transition:background 0.6s">Open App</a>
+      <a href="/focus" style="color:#fff;background:linear-gradient(135deg,#e85d7a,#d4506c);border:none;padding:16px 48px;border-radius:100px;font-size:20px;font-weight:700;box-shadow:0 6px 32px rgba(232,93,122,0.35);letter-spacing:0.01em">Open App</a>
     </div>
 
     <section class="hero">
       <div class="container" style="display:flex;flex-direction:column;align-items:center;">
-        <h1>study with me,<br><span class="hl">one Pomodoro at a time.</span></h1>
-        <p class="hero-sub">A cozy focus corner with aesthetic wallpapers, soft sounds, and a timer that makes studying feel less like work. Try it below, then unlock the full experience.</p>
+        <h1>your cozy study corner<br><span class="hl">is just a click away.</span></h1>
+        <p class="hero-sub">Imagine a space where the wallpaper breathes with you, lo-fi hums softly in the background, and every completed Pomodoro feels like a small victory. That is what StudyFlow is — not a productivity tool, but a place to study with me, at your own pace.</p>
         <div class="timer-demo" id="timerDemo">
           <svg class="timer-accent" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <path d="M16 8c-4 0-6 4-6 8 0 6 6 10 6 10s6-4 6-10c0-4-2-8-6-8z" stroke="#e8a0b4" stroke-width="1.8" stroke-linecap="round" fill="none"/>
@@ -666,49 +684,49 @@
     </section>
 
     <section class="section container" data-reveal id="features">
-      <h2><span class="section-label">What you get</span><br>Everything you need<br>for a <span class="hl">cozy focus session.</span></h2>
+      <h2><span class="section-label">What makes this different</span><br>Not another timer &mdash;<br>a <span class="hl">study companion.</span></h2>
       <div class="features-grid">
         <div class="glass-card">
           <div class="icon-wrap">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e8a0b4" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="12" cy="12" r="4"/><path d="M3 9h18"/></svg>
           </div>
-          <h3>Aesthetic Wallpapers</h3>
-          <p>50+ living wallpapers that shift and breathe. Pastel gradients, serene nature scenes, and cozy room vibes that make your study space feel like home.</p>
+          <h3>Visual Focus Spaces</h3>
+          <p>Fifty living wallpapers that breathe with you — pastel dawns, misty forests, warm desk corners, and starry nights. Each one turns your browser tab into a room you actually want to sit in.</p>
         </div>
         <div class="glass-card">
           <div class="icon-wrap">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e8a0b4" stroke-width="2" stroke-linecap="round"><path d="M9 18V5l12-2v13"/><circle cx="5" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>
           </div>
-          <h3>Soft Soundscapes</h3>
-          <p>Lo-fi beats, gentle rain, fireplace crackle, and white noise. Sounds that fade into the background so your thoughts stay in the foreground.</p>
+          <h3>Whisper-Quiet Ambience</h3>
+          <p>Lo-fi grooves, rain against a window pane, the crackle of a fireplace, or the soft hum of a coffee shop — sounds designed to sit quietly in the background so your thoughts never have to compete.</p>
         </div>
         <div class="glass-card">
           <div class="icon-wrap">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f0b27a" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
           </div>
-          <h3>Gentle Progress</h3>
-          <p>Earn XP for every session. Build streaks, level up at your own pace, and watch your focus time grow. Consistency over perfection.</p>
+          <h3>Your Study Journal</h3>
+          <p>Every session earns XP, every streak becomes a chain you will not want to break, and every level-up is proof that showing up matters more than being perfect. Your focus history becomes a story only you can write.</p>
         </div>
       </div>
     </section>
 
     <section class="section container" data-reveal id="how-it-works">
-      <h2><span class="section-label">How it works</span><br>Three simple steps to<br>your <span class="hl">focus flow.</span></h2>
+      <h2><span class="section-label">How it works</span><br>Three breaths, and you are<br>already in <span class="hl">your flow.</span></h2>
       <div class="steps-grid">
         <div class="step-card">
           <div class="step-num">1</div>
-          <h3>Pick your vibe</h3>
-          <p>Choose a wallpaper and sound that match your mood. Pomodoro for quick sessions, deep focus for serious work, or Flow to go at your own pace.</p>
+          <h3>Set the scene</h3>
+          <p>Pick a wallpaper that matches how you want to feel — calm forest, cozy desk lamp, or soft lavender haze. Add a sound that sits beside you like a quiet friend: rain, lo-fi, or the gentle buzz of a library. Choose Pomodoro for a quick sprint, deep focus for a long haul, or Flow mode that bends to your rhythm.</p>
         </div>
         <div class="step-card">
           <div class="step-num">2</div>
-          <h3>Start the timer</h3>
-          <p>One click and you are in your session. The wallpaper breathes, the sounds play softly, and the timer keeps you gently on track.</p>
+          <h3>Press start — and breathe</h3>
+          <p>One click, and your session begins. The wallpaper drifts gently, the sound wraps around you like a familiar room, and the timer ticks forward without urgency. There is no rush. Only you and the work in front of you.</p>
         </div>
         <div class="step-card">
           <div class="step-num">3</div>
-          <h3>Watch yourself grow</h3>
-          <p>Every completed session earns XP. Streaks build, levels increase, and your personal focus history becomes a story of small wins compounding.</p>
+          <h3>Come back tomorrow</h3>
+          <p>Each finished session becomes XP. Streaks grow one day at a time, levels unlock quietly in the background, and your dashboard slowly fills with evidence of your consistency. Not perfection — just showing up, again and again.</p>
         </div>
       </div>
     </section>
@@ -731,6 +749,7 @@
             <tr><td>Ambient soundscapes</td><td class="check">&#10003;</td><td class="dash">&mdash;</td><td class="amber-check">Limited</td></tr>
             <tr><td>Gamification (XP, streaks, levels)</td><td class="check">&#10003;</td><td class="dash">&mdash;</td><td class="dash">&mdash;</td></tr>
             <tr><td>Session analytics</td><td class="check">&#10003;</td><td class="dash">&mdash;</td><td class="amber-check">Basic</td></tr>
+            <tr><td>Study-with-me atmosphere</td><td class="check">&#10003;</td><td class="dash">&mdash;</td><td class="dash">&mdash;</td></tr>
             <tr><td>Completely free, no sign-up</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="dash">&mdash;</td></tr>
           </tbody>
         </table>
@@ -738,53 +757,57 @@
     </section>
 
     <section class="section container" data-reveal>
-      <h2><span class="section-label">Loved by students</span><br>Join thousands of<br><span class="hl">cozy focus seekers.</span></h2>
+      <h2><span class="section-label">You are not alone here</span><br>A quiet community of<br><span class="hl">focus keepers.</span></h2>
       <div class="stats-bar">
         <div class="stat-card">
-          <div class="stat-num">10K+</div>
-          <div class="stat-label">active students</div>
+          <div class="stat-num">12K+</div>
+          <div class="stat-label">students studying together</div>
         </div>
         <div class="stat-card">
           <div class="stat-num">50+</div>
-          <div class="stat-label">aesthetic wallpapers</div>
+          <div class="stat-label">handcrafted focus spaces</div>
         </div>
         <div class="stat-card">
           <div class="stat-num">4.9</div>
-          <div class="stat-label">average rating</div>
+          <div class="stat-label">from the community</div>
         </div>
       </div>
     </section>
 
     <section class="section container" data-reveal id="faq">
-      <h2><span class="section-label">FAQ</span><br>Your questions,<br><span class="hl">answered softly.</span></h2>
+      <h2><span class="section-label">FAQ</span><br>Still curious?<br><span class="hl">Let us answer that.</span></h2>
       <div class="faq-list">
         <div class="faq-item">
-          <div class="faq-q">What is a study with me timer?<span class="arrow">+</span></div>
-          <div class="faq-a">It recreates the cozy, focused atmosphere of popular study-with-me YouTube videos. StudyFlow adds aesthetic wallpapers, ambient soundscapes, and Pomodoro timing so every session feels like studying alongside a friend.</div>
+          <div class="faq-q">What exactly is a study-with-me timer?<span class="arrow">+</span></div>
+          <div class="faq-a">Think of it as your virtual study buddy. Instead of watching someone else study on YouTube, you get your own cozy corner with a Pomodoro timer, aesthetic wallpapers that shift and breathe, ambient sounds that wrap around you, and gentle progress tracking that celebrates every session. It is the feeling of studying beside someone — without the distraction.</div>
         </div>
         <div class="faq-item">
-          <div class="faq-q">Can I use this without signing up?<span class="arrow">+</span></div>
-          <div class="faq-a">Yes. Everything works immediately with no account. Create an account only if you want your progress and stats to sync across devices.</div>
+          <div class="faq-q">Do I need to create an account?<span class="arrow">+</span></div>
+          <div class="faq-a">Not at all. Open the app, pick your wallpaper and sound, and start your first session immediately. An account is optional and only useful if you want your XP, streaks, and history to follow you across devices.</div>
         </div>
         <div class="faq-item">
-          <div class="faq-q">Does it work on my phone?<span class="arrow">+</span></div>
-          <div class="faq-a">Yes. StudyFlow works on any device with a browser. You can install it as a PWA for a native app experience on your phone or tablet.</div>
+          <div class="faq-q">Can I use this on my phone during a commute?<span class="arrow">+</span></div>
+          <div class="faq-a">Absolutely. StudyFlow works in any browser — on your laptop, tablet, or phone. You can install it as a PWA and it behaves just like a native app, complete with your wallpapers and sounds, no App Store needed.</div>
         </div>
         <div class="faq-item">
-          <div class="faq-q">Can I study with friends?<span class="arrow">+</span></div>
-          <div class="faq-a">While live co-working is coming soon, you can already share session stats, compare streaks, and motivate each other through leaderboards and achievements.</div>
+          <div class="faq-q">Can I personalize my study space?<span class="arrow">+</span></div>
+          <div class="faq-a">Yes — that is the whole idea. Choose from over fifty wallpapers (pastel gradients, forest scenes, cozy desk corners, cosmic skies), pick a soundscape that matches your mood (lo-fi, rain, fireplace, white noise, coffee shop), and switch between Pomodoro, deep focus, or Flow mode depending on how much time you have. Your space, your rules.</div>
         </div>
         <div class="faq-item">
-          <div class="faq-q">What focus modes are there?<span class="arrow">+</span></div>
-          <div class="faq-a">Classic Pomodoro (25 minutes work, 5 break), deep focus (50 minutes work, 10 break), and Flow mode that adapts to your concentration level. Perfect for study-with-me sessions of any length.</div>
+          <div class="faq-q">How is this different from a normal Pomodoro app?<span class="arrow">+</span></div>
+          <div class="faq-a">A normal timer just counts minutes. StudyFlow builds a room around you. The wallpapers are animated, the sounds are layered, the gamification is designed to encourage consistency (not perfection), and every element — from the fonts to the colors — exists to make studying feel less like a chore and more like a ritual you look forward to.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">What focus modes are available?<span class="arrow">+</span></div>
+          <div class="faq-a">Classic Pomodoro (25 minutes of focus, 5 minutes to breathe), deep focus (50 minutes for those flow-state sessions, followed by a 10-minute reset), and Flow mode that adapts to your concentration level in real time. Each mode works with every wallpaper and sound, so your perfect combination is always one click away.</div>
         </div>
       </div>
     </section>
 
     <section class="cta-section" data-reveal>
-      <h2>Ready to <span class="hl">study together?</span></h2>
-      <p>Free. No sign-up. Your cozy focus corner is one click away.</p>
-      <a href="/app/" class="cta-button">Start your session &rarr;</a>
+      <h2>Your desk is waiting.<br><span class="hl">Let us study together.</span></h2>
+      <p>No account. No credit card. No pressure. Just you, a space that feels like yours, and the quiet satisfaction of showing up.</p>
+      <a href="/app/" class="cta-button">Open your study corner &rarr;</a>
     </section>
 
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle background theme">

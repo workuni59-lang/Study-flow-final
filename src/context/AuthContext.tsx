@@ -134,7 +134,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [fetchProfile]);
 
   useEffect(() => {
-    const urlDemo = window.location.search.includes('sf_admin=true');
+    const urlDemo = window.location.search.includes('sf_admin=true') || window.location.search.includes('demo=1');
     if (urlDemo) {
       setUser(DEMO_USER);
       fetchProfile(DEMO_USER.uid, true);

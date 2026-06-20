@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Play, Pause, RotateCcw, Zap, Maximize2, X,
@@ -32,7 +32,7 @@ const formatElapsed = (s: number) => {
 };
 interface Preset { id: string; name: string; icon: any; focus: number; short: number; long: number; }
 
-const PRESETS: Preset[] = [
+const BUILT_IN_PRESETS: Preset[] = [
   { id: 'pomodoro', name: 'Classic Pomodoro', icon: Timer, focus: 25, short: 5, long: 15 },
   { id: 'deep', name: 'Deep Work', icon: Rocket, focus: 50, short: 10, long: 25 },
   { id: 'flow', name: 'Elite Flow', icon: Zap, focus: 90, short: 15, long: 30 },
@@ -80,9 +80,9 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
   const { setFocusSession } = useFocus();
   const { mode: navMode, activePanel, timerId: navTimerId, themeTab: navThemeTab } = useNavigationContext();
   
-  const [activePreset, setActivePreset] = useState<Preset>(PRESETS[0]);
+  const [activePreset, setActivePreset] = useState<Preset>(BUILT_IN_PRESETS[0]);
   const [mode, setMode] = useState<TimerMode>('focus');
-  const [timeLeft, setTimeLeft] = useState(PRESETS[0].focus * 60);
+  const [timeLeft, setTimeLeft] = useState(BUILT_IN_PRESETS[0].focus * 60);
   const [isActive, setIsActive] = useState(false);
   const [direction, setDirection] = useState<'countdown' | 'countup'>('countdown');
   const [isZenMode, setIsZenMode] = useState(false);
@@ -94,8 +94,50 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
   const [tallyStyle, setTallyStyle] = useState('dots');
   const [elapsedTime, setElapsedTime] = useState(0);
   const [laps, setLaps] = useState<number[]>([]);
+
+  // Custom timer durations (premium)
+  const [customDurations, setCustomDurations] = useState(() => storage.loadCustomDurations());
+  // Adaptive flow log
+  const [avgFlowDuration, setAvgFlowDuration] = useState(0);
+  const [showFlowExtend, setShowFlowExtend] = useState(false);
+  const flowExtendResolve = useRef<((extend: boolean) => void) | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
+  // Compute all presets including custom (premium-gated)
+  const getAllPresets = useCallback((): Preset[] => {
+    if (!userStats.isPremium) return BUILT_IN_PRESETS;
+    return [
+      ...BUILT_IN_PRESETS,
+      {
+        id: 'custom',
+        name: 'Custom',
+        icon: Settings2,
+        focus: customDurations.focus,
+        short: customDurations.short,
+        long: customDurations.long,
+      },
+    ];
+  }, [userStats.isPremium, customDurations]);
+
+  // Load flow log and compute average duration for adaptive flow starting point
+  useEffect(() => {
+    const log = storage.loadFlowLog();
+    if (log.length > 0) {
+      const recent = log.slice(-5);
+      const avg = Math.round(recent.reduce((a, b) => a + b, 0) / recent.length);
+      setAvgFlowDuration(Math.min(120, Math.max(15, avg)));
+    }
+  }, []);
+
+  // Adaptive flow: use tracked average duration instead of fixed preset value
+  const effectiveFocusMinutes = useMemo(() => {
+    if (activePreset.id === 'flow' && avgFlowDuration > 0) return avgFlowDuration;
+    return activePreset.focus;
+  }, [activePreset.id, activePreset.focus, avgFlowDuration]);
+
+  // Track current session total (for progress bar accuracy during flow extends)
+  const [sessionTotalSeconds, setSessionTotalSeconds] = useState(() => effectiveFocusMinutes * 60);
 
   // Picker visibility derived from URL
   const showThemePicker = activePanel === 'themes';
@@ -138,7 +180,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
   const selectedTask = tasks.find(t => t.id === selectedTaskId);
   const taskTime = selectedTask?.estimatedMinutes ?? 25;
   const totalTime = mode === 'focus' 
-    ? activePreset.focus * 60 
+    ? sessionTotalSeconds
     : mode === 'shortBreak' 
     ? activePreset.short * 60 
     : mode === 'longBreak'
@@ -328,11 +370,24 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
     setIsActive(false);
     releaseWakeLock();
     if (mode === 'focus' || mode === 'taskETA') { logFocusSessionRef.current(totalFocusRef.current); }
+    const completedSeconds = totalFocusRef.current;
     totalFocusRef.current = 0;
     triggerConfettiRef.current();
     const alertId = (() => { try { return JSON.parse(localStorage.getItem('study_flow_alert_sound') || '"sparkle"'); } catch { return 'sparkle'; } })();
     const alertVol = (() => { try { return JSON.parse(localStorage.getItem('study_flow_alert_volume') || '0.75'); } catch { return 0.75; } })();
     playAlertSound(alertId, alertVol);
+
+    // Adaptive Flow: show extend prompt instead of auto-switching to break
+    if (mode === 'focus' && activePreset.id === 'flow' && completedSeconds > 0) {
+      const completedMinutes = Math.round(completedSeconds / 60);
+      storage.saveFlowLogEntry(completedMinutes);
+      const log = storage.loadFlowLog();
+      const recent = log.slice(-5);
+      const avg = Math.round(recent.reduce((a, b) => a + b, 0) / recent.length);
+      setAvgFlowDuration(Math.min(120, Math.max(15, avg)));
+      setShowFlowExtend(true);
+      return;
+    }
 
     setDirection('countdown');
     if (mode === 'focus' || mode === 'taskETA') {
@@ -345,10 +400,35 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
       });
     } else {
       setMode('focus');
-      setTimeLeft(activePreset.focus * 60);
+      setTimeLeft(effectiveFocusMinutes * 60);
+      setSessionTotalSeconds(effectiveFocusMinutes * 60);
     }
     if (autoStartRef.current) setIsActive(true);
   }, [mode, activePreset]);
+
+  const handleFlowExtend = useCallback(() => {
+    setShowFlowExtend(false);
+    sessionElapsed.current = 0;
+    setTimeLeft(15 * 60);
+    setSessionTotalSeconds(15 * 60);
+    setDirection('countdown');
+    setIsActive(true);
+  }, []);
+
+  const handleFlowEnd = useCallback(() => {
+    setShowFlowExtend(false);
+    sessionElapsed.current = 0;
+    setDirection('countdown');
+    setSessionsCompleted(prev => {
+      const newTotal = prev + 1;
+      const d = newTotal % 4 === 0 ? activePreset.long : activePreset.short;
+      setMode(newTotal % 4 === 0 ? 'longBreak' : 'shortBreak');
+      setTimeLeft(d * 60);
+      return newTotal;
+    });
+    if (autoStartRef.current) setIsActive(true);
+  }, [activePreset]);
+
   handleTimerCompleteRef.current = handleTimerComplete;
 
   const toggleTimer = () => {
@@ -435,7 +515,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
         {(['focus', 'shortBreak', 'longBreak'] as const).map(m => (
           <button key={m} onClick={() => {
             setIsActive(false); setDirection('countdown'); setMode(m);
-            const d = m === 'focus' ? activePreset.focus : m === 'shortBreak' ? activePreset.short : activePreset.long; setTimeLeft(d * 60);
+            const d = m === 'focus' ? effectiveFocusMinutes : m === 'shortBreak' ? activePreset.short : activePreset.long; setTimeLeft(d * 60); setSessionTotalSeconds(d * 60);
           }}
             className={`px-4 py-1.5 rounded-full text-[9px] font-semibold uppercase tracking-wider transition-all border ${
               mode === m
@@ -451,8 +531,8 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
         {(['focus', 'shortBreak', 'longBreak', 'taskETA'] as const).map(m => (
           <button key={m} onClick={() => {
             setIsActive(false); setDirection('countdown'); setMode(m);
-            const d = m === 'taskETA' ? (tasks.find(t => t.id === selectedTaskId)?.estimatedMinutes ?? 25) : m === 'focus' ? activePreset.focus : m === 'shortBreak' ? activePreset.short : activePreset.long;
-            setTimeLeft(d * 60);
+            const d = m === 'taskETA' ? (tasks.find(t => t.id === selectedTaskId)?.estimatedMinutes ?? 25) : m === 'focus' ? effectiveFocusMinutes : m === 'shortBreak' ? activePreset.short : activePreset.long;
+            setTimeLeft(d * 60); setSessionTotalSeconds(d * 60);
           }}
             className={`shrink-0 px-4 py-2 rounded-[10px] text-[9px] font-semibold uppercase tracking-wider transition-all border ${
               mode === m
@@ -514,7 +594,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
           {isActive ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current translate-x-0.5" />}
           {isActive ? 'Pause' : 'Start'}
         </button>
-        <button onClick={() => { if (isCountingUp) resetCountUp(); else { setIsActive(false); const d = mode === 'focus' ? activePreset.focus : mode === 'shortBreak' ? activePreset.short : mode === 'longBreak' ? activePreset.long : taskTime; setTimeLeft(d * 60); localStorage.removeItem('sf_timer_state'); } }} aria-label={isCountingUp ? 'Stop and reset' : 'Reset timer'}
+        <button onClick={() => { if (isCountingUp) resetCountUp(); else { setIsActive(false); const d = mode === 'focus' ? effectiveFocusMinutes : mode === 'shortBreak' ? activePreset.short : mode === 'longBreak' ? activePreset.long : taskTime; setTimeLeft(d * 60); setSessionTotalSeconds(d * 60); localStorage.removeItem('sf_timer_state'); } }} aria-label={isCountingUp ? 'Stop and reset' : 'Reset timer'}
           className={`transition-colors ${
             glassVariant
               ? 'px-4 py-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10'
@@ -666,12 +746,14 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
 
   const renderPresetPicker = () => (
     <motion.div key="presets" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-2">
-      {PRESETS.map(p => (
+      {getAllPresets().map(p => (
         <button key={p.id} onClick={() => { 
           setActivePreset(p);
           setDirection('countdown');
           setMode('focus');
-          setTimeLeft(p.focus * 60);
+          const presetFocusMins = p.id === 'flow' && avgFlowDuration > 0 ? avgFlowDuration : p.focus;
+          setTimeLeft(presetFocusMins * 60);
+          setSessionTotalSeconds(presetFocusMins * 60);
           setIsActive(false);
           navigate(ROUTES.FOCUS);
           setShowPresetPicker(false); 
@@ -694,6 +776,61 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
         className={`w-full p-3 rounded-xl flex items-center justify-between transition-all ${mode === 'stopwatch' ? 'bg-brand/20 text-white' : 'bg-black/15 backdrop-blur-sm border border-white/10 text-white/50 hover:bg-black/25 hover:text-white/80'}`}>
         <div className="flex items-center gap-2.5"><Flag className="w-3.5 h-3.5" /><span className="text-[9px] font-semibold uppercase tracking-wider">Stopwatch</span></div>
       </button>
+      {activePreset.id === 'custom' && userStats.isPremium && (
+        <div className="pt-3 space-y-3 border-t border-white/5">
+          <div className="space-y-1.5">
+            <div className="flex justify-between text-[8px] font-bold uppercase tracking-wider text-white/40">
+              <span>Focus Duration</span>
+              <span>{customDurations.focus} min</span>
+            </div>
+            <input type="range" min={5} max={180} step={5} value={customDurations.focus}
+              onChange={e => {
+                const val = Number(e.target.value);
+                const next = { ...customDurations, focus: val };
+                setCustomDurations(next);
+                storage.saveCustomDurations(next);
+                if (activePreset.id === 'custom') {
+                  setActivePreset({ id: 'custom', name: 'Custom', icon: Settings2, focus: val, short: customDurations.short, long: customDurations.long });
+                }
+              }}
+              className="w-full h-1.5 rounded-full appearance-none bg-white/10 cursor-pointer accent-amber-500 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-amber-500 [&::-webkit-slider-thumb]:shadow-lg" />
+          </div>
+          <div className="space-y-1.5">
+            <div className="flex justify-between text-[8px] font-bold uppercase tracking-wider text-white/40">
+              <span>Short Break</span>
+              <span>{customDurations.short} min</span>
+            </div>
+            <input type="range" min={1} max={30} step={1} value={customDurations.short}
+              onChange={e => {
+                const val = Number(e.target.value);
+                const next = { ...customDurations, short: val };
+                setCustomDurations(next);
+                storage.saveCustomDurations(next);
+                if (activePreset.id === 'custom') {
+                  setActivePreset({ id: 'custom', name: 'Custom', icon: Settings2, focus: customDurations.focus, short: val, long: customDurations.long });
+                }
+              }}
+              className="w-full h-1.5 rounded-full appearance-none bg-white/10 cursor-pointer accent-amber-500 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-amber-500 [&::-webkit-slider-thumb]:shadow-lg" />
+          </div>
+          <div className="space-y-1.5">
+            <div className="flex justify-between text-[8px] font-bold uppercase tracking-wider text-white/40">
+              <span>Long Break</span>
+              <span>{customDurations.long} min</span>
+            </div>
+            <input type="range" min={5} max={60} step={5} value={customDurations.long}
+              onChange={e => {
+                const val = Number(e.target.value);
+                const next = { ...customDurations, long: val };
+                setCustomDurations(next);
+                storage.saveCustomDurations(next);
+                if (activePreset.id === 'custom') {
+                  setActivePreset({ id: 'custom', name: 'Custom', icon: Settings2, focus: customDurations.focus, short: customDurations.short, long: val });
+                }
+              }}
+              className="w-full h-1.5 rounded-full appearance-none bg-white/10 cursor-pointer accent-amber-500 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-amber-500 [&::-webkit-slider-thumb]:shadow-lg" />
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 
@@ -709,66 +846,88 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
   if (variant === 'floating') {
     return (
       <div className="flex flex-col items-center gap-6 py-6">
-        {renderTimerFace()}
+        {showFlowExtend ? (
+          <motion.div key="flow-extend" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-5 py-8 px-6 rounded-2xl bg-black/30 backdrop-blur-lg border border-white/10">
+            <Zap className="w-8 h-8 text-amber-400" />
+            <div className="text-center">
+              <p className="text-lg font-bold text-white">Flow session complete!</p>
+              <p className="text-[10px] text-white/50 mt-1">You were in the zone. Keep going?</p>
+            </div>
+            <div className="flex gap-3">
+              <button onClick={handleFlowEnd}
+                className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white/70 text-[10px] font-bold uppercase tracking-wider transition-all">
+                End session
+              </button>
+              <button onClick={handleFlowExtend}
+                className="px-5 py-2.5 rounded-xl bg-amber-500/80 hover:bg-amber-500 text-white text-[10px] font-bold uppercase tracking-wider shadow-lg transition-all">
+                +15 more min
+              </button>
+            </div>
+          </motion.div>
+        ) : (
+          <>
+            {renderTimerFace()}
 
-        <TimerModePills />
+            <TimerModePills />
 
-        {mode === 'taskETA' && (
-          <div className="w-full max-w-[200px] px-1">
-            <select 
-              value={selectedTaskId || ''} 
-              onChange={(e) => {
-                const id = e.target.value;
-                setSelectedTaskId(id);
-                const task = tasks.find(t => t.id === id);
-                if (task) {
-                  setTimeLeft((task.estimatedMinutes || 25) * 60);
-                  setIsActive(false);
-                }
-              }}
-              className="w-full bg-white/5 border border-white/10 rounded-xl p-2 text-[10px] font-bold text-white focus:outline-none appearance-none cursor-pointer text-center"
-            >
-              <option value="" className="bg-[#0a0c10]">Select a task...</option>
-              {tasks.filter(t => !t.completed).map(t => (
-                <option key={t.id} value={t.id} className="bg-[#0a0c10]">
-                  {t.title} ({t.estimatedMinutes || 25}m)
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        {mode === 'stopwatch' && laps.length > 0 && (
-          <div className="w-full max-w-[200px] max-h-[160px] overflow-y-auto no-scrollbar space-y-1">
-            {laps.map((lap, i) => (
-              <div key={i} className="flex items-center justify-between px-2 py-1 rounded-lg bg-black/15 backdrop-blur-sm border border-white/5">
-                <span className="text-[8px] font-semibold text-white/40 uppercase">Lap {laps.length - i}</span>
-                <span className="text-[9px] font-mono text-white/70">{formatElapsed(lap)}</span>
+            {mode === 'taskETA' && (
+              <div className="w-full max-w-[200px] px-1">
+                <select 
+                  value={selectedTaskId || ''} 
+                  onChange={(e) => {
+                    const id = e.target.value;
+                    setSelectedTaskId(id);
+                    const task = tasks.find(t => t.id === id);
+                    if (task) {
+                      setTimeLeft((task.estimatedMinutes || 25) * 60);
+                      setIsActive(false);
+                    }
+                  }}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl p-2 text-[10px] font-bold text-white focus:outline-none appearance-none cursor-pointer text-center"
+                >
+                  <option value="" className="bg-[#0a0c10]">Select a task...</option>
+                  {tasks.filter(t => !t.completed).map(t => (
+                    <option key={t.id} value={t.id} className="bg-[#0a0c10]">
+                      {t.title} ({t.estimatedMinutes || 25}m)
+                    </option>
+                  ))}
+                </select>
               </div>
-            ))}
-          </div>
-        )}
+            )}
 
-        <AnimatePresence mode="wait">
-          {showThemePicker ? (
-            <motion.div key="theme" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="w-full max-w-xs">
-              {renderThemePicker()}
-            </motion.div>
-          ) : isPresetPickerVisible ? (
-            <motion.div key="presets" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="w-full max-w-xs">
-              {renderPresetPicker()}
-            </motion.div>
-          ) : (
-            <motion.div key="controls" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-4">
-                <button onClick={() => { setShowPresetPicker(true); setShowThemePicker(false); }}
-                  className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/15 backdrop-blur-sm border border-white/10 hover:bg-black/25 transition-colors text-[9px] font-semibold uppercase tracking-wider text-white/60">
-                  {mode === 'stopwatch' ? <Flag className="w-3 h-3 text-brand-light" /> : <activePreset.icon className="w-3 h-3 text-brand-light" />}
-                  {mode === 'stopwatch' ? 'Stopwatch' : activePreset.name}
-                </button>
-              {renderControls()}
-            </motion.div>
-          )}
-        </AnimatePresence>
+            {mode === 'stopwatch' && laps.length > 0 && (
+              <div className="w-full max-w-[200px] max-h-[160px] overflow-y-auto no-scrollbar space-y-1">
+                {laps.map((lap, i) => (
+                  <div key={i} className="flex items-center justify-between px-2 py-1 rounded-lg bg-black/15 backdrop-blur-sm border border-white/5">
+                    <span className="text-[8px] font-semibold text-white/40 uppercase">Lap {laps.length - i}</span>
+                    <span className="text-[9px] font-mono text-white/70">{formatElapsed(lap)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <AnimatePresence mode="wait">
+              {showThemePicker ? (
+                <motion.div key="theme" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="w-full max-w-xs">
+                  {renderThemePicker()}
+                </motion.div>
+              ) : isPresetPickerVisible ? (
+                <motion.div key="presets" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="w-full max-w-xs">
+                  {renderPresetPicker()}
+                </motion.div>
+              ) : (
+                <motion.div key="controls" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-4">
+                    <button onClick={() => { setShowPresetPicker(true); setShowThemePicker(false); }}
+                      className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/15 backdrop-blur-sm border border-white/10 hover:bg-black/25 transition-colors text-[9px] font-semibold uppercase tracking-wider text-white/60">
+                      {mode === 'stopwatch' ? <Flag className="w-3 h-3 text-brand-light" /> : <activePreset.icon className="w-3 h-3 text-brand-light" />}
+                      {mode === 'stopwatch' ? 'Stopwatch' : activePreset.name}
+                    </button>
+                  {renderControls()}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </>
+        )}
       </div>
     );
   }
@@ -946,7 +1105,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
                       setIsActive(false);
                       setDirection('countdown');
                       setMode(m);
-                      const d = m === 'focus' ? activePreset.focus : m === 'shortBreak' ? activePreset.short : activePreset.long;
+                      const d = m === 'focus' ? effectiveFocusMinutes : m === 'shortBreak' ? activePreset.short : activePreset.long;
                       setTimeLeft(d * 60);
                     }}
                     className={`text-[10px] font-semibold uppercase tracking-widest pb-1 transition-all border-b ${
@@ -1023,7 +1182,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
                 )}
 
                 <button
-                  onClick={() => { if (isCountingUp) resetCountUp(); else { setIsActive(false); setTimeLeft(activePreset.focus * 60); } }}
+                  onClick={() => { if (isCountingUp) resetCountUp(); else { setIsActive(false); setTimeLeft(effectiveFocusMinutes * 60); setSessionTotalSeconds(effectiveFocusMinutes * 60); } }}
                     className="w-12 h-12 rounded-full border border-white/15 bg-black/20 backdrop-blur-sm text-white/50 hover:text-white/90 hover:border-white/30 hover:bg-black/30 transition-all flex items-center justify-center"
                   >
                     <RotateCcw className="w-5 h-5" />

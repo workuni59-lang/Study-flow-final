@@ -40,6 +40,10 @@ const STORAGE_KEYS = {
   GAME_SHOP: 'sf_game_shop',
   GAME_SESSIONS_TODAY: 'sf_game_sessions_today',
   GAME_SESSIONS_DATE: 'sf_game_sessions_date',
+  // Timer custom durations
+  CUSTOM_DURATIONS: 'study_flow_custom_durations',
+  // Flow mode session log (for adaptive duration)
+  FLOW_LOG: 'study_flow_flow_log',
 };
 
 const safeGet = (key: string) => {
@@ -170,6 +174,22 @@ export const storage = {
 
   getSessionsDate: (): string | null => safeGet(STORAGE_KEYS.GAME_SESSIONS_DATE),
   saveSessionsDate: (date: string) => safeSet(STORAGE_KEYS.GAME_SESSIONS_DATE, date),
+
+  // --- Custom Timer Durations ---
+  saveCustomDurations: (durations: { focus: number; short: number; long: number }) =>
+    safeSet(STORAGE_KEYS.CUSTOM_DURATIONS, durations),
+  loadCustomDurations: (): { focus: number; short: number; long: number } =>
+    safeGet(STORAGE_KEYS.CUSTOM_DURATIONS) ?? { focus: 25, short: 5, long: 15 },
+
+  // --- Flow Mode Adaptive Duration Log ---
+  saveFlowLogEntry: (durationMinutes: number) => {
+    const log = (safeGet(STORAGE_KEYS.FLOW_LOG) as number[]) ?? [];
+    log.push(durationMinutes);
+    if (log.length > 20) log.splice(0, log.length - 20);
+    safeSet(STORAGE_KEYS.FLOW_LOG, log);
+  },
+  loadFlowLog: (): number[] => (safeGet(STORAGE_KEYS.FLOW_LOG) as number[]) ?? [],
+  clearFlowLog: () => safeSet(STORAGE_KEYS.FLOW_LOG, []),
 
   // --- Generic (scoped: only removes study_flow_* and sf_game_* keys) ---
   clearAll: () => {

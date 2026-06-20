@@ -20,8 +20,7 @@ export interface ParticlePreset {
   warmPalette?: { r: number; g: number; b: number }[];
   twinkleSpeed: number;
   direction?: { x: number; y: number; z: number };
-  textureType: 'circle' | 'streak' | 'sharp' | 'star';
-  streakSize?: { w: number; h: number };
+  textureType: 'circle' | 'sharp' | 'star';
   shootingStarInterval?: [number, number];
 }
 

@@ -64,6 +64,8 @@ export interface Task {
   topicId?: string;
 }
 
+export type ParticleMotion = 'static' | 'moving';
+
 export interface ThemeConfig {
   atmosphere: AtmosphereId;
   wallpaper: WallpaperId;
@@ -77,6 +79,8 @@ export interface ThemeConfig {
   showClock: boolean;
   scaleFactor: number; // 0.5-1.5
   clearMode: boolean;
+  autoStartNext: boolean;
+  particleMotion: ParticleMotion;
 }
 
 interface StudyContextType {
@@ -170,7 +174,9 @@ const DEFAULT_THEME: ThemeConfig = {
   showQuote: true,
   showClock: true,
   scaleFactor: 1,
-  clearMode: false
+  clearMode: false,
+  autoStartNext: false,
+  particleMotion: 'moving'
 };
 
 export function StudyProvider({ children }: { children: React.ReactNode }) {
@@ -317,6 +323,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     document.documentElement.setAttribute('data-atmosphere', themeConfig.atmosphere);
     document.documentElement.setAttribute('data-wallpaper', themeConfig.wallpaper);
     document.documentElement.setAttribute('data-clear-mode', String(themeConfig.clearMode));
+    document.documentElement.setAttribute('data-particle-motion', themeConfig.particleMotion);
     document.documentElement.style.setProperty('--scale-factor', String(themeConfig.scaleFactor));
   }, [themeConfig]);
   
@@ -466,6 +473,8 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     setQuests(newQuests);
     storage.saveDailyQuests(newQuests);
   }, []);
+
+  useEffect(() => { generateDailyQuests(); }, [generateDailyQuests]);
 
   const updateQuestProgress = (type: Quest['type'], amount: number) => {
     const completedRewards: number[] = [];

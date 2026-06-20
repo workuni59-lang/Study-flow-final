@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Trophy, Users, Loader2 } from 'lucide-react';
+import { Trophy, Users, RefreshCw } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { LeaderboardRow } from './LeaderboardRow';
 import { getTopUsers, getUserRank, formatFocusTime, type LeaderboardEntry, type LeaderboardPeriod } from '../../lib/leaderboard';
+import { LeaderboardSkeleton } from '../ui/skeleton';
 
 type Tab = LeaderboardPeriod | 'friends';
 
@@ -78,10 +79,14 @@ export const LeaderboardView = ({ onViewProfile }: LeaderboardViewProps) => {
         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-rose-600 flex items-center justify-center">
           <Trophy className="w-5 h-5 text-white" />
         </div>
-        <div>
+        <div className="flex-1">
           <h1 className="text-lg font-bold text-white">Leaderboard</h1>
           <p className="text-xs text-slate-400">Top focus times this period</p>
         </div>
+        <button onClick={fetchLeaderboard} disabled={loading}
+          className="p-2 rounded-lg bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] transition-colors disabled:opacity-40">
+          <RefreshCw className={`w-4 h-4 text-slate-400 ${loading ? 'animate-spin' : ''}`} />
+        </button>
       </div>
 
       {/* Tabs */}
@@ -122,9 +127,7 @@ export const LeaderboardView = ({ onViewProfile }: LeaderboardViewProps) => {
       )}
 
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-6 h-6 text-brand animate-spin" />
-        </div>
+        <LeaderboardSkeleton />
       ) : entries.length === 0 ? (
         <div className="text-center py-20">
           <Trophy className="w-12 h-12 text-slate-600 mx-auto mb-4" />

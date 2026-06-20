@@ -17,6 +17,7 @@ import { AmbiencePanel, type CuratedPlaylist } from '../panels/AmbiencePanel';
 import { NotesPanel } from '../panels/NotesPanel';
 import { MOOD_GRADIENTS } from '../../lib/wallpapers';
 import { WALLPAPERS } from '../../lib/gamification';
+import { DashboardSkeleton, ContentSkeleton } from '../ui/skeleton';
 
 import { TasksPanel } from '../panels/TasksPanel';
 import { PremiumModal } from '../modals/PremiumModal';
@@ -26,6 +27,8 @@ import { Confetti } from '../notifications/Confetti';
 import { LevelUpModal } from '../modals/LevelUpModal';
 import { PanicModeUI } from '../dashboard/PanicModeUI';
 import { WallpaperEngine } from '../navigation/WallpaperEngine';
+import { CustomCursor } from './CustomCursor';
+import { ScrollProgress } from './ScrollProgress';
 import { storage } from '../../services/storage';
 
 const AnalyticsDashboardLazy = lazy(() => import('../analytics/AnalyticsDashboard'));
@@ -38,9 +41,7 @@ const LeaderboardViewLazy = lazy(() => import('../leaderboard/LeaderboardView').
 const ProfileViewLazy = lazy(() => import('../profile/ProfileView').then(m => ({ default: m.ProfileView })));
 const PomodoroLandingLazy = lazy(() => import('../pomodoro/PomodoroLanding').then(m => ({ default: m.PomodoroLanding })));
 
-const MobileSkeleton = () => (
-  <div style={{ width: '100%', minHeight: '100vh', backgroundColor: '#0f0f1a', animation: 'pulse 1.5s ease-in-out infinite' }} />
-);
+const MobileSkeleton = () => <DashboardSkeleton />;
 
 const skeletonKeyframes = `@keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.7; } }`;
 
@@ -175,7 +176,9 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
   };
 
   return (
-    <div className={`min-h-screen transition-colors duration-1000 ${section === 'dashboard' ? '' : (baseBg[themeConfig.atmosphere] || baseBg.indigo)} relative overflow-hidden`} style={{ backgroundAttachment: 'scroll' }}>
+    <div className={`min-h-screen transition-colors duration-1000 noise-overlay ${section === 'dashboard' ? '' : (baseBg[themeConfig.atmosphere] || baseBg.indigo)} relative overflow-hidden`} style={{ backgroundAttachment: 'scroll' }}>
+      <CustomCursor />
+      <ScrollProgress />
       <style>{skeletonKeyframes}</style>
       
       {/* Background Engine - Static Only on Mobile */}
@@ -183,84 +186,84 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
 
       {/* Main content area */}
       <div className="relative z-10">
-
-        {/* Full-view pages (analytics, subjects, achievements, settings) */}
-        {section === 'pomodoro' ? (
-          <main className="p-3 md:p-4 pb-28">
-            <Suspense fallback={<MobileSkeleton />}>
-              <PomodoroLandingLazy />
-            </Suspense>
-          </main>
-        ) : isFullView ? (
-          <div className="min-h-screen">
-            <header className="sticky top-0 z-30 bg-white/70 dark:bg-[#0a0c10]/70 backdrop-blur-2xl border-b border-slate-100 dark:border-slate-800 pt-safe">
-              <div className="flex items-center gap-3 h-14 px-4">
-                <button onClick={() => setSection('dashboard')} aria-label="Go back"
-                  className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                >
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
-                </button>
-                <span className="text-sm font-semibold dark:text-white capitalize">{section}</span>
-              </div>
-            </header>
-            <main className="p-3 md:p-4 pb-28">
+        <AnimatePresence mode="wait">
+          {section === 'pomodoro' ? (
+            <motion.main key="pomodoro" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.15 }} className="p-3 md:p-4 pb-28">
               <Suspense fallback={<MobileSkeleton />}>
-                {section === 'analytics' && <AnalyticsDashboardLazy />}
-                {section === 'subjects' && <SubjectsViewLazy key={spotlightSubjectId ?? 'default'} initialSubjectId={spotlightSubjectId ?? undefined} />}
-                {section === 'achievements' && <AchievementsViewLazy />}
-                {section === 'settings' && <SettingsViewLazy />}
-                {section === 'progression' && <ProgressionViewLazy />}
-                {section === 'quests' && <QuestsViewLazy />}
-                {section === 'leaderboard' && <LeaderboardViewLazy onViewProfile={handleViewProfile} />}
-                {section === 'profile' && profileUserId && (
-                  <Suspense fallback={<MobileSkeleton />}>
-                    <ProfileViewLazy userId={profileUserId} onEditProfile={handleEditProfile} />
-                  </Suspense>
-                )}
+                <PomodoroLandingLazy />
               </Suspense>
+            </motion.main>
+          ) : isFullView ? (
+            <motion.div key={'full-' + section} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.15 }} className="min-h-screen">
+              <header className="sticky top-0 z-30 bg-white/70 dark:bg-[#0a0c10]/70 backdrop-blur-2xl border-b border-slate-100 dark:border-slate-800 pt-safe">
+                <div className="flex items-center gap-3 h-14 px-4">
+                  <button onClick={() => setSection('dashboard')} aria-label="Go back"
+                    className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  >
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+                  </button>
+                  <span className="text-sm font-semibold dark:text-white capitalize">{section}</span>
+                </div>
+              </header>
+              <main className="p-3 md:p-4 pb-28">
+                <Suspense fallback={<MobileSkeleton />}>
+                  {section === 'analytics' && <AnalyticsDashboardLazy />}
+                  {section === 'subjects' && <SubjectsViewLazy key={spotlightSubjectId ?? 'default'} initialSubjectId={spotlightSubjectId ?? undefined} />}
+                  {section === 'achievements' && <AchievementsViewLazy />}
+                  {section === 'settings' && <SettingsViewLazy />}
+                  {section === 'progression' && <ProgressionViewLazy />}
+                  {section === 'quests' && <QuestsViewLazy />}
+                  {section === 'leaderboard' && <LeaderboardViewLazy onViewProfile={handleViewProfile} />}
+                  {section === 'profile' && profileUserId && (
+                    <Suspense fallback={<MobileSkeleton />}>
+                      <ProfileViewLazy userId={profileUserId} onEditProfile={handleEditProfile} />
+                    </Suspense>
+                  )}
+                </Suspense>
+              </main>
+            </motion.div>
+          ) : (
+          <motion.div key={'dash-' + mode} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.15 }}>
+            {/* Floating toolbar */}
+            <TopBar
+              mode={mode}
+              onModeChange={setMode}
+              onMenuOpen={handleMenuOpen}
+              onOpenAuth={onOpenAuth}
+              onLeaderboardOpen={handleLeaderboardOpen}
+              onProfileOpen={user ? handleProfileOpen : undefined}
+            />
+
+            {/* Main content */}
+            <main>
+              {mode === 'home' && (
+                <Suspense fallback={<MobileSkeleton />}>
+                  <HomeViewLazy onNotepadOpen={handleNotepadOpen} onSubjectsOpen={handleSubjectsOpen} menuOpen={menuOpen} />
+                </Suspense>
+              )}
+              {mode === 'focus' && (
+                <Suspense fallback={<MobileSkeleton />}>
+                  <FocusEnvironmentLazy 
+                    onTasksOpen={handleTasksOpen}
+                    onMusicOpen={handleMusicOpen}
+                    onNotepadOpen={handleNotepadOpen}
+                  />
+                </Suspense>
+              )}
             </main>
-          </div>
-        ) : (
-        <>
-          {/* Floating toolbar */}
-          <TopBar
-            mode={mode}
-            onModeChange={setMode}
-            onMenuOpen={handleMenuOpen}
-            onOpenAuth={onOpenAuth}
-            onLeaderboardOpen={handleLeaderboardOpen}
-            onProfileOpen={user ? handleProfileOpen : undefined}
-          />
 
-          {/* Main content */}
-          <main>
-            {mode === 'home' && (
-              <Suspense fallback={<MobileSkeleton />}>
-                <HomeViewLazy onNotepadOpen={handleNotepadOpen} onSubjectsOpen={handleSubjectsOpen} menuOpen={menuOpen} />
-              </Suspense>
-            )}
-            {mode === 'focus' && (
-              <Suspense fallback={<MobileSkeleton />}>
-                <FocusEnvironmentLazy 
-                  onTasksOpen={handleTasksOpen}
-                  onMusicOpen={handleMusicOpen}
-                  onNotepadOpen={handleNotepadOpen}
-                />
-              </Suspense>
-            )}
-          </main>
-
-          {/* Bottom bar */}
-          <BottomBar
-            mode={mode}
-            onModeChange={setMode}
-            onTasksOpen={handleTasksOpen}
-            onStatsOpen={handleStatsOpen}
-            onNotepadOpen={handleNotepadOpen}
-            onMenuOpen={handleMenuOpen}
-          />
-        </>
-      )}
+            {/* Bottom bar */}
+            <BottomBar
+              mode={mode}
+              onModeChange={setMode}
+              onTasksOpen={handleTasksOpen}
+              onStatsOpen={handleStatsOpen}
+              onNotepadOpen={handleNotepadOpen}
+              onMenuOpen={handleMenuOpen}
+            />
+          </motion.div>
+        )}
+        </AnimatePresence>
       </div>
 
       {/* Mood picker bottom sheet */}

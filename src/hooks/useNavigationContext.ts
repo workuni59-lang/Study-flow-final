@@ -5,7 +5,7 @@ import type { Section } from '../components/layout/MenuDrawer';
 
 export type Panel = 'tasks' | 'ambience' | 'notepad' | 'themes';
 export type AmbienceTab = 'sounds' | 'music' | 'playlists';
-export type ThemeTab = 'atm' | 'moods' | 'animated' | 'photos' | 'custom';
+export type ThemeTab = 'presets' | 'wallpaper' | 'atm';
 export type TimerModeId = 'pomodoro' | 'stopwatch' | 'deep' | 'flow' | 'task-eta';
 
 interface NavigationContext {
@@ -69,10 +69,9 @@ export function useNavigationContext(): NavigationContext {
   } else if (path.includes('/themes')) {
     section = 'dashboard';
     activePanel = 'themes';
-    if (path.endsWith('/moods')) themeTab = 'moods';
-    else if (path.endsWith('/animated')) themeTab = 'animated';
-    else if (path.endsWith('/photos')) themeTab = 'photos';
-    else if (path.endsWith('/custom')) themeTab = 'custom';
+    if (path.endsWith('/presets')) themeTab = 'presets';
+    else if (path.endsWith('/atm')) themeTab = 'atm';
+    else if (path.endsWith('/wallpaper') || path.endsWith('/moods') || path.endsWith('/animated') || path.endsWith('/photos') || path.endsWith('/custom')) themeTab = 'wallpaper';
   } else if (path === '/pomodoro') {
     section = 'pomodoro';
     timerId = 'pomodoro';

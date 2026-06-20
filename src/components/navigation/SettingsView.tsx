@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Settings, 
@@ -30,13 +30,15 @@ import {
   Key,
   AlertTriangle,
   ExternalLink,
-  Loader2
+  Loader2,
+  Wind
 } from 'lucide-react';
 import { useStudy } from '../../context/StudyContext';
 import { useAuth } from '../../context/AuthContext';
 import { DashboardCard } from '../dashboard/DashboardCard';
 import { storage } from '../../services/storage';
 import { supabase } from '../../lib/supabase';
+import { ALERT_SOUNDS, playAlertSound } from '../../lib/alertSounds';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
@@ -76,6 +78,12 @@ export const SettingsView = () => {
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState(false);
   const [portalLoading, setPortalLoading] = useState(false);
+  const [selectedSound, setSelectedSound] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('study_flow_alert_sound') || '"sparkle"'); } catch { return 'sparkle'; }
+  });
+  const [soundVolume, setSoundVolume] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('study_flow_alert_volume') || '0.75'); } catch { return 0.75; }
+  });
 
   // Sync local state with context updates
   const prevDisplayName = useRef(user?.displayName);
@@ -88,6 +96,10 @@ export const SettingsView = () => {
     prevBio.current = profile?.bio;
     setBio(profile?.bio || '');
   }
+
+  // Persist sound settings
+  useEffect(() => { localStorage.setItem('study_flow_alert_sound', JSON.stringify(selectedSound)); }, [selectedSound]);
+  useEffect(() => { localStorage.setItem('study_flow_alert_volume', JSON.stringify(soundVolume)); }, [soundVolume]);
 
   const handleSaveProfile = async () => {
     const { error } = await updateProfile({ display_name: name, bio: bio || null });
@@ -398,6 +410,13 @@ export const SettingsView = () => {
                    <Sparkles className="w-5 h-5" />
                    <span className="text-[9px] font-black uppercase tracking-widest text-center">Clear Mode</span>
                 </button>
+                <button 
+                   onClick={() => updateConfig('particleMotion', themeConfig.particleMotion === 'moving' ? 'static' : 'moving')}
+                  className={`p-4 rounded-[24px] border-2 transition-all flex flex-col items-center gap-3 ${themeConfig.particleMotion === 'moving' ? 'border-indigo-600 bg-indigo-50/50 dark:bg-indigo-900/20' : 'border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400'}`}
+                >
+                   <Wind className="w-5 h-5" />
+                   <span className="text-[9px] font-black uppercase tracking-widest text-center">{themeConfig.particleMotion === 'moving' ? 'Moving' : 'Static'}</span>
+                </button>
              </div>
           </DashboardCard>
 
@@ -414,20 +433,37 @@ export const SettingsView = () => {
              </div>
 
              <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 ${!userStats.isPremium ? 'opacity-40 pointer-events-none' : ''}`}>
-                <div className="space-y-3">
-                   <p className="text-[8px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 ml-1">Auto-Start Next Session</p>
-                   <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800">
-                      <span className="text-xs font-bold dark:text-white uppercase">Disabled</span>
-                      <div className="w-10 h-5 bg-slate-200 dark:bg-slate-700 rounded-full relative"><div className="absolute top-1 left-1 w-3 h-3 bg-white rounded-full" /></div>
-                   </div>
-                </div>
-                <div className="space-y-3">
-                   <p className="text-[8px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 ml-1">Sound Selection</p>
-                   <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800">
-                      <span className="text-xs font-bold dark:text-white uppercase">Minimal Chime</span>
-                      <Volume2 className="w-4 h-4 text-indigo-600" />
-                   </div>
-                </div>
+                 <div className="space-y-3">
+                    <p className="text-[8px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 ml-1">Auto-Start Next Session</p>
+                    <button onClick={() => updateConfig('autoStartNext', !themeConfig.autoStartNext)}
+                      className={`flex items-center justify-between w-full p-4 rounded-2xl transition-all border ${themeConfig.autoStartNext ? 'bg-indigo-50/50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800' : 'bg-slate-50 dark:bg-slate-800/40 border-slate-100 dark:border-slate-800'}`}>
+                       <span className="text-xs font-bold dark:text-white uppercase">{themeConfig.autoStartNext ? 'Enabled' : 'Disabled'}</span>
+                       <div className={`w-10 h-5 rounded-full relative transition-all ${themeConfig.autoStartNext ? 'bg-indigo-600' : 'bg-slate-200 dark:bg-slate-700'}`}>
+                          <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${themeConfig.autoStartNext ? 'left-6' : 'left-1'}`} />
+                       </div>
+                    </button>
+                 </div>
+                 <div className="space-y-3">
+                    <p className="text-[8px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 ml-1">Sound Selection</p>
+                    <div className="space-y-2">
+                       {ALERT_SOUNDS.map(a => (
+                          <button key={a.id} onClick={() => { setSelectedSound(a.id); playAlertSound(a.id, soundVolume); }}
+                             className={`flex items-center justify-between w-full p-3 rounded-xl transition-all ${selectedSound === a.id ? 'bg-indigo-50/50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800' : 'bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700/60'}`}>
+                             <span className="flex items-center gap-2 text-xs font-bold dark:text-white uppercase">
+                                <span className="text-sm">{a.emoji}</span>
+                                {a.name}
+                             </span>
+                             {selectedSound === a.id && <Volume2 className="w-3.5 h-3.5 text-indigo-600" />}
+                          </button>
+                       ))}
+                       <div className="flex items-center gap-3 pt-1">
+                          <span className="text-[8px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 w-12">Volume</span>
+                          <input type="range" min="0" max="1" step="0.01" value={soundVolume} onChange={(e) => setSoundVolume(parseFloat(e.target.value))}
+                            className="flex-1 h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full appearance-none accent-indigo-600 cursor-pointer" />
+                          <span className="text-[9px] font-bold dark:text-white w-8 text-right">{Math.round(soundVolume * 100)}%</span>
+                       </div>
+                    </div>
+                 </div>
                {/* Scale Slider */}
                <div className="space-y-4">
                   <div className="flex justify-between items-center">

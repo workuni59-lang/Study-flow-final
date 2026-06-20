@@ -14,9 +14,12 @@ export const MOOD_GRADIENTS: Record<string, string> = {
   'harvest': 'linear-gradient(135deg, #d97706, #b91c1c, #f59e0b)',
   'moonlit-fog': 'linear-gradient(135deg, #94a3b8, #cbd5e1, #f1f5f9)',
   'terra-cotta': 'linear-gradient(135deg, #c2410c, #9a3412, #7c2d12)',
+  'cozy-warm': 'linear-gradient(135deg, #fce7f3, #f43f5e, #fda4af)',
+  'forest-deep': 'linear-gradient(135deg, #064e3b, #059669, #047857)',
 };
 
 export const MOOD_ANIMATED = new Set([
   'ember-glow', 'frost-mint', 'twilight-sky',
   'lavender-dream', 'midnight-ocean', 'northern-sky', 'cobalt-night', 'harvest',
+  'cozy-warm', 'forest-deep',
 ]);

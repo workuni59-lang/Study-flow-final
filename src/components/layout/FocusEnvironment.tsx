@@ -1,6 +1,9 @@
-import { memo, useMemo, useState, useRef, useEffect, type ReactNode } from 'react';
+import { memo, useMemo, useState, useRef, useEffect, lazy, Suspense, type ReactNode } from 'react';
 import { StudyTimer } from '../dashboard/StudyTimer';
 import { NotesPanel } from '../panels/NotesPanel';
+import { useStudy } from '../../context/StudyContext';
+
+const ThreeBackground = lazy(() => import('../background/ThreeBackground').then(m => ({ default: m.ThreeBackground })));
 
 interface FocusEnvironmentProps {
   onTasksOpen: () => void;
@@ -72,6 +75,7 @@ const UtilityButton = memo(({ onClick, children, label }: {
 export const FocusEnvironment = memo(({
   onTasksOpen, onMusicOpen, onNotepadOpen, onQuestsOpen,
 }: FocusEnvironmentProps) => {
+  const { themeConfig } = useStudy();
   const dockRef = useRef<HTMLDivElement>(null);
   const [isMobile] = useState(() => window.innerWidth < 768);
   const [dockVisible, setDockVisible] = useState(true);
@@ -118,6 +122,11 @@ export const FocusEnvironment = memo(({
       {/* Atmosphere glow — soft radial light behind timer */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vmin] h-[60vmin] rounded-full bg-brand/5 blur-[120px] pointer-events-none z-0" />
       <div className="absolute top-[55%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40vmin] h-[40vmin] rounded-full bg-violet-500/5 blur-[100px] pointer-events-none z-0" />
+
+      {/* Three.js particle background (lazy-loaded, re-mounts on wallpaper change) */}
+      <Suspense fallback={null}>
+        <ThreeBackground key={themeConfig.wallpaper} />
+      </Suspense>
 
       {/* Particle atmosphere */}
       {canParticles && <ParticleField />}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Play, Pause, RotateCcw, Zap, Maximize2, X,
@@ -11,27 +11,14 @@ import { storage } from '../../services/storage';
 import { useStudy, useFocus } from '../../context/StudyContext';
 import { useNavigationContext, type ThemeTab, type TimerModeId } from '../../hooks/useNavigationContext';
 import { ROUTES } from '../../lib/routes';
-import { ATMOSPHERES, WALLPAPERS } from '../../lib/gamification';
+import { ATMOSPHERES, WALLPAPERS, THEME_PRESETS } from '../../lib/gamification';
 import { MOOD_GRADIENTS, MOOD_ANIMATED } from '../../lib/wallpapers';
 import { playAlertSound } from '../../lib/alertSounds';
-
-const PHOTO_CATEGORIES = [...new Set(WALLPAPERS.filter(w => w.type === 'image' && w.category).map(w => w.category!))];
 
 const formatTimeBase = (seconds: number) => {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
   return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-};
-
-const ANIMATED_ACCENTS: Record<string, string> = {
-  'none': '#64748b',
-  'minimal': '#94a3b8',
-  'mesh': '#818cf8',
-  'cyberpunk': '#e879f9',
-  'dots': '#38bdf8',
-  'aurora': '#34d399',
-  'stardust': '#1e293b',
-  'zen': '#c084fc',
 };
 
 type TimerMode = 'focus' | 'shortBreak' | 'longBreak' | 'taskETA' | 'stopwatch';
@@ -102,7 +89,6 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
     
   // Theme Picker State
   const [pickerTab, setPickerTab] = useState<ThemeTab>('atm');
-  const [photoCategory, setPhotoCategory] = useState<string>('All');
   const [sessionsCompleted, setSessionsCompleted] = useState(0);
   const [customImgError, setCustomImgError] = useState(false);
   const [tallyStyle, setTallyStyle] = useState('dots');
@@ -133,10 +119,6 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
   const setShowPresetPicker = (val: boolean) => {
     setInternalPresetPicker(val);
   };
-
-  const filteredPhotos = useMemo(() =>
-    WALLPAPERS.filter(w => w.url).filter(w => photoCategory === 'All' || w.category === photoCategory),
-  [photoCategory]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -181,6 +163,8 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
   const isMobileRef = useRef(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
   const cumulatedRef = useRef(0);
   const runStartRef = useRef(0);
+  const autoStartRef = useRef(themeConfig.autoStartNext);
+  autoStartRef.current = themeConfig.autoStartNext;
   const logFocusSession = (duration: number) => {
     if (!sessionStartTime.current || duration <= 0) return;
     logSession({
@@ -363,6 +347,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
       setMode('focus');
       setTimeLeft(activePreset.focus * 60);
     }
+    if (autoStartRef.current) setIsActive(true);
   }, [mode, activePreset]);
   handleTimerCompleteRef.current = handleTimerComplete;
 
@@ -568,113 +553,112 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
     </motion.div>
   );
 
-  const renderMoodsTab = () => (
-    <motion.div key="moods" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.15 }} className="pt-1">
-      <div className="grid grid-cols-2 gap-2">
-        {WALLPAPERS.filter(w => w.category === 'Moods').map(w => (
-          <button key={w.id} onClick={() => { if(w.isPremium && !userStats.isPremium) setShowPremiumModal(true); else setThemeConfig({...themeConfig, wallpaper: w.id}); }}
-            className={`aspect-[4/3] rounded-xl relative overflow-hidden transition-all group ${themeConfig.wallpaper === w.id ? 'ring-2 ring-brand' : 'hover:ring-1 ring-white/20'}`}>
-            <div className="absolute inset-0" style={{ background: MOOD_GRADIENTS[w.id] || MOOD_GRADIENTS['ember-glow'] }} />
-            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-2">
-              <span className="text-[9px] font-bold text-white leading-tight block truncate">{w.name}</span>
+  const renderPresetsTab = () => (
+    <motion.div key="presets" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.15 }} className="pt-1 space-y-2">
+      {THEME_PRESETS.map(preset => {
+        const isActive = themeConfig.atmosphere === preset.atmosphere && themeConfig.wallpaper === preset.wallpaper;
+        return (
+          <button key={preset.id} onClick={() => setThemeConfig({ ...themeConfig, atmosphere: preset.atmosphere, wallpaper: preset.wallpaper, brightness: preset.brightness, saturation: preset.saturation })}
+            className={`w-full p-3 rounded-xl flex items-center gap-3 transition-all ${isActive ? 'bg-brand/20 text-white ring-1 ring-brand/30' : 'bg-black/15 backdrop-blur-sm border border-white/10 text-white/50 hover:bg-black/25 hover:text-white/80'}`}>
+            <span className="text-lg">{preset.icon}</span>
+            <div className="flex-1 text-left">
+              <div className="text-[10px] font-bold uppercase tracking-wider">{preset.name}</div>
+              <div className="text-[8px] text-white/40 mt-0.5">{preset.description}</div>
             </div>
-            {themeConfig.wallpaper === w.id && <div className="absolute top-2 right-2 bg-brand rounded-full p-0.5"><Check className="w-3 h-3 text-white" /></div>}
-            {!userStats.isPremium && w.isPremium && <div className="absolute top-2 left-2"><Crown className="w-3 h-3 text-white" /></div>}
+            {isActive && <div className="w-1.5 h-1.5 rounded-full bg-brand" />}
           </button>
-        ))}
-      </div>
+        );
+      })}
     </motion.div>
   );
 
-  const renderAnimatedTab = () => (
-    <motion.div key="animated" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.15 }} className="pt-1">
-      <div className="flex flex-wrap gap-1.5">
-        {WALLPAPERS.filter(w => w.type === 'animated' && w.category !== 'Moods').map(w => (
-          <button key={w.id} onClick={() => { if(w.isPremium && !userStats.isPremium) setShowPremiumModal(true); else setThemeConfig({...themeConfig, wallpaper: w.id}); }}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[8px] font-bold tracking-wider transition-all ${
-              themeConfig.wallpaper === w.id
-                ? 'bg-brand text-white shadow-lg'
-                : 'bg-black/15 backdrop-blur-sm border border-white/10 text-white/60 hover:text-white/90 hover:bg-black/25'
-            }`}>
-            <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: ANIMATED_ACCENTS[w.id] || '#64748b' }} />
-            {w.name}
-            {!userStats.isPremium && w.isPremium && <Crown className="w-2.5 h-2.5 ml-0.5" />}
-          </button>
-        ))}
-      </div>
-    </motion.div>
-  );
-
-  const renderPhotosTab = () => (
-    <motion.div key="photos" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.15 }} className="pt-1 space-y-3">
-      <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
-        <button onClick={() => setPhotoCategory('All')}
-          className={`shrink-0 px-2.5 py-1 rounded-lg text-[7px] font-bold uppercase tracking-wider transition-all ${photoCategory === 'All' ? 'bg-brand text-white shadow-sm' : 'bg-black/15 backdrop-blur-sm border border-white/10 text-white/50 hover:text-white/80 hover:bg-black/25'}`}>All</button>
-        {PHOTO_CATEGORIES.map(cat => (
-          <button key={cat} onClick={() => setPhotoCategory(cat)}
-            className={`shrink-0 px-2.5 py-1 rounded-lg text-[7px] font-bold uppercase tracking-wider transition-all ${photoCategory === cat ? 'bg-brand text-white shadow-sm' : 'bg-black/15 backdrop-blur-sm border border-white/10 text-white/50 hover:text-white/80 hover:bg-black/25'}`}>{cat}</button>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-2 gap-2">
-        {filteredPhotos.map(w => (
-          <button key={w.id} onClick={() => { if(w.isPremium && !userStats.isPremium) setShowPremiumModal(true); else setThemeConfig({...themeConfig, wallpaper: w.id}); }}
-            className={`aspect-[4/3] rounded-xl relative overflow-hidden transition-all group ${themeConfig.wallpaper === w.id ? 'ring-2 ring-brand' : 'hover:ring-1 ring-white/20'}`}>
-            <img src={w.url} alt={w.name} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-2">
-              <span className="text-[9px] font-bold text-white leading-tight block truncate">{w.name}</span>
-            </div>
-            {themeConfig.wallpaper === w.id && <div className="absolute top-2 right-2 bg-brand rounded-full p-0.5"><Check className="w-3 h-3 text-white" /></div>}
-            {!userStats.isPremium && w.isPremium && <div className="absolute top-2 left-2"><Crown className="w-3 h-3 text-white" /></div>}
-          </button>
-        ))}
-      </div>
-    </motion.div>
-  );
-
-  const renderCustomTab = () => (
-    <motion.div key="custom" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.15 }} className="pt-1 space-y-3">
-      <button onClick={() => { if(!userStats.isPremium) setShowPremiumModal(true); else setThemeConfig({...themeConfig, wallpaper: 'custom'}); }}
-        className={`w-full aspect-[4/3] rounded-xl relative overflow-hidden transition-all group ${themeConfig.wallpaper === 'custom' ? 'ring-2 ring-brand' : 'hover:ring-1 ring-white/20'}`}>
-        {themeConfig.customWallpaperUrl && !customImgError ? (
-          <img src={themeConfig.customWallpaperUrl} alt="Custom" className="absolute inset-0 w-full h-full object-cover" loading="lazy" onError={() => setCustomImgError(true)} />
-        ) : themeConfig.customWallpaperUrl && customImgError ? (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/[0.03] p-2">
-            <span className="text-[6px] font-mono text-white/30 break-all text-center leading-tight">{themeConfig.customWallpaperUrl}</span>
-          </div>
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/[0.03] border-2 border-dashed border-white/10">
-            <span className="text-[8px] font-bold text-white/30 uppercase tracking-widest">Custom</span>
-          </div>
-        )}
-        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-2">
-          <span className="text-[9px] font-bold text-white leading-tight block truncate">Custom</span>
+  const renderWallpaperTab = () => (
+    <motion.div key="wallpaper" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.15 }} className="pt-1 space-y-4">
+      <div>
+        <div className="text-[9px] font-bold uppercase tracking-wider text-white/40 mb-2">Mood Gradients</div>
+        <div className="grid grid-cols-5 gap-2">
+          {WALLPAPERS.filter(w => w.category === 'Moods').map(w => {
+            const selected = themeConfig.wallpaper === w.id;
+            return (
+              <button key={w.id} onClick={() => { if(w.isPremium && !userStats.isPremium) setShowPremiumModal(true); else setThemeConfig({...themeConfig, wallpaper: w.id}); }}
+                className={`relative aspect-square rounded-xl transition-all active:scale-90 ${selected ? 'ring-2 ring-white ring-offset-1 ring-offset-[#0f0f1f]' : 'ring-1 ring-white/[0.06] hover:ring-white/25'}`}
+                style={{ background: MOOD_GRADIENTS[w.id] }} title={w.name}>
+                {selected && <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-xl"><Check className="w-4 h-4 text-white drop-shadow-md" /></div>}
+                {!userStats.isPremium && w.isPremium && <Crown className="absolute top-0.5 right-0.5 w-2.5 h-2.5 text-amber-400 drop-shadow-md" />}
+              </button>
+            );
+          })}
         </div>
-        {themeConfig.wallpaper === 'custom' && <div className="absolute top-2 right-2 bg-brand rounded-full p-0.5"><Check className="w-3 h-3 text-white" /></div>}
-      </button>
-
-      <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
-      <button onClick={() => fileInputRef.current?.click()} className="w-full flex items-center justify-center gap-2 bg-black/15 backdrop-blur-sm border border-dashed border-white/20 hover:border-white/30 rounded-xl p-3 text-[9px] font-semibold hover:bg-black/25 transition-all text-white/60 hover:text-white/80 uppercase tracking-wider">
-        <Upload className="w-3 h-3" /> Upload Image
-      </button>
+      </div>
+      <div>
+        <div className="text-[9px] font-bold uppercase tracking-wider text-white/40 mb-2">Animated</div>
+        <div className="flex gap-2 flex-wrap">
+          {WALLPAPERS.filter(w => w.type === 'animated' && w.category === 'Abstract').map(w => {
+            const selected = themeConfig.wallpaper === w.id;
+            return (
+              <button key={w.id} onClick={() => { if(w.isPremium && !userStats.isPremium) setShowPremiumModal(true); else setThemeConfig({...themeConfig, wallpaper: w.id}); }}
+                className={`px-3 py-2 rounded-lg text-[9px] font-semibold uppercase tracking-wider transition-all ${selected ? 'bg-white/15 text-white ring-1 ring-white/30' : 'bg-black/15 border border-white/10 text-white/50 hover:bg-black/25 hover:text-white/80'}`}>
+                {w.name}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+      {(() => {
+        const photoCats = [...new Set(WALLPAPERS.filter(w => w.type === 'image' && w.category && !['Abstract', 'Moods', 'Special'].includes(w.category!)).map(w => w.category!))];
+        return photoCats.map(cat => {
+          const catWalls = WALLPAPERS.filter(w => w.category === cat && w.type === 'image');
+          return (
+            <div key={cat}>
+              <div className="text-[9px] font-bold uppercase tracking-wider text-white/40 mb-2">{cat}</div>
+              <div className="grid grid-cols-3 gap-2">
+                {catWalls.map(w => (
+                  <button key={w.id} onClick={() => { if(w.isPremium && !userStats.isPremium) setShowPremiumModal(true); else setThemeConfig({...themeConfig, wallpaper: w.id}); }}
+                    className={`relative aspect-[4/3] rounded-xl overflow-hidden transition-all active:scale-90 ${themeConfig.wallpaper === w.id ? 'ring-2 ring-white ring-offset-1 ring-offset-[#0f0f1f]' : 'ring-1 ring-white/[0.06] hover:ring-white/25'}`}
+                    style={{ backgroundImage: `url(${w.url})`, backgroundSize: 'cover', backgroundPosition: 'center' }} title={w.name}>
+                    {themeConfig.wallpaper === w.id && <div className="absolute inset-0 flex items-center justify-center bg-black/20"><Check className="w-4 h-4 text-white drop-shadow-md" /></div>}
+                    {!userStats.isPremium && w.isPremium && <Crown className="absolute top-0.5 right-0.5 w-2.5 h-2.5 text-amber-400 drop-shadow-md" />}
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-1.5">
+                      <span className="text-[7px] font-bold text-white/90 block truncate">{w.name}</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          );
+        });
+      })()}
+      <div>
+        <div className="text-[9px] font-bold uppercase tracking-wider text-white/40 mb-2">Custom</div>
+        <button onClick={() => { if(!userStats.isPremium) setShowPremiumModal(true); else setThemeConfig({...themeConfig, wallpaper: 'custom'}); }}
+          className={`w-full aspect-[4/1] rounded-xl relative overflow-hidden transition-all ${themeConfig.wallpaper === 'custom' ? 'ring-2 ring-brand' : 'ring-1 ring-white/[0.06] hover:ring-white/25'}`}>
+          {themeConfig.customWallpaperUrl && !customImgError ? (
+            <img src={themeConfig.customWallpaperUrl} alt="Custom" className="absolute inset-0 w-full h-full object-cover" loading="lazy" onError={() => setCustomImgError(true)} />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center bg-white/[0.03] border-2 border-dashed border-white/10">
+              <span className="text-[8px] font-bold text-white/30 uppercase tracking-widest">Upload Image</span>
+            </div>
+          )}
+        </button>
+        <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+        <button onClick={() => fileInputRef.current?.click()} className="w-full mt-1.5 flex items-center justify-center gap-2 bg-black/15 backdrop-blur-sm border border-dashed border-white/20 hover:border-white/30 rounded-xl p-2.5 text-[8px] font-semibold hover:bg-black/25 transition-all text-white/50 hover:text-white/80 uppercase tracking-wider">
+          <Upload className="w-3 h-3" /> Browse Files
+        </button>
+      </div>
     </motion.div>
   );
 
   const renderThemePicker = () => (
     <motion.div key="theme" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
-      <div className="flex gap-1.5 p-1 bg-black/15 backdrop-blur-lg border border-white/10 rounded-xl overflow-x-auto no-scrollbar">
-        <button onClick={() => handleSetPickerTab('atm')} className={`shrink-0 px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${activePickerTab === 'atm' ? 'bg-white/15 text-white shadow-sm' : 'text-white/50 backdrop-blur-sm border border-white/[0.04]'}`}>Atmosphere</button>
-        {!isMobile && <button onClick={() => handleSetPickerTab('moods')} className={`shrink-0 px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${activePickerTab === 'moods' ? 'bg-white/15 text-white shadow-sm' : 'text-white/50 backdrop-blur-sm border border-white/[0.04]'}`}>Moods</button>}
-        {!isMobile && <button onClick={() => handleSetPickerTab('animated')} className={`shrink-0 px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${activePickerTab === 'animated' ? 'bg-white/15 text-white shadow-sm' : 'text-white/50 backdrop-blur-sm border border-white/[0.04]'}`}>Animated</button>}
-        {!isMobile && <button onClick={() => handleSetPickerTab('photos')} className={`shrink-0 px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${activePickerTab === 'photos' ? 'bg-white/15 text-white shadow-sm' : 'text-white/50 backdrop-blur-sm border border-white/[0.04]'}`}>Photos</button>}
-        {!isMobile && <button onClick={() => handleSetPickerTab('custom')} className={`shrink-0 px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${activePickerTab === 'custom' ? 'bg-white/15 text-white shadow-sm' : 'text-white/50 backdrop-blur-sm border border-white/[0.04]'}`}>Custom</button>}
+      <div className="flex gap-1.5 p-1 bg-black/15 backdrop-blur-lg border border-white/10 rounded-xl">
+        <button onClick={() => handleSetPickerTab('presets')} className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${activePickerTab === 'presets' ? 'bg-white/15 text-white shadow-sm' : 'text-white/50 hover:text-white/80'}`}>Presets</button>
+        <button onClick={() => handleSetPickerTab('wallpaper')} className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${activePickerTab === 'wallpaper' ? 'bg-white/15 text-white shadow-sm' : 'text-white/50 hover:text-white/80'}`}>Wallpaper</button>
+        <button onClick={() => handleSetPickerTab('atm')} className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${activePickerTab === 'atm' ? 'bg-white/15 text-white shadow-sm' : 'text-white/50 hover:text-white/80'}`}>Atmosphere</button>
       </div>
       <div className="max-h-[45vh] overflow-y-auto no-scrollbar mt-3">
+        {activePickerTab === 'presets' && renderPresetsTab()}
+        {activePickerTab === 'wallpaper' && renderWallpaperTab()}
         {activePickerTab === 'atm' && renderAtmosphereTab()}
-        {activePickerTab === 'moods' && !isMobile && renderMoodsTab()}
-        {activePickerTab === 'animated' && !isMobile && renderAnimatedTab()}
-        {activePickerTab === 'photos' && !isMobile && renderPhotosTab()}
-        {activePickerTab === 'custom' && !isMobile && renderCustomTab()}
       </div>
       <button onClick={() => setShowThemePicker(false)} className="w-full mt-3 py-2.5 bg-black/25 backdrop-blur-sm border border-white/10 rounded-xl text-[9px] font-semibold uppercase tracking-wider text-white/70 hover:bg-black/35 transition-colors">Done</button>
     </motion.div>

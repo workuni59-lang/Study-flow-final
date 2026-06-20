@@ -674,5 +674,11 @@
             document.querySelectorAll('[data-reveal]').forEach(function(el) { observer.observe(el); });
         })();
     </script>
+    <script>
+        // OAuth redirect: if URL hash contains access_token, redirect to SPA
+        if (location.hash && (location.hash.includes('access_token') || location.hash.includes('type=recovery'))) {
+            location.replace('/app/' + location.hash);
+        }
+    </script>
 </body>
 </html>

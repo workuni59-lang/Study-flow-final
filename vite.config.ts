@@ -24,6 +24,7 @@ export default defineConfig((): UserConfig => {
           background_color: '#0a0c10',
           display: 'standalone',
           orientation: 'portrait',
+          start_url: '/app/',
           icons: [
             {
               src: 'logo.png',
@@ -45,6 +46,7 @@ export default defineConfig((): UserConfig => {
         },
         workbox: {
           globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+          globIgnores: ['**/index.html', '**/landing/**', '**/flip-clock/**', '**/pomodoro-timer/**', '**/study-timer/**', '**/study-planner/**', '**/study-with-me/**', '**/aesthetic-stopwatch/**', '**/studyflow-focus-timer/**'],
           navigateFallback: '/app/index.html',
           runtimeCaching: [
             {

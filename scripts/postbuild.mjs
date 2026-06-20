@@ -54,4 +54,27 @@ if (existsSync(wranglerPath)) {
   console.log('✓ Removed Worker main from wrangler.json');
 }
 
+// 5. Patch SW precache manifest: remove root index.html (now landing page) and landing/ pages
+const swPath = join(SRC, 'sw.js');
+if (existsSync(swPath)) {
+  let sw = readFileSync(swPath, 'utf-8');
+  sw = sw.replace(/\{url:"index\.html",revision:"[^"]+"},?/g, '');
+  sw = sw.replace(/\{url:"landing\/[^"]+",revision:"[^"]+"},?/g, '');
+  // Also remove standalone tool pages from precache (not part of PWA)
+  for (const subdir of ['flip-clock', 'pomodoro-timer', 'study-timer', 'study-planner', 'study-with-me', 'aesthetic-stopwatch', 'studyflow-focus-timer']) {
+    sw = sw.replace(new RegExp(`\\{url:"${subdir}\\/index\\.html",revision:"[^"]+"},?`, 'g'), '');
+  }
+  writeFileSync(swPath, sw);
+  console.log('✓ Patched sw.js precache manifest');
+}
+
+// 6. Update manifest.webmanifest: set start_url to /app/
+const manifestPath = join(SRC, 'manifest.webmanifest');
+if (existsSync(manifestPath)) {
+  const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8'));
+  manifest.start_url = '/app/';
+  writeFileSync(manifestPath, JSON.stringify(manifest));
+  console.log('✓ Updated manifest.webmanifest start_url → /app/');
+}
+
 console.log('✓ Postbuild complete — SPA at /app/, landing at /, no Worker');

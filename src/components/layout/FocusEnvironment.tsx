@@ -75,7 +75,8 @@ const UtilityButton = memo(({ onClick, children, label }: {
 export const FocusEnvironment = memo(({
   onTasksOpen, onMusicOpen, onNotepadOpen, onQuestsOpen,
 }: FocusEnvironmentProps) => {
-  const { themeConfig } = useStudy();
+  const { themeConfig, setThemeConfig } = useStudy();
+  const particleEnabled = themeConfig.particleMotion === 'moving';
   const dockRef = useRef<HTMLDivElement>(null);
   const [isMobile] = useState(() => window.innerWidth < 768);
   const [dockVisible, setDockVisible] = useState(true);
@@ -123,10 +124,12 @@ export const FocusEnvironment = memo(({
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vmin] h-[60vmin] rounded-full bg-brand/5 blur-[120px] pointer-events-none z-0" />
       <div className="absolute top-[55%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40vmin] h-[40vmin] rounded-full bg-violet-500/5 blur-[100px] pointer-events-none z-0" />
 
-      {/* Three.js particle background (lazy-loaded, re-mounts on wallpaper change) */}
-      <Suspense fallback={null}>
-        <ThreeBackground key={themeConfig.wallpaper} />
-      </Suspense>
+      {/* Three.js particle background (lazy-loaded, only when enabled) */}
+      {particleEnabled && (
+        <Suspense fallback={null}>
+          <ThreeBackground key={themeConfig.wallpaper} />
+        </Suspense>
+      )}
 
       {/* Particle atmosphere */}
       {canParticles && <ParticleField />}
@@ -153,6 +156,19 @@ export const FocusEnvironment = memo(({
             {id === 'quests' && <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>}
           </UtilityButton>
         ))}
+        {/* Particle toggle — hidden in dock, appears on hover */}
+        <button
+          onClick={() => setThemeConfig({ ...themeConfig, particleMotion: particleEnabled ? 'static' : 'moving' })}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl backdrop-blur-md bg-white/[0.04] border border-white/[0.04] text-white/40 hover:text-white/80 hover:bg-white/[0.08] transition-all text-[10px] font-medium"
+          title={particleEnabled ? 'Disable particles' : 'Enable particles'}
+          aria-label={particleEnabled ? 'Disable particles' : 'Enable particles'}
+        >
+          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M12 3v1m0 16v1m8.66-13.66l-.71.71M4.05 19.95l-.71.71M21 12h-1M4 12H3m15.66 7.66l-.71-.71M4.05 4.05l-.71-.71"/>
+            <circle cx="12" cy="12" r="1"/>
+          </svg>
+          <span className="hidden sm:inline">{particleEnabled ? 'Particles On' : 'Particles Off'}</span>
+        </button>
       </div>
     </div>
   );

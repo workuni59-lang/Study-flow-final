@@ -176,7 +176,7 @@ const DEFAULT_THEME: ThemeConfig = {
   scaleFactor: 1,
   clearMode: false,
   autoStartNext: false,
-  particleMotion: 'moving'
+  particleMotion: 'static'
 };
 
 export function StudyProvider({ children }: { children: React.ReactNode }) {

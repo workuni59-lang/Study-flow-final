@@ -30,8 +30,7 @@ import {
   Key,
   AlertTriangle,
   ExternalLink,
-  Loader2,
-  Wind
+  Loader2
 } from 'lucide-react';
 import { useStudy } from '../../context/StudyContext';
 import { useAuth } from '../../context/AuthContext';
@@ -409,15 +408,8 @@ export const SettingsView = () => {
                 >
                    <Sparkles className="w-5 h-5" />
                    <span className="text-[9px] font-black uppercase tracking-widest text-center">Clear Mode</span>
-                </button>
-                <button 
-                   onClick={() => updateConfig('particleMotion', themeConfig.particleMotion === 'moving' ? 'static' : 'moving')}
-                  className={`p-4 rounded-[24px] border-2 transition-all flex flex-col items-center gap-3 ${themeConfig.particleMotion === 'moving' ? 'border-indigo-600 bg-indigo-50/50 dark:bg-indigo-900/20' : 'border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400'}`}
-                >
-                   <Wind className="w-5 h-5" />
-                   <span className="text-[9px] font-black uppercase tracking-widest text-center">{themeConfig.particleMotion === 'moving' ? 'Moving' : 'Static'}</span>
-                </button>
-             </div>
+                 </button>
+              </div>
           </DashboardCard>
 
           {/* Focus Engine Config (Premium) */}

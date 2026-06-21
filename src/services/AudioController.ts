@@ -191,8 +191,12 @@ class AudioController {
         this.activeIds.delete(id);
         this.notify();
       },
+      onplay: () => {
+        this.states.set(id, 'playing');
+        this.notify();
+      },
       onplayerror: () => {
-        this.states.set(id, 'error');
+        this.states.set(id, 'loading');
         howl.once('unlock', () => {
           if (this.activeIds.has(id)) howl.play();
         });

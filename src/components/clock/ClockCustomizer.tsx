@@ -274,18 +274,18 @@ export default function ClockCustomizer({ isOpen, onClose, config, onChange, cur
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center"
+          className="fixed inset-0 z-[100] flex items-stretch sm:items-center justify-end pointer-events-none"
         >
-          <div className="absolute inset-0 bg-black/10" onClick={onClose} />
+          <div className="absolute inset-0 pointer-events-auto" onClick={onClose} />
           <motion.div
-            initial={{ y: '100%', opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: '100%', opacity: 0 }}
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="relative w-full sm:max-w-md bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden max-h-[85vh] flex flex-col"
+            className="relative w-full sm:w-80 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-none sm:rounded-l-2xl shadow-2xl overflow-hidden h-full sm:max-h-[90vh] flex flex-col pointer-events-auto"
           >
             {/* Header */}
-            <div className="sticky top-0 z-10 bg-inherit rounded-t-3xl">
+            <div className="sticky top-0 z-10 bg-inherit">
               <div className="flex items-center justify-between px-6 pt-4 pb-3">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
@@ -317,35 +317,6 @@ export default function ClockCustomizer({ isOpen, onClose, config, onChange, cur
                 >{s.label}{locked && <Lock className="w-2.5 h-2.5" />}</button>
                 );
               })}
-            </div>
-
-            {/* Live preview of current clock config */}
-            <div className="flex items-center justify-center px-6 py-4 bg-white/[0.01] border-b border-white/[0.04]">
-              <div className="relative flex items-center justify-center" style={{
-                opacity: config.opacity / 100,
-                filter: config.blur > 0 ? `blur(${config.blur}px)` : undefined,
-                borderRadius: config.borderRadius,
-                fontFamily: isAnalog ? undefined : config.fontFamily,
-                transform: `scale(${config.size / 100})`,
-              }}>
-                <div style={{
-                  boxShadow: config.shadowSoftness > 0
-                    ? `0 ${config.shadowSoftness * 0.15}px ${config.shadowSoftness * 0.5}px ${config.accentColor}22, 0 ${config.shadowSoftness * 0.3}px ${config.shadowSoftness * 0.8}px ${config.accentColor}11`
-                    : undefined,
-                }}>
-                  {isAnalog ? (
-                    <AnalogClock hours={10} minutes={9} seconds={35} config={config} />
-                  ) : (
-                    <DigitalClock
-                      hours={10}
-                      minutes={0}
-                      seconds={0}
-                      ampm={'AM'}
-                      config={config}
-                    />
-                  )}
-                </div>
-              </div>
             </div>
 
             {/* Content */}

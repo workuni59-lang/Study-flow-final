@@ -29,6 +29,7 @@ class SyncService {
   private _userId: string | null = null;
   private _online = navigator.onLine;
   private _listenersAttached = false;
+  private _isPremium = true;
 
   get userId(): string | null {
     return this._userId;
@@ -59,6 +60,35 @@ class SyncService {
       this.saveQueue();
       this.schedule();
     } catch {}
+  }
+
+  setPremium(premium: boolean): void {
+    this._isPremium = premium;
+    if (!premium) {
+      this.queue = [];
+      this.saveQueue();
+      if (this.timer) clearTimeout(this.timer);
+    } else if (this.queue.length > 0) {
+      this.schedule();
+    }
+  }
+
+  enqueueAll(items: { table: TableName; data: Record<string, any> }[]): void {
+    if (!this._userId || !supabase || !this._isPremium) return;
+    for (const item of items) {
+      this.queue = this.queue.filter(q => !(q.table === item.table && q.data.id === item.data.id));
+      const now = new Date().toISOString();
+      this.queue.push({
+        id: `${item.table}_${item.data.id}_${now}`,
+        table: item.table,
+        operation: 'upsert',
+        data: { ...item.data, updated_at: item.data.updated_at ?? now },
+        retries: 0,
+        createdAt: now,
+      });
+    }
+    this.saveQueue();
+    this.schedule();
   }
 
   init(userId: string | null): void {
@@ -134,6 +164,12 @@ class SyncService {
     if (!this._online) {
       this.processing = false;
       this.schedule();
+      return;
+    }
+    if (!this._isPremium) {
+      this.queue = [];
+      this.saveQueue();
+      this.processing = false;
       return;
     }
     this.processing = true;

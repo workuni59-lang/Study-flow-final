@@ -340,8 +340,9 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
 
   // Cloud sync: gamification state
   const isRealUser = authUser && authUser.uid !== 'demo-user-001' && supabase;
+  const isSyncEnabled = isRealUser && userStats.isPremium;
   useEffect(() => {
-    if (!isRealUser) return;
+    if (!isSyncEnabled) return;
     const payload = {
       gold: gameGold,
       hp: gameHp,
@@ -354,11 +355,11 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     };
     localStorage.setItem('study_flow_gamification_updated_at', new Date().toISOString());
     sync.enqueue('gamification_state', 'upsert', payload);
-  }, [isRealUser, gameGold, gameHp, gameQuestProgress, questResets, shopItems, sessionsToday, sessionsDate, quests]);
+  }, [isSyncEnabled, gameGold, gameHp, gameQuestProgress, questResets, shopItems, sessionsToday, sessionsDate, quests]);
 
   // Badge sync to Supabase (canonical source)
   useEffect(() => {
-    if (!authUser || !supabase || authUser.uid === 'demo-user-001') return;
+    if (!authUser || !isSyncEnabled) return;
     const badgeIds = unlockedBadges.map(b => b.achievementId);
     supabase.from('user_stats').upsert({
       user_id: authUser.uid,
@@ -371,7 +372,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
 
   // Load badges from Supabase on auth init (replace local)
   useEffect(() => {
-    if (!authUser || !supabase || authUser.uid === 'demo-user-001') return;
+    if (!authUser || !isSyncEnabled) return;
     const onBadgeErr = (err: any) => {
       console.warn('[StudyContext] badge load failed:', err?.message ?? err);
     };
@@ -407,9 +408,9 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     return merged;
   }
 
-  // Pull cloud data on login (skip demo)
+  // Pull cloud data on login (premium only)
   useEffect(() => {
-    if (!authUser || authUser.uid === 'demo-user-001' || !supabase) return;
+    if (!authUser || !isSyncEnabled) return;
     sync.pullAll(authUser.uid).then(cloud => {
       setTasks(prev => mergeItems(prev, cloud.tasks, 'id'));
       setSubjects(prev => mergeItems(prev, cloud.subjects, 'id'));
@@ -568,6 +569,34 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     }
   }, [userStats.isPremium, userStats.hasShield]);
 
+  // Gate sync behind premium
+  const prevPremiumRef = useRef(userStats.isPremium);
+  useEffect(() => {
+    const was = prevPremiumRef.current;
+    const now = userStats.isPremium;
+    prevPremiumRef.current = now;
+    if (was === now) return;
+    if (now && isRealUser) {
+      sync.setPremium(true);
+      const ts = new Date().toISOString();
+      sync.enqueueAll([
+        ...tasks.map(t => ({ table: 'tasks' as const, data: { ...t, updated_at: ts } })),
+        ...subjects.map(s => ({ table: 'subjects' as const, data: { ...s, updated_at: ts } })),
+        {
+          table: 'gamification_state' as const,
+          data: {
+            gold: gameGold, hp: gameHp, quest_progress: gameQuestProgress,
+            quest_resets: questResets, shop_items: shopItems,
+            sessions_today: sessionsToday, sessions_date: sessionsDate,
+            daily_quests: quests, updated_at: ts,
+          },
+        },
+      ]);
+    } else if (!now) {
+      sync.setPremium(false);
+    }
+  }, [userStats.isPremium]);
+
   const checkAchievements = (stats: UserStats) => {
     const newlyUnlocked: Achievement[] = [];
     ACHIEVEMENTS.forEach(achievement => {
@@ -603,7 +632,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   const addTask = (title: string, category: string, priority: string, dueDate?: string, estimatedMinutes?: number, subjectId?: string, topicId?: string) => {
     const newTask: Task = { id: Date.now().toString() + Math.random().toString(36).substr(2, 9), title, category, priority, completed: false, dueDate, estimatedMinutes, subjectId, topicId };
     setTasks(prev => [newTask, ...prev]);
-    if (isRealUser) sync.enqueue('tasks', 'upsert', newTask);
+    if (isSyncEnabled) sync.enqueue('tasks', 'upsert', newTask);
   };
 
   const toggleTask = (id: string) => {
@@ -638,7 +667,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       }
     }
     setTasks(prev => prev.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
-    if (isRealUser && task) sync.enqueue('tasks', 'upsert', { ...task, completed: !task.completed });
+    if (isSyncEnabled && task) sync.enqueue('tasks', 'upsert', { ...task, completed: !task.completed });
     if (isCompleting) {
       const newTotal = userStats.totalTasksCompleted + 1;
       setUserStats(prev => ({ ...prev, totalTasksCompleted: newTotal }));
@@ -651,14 +680,14 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
 
   const deleteTask = (id: string) => {
     setTasks(prev => prev.filter(t => t.id !== id));
-    if (isRealUser) sync.enqueue('tasks', 'delete', { id });
+    if (isSyncEnabled) sync.enqueue('tasks', 'delete', { id });
   };
 
   const updateTask = useCallback((id: string, updates: Partial<Task>) => {
     const existing = tasks.find(t => t.id === id);
     setTasks(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
-    if (isRealUser && existing) sync.enqueue('tasks', 'upsert', { ...existing, ...updates });
-  }, [tasks, isRealUser]);
+    if (isSyncEnabled && existing) sync.enqueue('tasks', 'upsert', { ...existing, ...updates });
+  }, [tasks, isSyncEnabled]);
 
   const recalibrateTasks = () => {
     setTasks(prev => {
@@ -680,20 +709,20 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       id, name, topics: initialTopics.map(title => ({ id: Math.random().toString(36).substr(2, 9), title, mastery: 'Red' })), color: color || 'indigo'
     };
     setSubjects(prev => [...prev, newSubject]);
-    if (isRealUser) sync.enqueue('subjects', 'upsert', newSubject);
+    if (isSyncEnabled) sync.enqueue('subjects', 'upsert', newSubject);
     return id;
   };
 
   const deleteSubject = (id: string) => {
     setSubjects(prev => prev.filter(s => s.id !== id));
-    if (isRealUser) sync.enqueue('subjects', 'delete', { id });
+    if (isSyncEnabled) sync.enqueue('subjects', 'delete', { id });
   };
 
   const addTopic = (subjectId: string, title: string) => {
     const newTopic = { id: Date.now().toString(), title, mastery: 'Red' as MasteryLevel };
     setSubjects(prev => prev.map(s => s.id === subjectId ? { ...s, topics: [...s.topics, newTopic] } : s));
     const subject = subjects.find(s => s.id === subjectId);
-    if (isRealUser && subject) {
+    if (isSyncEnabled && subject) {
       const updated = { ...subject, topics: [...subject.topics, newTopic] };
       sync.enqueue('subjects', 'upsert', updated);
     }
@@ -713,7 +742,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
         ? { ...s, topics: s.topics.map(t => t.id === topicId ? { ...t, mastery } : t) }
         : s
     ));
-    if (isRealUser && subject) {
+    if (isSyncEnabled && subject) {
       const updated = { ...subject, topics: subject.topics.map(t => t.id === topicId ? { ...t, mastery } : t) };
       sync.enqueue('subjects', 'upsert', updated);
     }
@@ -722,7 +751,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   const deleteTopic = (subjectId: string, topicId: string) => {
     setSubjects(prev => prev.map(s => s.id === subjectId ? { ...s, topics: s.topics.filter(t => t.id !== topicId) } : s));
     const subject = subjects.find(s => s.id === subjectId);
-    if (isRealUser && subject) {
+    if (isSyncEnabled && subject) {
       const updated = { ...subject, topics: subject.topics.filter(t => t.id !== topicId) };
       sync.enqueue('subjects', 'upsert', updated);
     }
@@ -737,7 +766,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     const newTotalFocus = (userStats.totalFocusSeconds || 0) + seconds;
     setUserStats(prev => ({ ...prev, totalFocusSeconds: newTotalFocus }));
     checkAchievements({ ...userStats, totalFocusSeconds: newTotalFocus });
-    if (authUser && seconds >= 60 && authUser.uid !== 'demo-user-001') {
+    if (authUser && isSyncEnabled && seconds >= 60) {
       syncFocusSession(
         authUser.uid,
         authProfile?.display_name ?? authUser.displayName ?? 'Anonymous',

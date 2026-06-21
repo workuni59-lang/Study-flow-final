@@ -205,19 +205,20 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
               )}
             </main>
 
-          {/* Bottom bar (mobile only, hidden in full-view) */}
-          <BottomBar
-            mode={mode}
-            onModeChange={setMode}
-            onTasksOpen={handleTasksOpen}
-            onStatsOpen={handleStatsOpen}
-            onNotepadOpen={handleNotepadOpen}
-            onQuestsOpen={handleQuestsOpen}
-            onMenuOpen={handleMenuOpen}
-          />
         </motion.div>
       )}
       </AnimatePresence>
+
+      {/* Bottom bar — rendered outside AnimatePresence so fixed positioning isn't broken by motion.div transforms */}
+      <BottomBar
+        mode={mode}
+        onModeChange={setMode}
+        onTasksOpen={handleTasksOpen}
+        onStatsOpen={handleStatsOpen}
+        onNotepadOpen={handleNotepadOpen}
+        onQuestsOpen={handleQuestsOpen}
+        onMenuOpen={handleMenuOpen}
+      />
       </div>
 
       {/* Menu drawer (slide-in from left) */}

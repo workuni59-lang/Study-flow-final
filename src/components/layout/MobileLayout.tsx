@@ -252,18 +252,19 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
               )}
             </main>
 
-            {/* Bottom bar */}
-            <BottomBar
-              mode={mode}
-              onModeChange={setMode}
-              onTasksOpen={handleTasksOpen}
-              onStatsOpen={handleStatsOpen}
-              onNotepadOpen={handleNotepadOpen}
-              onMenuOpen={handleMenuOpen}
-            />
           </motion.div>
         )}
         </AnimatePresence>
+
+        {/* Bottom bar — rendered outside AnimatePresence so fixed positioning isn't broken by motion.div transforms */}
+        <BottomBar
+          mode={mode}
+          onModeChange={setMode}
+          onTasksOpen={handleTasksOpen}
+          onStatsOpen={handleStatsOpen}
+          onNotepadOpen={handleNotepadOpen}
+          onMenuOpen={handleMenuOpen}
+        />
       </div>
 
       {/* Mood picker bottom sheet */}

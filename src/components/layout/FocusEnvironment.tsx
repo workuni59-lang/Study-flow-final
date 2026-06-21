@@ -1,9 +1,7 @@
-import { memo, useMemo, useState, useRef, useEffect, lazy, Suspense, type ReactNode } from 'react';
+import { memo, useMemo, useRef, useEffect, useState, type ReactNode } from 'react';
 import { StudyTimer } from '../dashboard/StudyTimer';
 import { NotesPanel } from '../panels/NotesPanel';
 import { useStudy } from '../../context/StudyContext';
-
-const ThreeBackground = lazy(() => import('../background/ThreeBackground').then(m => ({ default: m.ThreeBackground })));
 
 interface FocusEnvironmentProps {
   onTasksOpen: () => void;
@@ -11,51 +9,6 @@ interface FocusEnvironmentProps {
   onNotepadOpen?: () => void;
   onQuestsOpen?: () => void;
   section?: string;
-}
-
-const PARTICLES_COUNT = 20;
-
-function ParticleField({ accentColor = 'rgba(99,102,241,0.3)' }: { accentColor?: string }) {
-  const particles = useMemo(() =>
-    Array.from({ length: PARTICLES_COUNT }, (_, i) => ({
-      id: i,
-      size: 1.5 + Math.random() * 2.5,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      duration: 12 + Math.random() * 20,
-      delay: Math.random() * -20,
-      drift: -15 + Math.random() * 30,
-    })),
-  []);
-
-  return (
-    <div className="fixed inset-0 pointer-events-none z-[2]" style={{ perspective: '800px' }}>
-      {particles.map(p => (
-        <div
-          key={p.id}
-          className="absolute rounded-full"
-          style={{
-            width: p.size,
-            height: p.size,
-            left: `${p.x}%`,
-            top: `${p.y}%`,
-            background: accentColor,
-            boxShadow: `0 0 ${p.size * 2}px ${accentColor}`,
-            animation: `focus-float ${p.duration}s ease-in-out ${p.delay}s infinite alternate`,
-            transform: `translateX(${p.drift}px)`,
-            opacity: 0.3 + Math.random() * 0.4,
-          }}
-        />
-      ))}
-      <style>{`
-        @keyframes focus-float {
-          0% { transform: translateY(0px) translateX(0px) scale(1); opacity: 0.2; }
-          50% { transform: translateY(-30px) translateX(5px) scale(1.2); opacity: 0.6; }
-          100% { transform: translateY(10px) translateX(-5px) scale(0.9); opacity: 0.3; }
-        }
-      `}</style>
-    </div>
-  );
 }
 
 const UtilityButton = memo(({ onClick, children, label }: {
@@ -75,16 +28,12 @@ const UtilityButton = memo(({ onClick, children, label }: {
 export const FocusEnvironment = memo(({
   onTasksOpen, onMusicOpen, onNotepadOpen, onQuestsOpen,
 }: FocusEnvironmentProps) => {
-  const { themeConfig, setThemeConfig } = useStudy();
-  const particleEnabled = themeConfig.particleMotion === 'moving';
   const dockRef = useRef<HTMLDivElement>(null);
   const [isMobile] = useState(() => window.innerWidth < 768);
   const [dockVisible, setDockVisible] = useState(true);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
-  // ... (auto-hide dock effect unchanged)
-
-  // Auto-hide dock when idle (desktop only — mobile always shows)
+  // Auto-hide dock when idle
   useEffect(() => {
     if (isMobile) return;
     const show = () => {
@@ -108,8 +57,7 @@ export const FocusEnvironment = memo(({
     };
   }, [isMobile]);
 
-  // Performance gate for particles
-  const canParticles = typeof navigator === 'undefined' || navigator.hardwareConcurrency > 4;
+
 
   const utilityItems = useMemo(() => [
     { id: 'tasks', label: 'Tasks', handler: onTasksOpen },
@@ -121,18 +69,8 @@ export const FocusEnvironment = memo(({
   return (
     <div className="relative flex flex-col items-center w-full min-h-[calc(100dvh-8rem)]">
       {/* Atmosphere glow — soft radial light behind timer */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vmin] h-[60vmin] rounded-full bg-brand/5 blur-[120px] pointer-events-none z-0" />
-      <div className="absolute top-[55%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40vmin] h-[40vmin] rounded-full bg-violet-500/5 blur-[100px] pointer-events-none z-0" />
-
-      {/* Three.js particle background (lazy-loaded, only when enabled) */}
-      {particleEnabled && (
-        <Suspense fallback={null}>
-          <ThreeBackground key={themeConfig.wallpaper} />
-        </Suspense>
-      )}
-
-      {/* Particle atmosphere */}
-      {canParticles && <ParticleField />}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vmin] h-[60vmin] rounded-full bg-brand/[0.04] blur-[60px] pointer-events-none z-0" />
+      <div className="absolute top-[55%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40vmin] h-[40vmin] rounded-full bg-violet-500/[0.04] blur-[50px] pointer-events-none z-0" />
 
       {/* Timer — flex-1 centers it vertically between atmosphere and dock */}
       <div className="relative z-10 flex flex-col items-center justify-center flex-1 w-full px-4 min-h-0">
@@ -156,19 +94,7 @@ export const FocusEnvironment = memo(({
             {id === 'quests' && <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>}
           </UtilityButton>
         ))}
-        {/* Particle toggle — hidden in dock, appears on hover */}
-        <button
-          onClick={() => setThemeConfig({ ...themeConfig, particleMotion: particleEnabled ? 'static' : 'moving' })}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl backdrop-blur-md bg-white/[0.04] border border-white/[0.04] text-white/40 hover:text-white/80 hover:bg-white/[0.08] transition-all text-[10px] font-medium"
-          title={particleEnabled ? 'Disable particles' : 'Enable particles'}
-          aria-label={particleEnabled ? 'Disable particles' : 'Enable particles'}
-        >
-          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M12 3v1m0 16v1m8.66-13.66l-.71.71M4.05 19.95l-.71.71M21 12h-1M4 12H3m15.66 7.66l-.71-.71M4.05 4.05l-.71-.71"/>
-            <circle cx="12" cy="12" r="1"/>
-          </svg>
-          <span className="hidden sm:inline">{particleEnabled ? 'Particles On' : 'Particles Off'}</span>
-        </button>
+
       </div>
     </div>
   );

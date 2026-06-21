@@ -83,8 +83,12 @@ export const FocusEnvironment = memo(({
 
   if (isFullscreen) {
     return (
-      <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#0a0c10]">
-        <div className="w-full max-w-lg px-4">
+      <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center">
+        {/* Atmosphere glow — matches non-fullscreen */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vmin] h-[60vmin] rounded-full bg-brand/[0.04] blur-[60px] pointer-events-none z-0" />
+        <div className="absolute top-[55%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40vmin] h-[40vmin] rounded-full bg-violet-500/[0.04] blur-[50px] pointer-events-none z-0" />
+
+        <div className="relative z-10 w-full max-w-lg px-4">
           <StudyTimer variant="floating" />
         </div>
         <button

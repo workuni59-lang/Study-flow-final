@@ -44,6 +44,13 @@ class AudioController {
     const asset = AUDIO_ASSETS.find(a => a.id === id);
     if (!asset) return;
 
+    const state = this.states.get(id);
+    if (state === 'error') {
+      this.states.delete(id);
+      this.activeIds.delete(id);
+      this.pool.delete(id);
+    }
+
     if (this.activeIds.has(id)) {
       this.stop(id);
     } else {
@@ -167,8 +174,6 @@ class AudioController {
     const howl = new Howl({
       src: [asset.url],
       loop: true,
-      html5: true,
-      preload: true,
       volume: 0,
       onload: () => {
         if (this.activeIds.has(id)) {
@@ -196,7 +201,7 @@ class AudioController {
         this.notify();
       },
       onplayerror: () => {
-        this.states.set(id, 'loading');
+        this.states.set(id, 'error');
         howl.once('unlock', () => {
           if (this.activeIds.has(id)) howl.play();
         });

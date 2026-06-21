@@ -254,7 +254,7 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
             width="100%"
             height={ambienceUrl.service?.toLowerCase() === 'youtube' ? '232' : '152'}
             frameBorder="0"
-            allow="encrypted-media; autoplay; clipboard-write; fullscreen; picture-in-picture"
+            allow="encrypted-media; autoplay; clipboard-write; fullscreen; picture-in-picture; web-share"
             allowFullScreen
             className="w-full"
             title={ambienceUrl.name}

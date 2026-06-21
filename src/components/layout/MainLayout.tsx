@@ -234,7 +234,7 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
         <TasksPanel />
       </FloatingPanel>
 
-      <FloatingPanel open={activePanel === 'ambience'} onClose={handleClosePanel} title="Ambience" width={420}>
+      <FloatingPanel open={activePanel === 'ambience'} onClose={handleClosePanel} title="Ambience" width={420} draggable={false}>
         <AmbiencePanel ambienceUrl={ambienceUrl} onAmbienceUrlChange={setAmbienceUrl} />
       </FloatingPanel>
       {/* Persistent ambience iframe — rendered outside SidePanel so it survives panel close */}

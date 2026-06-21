@@ -9,9 +9,10 @@ interface FloatingPanelProps {
   title: string;
   children: ReactNode;
   width?: number;
+  draggable?: boolean;
 }
 
-export const FloatingPanel = ({ open, onClose, title, children, width = 320 }: FloatingPanelProps) => {
+export const FloatingPanel = ({ open, onClose, title, children, width = 320, draggable = true }: FloatingPanelProps) => {
   const { mode } = useNavigationContext();
   const [isMobile, setIsMobile] = useState(false);
 
@@ -40,17 +41,13 @@ export const FloatingPanel = ({ open, onClose, title, children, width = 320 }: F
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              drag="y"
-              dragConstraints={{ top: 0 }}
-              dragElastic={0.2}
-              onDragEnd={(_, info) => {
-                if (info.offset.y > 100 || info.velocity.y > 500) {
-                  onClose();
-                }
-              }}
+              drag={draggable ? 'y' : false}
+              dragConstraints={draggable ? { top: 0 } : undefined}
+              dragElastic={draggable ? 0.2 : undefined}
+              onDragEnd={draggable ? (_, info) => { if (info.offset.y > 100 || info.velocity.y > 500) onClose(); } : undefined}
               className="fixed inset-x-0 bottom-0 z-50 rounded-t-[32px] bg-[#0f0f1f] border-t border-white/[0.08] max-h-[85vh] flex flex-col shadow-2xl"
             >
-              <div className="flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing">
+              <div className={`flex justify-center pt-3 pb-2 ${draggable ? 'cursor-grab active:cursor-grabbing' : ''}`}>
                 <div className="w-12 h-1.5 rounded-full bg-white/[0.15]" />
               </div>
               <div className="flex items-center justify-between px-6 py-2">
@@ -92,10 +89,10 @@ export const FloatingPanel = ({ open, onClose, title, children, width = 320 }: F
               zIndex: 50,
               transformOrigin: 'bottom center',
             }}
-            className="max-h-[70vh] overflow-y-auto rounded-xl bg-[#0f0f1f]/95 backdrop-blur-2xl border border-white/[0.06] shadow-2xl cursor-grab"
-            drag
-            dragMomentum={false}
-            whileTap={{ cursor: 'grabbing' }}
+            className={`max-h-[70vh] overflow-y-auto rounded-xl bg-[#0f0f1f]/95 backdrop-blur-2xl border border-white/[0.06] shadow-2xl ${draggable ? 'cursor-grab' : ''}`}
+            drag={draggable}
+            dragMomentum={draggable ? false : undefined}
+            whileTap={draggable ? { cursor: 'grabbing' } : undefined}
           >
             <div className="flex items-center justify-between px-4 pt-4 pb-2">
               <h3 className="text-sm font-semibold text-white/90">{title}</h3>

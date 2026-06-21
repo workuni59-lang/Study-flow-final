@@ -393,7 +393,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
         <TasksPanel />
       </FloatingPanel>
 
-      <FloatingPanel open={activePanel === 'ambience'} onClose={handleClosePanel} title="Ambience" width={420}>
+      <FloatingPanel open={activePanel === 'ambience'} onClose={handleClosePanel} title="Ambience" width={420} draggable={false}>
         <AmbiencePanel ambienceUrl={ambienceUrl} onAmbienceUrlChange={setAmbienceUrl} />
       </FloatingPanel>
 

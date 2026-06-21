@@ -68,9 +68,9 @@ const TimerProgress = React.memo(({ progress, completed, tallyEmojis, sessionsCo
   </>
 ));
 
-interface StudyTimerProps { onTick?: () => void; compact?: boolean; variant?: 'card' | 'floating'; }
+interface StudyTimerProps { onTick?: () => void; compact?: boolean; variant?: 'card' | 'floating'; onToggleFullscreen?: () => void; }
 
-export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProps) => {
+export const StudyTimer = ({ onTick, compact, variant = 'card', onToggleFullscreen }: StudyTimerProps) => {
   const navigate = useNavigate();
   const { 
     themeConfig, setThemeConfig, completeFocusSession, logSession, 
@@ -917,11 +917,20 @@ export const StudyTimer = ({ onTick, compact, variant = 'card' }: StudyTimerProp
                 </motion.div>
               ) : (
                 <motion.div key="controls" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-4">
-                    <button onClick={() => { setShowPresetPicker(true); setShowThemePicker(false); }}
-                      className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/15 backdrop-blur-sm border border-white/10 hover:bg-black/25 transition-colors text-[9px] font-semibold uppercase tracking-wider text-white/60">
-                      {mode === 'stopwatch' ? <Flag className="w-3 h-3 text-brand-light" /> : <activePreset.icon className="w-3 h-3 text-brand-light" />}
-                      {mode === 'stopwatch' ? 'Stopwatch' : activePreset.name}
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => { setShowPresetPicker(true); setShowThemePicker(false); }}
+                        className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/15 backdrop-blur-sm border border-white/10 hover:bg-black/25 transition-colors text-[9px] font-semibold uppercase tracking-wider text-white/60">
+                        {mode === 'stopwatch' ? <Flag className="w-3 h-3 text-brand-light" /> : <activePreset.icon className="w-3 h-3 text-brand-light" />}
+                        {mode === 'stopwatch' ? 'Stopwatch' : activePreset.name}
+                      </button>
+                      {onToggleFullscreen && (
+                        <button onClick={onToggleFullscreen}
+                          className="flex items-center justify-center w-7 h-7 rounded-full bg-black/15 backdrop-blur-sm border border-white/10 hover:bg-black/25 hover:text-white/80 transition-colors text-white/40"
+                          aria-label="Enter fullscreen">
+                          <Maximize2 className="w-3 h-3" />
+                        </button>
+                      )}
+                    </div>
                   {renderControls()}
                 </motion.div>
               )}

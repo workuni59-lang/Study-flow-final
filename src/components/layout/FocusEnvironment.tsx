@@ -120,7 +120,7 @@ export const FocusEnvironment = memo(({
       {/* Timer — flex-1 centers it vertically between atmosphere and dock */}
       <div className="relative z-10 flex flex-col items-center justify-center flex-1 w-full px-4 min-h-0">
         <div className="w-full max-w-lg">
-          <StudyTimer variant="floating" />
+          <StudyTimer variant="floating" onToggleFullscreen={toggleFullscreen} />
         </div>
       </div>
 
@@ -131,12 +131,7 @@ export const FocusEnvironment = memo(({
           dockVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
         }`}
       >
-        <UtilityButton onClick={toggleFullscreen} label="Fullscreen">
-          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/>
-          </svg>
-        </UtilityButton>
-        <div className="w-px h-5 bg-white/[0.06]" />
+
         {utilityItems.map(({ id, label, handler }) => (
           <UtilityButton key={id} onClick={handler!} label={label}>
             {id === 'tasks' && <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>}

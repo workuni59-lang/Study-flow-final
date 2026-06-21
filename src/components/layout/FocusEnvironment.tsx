@@ -9,6 +9,7 @@ interface FocusEnvironmentProps {
   onNotepadOpen?: () => void;
   onQuestsOpen?: () => void;
   section?: string;
+  onFullscreenChange?: (fullscreen: boolean) => void;
 }
 
 const UtilityButton = memo(({ onClick, children, label }: {
@@ -26,7 +27,7 @@ const UtilityButton = memo(({ onClick, children, label }: {
   </button>
 ));
 export const FocusEnvironment = memo(({
-  onTasksOpen, onMusicOpen, onNotepadOpen, onQuestsOpen,
+  onTasksOpen, onMusicOpen, onNotepadOpen, onQuestsOpen, onFullscreenChange,
 }: FocusEnvironmentProps) => {
   const dockRef = useRef<HTMLDivElement>(null);
   const [isMobile] = useState(() => window.innerWidth < 768);
@@ -47,6 +48,11 @@ export const FocusEnvironment = memo(({
       document.documentElement.requestFullscreen().catch(() => {});
     }
   };
+
+  // Notify parent so it can hide chrome
+  useEffect(() => {
+    onFullscreenChange?.(isFullscreen);
+  }, [isFullscreen, onFullscreenChange]);
 
   // Auto-hide dock when idle
   useEffect(() => {
@@ -83,8 +89,8 @@ export const FocusEnvironment = memo(({
 
   if (isFullscreen) {
     return (
-      <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center">
-        {/* Atmosphere glow — matches non-fullscreen */}
+      <div className="flex flex-col items-center justify-center w-full min-h-screen">
+        {/* Atmosphere glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vmin] h-[60vmin] rounded-full bg-brand/[0.04] blur-[60px] pointer-events-none z-0" />
         <div className="absolute top-[55%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40vmin] h-[40vmin] rounded-full bg-violet-500/[0.04] blur-[50px] pointer-events-none z-0" />
 

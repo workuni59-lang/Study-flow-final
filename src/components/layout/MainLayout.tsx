@@ -56,6 +56,7 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [ambienceUrl, setAmbienceUrl] = useState<CuratedPlaylist | null>(null);
   const [spotlightSubjectId, setSpotlightSubjectId] = useState<string | null>(null);
+  const [focusFullscreen, setFocusFullscreen] = useState(false);
 
   const setMode = (m: Mode) => {
     navigate(m === 'focus' ? ROUTES.FOCUS : ROUTES.HOME);
@@ -178,6 +179,7 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
           ) : (
           <motion.div key={'dash-' + mode} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.15 }}>
             {/* Top bar with mode toggle */}
+            {!focusFullscreen && (
             <TopBar
               mode={mode}
               onModeChange={setMode}
@@ -186,6 +188,7 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
               onLeaderboardOpen={handleLeaderboardOpen}
               onProfileOpen={user ? handleProfileOpen : undefined}
             />
+            )}
     
             {/* Main content */}
             <main className="main-layout-content">
@@ -200,6 +203,7 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
                     onTasksOpen={handleTasksOpen}
                     onMusicOpen={handleMusicOpen}
                     onNotepadOpen={handleNotepadOpen}
+                    onFullscreenChange={setFocusFullscreen}
                   />
                 </Suspense>
               )}
@@ -210,6 +214,7 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
       </AnimatePresence>
 
       {/* Bottom bar — rendered outside AnimatePresence so fixed positioning isn't broken by motion.div transforms */}
+      {!focusFullscreen && (
       <BottomBar
         mode={mode}
         onModeChange={setMode}
@@ -219,26 +224,33 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
         onQuestsOpen={handleQuestsOpen}
         onMenuOpen={handleMenuOpen}
       />
+      )}
       </div>
 
       {/* Menu drawer (slide-in from left) */}
+      {!focusFullscreen && (
       <MenuDrawer
         open={menuOpen}
         onClose={() => setMenuOpen(false)}
         activeSection={section}
         onNavigate={setSection}
       />
+      )}
 
       {/* Side panels */}
+      {!focusFullscreen && (
       <FloatingPanel open={activePanel === 'tasks'} onClose={handleClosePanel} title="Tasks" width={380}>
         <TasksPanel />
       </FloatingPanel>
+      )}
 
+      {!focusFullscreen && (
       <FloatingPanel open={activePanel === 'ambience'} onClose={handleClosePanel} title="Ambience" width={420} draggable={false}>
         <AmbiencePanel ambienceUrl={ambienceUrl} onAmbienceUrlChange={setAmbienceUrl} />
       </FloatingPanel>
+      )}
       {/* Persistent ambience iframe — rendered outside SidePanel so it survives panel close */}
-      {ambienceUrl && (
+      {!focusFullscreen && ambienceUrl && (
         <div className="fixed bottom-4 right-4 z-50 w-80 rounded-xl overflow-hidden shadow-2xl border border-white/10 bg-black/80 backdrop-blur-lg">
           <div className="flex items-center gap-2 px-3 py-1.5 bg-white/[0.06] border-b border-white/[0.06]">
             <span className="text-sm">{ambienceUrl.emoji}</span>
@@ -270,7 +282,9 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
       <DemoSignUpNudge onOpenAuth={onOpenAuth} />
       <PanicModeUI />
 
+      {!focusFullscreen && (
       <NotesPanel isOpen={activePanel === 'notepad'} onClose={handleClosePanel} />
+      )}
     </div>
   );
 };

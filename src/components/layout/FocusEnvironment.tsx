@@ -32,6 +32,21 @@ export const FocusEnvironment = memo(({
   const [isMobile] = useState(() => window.innerWidth < 768);
   const [dockVisible, setDockVisible] = useState(true);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const handle = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', handle);
+    return () => document.removeEventListener('fullscreenchange', handle);
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+    } else {
+      document.documentElement.requestFullscreen().catch(() => {});
+    }
+  };
 
   // Auto-hide dock when idle
   useEffect(() => {
@@ -66,6 +81,26 @@ export const FocusEnvironment = memo(({
     { id: 'quests', label: 'Quests', handler: onQuestsOpen },
   ].filter(i => i.handler), [onTasksOpen, onNotepadOpen, onMusicOpen, onQuestsOpen]);
 
+  if (isFullscreen) {
+    return (
+      <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#0a0c10]">
+        <div className="w-full max-w-lg px-4">
+          <StudyTimer variant="floating" />
+        </div>
+        <button
+          onClick={toggleFullscreen}
+          className="fixed bottom-6 right-6 z-50 flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/[0.03] border border-white/[0.04] text-white/20 hover:text-white/60 hover:bg-white/[0.06] transition-all text-[10px] font-medium opacity-0 hover:opacity-100 focus-visible:opacity-100"
+          aria-label="Exit fullscreen"
+        >
+          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M8 3v3a2 2 0 01-2 2H3m18 0h-3a2 2 0 01-2-2V3m0 18v-3a2 2 0 012-2h3M3 16h3a2 2 0 012 2v3"/>
+          </svg>
+          <span className="hidden sm:inline">Exit</span>
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="relative flex flex-col items-center w-full min-h-[calc(100dvh-8rem)]">
       {/* Atmosphere glow — soft radial light behind timer */}
@@ -86,6 +121,12 @@ export const FocusEnvironment = memo(({
           dockVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
         }`}
       >
+        <UtilityButton onClick={toggleFullscreen} label="Fullscreen">
+          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/>
+          </svg>
+        </UtilityButton>
+        <div className="w-px h-5 bg-white/[0.06]" />
         {utilityItems.map(({ id, label, handler }) => (
           <UtilityButton key={id} onClick={handler!} label={label}>
             {id === 'tasks' && <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>}

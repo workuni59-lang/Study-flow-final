@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Play, Pause, RotateCcw, Zap, Maximize2, X,
   Palette, Crown, Timer, Rocket, Check, Upload, Settings2,
-  Clock, Flag, ArrowUpDown
+  Clock, Flag, ArrowUpDown, ChevronDown
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { DashboardCard } from './DashboardCard';
@@ -845,7 +845,14 @@ export const StudyTimer = ({ onTick, compact, variant = 'card', onToggleFullscre
   /* ── Floating variant: no card, no container, rendered directly on environment ── */
   if (variant === 'floating') {
     return (
-      <div className="flex flex-col items-center gap-6 py-6">
+      <div className="relative flex flex-col items-center gap-6 py-6">
+        {onToggleFullscreen && (
+          <button onClick={onToggleFullscreen}
+            className="absolute top-3 right-3 flex items-center justify-center w-7 h-7 rounded-full bg-black/15 backdrop-blur-sm border border-white/10 hover:bg-black/25 hover:text-white/80 transition-colors text-white/40"
+            aria-label="Enter fullscreen">
+            <Maximize2 className="w-3 h-3" />
+          </button>
+        )}
         {showFlowExtend ? (
           <motion.div key="flow-extend" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-5 py-8 px-6 rounded-2xl bg-black/30 backdrop-blur-lg border border-white/10">
             <Zap className="w-8 h-8 text-amber-400" />
@@ -922,14 +929,10 @@ export const StudyTimer = ({ onTick, compact, variant = 'card', onToggleFullscre
                         className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/15 backdrop-blur-sm border border-white/10 hover:bg-black/25 transition-colors text-[9px] font-semibold uppercase tracking-wider text-white/60">
                         {mode === 'stopwatch' ? <Flag className="w-3 h-3 text-brand-light" /> : <activePreset.icon className="w-3 h-3 text-brand-light" />}
                         {mode === 'stopwatch' ? 'Stopwatch' : activePreset.name}
+                        <motion.span animate={{ rotate: isPresetPickerVisible ? 180 : 0 }} transition={{ duration: 0.2 }} className="inline-flex">
+                          <ChevronDown className="w-2.5 h-2.5" />
+                        </motion.span>
                       </button>
-                      {onToggleFullscreen && (
-                        <button onClick={onToggleFullscreen}
-                          className="flex items-center justify-center w-7 h-7 rounded-full bg-black/15 backdrop-blur-sm border border-white/10 hover:bg-black/25 hover:text-white/80 transition-colors text-white/40"
-                          aria-label="Enter fullscreen">
-                          <Maximize2 className="w-3 h-3" />
-                        </button>
-                      )}
                     </div>
                   {renderControls()}
                 </motion.div>

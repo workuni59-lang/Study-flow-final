@@ -93,7 +93,7 @@ export const HomeView = memo(({ onNotepadOpen, onQuestsOpen, onMusicOpen, onProg
     : 0;
 
   return (
-    <div className="relative flex flex-col items-center justify-center min-h-screen px-4 md:px-6 pb-28 lg:pb-12">
+      <div className="relative flex flex-col items-center min-h-screen px-4 md:px-6 pb-28 lg:pb-12">
       {/* Badge — top-right */}
       <button
         onClick={onProgressionOpen}
@@ -105,7 +105,7 @@ export const HomeView = memo(({ onNotepadOpen, onQuestsOpen, onMusicOpen, onProg
       </button>
 
       {/* Central content — transparent floating panel, no backdrop blur */}
-      <div className="flex flex-col items-center px-6 py-8 w-full max-w-sm animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+      <div className="flex flex-col items-center px-6 pt-8 pb-0 w-full max-w-sm flex-1 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
         {/* Greeting */}
         {themeConfig.showGreeting !== false && (
           <p className={`text-sm font-medium ${t}/60 mb-0.5`}>
@@ -164,7 +164,7 @@ export const HomeView = memo(({ onNotepadOpen, onQuestsOpen, onMusicOpen, onProg
         )}
 
         {/* Stats row — ultra-light glass cards */}
-        <div className="flex gap-2 w-full max-w-xs">
+        <div className="mt-auto flex gap-2 w-full max-w-xs">
           {statCards.map(({ icon: Icon, value, label, color }) => (
             <div key={label} className={`flex-1 py-2.5 px-1 text-center rounded-xl ${panelBg} border ${panelBorder}`}>
               <Icon size={14} className="mx-auto mb-1" style={{ color }} />

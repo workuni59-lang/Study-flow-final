@@ -1,126 +1,142 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import type { Subject, Task } from '../../context/StudyContext';
+import { BookOpen, Award, LinkIcon } from 'lucide-react';
+import type { Subject } from '../../context/StudyContext';
 
 interface Props {
   subjects: Subject[];
-  tasks?: Task[];
 }
 
 function countGreen(subject: Subject): number {
   return subject.topics?.filter(t => t.mastery === 'Green').length || 0;
 }
 
-const COLORS = ['#6366f1', '#22d3ee', '#4ade80', '#fbbf24', '#f97316', '#fb7185', '#a78bfa', '#34d399', '#f472b6', '#06b6d4'];
+export default function AnalyticsSubjects({ subjects }: Props) {
+  const [activeSubject, setActiveSubject] = useState<any | null>(null);
 
-export default function AnalyticsSubjects({ subjects, tasks = [] }: Props) {
   const data = useMemo(() => {
-    const hasMastery = subjects.some(s => (s.topics?.length || 0) > 0);
-    if (!hasMastery) return [];
+    const hasData = subjects.some(s => (s.topics?.length || 0) > 0);
+    if (!hasData) return [];
+
     return subjects
       .filter(s => (s.topics?.length || 0) > 0)
       .map(s => ({
         name: s.name,
         value: Math.max(1, countGreen(s)),
         total: s.topics?.length || 0,
+        color: s.color || '#6366f1',
+        focusTime: '0h'
       }))
       .sort((a, b) => b.value - a.value);
   }, [subjects]);
 
-  // Per-subject task completion (total vs completed).
-  const taskStats = useMemo(() => {
-    return subjects
-      .map((s, i) => {
-        const subjectTasks = tasks.filter(t => t.subjectId === s.id);
-        const total = subjectTasks.length;
-        const completed = subjectTasks.filter(t => t.completed).length;
-        return {
-          id: s.id,
-          name: s.name,
-          color: COLORS[i % COLORS.length],
-          total,
-          completed,
-          pct: total === 0 ? 0 : Math.round((completed / total) * 100),
-        };
-      })
-      .filter(s => s.total > 0)
-      .sort((a, b) => b.total - a.total);
-  }, [subjects, tasks]);
-
-  const totalGreen = data.reduce((s, d) => s + d.value, 0);
-  const totalTasks = taskStats.reduce((s, d) => s + d.total, 0);
-  const totalCompleted = taskStats.reduce((s, d) => s + d.completed, 0);
+  const totalMastered = data.reduce((s, d) => s + d.value, 0);
+  const totalTopics = data.reduce((s, d) => s + d.total, 0);
+  const totalPercentage = totalTopics > 0 ? Math.round((totalMastered / totalTopics) * 100) : 0;
 
   return (
-    <div className="space-y-4">
-      <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/[0.06]">
-        <p className="text-[9px] font-bold text-white/40 uppercase tracking-wider mb-3">Subject Mastery</p>
+    <div className="space-y-6">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="p-8 rounded-2xl bg-white/[0.04] border border-white/[0.06] overflow-hidden"
+      >
+        <div className="flex items-center gap-2 mb-8">
+          <BookOpen className="w-4 h-4 text-violet-400" />
+          <h3 className="text-xs font-bold text-white/90 uppercase tracking-widest">Subject Mastery</h3>
+        </div>
+
         {data.length === 0 ? (
-          <p className="text-[10px] text-white/30 py-6 text-center">Add topics to subjects to see mastery breakdown</p>
+          <div className="flex flex-col items-center gap-2 py-12">
+            <div className="w-12 h-12 rounded-full bg-white/[0.04] flex items-center justify-center">
+              <LinkIcon className="w-6 h-6 text-white/20"/>
+            </div>
+            <p className="text-sm text-white/20">Link tasks to subjects to track completion</p>
+          </div>
         ) : (
-          <div className="flex items-center gap-4">
-            <div className="w-28 h-28 flex-shrink-0" role="img" aria-label="Subject distribution chart">
+          <div className="flex flex-col md:flex-row items-center justify-around gap-8">
+            <div className="relative w-[240px] h-[240px]">
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={data} cx="50%" cy="50%" innerRadius={26} outerRadius={40} dataKey="value" stroke="none">
-                    {data.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} opacity={0.8} />)}
+                <PieChart onMouseLeave={() => setActiveSubject(null)}>
+                  <Pie
+                    data={data}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={80}
+                    outerRadius={110}
+                    dataKey="value"
+                    strokeWidth={0}
+                    animationDuration={1000}
+                  >
+                    {data.map((entry, i) => (
+                      <Cell
+                        key={i}
+                        fill={entry.color}
+                        onMouseEnter={() => setActiveSubject(entry)}
+                        className="cursor-default outline-none"
+                      />
+                    ))}
                   </Pie>
                 </PieChart>
               </ResponsiveContainer>
+
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={activeSubject?.name ?? 'default'}
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex flex-col items-center"
+                  >
+                    <p className="text-xs text-white/30 text-center mb-0.5">
+                      {activeSubject ? 'Mastered' : 'Total'}
+                    </p>
+                    <p className="text-3xl font-semibold text-white text-center tracking-tight">
+                      {activeSubject ? activeSubject.value : totalMastered}
+                    </p>
+                    <p className="text-[11px] text-white/30 text-center mt-0.5">
+                      {activeSubject ? activeSubject.name : 'Topics'}
+                    </p>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
             </div>
-            <div className="flex-1 space-y-1.5">
-              {data.slice(0, 5).map((d, i) => (
-                <div key={d.name} className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
-                  <span className="text-[9px] text-white/60 flex-1 truncate">{d.name}</span>
-                  <span className="text-[9px] text-white/40 tabular-nums">{d.value}/{d.total}</span>
+
+            <div className="flex-1 w-full max-w-[240px] space-y-1">
+              {data.map((s, i) => (
+                <div key={i} className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white/[0.04] transition-colors cursor-default">
+                  <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: s.color, boxShadow: `0 0 6px ${s.color}88` }}/>
+                  <span className="text-sm text-white/70 truncate">{s.name}</span>
+                  <span className="ml-auto text-xs text-white/30 font-medium">{Math.round((s.value / s.total) * 100)}%</span>
                 </div>
               ))}
             </div>
           </div>
         )}
-      </div>
+      </motion.div>
 
-      {/* Per-subject task completion */}
-      <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/[0.06]">
-        <div className="flex items-center justify-between mb-3">
-          <p className="text-[9px] font-bold text-white/40 uppercase tracking-wider">Task Completion</p>
-          {totalTasks > 0 && (
-            <span className="text-[9px] text-white/40 tabular-nums">{totalCompleted}/{totalTasks} done</span>
-          )}
-        </div>
-        {taskStats.length === 0 ? (
-          <p className="text-[10px] text-white/30 py-6 text-center">Link tasks to subjects to track completion</p>
-        ) : (
-          <div className="space-y-2.5">
-            {taskStats.map(s => (
-              <div key={s.id}>
-                <div className="flex items-center gap-2 mb-1">
-                  <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: s.color }} />
-                  <span className="text-[9px] text-white/60 flex-1 truncate">{s.name}</span>
-                  <span className="text-[9px] text-white/40 tabular-nums">{s.completed}/{s.total}</span>
-                </div>
-                <div className="h-1 rounded-full bg-white/[0.06] overflow-hidden">
-                  <div
-                    className="h-full rounded-full transition-all duration-500"
-                    style={{ width: `${s.pct}%`, backgroundColor: s.color }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div className="grid grid-cols-2 gap-2.5">
-        <div className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/[0.06]">
-          <p className="text-[9px] font-medium text-white/40 uppercase tracking-wider mb-1">Subjects</p>
-          <p className="text-xl font-bold text-white/90 tabular-nums">{subjects.length}</p>
-        </div>
-        <div className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/[0.06]">
-          <p className="text-[9px] font-medium text-white/40 uppercase tracking-wider mb-1">Mastered</p>
-          <p className="text-xl font-bold text-white/90 tabular-nums">{totalGreen}</p>
-        </div>
+      <div className="grid grid-cols-2 gap-4">
+        {[
+          { label: 'Subjects', value: subjects.length, icon: BookOpen, accent: '#a78bfa' },
+          { label: 'Mastered', value: `${totalPercentage}%`, icon: Award, accent: '#4ade80' }
+        ].map((s, i) => (
+          <motion.div
+            key={s.label}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: 0.4 + (i * 0.07) }}
+            className="group relative p-6 rounded-2xl bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.06] hover:border-white/[0.1] transition-colors duration-200 overflow-hidden text-center flex flex-col items-center"
+          >
+            <div className="w-10 h-10 rounded-full flex items-center justify-center mb-3" style={{ backgroundColor: `${s.accent}20` }}>
+              <s.icon className="w-5 h-5" style={{ color: s.accent }} />
+            </div>
+            <p className="text-3xl font-semibold text-white">{s.value}</p>
+            <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest mt-1">{s.label}</p>
+          </motion.div>
+        ))}
       </div>
     </div>
   );

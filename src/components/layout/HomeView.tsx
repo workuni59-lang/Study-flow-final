@@ -85,15 +85,10 @@ export const HomeView = memo(({ onNotepadOpen, onQuestsOpen, onMusicOpen, onProg
   const panelBg = isLightBg ? 'bg-black/[0.05]' : 'bg-white/[0.03]';
   const panelBorder = isLightBg ? 'border-black/[0.05]' : 'border-white/[0.04]';
   const panelHover = isLightBg ? 'hover:bg-black/[0.07]' : 'hover:bg-white/[0.08]';
-  const trackBg = isLightBg ? 'bg-black/10' : 'bg-white/10';
-
   const sa = spotlight ? (SUBJECT_ACCENTS[spotlight.subject.color || 'indigo'] ?? SUBJECT_ACCENTS.indigo) : null;
-  const sp = spotlight && spotlight.subject.topics.length > 0
-    ? Math.round((spotlight.subject.topics.filter(t => t.mastery === 'Green').length / spotlight.subject.topics.length) * 100)
-    : 0;
 
   return (
-      <div className="relative flex flex-col items-center min-h-screen px-4 md:px-6 pb-28 lg:pb-12">
+      <div className="relative flex flex-col items-center justify-center min-h-screen px-4 md:px-6 pb-28 lg:pb-12">
       {/* Badge — top-right */}
       <button
         onClick={onProgressionOpen}
@@ -105,7 +100,7 @@ export const HomeView = memo(({ onNotepadOpen, onQuestsOpen, onMusicOpen, onProg
       </button>
 
       {/* Central content — transparent floating panel, no backdrop blur */}
-      <div className="flex flex-col items-center px-6 pt-8 pb-0 w-full max-w-sm flex-1 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+      <div className="flex flex-col items-center px-6 py-8 w-full max-w-sm animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
         {/* Greeting */}
         {themeConfig.showGreeting !== false && (
           <p className={`text-sm font-medium ${t}/60 mb-0.5`}>
@@ -120,51 +115,32 @@ export const HomeView = memo(({ onNotepadOpen, onQuestsOpen, onMusicOpen, onProg
           </div>
         )}
 
-        {/* Focus time label */}
-        <p className={`text-[11px] ${t}/45 mb-3`}>
-          {userStats.totalFocusSeconds > 0
-            ? `${formatTime(userStats.totalFocusSeconds)} focused today`
-            : 'Ready for a focused session?'}
+        {/* Focus time label + inline spotlight */}
+        <p className={`text-[11px] ${t}/45 mb-3 flex items-center justify-center gap-1.5 flex-wrap`}>
+          <span>
+            {userStats.totalFocusSeconds > 0
+              ? `${formatTime(userStats.totalFocusSeconds)} focused today`
+              : 'Ready for a focused session?'}
+          </span>
+          {spotlight && sa && (
+            <>
+              <span className={`${t}/20`}>·</span>
+              <button
+                onClick={() => onSubjectsOpen?.(spotlight.subject.id)}
+                className="inline-flex items-center gap-1 hover:opacity-80 transition-opacity"
+                aria-label={`Review ${spotlight.subject.name}: ${spotlight.redCount} topics need attention`}
+              >
+                <Sparkles className="w-3 h-3" style={{ color: sa.icon }} />
+                <span className="font-medium">{spotlight.subject.name}</span>
+                <span className={`${t}/50`}>({spotlight.redCount})</span>
+                <span className="underline underline-offset-2 ml-0.5">Review</span>
+              </button>
+            </>
+          )}
         </p>
 
-        {/* Subject Spotlight — weakest subject nudge */}
-        {spotlight && sa && (
-          <div className="w-full max-w-xs mb-3">
-            <button
-              onClick={() => onSubjectsOpen?.(spotlight.subject.id)}
-              className={`w-full group flex items-center gap-3 px-3.5 py-3 rounded-2xl glass-panel-light text-left ${panelHover} transition-all`}
-              aria-label={`Review ${spotlight.subject.name}: ${spotlight.redCount} topics need attention`}
-            >
-              <div
-                className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                style={{ backgroundColor: sa.bg }}
-              >
-                <Sparkles className="w-4 h-4" style={{ color: sa.icon }} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className={`text-[7px] font-bold uppercase tracking-widest ${t}/40 mb-0.5`}>Subject Spotlight</p>
-                <p className={`text-xs font-bold ${t}/85 truncate`}>{spotlight.subject.name}</p>
-                <div className="flex items-center gap-2 mt-1">
-                  <div className={`flex-1 h-1 rounded-full ${trackBg} overflow-hidden`}>
-                    <div className="h-full rounded-full" style={{ width: `${sp}%`, backgroundColor: sa.dot }} />
-                  </div>
-                  <span className={`text-[9px] ${t}/50 font-medium tabular-nums whitespace-nowrap`}>
-                    {spotlight.subject.topics.filter(t => t.mastery === 'Green').length}/{spotlight.subject.topics.length}
-                  </span>
-                </div>
-                <p className={`text-[10px] ${t}/50 leading-tight mt-0.5`}>
-                  {spotlight.redCount} topic{spotlight.redCount === 1 ? '' : 's'} to review
-                </p>
-              </div>
-              <span className="shrink-0 px-2.5 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider group-hover:opacity-80 transition-opacity" style={{ backgroundColor: sa.badge, color: sa.icon }}>
-                Review
-              </span>
-            </button>
-          </div>
-        )}
-
         {/* Stats row — ultra-light glass cards */}
-        <div className="mt-auto flex gap-2 w-full max-w-xs">
+        <div className="flex gap-2 w-full max-w-xs">
           {statCards.map(({ icon: Icon, value, label, color }) => (
             <div key={label} className={`flex-1 py-2.5 px-1 text-center rounded-xl ${panelBg} border ${panelBorder}`}>
               <Icon size={14} className="mx-auto mb-1" style={{ color }} />

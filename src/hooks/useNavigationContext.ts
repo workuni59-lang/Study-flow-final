@@ -16,11 +16,12 @@ interface NavigationContext {
   themeTab: ThemeTab;
   timerId: TimerModeId | null;
   profileId: string | null;
+  subjectId: string | null;
 }
 
 export function useNavigationContext(): NavigationContext {
   const location = useLocation();
-  const { id } = useParams<{ id: string }>();
+  const { id, subjectId: paramSubjectId } = useParams<{ id: string; subjectId: string }>();
   const path = location.pathname;
 
   let mode: Mode = 'home';
@@ -87,5 +88,5 @@ export function useNavigationContext(): NavigationContext {
     section = 'dashboard';
   }
 
-  return { mode, section, activePanel, ambienceTab, themeTab, timerId, profileId };
+  return { mode, section, activePanel, ambienceTab, themeTab, timerId, profileId, subjectId: paramSubjectId || null };
 }

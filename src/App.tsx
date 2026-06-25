@@ -124,6 +124,7 @@ export default function App() {
             <Route path="/progress" element={<AppContent />} />
             <Route path="/quests" element={<AppContent />} />
             <Route path="/subjects" element={<AppContent />} />
+            <Route path="/subjects/:subjectId" element={<AppContent />} />
             <Route path="/achievements" element={<AppContent />} />
             <Route path="/leaderboard" element={<AppContent />} />
             <Route path="/settings" element={<AppContent />} />

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, BookOpen, ChevronRight, Trash2, ArrowLeft, Target, MoreVertical, Zap, Calendar, CheckCircle2, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useNavigate } from 'react-router-dom';
 import { useStudy, Subject, Topic, MasteryLevel } from '../../context/StudyContext';
 import { DashboardCard } from '../dashboard/DashboardCard';
 import { SUBJECT_TEMPLATES, SubjectTemplate } from '../../lib/templates';
@@ -12,6 +13,7 @@ const masteryColors: Record<MasteryLevel, string> = {
 };
 
 export const SubjectsView = ({ initialSubjectId }: { initialSubjectId?: string }) => {
+  const navigate = useNavigate();
   const { subjects, deleteSubject } = useStudy();
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
   const [isAddingSubject, setIsAddingSubject] = useState(false);
@@ -22,13 +24,23 @@ export const SubjectsView = ({ initialSubjectId }: { initialSubjectId?: string }
     }
   }, []);
 
+  const openSubject = (id: string) => {
+    setSelectedSubjectId(id);
+    navigate(`/subjects/${id}`, { replace: true });
+  };
+
+  const closeSubject = () => {
+    setSelectedSubjectId(null);
+    navigate('/subjects', { replace: true });
+  };
+
   const selectedSubject = subjects.find(s => s.id === selectedSubjectId);
 
   if (selectedSubject) {
     return (
       <SubjectDetails 
         subject={selectedSubject} 
-        onBack={() => setSelectedSubjectId(null)} 
+        onBack={closeSubject}
       />
     );
   }
@@ -59,7 +71,7 @@ export const SubjectsView = ({ initialSubjectId }: { initialSubjectId?: string }
               exit={{ opacity: 0, scale: 0.9 }}
               whileHover={{ y: -5 }}
               className="bg-white dark:bg-slate-900 rounded-[32px] p-8 border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-xl transition-all group cursor-pointer relative"
-              onClick={() => setSelectedSubjectId(subject.id)}
+              onClick={() => openSubject(subject.id)}
             >
               <div className={`w-14 h-14 rounded-2xl bg-${subject.color || 'indigo'}-50 dark:bg-${subject.color || 'indigo'}-900/20 flex items-center justify-center text-${subject.color || 'indigo'}-600 dark:text-${subject.color || 'indigo'}-400 mb-6 group-hover:scale-110 transition-transform`}>
                 <BookOpen className="w-7 h-7" />

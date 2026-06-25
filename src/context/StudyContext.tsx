@@ -338,6 +338,80 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => { storage.saveSessionsDate(sessionsDate); }, [sessionsDate]);
   useEffect(() => { storage.saveSubjectStreaks(subjectStreaks); }, [subjectStreaks]);
 
+  // Proactive quest reset (on mount + periodic check)
+  useEffect(() => {
+    const reconcileQuests = () => {
+      const today = new Date().toISOString();
+      let needsReset = false;
+      const nextResets = { ...questResets };
+      SEED_QUESTS.forEach(q => {
+        if (q.tier === 'milestone') return;
+        if (shouldResetQuests(q.tier, questResets[q.id] ?? null)) {
+          nextResets[q.id] = today;
+          needsReset = true;
+        }
+      });
+      if (needsReset) {
+        setQuestResets(nextResets);
+        setGameQuestProgress(prev => {
+          const next = { ...prev };
+          SEED_QUESTS.forEach(q => {
+            if (q.tier === 'milestone') return;
+            if (nextResets[q.id] !== questResets[q.id]) {
+              next[q.id] = 0;
+            }
+          });
+          return next;
+        });
+      }
+    };
+    const interval = setInterval(reconcileQuests, 60000);
+    reconcileQuests();
+    return () => clearInterval(interval);
+  }, []);
+
+  // Reconcile xp_earned quests when gameXp changes
+  useEffect(() => {
+    if (gameXp === 0) return;
+    setGameQuestProgress(prev => {
+      let changed = false;
+      const next = { ...prev };
+      SEED_QUESTS.forEach(q => {
+        if (q.metric !== 'xp_earned') return;
+        const capped = Math.min(gameXp, q.goal);
+        if (capped > (prev[q.id] || 0)) {
+          changed = true;
+          next[q.id] = capped;
+          if (capped >= q.goal && (prev[q.id] || 0) < q.goal) {
+            setTimeout(() => { earnXp(q.reward.xp); awardGold(q.reward.gold); setQuestCompleteEvent(q.id); }, 0);
+          }
+        }
+      });
+      return changed ? next : prev;
+    });
+  }, [gameXp]);
+
+  // Reconcile streak_days quests when currentStreak changes
+  useEffect(() => {
+    if (userStats.currentStreak === 0 && !userStats.lastActiveDate) return;
+    setGameQuestProgress(prev => {
+      let changed = false;
+      const next = { ...prev };
+      SEED_QUESTS.forEach(q => {
+        if (q.metric !== 'streak_days') return;
+        const capped = Math.min(userStats.currentStreak, q.goal);
+        if (capped > (prev[q.id] || 0)) {
+          changed = true;
+          next[q.id] = capped;
+          if (capped >= q.goal && (prev[q.id] || 0) < q.goal) {
+            setTimeout(() => { earnXp(q.reward.xp); awardGold(q.reward.gold); setQuestCompleteEvent(q.id); }, 0);
+          }
+        }
+      });
+      return changed ? next : prev;
+    });
+  }, [userStats.currentStreak]);
+
   // Cloud sync: gamification state
   const isRealUser = authUser && authUser.uid !== 'demo-user-001' && supabase;
   const isSyncEnabled = isRealUser && userStats.isPremium;
@@ -644,6 +718,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       awardGold(goldForSubjectTask(task!.priority, subject));
       updateQuestProgress('tasks', 1);
       updateGameQuestProgress('tasks_completed', 1);
+      updateStreak();
 
       // Automated Mastery Advancement
       if (task?.subjectId && task?.topicId) {
@@ -762,6 +837,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     earnXp(minutes * XP_PER_FOCUS_MINUTE);
     updateQuestProgress('focus', seconds);
     updateGameQuestProgress('sessions_completed', 1);
+    updateStreak();
     setGameHp(prev => regenHp(prev));
     const newTotalFocus = (userStats.totalFocusSeconds || 0) + seconds;
     setUserStats(prev => ({ ...prev, totalFocusSeconds: newTotalFocus }));

@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Settings2, Save, Sparkles, ChevronDown, ChevronUp, Sun, Moon, Lock, Crown } from 'lucide-react';
+import { X, Save, Lock, Crown } from 'lucide-react';
 import type { ClockConfig, ClockVariant, HandStyle, TickStyle, FaceTexture, ThemePreset } from './types';
 import { getDefaultConfig, CLOCK_PRESETS, saveCustomPresets, getVariantType } from './ThemeEngine';
 import { useStudy } from '../../context/StudyContext';
@@ -274,188 +274,213 @@ export default function ClockCustomizer({ isOpen, onClose, config, onChange, cur
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] flex items-stretch sm:items-center justify-end pointer-events-none"
+          className="fixed inset-0 z-[100] flex items-start justify-center pointer-events-auto overflow-y-auto py-8"
         >
-          <div className="absolute inset-0 pointer-events-auto" onClick={onClose} />
+          {/* Backdrop */}
           <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="relative w-full sm:w-80 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-none sm:rounded-l-2xl shadow-2xl overflow-hidden h-full sm:max-h-[90vh] flex flex-col pointer-events-auto"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={onClose}
+          />
+
+          {/* Modal container */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 10 }}
+            transition={{ duration: 0.2 }}
+            className="relative bg-[#181818] rounded-2xl w-[90vw] max-w-4xl mx-auto mt-16 p-8 flex gap-8 pointer-events-auto"
           >
-            {/* Header */}
-            <div className="sticky top-0 z-10 bg-inherit">
-              <div className="flex items-center justify-between px-6 pt-4 pb-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                    <Settings2 className="w-4 h-4 text-white" />
-                  </div>
-                  <h2 className="text-sm font-display font-semibold dark:text-white/90">Clock Style</h2>
+            {/* Close button */}
+            <button
+              onClick={onClose}
+              className="absolute top-4 right-4 p-2 rounded-xl hover:bg-white/[0.08] text-white/40 hover:text-white/70 transition-all z-10"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Left column — Live preview */}
+            <div className="w-[40%] shrink-0 flex flex-col">
+              <h3 className="text-2xl font-black uppercase tracking-widest text-white mb-6">CLOCK</h3>
+              <div className="flex-1 flex items-center justify-center min-h-[280px] bg-white/[0.02] rounded-2xl p-6">
+                <div style={{ transform: 'scale(1.1)', transformOrigin: 'center center' }}>
+                  {isAnalog ? (
+                    <AnalogClock hours={previewHour} minutes={0} seconds={0} config={config} />
+                  ) : (
+                    <div style={{ fontSize: '4rem' }}>
+                      <DigitalClock hours={previewHour} minutes={0} seconds={0} ampm={previewHour >= 12 ? 'PM' : 'AM'} config={config} />
+                    </div>
+                  )}
                 </div>
-                <button onClick={onClose} className="p-2 rounded-xl hover:bg-white/[0.08] text-white/40 hover:text-white/70 transition-all">
-                  <X className="w-4 h-4" />
-                </button>
               </div>
-              <div className="mx-6 h-px bg-white/[0.06]" />
             </div>
 
-            {/* Section tabs */}
-            <div className="flex gap-1.5 px-6 pt-3 pb-1 bg-white/[0.02] border-b border-white/[0.04]">
-              {[
-                { id: 'variants' as const, label: 'Layout' },
-                { id: 'general' as const, label: 'Style' },
-                { id: isAnalog ? 'analog' as const : 'digital' as const, label: isAnalog ? 'Hands' : 'Format' },
-                { id: 'presets' as const, label: 'Presets' },
-              ].map(s => {
-                const locked = isSectionLocked(s.id);
-                return (
-                <button key={s.id} onClick={() => handleSectionClick(s.id)}
-                  className={`px-2.5 py-1.5 rounded-lg text-[7px] font-bold uppercase tracking-wider transition-all flex items-center gap-1 ${
-                    section === s.id ? 'bg-brand text-white shadow-sm' : locked ? 'text-white/20 cursor-not-allowed' : 'text-white/40 hover:text-white/60'
-                  }`}
-                >{s.label}{locked && <Lock className="w-2.5 h-2.5" />}</button>
-                );
-              })}
-            </div>
+            {/* Vertical divider */}
+            <div className="w-px bg-white/10 self-stretch" />
 
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto no-scrollbar p-6 pb-12 space-y-4">
-              {/* ── VARIANTS SECTION ── */}
-              {section === 'variants' && (
-                <div>
-                  <p className="text-[9px] font-bold uppercase tracking-widest text-white/30 mb-2">Digital Clocks</p>
-                  <div className="grid grid-cols-4 gap-2 mb-4">
-                    {DIGITAL_VARIANTS.map(v => {
-                      const active = config.variant === v.id;
-                      const locked = isVariantLocked(v.id);
-                      return (
-                        <button key={v.id} onClick={() => handleVariantClick(v.id)}
-                          className={`rounded-xl overflow-hidden transition-all border relative ${
-                            active ? 'ring-2 ring-brand border-brand/50 bg-brand/10' : locked ? 'border-white/5 bg-white/[0.02] opacity-40' : 'border-white/5 bg-white/[0.03] hover:bg-white/[0.06]'
-                          } ${locked ? 'cursor-not-allowed' : ''}`}
-                        >
-                          {locked && <div className="absolute inset-0 flex items-center justify-center z-10"><Lock className="w-3 h-3 text-white/40" /></div>}
-                          <div className="h-12 flex items-center justify-center p-1" style={{
-                            background: active ? `linear-gradient(180deg, ${config.accentColor}11, transparent)` : undefined,
-                          }}>
-                            <MiniClockPreview variant={v.id} accentColor={config.accentColor} hour={previewHour} />
-                          </div>
-                          <div className="px-1.5 py-1 text-center">
-                            <span className={`text-[7px] font-bold uppercase tracking-wider ${active ? 'text-brand-light' : 'text-white/50'}`}>
-                              {v.label}
-                            </span>
-                          </div>
-                        </button>
-                      );
-                    })}
+            {/* Right column — Settings */}
+            <div className="flex-1 min-w-0 flex flex-col">
+              <h3 className="text-2xl font-black uppercase tracking-widest text-white mb-6">CLOCK STYLE</h3>
+
+              {/* Section tabs */}
+              <div className="flex gap-1.5 mb-4 flex-wrap">
+                {[
+                  { id: 'variants' as const, label: 'Layout' },
+                  { id: 'general' as const, label: 'Style' },
+                  { id: isAnalog ? 'analog' as const : 'digital' as const, label: isAnalog ? 'Hands' : 'Format' },
+                  { id: 'presets' as const, label: 'Presets' },
+                ].map(s => {
+                  const locked = isSectionLocked(s.id);
+                  return (
+                  <button key={s.id} onClick={() => handleSectionClick(s.id)}
+                    className={`px-2.5 py-1.5 rounded-lg text-[7px] font-bold uppercase tracking-wider transition-all flex items-center gap-1 ${
+                      section === s.id ? 'bg-brand text-white shadow-sm' : locked ? 'text-white/20 cursor-not-allowed' : 'text-white/40 hover:text-white/60'
+                    }`}
+                  >{s.label}{locked && <Lock className="w-2.5 h-2.5" />}</button>
+                  );
+                })}
+              </div>
+
+              {/* Content */}
+              <div className="flex-1 overflow-y-auto no-scrollbar space-y-4 pr-2">
+                {/* ── VARIANTS SECTION ── */}
+                {section === 'variants' && (
+                  <div>
+                    <p className="text-[9px] font-bold uppercase tracking-widest text-white/30 mb-2">Digital Clocks</p>
+                    <div className="grid grid-cols-4 gap-2 mb-4">
+                      {DIGITAL_VARIANTS.map(v => {
+                        const active = config.variant === v.id;
+                        const locked = isVariantLocked(v.id);
+                        return (
+                          <button key={v.id} onClick={() => handleVariantClick(v.id)}
+                            className={`rounded-xl overflow-hidden transition-all border relative ${
+                              active ? 'ring-2 ring-brand border-brand/50 bg-brand/10' : locked ? 'border-white/5 bg-white/[0.02] opacity-40' : 'border-white/5 bg-white/[0.03] hover:bg-white/[0.06]'
+                            } ${locked ? 'cursor-not-allowed' : ''}`}
+                          >
+                            {locked && <div className="absolute inset-0 flex items-center justify-center z-10"><Lock className="w-3 h-3 text-white/40" /></div>}
+                            <div className="h-12 flex items-center justify-center p-1" style={{
+                              background: active ? `linear-gradient(180deg, ${config.accentColor}11, transparent)` : undefined,
+                            }}>
+                              <MiniClockPreview variant={v.id} accentColor={config.accentColor} hour={previewHour} />
+                            </div>
+                            <div className="px-1.5 py-1 text-center">
+                              <span className={`text-[7px] font-bold uppercase tracking-wider ${active ? 'text-brand-light' : 'text-white/50'}`}>
+                                {v.label}
+                              </span>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <p className="text-[9px] font-bold uppercase tracking-widest text-white/30 mb-2">Analog Clocks</p>
+                    <div className="grid grid-cols-4 gap-2">
+                      {ANALOG_VARIANTS.map(v => {
+                        const active = config.variant === v.id;
+                        const locked = isVariantLocked(v.id);
+                        return (
+                          <button key={v.id} onClick={() => handleVariantClick(v.id)}
+                            className={`rounded-xl overflow-hidden transition-all border relative ${
+                              active ? 'ring-2 ring-brand border-brand/50 bg-brand/10' : locked ? 'border-white/5 bg-white/[0.02] opacity-40' : 'border-white/5 bg-white/[0.03] hover:bg-white/[0.06]'
+                            } ${locked ? 'cursor-not-allowed' : ''}`}
+                          >
+                            {locked && <div className="absolute inset-0 flex items-center justify-center z-10"><Lock className="w-3 h-3 text-white/40" /></div>}
+                            <div className="h-12 flex items-center justify-center p-1">
+                              <MiniAnalogPreview variant={v.id} accentColor={config.accentColor} hour={previewHour} />
+                            </div>
+                            <div className="px-1.5 py-1 text-center">
+                              <span className={`text-[7px] font-bold uppercase tracking-wider ${active ? 'text-brand-light' : 'text-white/50'}`}>
+                                {v.label}
+                              </span>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
+                )}
 
-                  <p className="text-[9px] font-bold uppercase tracking-widest text-white/30 mb-2">Analog Clocks</p>
-                  <div className="grid grid-cols-4 gap-2">
-                    {ANALOG_VARIANTS.map(v => {
-                      const active = config.variant === v.id;
-                      const locked = isVariantLocked(v.id);
-                      return (
-                        <button key={v.id} onClick={() => handleVariantClick(v.id)}
-                          className={`rounded-xl overflow-hidden transition-all border relative ${
-                            active ? 'ring-2 ring-brand border-brand/50 bg-brand/10' : locked ? 'border-white/5 bg-white/[0.02] opacity-40' : 'border-white/5 bg-white/[0.03] hover:bg-white/[0.06]'
-                          } ${locked ? 'cursor-not-allowed' : ''}`}
-                        >
-                          {locked && <div className="absolute inset-0 flex items-center justify-center z-10"><Lock className="w-3 h-3 text-white/40" /></div>}
-                          <div className="h-12 flex items-center justify-center p-1">
-                            <MiniAnalogPreview variant={v.id} accentColor={config.accentColor} hour={previewHour} />
-                          </div>
-                          <div className="px-1.5 py-1 text-center">
-                            <span className={`text-[7px] font-bold uppercase tracking-wider ${active ? 'text-brand-light' : 'text-white/50'}`}>
-                              {v.label}
-                            </span>
-                          </div>
-                        </button>
-                      );
-                    })}
+                {/* ── GENERAL SECTION ── */}
+                {section === 'general' && (
+                  <div className="space-y-3">
+                    <Slider label="Size" value={config.size} min={50} max={200} onChange={v => update({ size: v })} unit="%" />
+                    <Slider label="Opacity" value={config.opacity} min={20} max={100} onChange={v => update({ opacity: v })} unit="%" />
+                    <Slider label="Blur" value={config.blur} min={0} max={20} onChange={v => update({ blur: v })} unit="px" />
+                    <Slider label="Roundness" value={config.borderRadius} min={0} max={40} onChange={v => update({ borderRadius: v })} unit="px" />
+                    <Slider label="Glow" value={config.glowIntensity} min={0} max={100} onChange={v => update({ glowIntensity: v })} unit="%" />
+                    <Slider label="Shadow" value={config.shadowSoftness} min={0} max={100} onChange={v => update({ shadowSoftness: v })} unit="%" />
+                    <Slider label="Animation" value={config.animationIntensity} min={0} max={100} onChange={v => update({ animationIntensity: v })} unit="%" />
+                    <ColorGrid label="Accent Color" value={config.accentColor} onChange={v => update({ accentColor: v })} />
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* ── GENERAL SECTION ── */}
-              {section === 'general' && (
-                <div className="space-y-3">
-                  <Slider label="Size" value={config.size} min={50} max={200} onChange={v => update({ size: v })} unit="%" />
-                  <Slider label="Opacity" value={config.opacity} min={20} max={100} onChange={v => update({ opacity: v })} unit="%" />
-                  <Slider label="Blur" value={config.blur} min={0} max={20} onChange={v => update({ blur: v })} unit="px" />
-                  <Slider label="Roundness" value={config.borderRadius} min={0} max={40} onChange={v => update({ borderRadius: v })} unit="px" />
-                  <Slider label="Glow" value={config.glowIntensity} min={0} max={100} onChange={v => update({ glowIntensity: v })} unit="%" />
-                  <Slider label="Shadow" value={config.shadowSoftness} min={0} max={100} onChange={v => update({ shadowSoftness: v })} unit="%" />
-                  <Slider label="Animation" value={config.animationIntensity} min={0} max={100} onChange={v => update({ animationIntensity: v })} unit="%" />
-                  <ColorGrid label="Accent Color" value={config.accentColor} onChange={v => update({ accentColor: v })} />
-                </div>
-              )}
-
-              {/* ── DIGITAL SECTION ── */}
-              {section === 'digital' && !isAnalog && (
-                isSectionLocked('digital') ? <PremiumLockSection onUpgrade={() => setShowPremiumModal(true)} /> : (
-                <div className="space-y-3">
-                  <OptGroup label="Font" value={config.fontFamily} options={FONT_OPTIONS} onChange={v => update({ fontFamily: v })} />
-                  <Toggle label="12h / 24h" value={config.hour12} onToggle={() => update({ hour12: !config.hour12 })} onLabel="12h" offLabel="24h" />
-                  <Toggle label="Seconds" value={config.showSeconds} onToggle={() => update({ showSeconds: !config.showSeconds })} />
-                  <Toggle label="Neon Glow" value={config.glowEffect} onToggle={() => update({ glowEffect: !config.glowEffect })} />
-                </div>
-                )
-              )}
-
-              {/* ── ANALOG SECTION ── */}
-              {section === 'analog' && isAnalog && (
-                isSectionLocked('analog') ? <PremiumLockSection onUpgrade={() => setShowPremiumModal(true)} /> : (
-                <div className="space-y-3">
-                  <OptGroup label="Hand Style" value={config.handStyle} options={HAND_OPTIONS} onChange={v => update({ handStyle: v })} />
-                  <OptGroup label="Tick Marks" value={config.tickStyle} options={TICK_OPTIONS} onChange={v => update({ tickStyle: v })} />
-                  <OptGroup label="Face" value={config.faceTexture} options={FACE_OPTIONS} onChange={v => update({ faceTexture: v })} />
-                  <Toggle label="Smooth Sweep" value={config.smoothSweep} onToggle={() => update({ smoothSweep: !config.smoothSweep })} />
-                </div>
-                )
-              )}
-
-              {/* ── PRESETS SECTION ── */}
-              {section === 'presets' && (
-                isSectionLocked('presets') ? <PremiumLockSection onUpgrade={() => setShowPremiumModal(true)} /> : (
-                <div className="space-y-3">
-                  <p className="text-[8px] font-medium text-white/30">Select a preset to instantly transform your clock</p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {CLOCK_PRESETS.map(p => {
-                      const active = currentPresetId === p.id;
-                      return (
-                        <motion.button key={p.id} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-                          onClick={() => { onChange({ ...p.config }); onPresetChange(p.id); }}
-                          className={`p-3 rounded-xl text-left transition-all border ${
-                            active ? 'bg-brand/20 border-brand/50 ring-1 ring-brand/50' : 'bg-white/[0.04] border-white/5 hover:bg-white/[0.08]'
-                          }`}
-                        >
-                          <span className="text-lg">{p.icon}</span>
-                          <p className="text-[10px] font-semibold text-white/90 mt-0.5">{p.name}</p>
-                          <p className="text-[7px] text-white/30 leading-tight">{p.description}</p>
-                          {active && <span className="text-[7px] font-bold text-brand-light mt-1 block">Active</span>}
-                        </motion.button>
-                      );
-                    })}
+                {/* ── DIGITAL SECTION ── */}
+                {section === 'digital' && !isAnalog && (
+                  isSectionLocked('digital') ? <PremiumLockSection onUpgrade={() => setShowPremiumModal(true)} /> : (
+                  <div className="space-y-3">
+                    <OptGroup label="Font" value={config.fontFamily} options={FONT_OPTIONS} onChange={v => update({ fontFamily: v })} />
+                    <Toggle label="12h / 24h" value={config.hour12} onToggle={() => update({ hour12: !config.hour12 })} onLabel="12h" offLabel="24h" />
+                    <Toggle label="Seconds" value={config.showSeconds} onToggle={() => update({ showSeconds: !config.showSeconds })} />
+                    <Toggle label="Neon Glow" value={config.glowEffect} onToggle={() => update({ glowEffect: !config.glowEffect })} />
                   </div>
+                  )
+                )}
 
-                  <div className="h-px bg-white/[0.06] my-2" />
-
-                  <p className="text-[9px] font-bold uppercase tracking-widest text-white/30">Save Current</p>
-                  <div className="flex gap-2">
-                    <input type="text" value={saveName} onChange={e => setSaveName(e.target.value)}
-                      placeholder="Preset name..."
-                      className="flex-1 bg-white/[0.04] border border-white/5 rounded-lg px-3 py-2 text-[9px] font-medium text-white/70 placeholder-white/20 focus:ring-1 ring-brand transition-all outline-none" />
-                    <button onClick={handleSavePreset} disabled={!saveName.trim() || saved}
-                      className={`px-3 py-2 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all ${
-                        saved ? 'bg-emerald-500/20 text-emerald-400' : 'bg-brand/20 text-brand-light hover:bg-brand/30'
-                      } disabled:opacity-30`}
-                    >{saved ? 'Saved!' : <Save className="w-3 h-3" />}</button>
+                {/* ── ANALOG SECTION ── */}
+                {section === 'analog' && isAnalog && (
+                  isSectionLocked('analog') ? <PremiumLockSection onUpgrade={() => setShowPremiumModal(true)} /> : (
+                  <div className="space-y-3">
+                    <OptGroup label="Hand Style" value={config.handStyle} options={HAND_OPTIONS} onChange={v => update({ handStyle: v })} />
+                    <OptGroup label="Tick Marks" value={config.tickStyle} options={TICK_OPTIONS} onChange={v => update({ tickStyle: v })} />
+                    <OptGroup label="Face" value={config.faceTexture} options={FACE_OPTIONS} onChange={v => update({ faceTexture: v })} />
+                    <Toggle label="Smooth Sweep" value={config.smoothSweep} onToggle={() => update({ smoothSweep: !config.smoothSweep })} />
                   </div>
-                </div>
-                )
-              )}
+                  )
+                )}
+
+                {/* ── PRESETS SECTION ── */}
+                {section === 'presets' && (
+                  isSectionLocked('presets') ? <PremiumLockSection onUpgrade={() => setShowPremiumModal(true)} /> : (
+                  <div className="space-y-3">
+                    <p className="text-[8px] font-medium text-white/30">Select a preset to instantly transform your clock</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {CLOCK_PRESETS.map(p => {
+                        const active = currentPresetId === p.id;
+                        return (
+                          <motion.button key={p.id} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                            onClick={() => { onChange({ ...p.config }); onPresetChange(p.id); }}
+                            className={`p-3 rounded-xl text-left transition-all border ${
+                              active ? 'bg-brand/20 border-brand/50 ring-1 ring-brand/50' : 'bg-white/[0.04] border-white/5 hover:bg-white/[0.08]'
+                            }`}
+                          >
+                            <span className="text-lg">{p.icon}</span>
+                            <p className="text-[10px] font-semibold text-white/90 mt-0.5">{p.name}</p>
+                            <p className="text-[7px] text-white/30 leading-tight">{p.description}</p>
+                            {active && <span className="text-[7px] font-bold text-brand-light mt-1 block">Active</span>}
+                          </motion.button>
+                        );
+                      })}
+                    </div>
+
+                    <div className="h-px bg-white/[0.06] my-2" />
+
+                    <p className="text-[9px] font-bold uppercase tracking-widest text-white/30">Save Current</p>
+                    <div className="flex gap-2">
+                      <input type="text" value={saveName} onChange={e => setSaveName(e.target.value)}
+                        placeholder="Preset name..."
+                        className="flex-1 bg-white/[0.04] border border-white/5 rounded-lg px-3 py-2 text-[9px] font-medium text-white/70 placeholder-white/20 focus:ring-1 ring-brand transition-all outline-none" />
+                      <button onClick={handleSavePreset} disabled={!saveName.trim() || saved}
+                        className={`px-3 py-2 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all ${
+                          saved ? 'bg-emerald-500/20 text-emerald-400' : 'bg-brand/20 text-brand-light hover:bg-brand/30'
+                        } disabled:opacity-30`}
+                      >{saved ? 'Saved!' : <Save className="w-3 h-3" />}</button>
+                    </div>
+                  </div>
+                  )
+                )}
+              </div>
             </div>
           </motion.div>
         </motion.div>

@@ -88,35 +88,47 @@ export const HomeView = memo(({ onNotepadOpen, onQuestsOpen, onMusicOpen, onProg
   const sa = spotlight ? (SUBJECT_ACCENTS[spotlight.subject.color || 'indigo'] ?? SUBJECT_ACCENTS.indigo) : null;
 
   return (
-      <div className="relative flex flex-col items-center justify-center min-h-screen px-4 md:px-6 pb-28 lg:pb-12">
-      {/* Badge — top-right */}
+      <div className="relative flex flex-col items-center justify-center min-h-screen px-4 md:px-6 pb-28 lg:pb-12 overflow-hidden"
+        style={{ background: 'linear-gradient(135deg, #fef3c7, #d97706, #78350f)' }}>
+      {/* Darken overlay for text readability */}
+      <div className="absolute inset-0 bg-black/20 pointer-events-none z-0" />
+
+      {/* Badge — top-left */}
       <button
         onClick={onProgressionOpen}
-        className={`fixed top-20 left-4 z-20 flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl glass-panel-light ${t}/80 ${panelHover} transition-all text-[11px] font-semibold`}
+        className={`fixed top-20 left-4 z-20 flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl ${t}/80 ${panelHover} transition-all text-[11px] font-semibold`}
+        style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1 }}
       >
         <BadgeSvg tier={badgeInfo.tier} size={20} unlocked={true} />
         Lv.{badgeInfo.level}
         <ArrowUpRight className={`w-3 h-3 ${t}/30`} />
       </button>
 
-      {/* Central content — transparent floating panel, no backdrop blur */}
-      <div className="flex flex-col items-center px-6 py-8 w-full max-w-sm animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+      {/* Central content */}
+      <div className="relative z-10 flex flex-col items-center w-full max-w-sm animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
         {/* Greeting */}
         {themeConfig.showGreeting !== false && (
-          <p className={`text-sm font-medium ${t}/60 mb-0.5`}>
+          <p className="text-white/60 text-sm tracking-wide mb-2">
             {getGreeting(user?.displayName?.split(' ')[0])}
+          </p>
+        )}
+
+        {/* Quote (moved from top-right) */}
+        {themeConfig.showQuote !== false && (
+          <p className="font-serif italic text-white/80 text-lg text-center max-w-[480px] mb-6 leading-relaxed">
+            &ldquo;{quote.text}&rdquo;
           </p>
         )}
 
         {/* Clock */}
         {themeConfig.showClock !== false && (
-          <div className="my-1" style={{ filter: 'drop-shadow(0 2px 12px rgba(0,0,0,0.3))' }}>
+          <div className="mb-3">
             <ClockRenderer time={time} focusState={focusSession} />
           </div>
         )}
 
         {/* Focus time label + inline spotlight */}
-        <p className={`text-[11px] ${t}/45 mb-3 flex items-center justify-center gap-1.5 flex-wrap`}>
+        <p className={`text-[11px] ${t}/45 mb-4 flex items-center justify-center gap-1.5 flex-wrap`}>
           <span>
             {userStats.totalFocusSeconds > 0
               ? `${formatTime(userStats.totalFocusSeconds)} focused today`
@@ -149,17 +161,7 @@ export const HomeView = memo(({ onNotepadOpen, onQuestsOpen, onMusicOpen, onProg
             </div>
           ))}
         </div>
-
       </div>
-
-      {/* Quote — fixed top-right, no overlap with badge (now top-left) */}
-      {themeConfig.showQuote !== false && (
-        <div className="fixed top-28 right-6 z-20 max-w-[280px]">
-          <p className="font-serif text-[18px] font-bold italic leading-tight text-white/90 text-right" style={{ textShadow: '0 2px 20px rgba(0,0,0,0.7), 0 0 60px rgba(0,0,0,0.3)' }}>
-            &ldquo;{quote.text}&rdquo;
-          </p>
-        </div>
-      )}
 
       {/* Bottom-left icon cluster */}
       {!menuOpen && (

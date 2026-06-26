@@ -1,7 +1,7 @@
 import { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Clock } from 'lucide-react';
+
 import type { ClockConfig, ClockFocusState } from './types';
 import { getDefaultConfig, loadClockConfig, saveClockConfig, getVariantType } from './ThemeEngine';
 import { styleFadeTransition, floatHover, focusPulse, softTransition } from './ClockAnimations';
@@ -133,12 +133,11 @@ export default function ClockRenderer({ time, focusState }: ClockRendererProps) 
         {/* Customize button */}
         <motion.button
           onClick={() => setShowCustomizer(true)}
-          className="mt-4 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 dark:bg-white/[0.06] dark:hover:bg-white/[0.10] text-white/40 hover:text-white/70 transition-all flex items-center gap-1.5 backdrop-blur-sm border border-white/10"
+          className="mt-4 bg-blue-500 hover:bg-blue-400 text-white text-sm font-medium rounded-full px-6 py-2 transition-colors"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          <Clock className="w-3 h-3" />
-          <span className="text-[8px] font-bold uppercase tracking-wider">Customize</span>
+          Customize
         </motion.button>
       </motion.div>
 

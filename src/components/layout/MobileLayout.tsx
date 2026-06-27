@@ -68,7 +68,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
-  const { userStats, gameLevel, levelUpEvent, dismissLevelUp, themeConfig, setThemeConfig, activeNotification, confettiActive, closeNotification, setShowPremiumModal } = useStudy();
+  const { userStats, gameLevel, levelUpEvent, dismissLevelUp, themeConfig, setThemeConfig, setThemeCustomized, activeNotification, confettiActive, closeNotification, setShowPremiumModal } = useStudy();
   const { mode, section, activePanel, profileId: profileUserId, ambienceTab, subjectId: urlSubjectId } = useNavigationContext();
 
   const [menuOpen, setMenuOpen] = useState(false);
@@ -161,6 +161,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
       return;
     }
     setThemeConfig(prev => ({ ...prev, wallpaper: id }));
+    setThemeCustomized(true);
     setShowMoodPicker(false);
   };
 

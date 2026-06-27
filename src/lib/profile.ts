@@ -7,6 +7,7 @@ export interface PublicProfile {
   display_name: string | null;
   avatar_url: string | null;
   bio: string | null;
+  country: string | null;
   created_at: string;
   is_premium: boolean;
 }
@@ -34,7 +35,7 @@ export async function getPublicProfile(userId: string): Promise<ProfileWithStats
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('id, display_name, avatar_url, bio, created_at, is_premium')
+    .select('id, display_name, avatar_url, bio, country, created_at, is_premium')
     .eq('id', userId)
     .single();
 

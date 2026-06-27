@@ -10,6 +10,7 @@ export interface Profile {
   display_name: string | null;
   avatar_url: string | null;
   bio: string | null;
+  country: string | null;
   is_premium: boolean;
   premium_until: string | null;
   created_at: string;
@@ -54,7 +55,7 @@ interface AuthContextType {
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
-  updateProfile: (data: Partial<Pick<Profile, 'display_name' | 'avatar_url' | 'bio'>>) => Promise<{ error: string | null }>;
+  updateProfile: (data: Partial<Pick<Profile, 'display_name' | 'avatar_url' | 'bio' | 'country'>>) => Promise<{ error: string | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -229,7 +230,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error };
   }, [isDemo]);
 
-  const updateProfile = useCallback(async (data: Partial<Pick<Profile, 'display_name' | 'avatar_url' | 'bio'>>) => {
+  const updateProfile = useCallback(async (data: Partial<Pick<Profile, 'display_name' | 'avatar_url' | 'bio' | 'country'>>) => {
     if (!user) return { error: 'Not authenticated' };
     if (isDemo) {
       return { error: null };

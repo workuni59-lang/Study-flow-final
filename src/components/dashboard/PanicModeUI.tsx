@@ -4,7 +4,7 @@ import { AlertTriangle, Clock, X, Zap, ArrowRight, CheckCircle2 } from 'lucide-r
 import { useStudy } from '../../context/StudyContext';
 
 export const PanicModeUI = () => {
-  const { panicModeActive, setPanicMode, tasks, toggleTask, exams, setSelectedExamForPath } = useStudy();
+  const { panicModeActive, setPanicMode, tasks, toggleTask } = useStudy();
   
   // Local state to keep track of tasks specifically for this view
   const [highYieldTasks, setHighYieldTasks] = useState(() => 
@@ -16,16 +16,7 @@ export const PanicModeUI = () => {
   }, [tasks]);
 
   const handleNextMilestone = () => {
-    // 1. Find the closest exam
-    if (exams.length > 0) {
-      const closest = [...exams].sort((a, b) => a.daysLeft - b.daysLeft)[0];
-      // 2. Open its Path to Mastery
-      setSelectedExamForPath(closest);
-      // 3. Exit Panic Mode overlay to show the Roadmap
-      setPanicMode(false);
-    } else {
-      alert("No exams found to track milestones!");
-    }
+    setPanicMode(false);
   };
 
   return (

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, BookOpen, ChevronRight, Trash2, ArrowLeft, Target, MoreVertical, Zap, Calendar, CheckCircle2, RefreshCw } from 'lucide-react';
+import { Plus, BookOpen, ChevronRight, Trash2, ArrowLeft, Target, MoreVertical, Zap, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { useStudy, Subject, Topic, MasteryLevel } from '../../context/StudyContext';
@@ -140,7 +140,6 @@ export const SubjectsView = ({ initialSubjectId }: { initialSubjectId?: string }
 const SubjectDetails = ({ subject, onBack }: { subject: Subject, onBack: () => void }) => {
   const { addTopic, updateTopicMastery, deleteTopic, tasks, toggleTask, deleteTask, addTask } = useStudy();
   const [newTopicTitle, setNewTopicTitle] = useState('');
-  const [isSyncing, setIsSyncing] = useState(false);
   const [activeTopicId, setActiveTopicId] = useState<string | null>(null);
 
   const subjectTasks = tasks.filter(t => t.subjectId === subject.id);
@@ -164,14 +163,6 @@ const SubjectDetails = ({ subject, onBack }: { subject: Subject, onBack: () => v
     return Math.round(((greenCount + amberCount * 0.5) / subject.topics.length) * 100);
   };
 
-  const handleSync = () => {
-    setIsSyncing(true);
-    setTimeout(() => {
-      setIsSyncing(false);
-      alert("Successfully synced with Google Tasks!");
-    }, 2500);
-  };
-
   return (
     <div className="max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex justify-between items-start mb-8">
@@ -182,18 +173,6 @@ const SubjectDetails = ({ subject, onBack }: { subject: Subject, onBack: () => v
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Back to Subjects
         </button>
 
-        <button 
-          onClick={handleSync}
-          disabled={isSyncing}
-          className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 rounded-xl font-bold text-[10px] uppercase tracking-widest border border-slate-100 dark:border-slate-800 hover:border-indigo-600 transition-all shadow-sm group disabled:opacity-50"
-        >
-          {isSyncing ? (
-            <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-          ) : (
-            <Calendar className="w-3.5 h-3.5 group-hover:text-indigo-600 transition-colors" />
-          )}
-          {isSyncing ? 'Syncing...' : 'Sync with Google'}
-        </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

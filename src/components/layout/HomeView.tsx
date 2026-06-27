@@ -88,10 +88,9 @@ export const HomeView = memo(({ onNotepadOpen, onQuestsOpen, onMusicOpen, onProg
   const sa = spotlight ? (SUBJECT_ACCENTS[spotlight.subject.color || 'indigo'] ?? SUBJECT_ACCENTS.indigo) : null;
 
   return (
-      <div className="relative flex flex-col items-center justify-center min-h-screen px-4 md:px-6 pb-28 lg:pb-12 overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #fef3c7, #d97706, #78350f)' }}>
+      <div className="relative flex flex-col items-center justify-center min-h-screen px-4 md:px-6 pb-28 lg:pb-12 overflow-hidden">
       {/* Darken overlay for text readability */}
-      <div className="absolute inset-0 bg-black/20 pointer-events-none z-0" />
+      <div className="absolute inset-0 bg-black/10 pointer-events-none z-0" />
 
       {/* Badge — top-left */}
       <button

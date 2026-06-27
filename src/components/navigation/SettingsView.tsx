@@ -60,12 +60,14 @@ export const SettingsView = () => {
     userStats, 
     themeConfig, 
     setThemeConfig, 
+    setThemeCustomized,
     setShowPremiumModal,
     triggerConfetti,
   } = useStudy();
 
   const [name, setName] = useState(user?.displayName || '');
   const [bio, setBio] = useState(profile?.bio || '');
+  const [country, setCountry] = useState(profile?.country || '');
   const [showSaved, setShowSaved] = useState(false);
 
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
@@ -87,6 +89,7 @@ export const SettingsView = () => {
   // Sync local state with context updates
   const prevDisplayName = useRef(user?.displayName);
   const prevBio = useRef(profile?.bio);
+  const prevCountry = useRef(profile?.country);
   if (prevDisplayName.current !== user?.displayName) {
     prevDisplayName.current = user?.displayName;
     setName(user?.displayName || '');
@@ -95,13 +98,17 @@ export const SettingsView = () => {
     prevBio.current = profile?.bio;
     setBio(profile?.bio || '');
   }
+  if (prevCountry.current !== profile?.country) {
+    prevCountry.current = profile?.country;
+    setCountry(profile?.country || '');
+  }
 
   // Persist sound settings
   useEffect(() => { localStorage.setItem('study_flow_alert_sound', JSON.stringify(selectedSound)); }, [selectedSound]);
   useEffect(() => { localStorage.setItem('study_flow_alert_volume', JSON.stringify(soundVolume)); }, [soundVolume]);
 
   const handleSaveProfile = async () => {
-    const { error } = await updateProfile({ display_name: name, bio: bio || null });
+    const { error } = await updateProfile({ display_name: name, bio: bio || null, country: country || null });
     if (!error) {
       setShowSaved(true);
       setTimeout(() => setShowSaved(false), 2000);
@@ -294,6 +301,7 @@ export const SettingsView = () => {
 
   const updateConfig = <K extends keyof typeof themeConfig>(key: K, value: (typeof themeConfig)[K]) => {
     setThemeConfig(prev => ({ ...prev, [key]: value }));
+    setThemeCustomized(true);
   };
 
   return (
@@ -490,20 +498,30 @@ export const SettingsView = () => {
                       className="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border-none text-sm font-bold dark:text-white focus:ring-2 ring-indigo-500 transition-all"
                     />
                  </div>
-                 <div>
-                    <label className="text-[8px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 ml-2 mb-1 block">Bio</label>
-                    <textarea
-                      value={bio}
-                      onChange={(e) => setBio(e.target.value.slice(0, 160))}
-                      maxLength={160}
-                      rows={3}
-                      placeholder="Tell the world a little about yourself..."
-                      className="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border-none text-sm font-medium dark:text-white focus:ring-2 ring-indigo-500 transition-all resize-none"
-                    />
-                    <div className="flex justify-between mt-1 px-2">
-                      <span className="text-[8px] text-slate-500">{160 - bio.length} characters remaining</span>
-                    </div>
-                 </div>
+                  <div>
+                     <label className="text-[8px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 ml-2 mb-1 block">Bio</label>
+                     <textarea
+                       value={bio}
+                       onChange={(e) => setBio(e.target.value.slice(0, 160))}
+                       maxLength={160}
+                       rows={3}
+                       placeholder="Tell the world a little about yourself..."
+                       className="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border-none text-sm font-medium dark:text-white focus:ring-2 ring-indigo-500 transition-all resize-none"
+                     />
+                     <div className="flex justify-between mt-1 px-2">
+                       <span className="text-[8px] text-slate-500">{160 - bio.length} characters remaining</span>
+                     </div>
+                  </div>
+                  <div>
+                     <label className="text-[8px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 ml-2 mb-1 block">Country</label>
+                     <input
+                       type="text"
+                       value={country}
+                       onChange={(e) => setCountry(e.target.value)}
+                       placeholder="e.g. United States, Japan, France..."
+                       className="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border-none text-sm font-medium dark:text-white focus:ring-2 ring-indigo-500 transition-all"
+                     />
+                  </div>
                  <button 
                    onClick={handleSaveProfile}
                    className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-slate-900 transition-all shadow-xl shadow-indigo-600/20"

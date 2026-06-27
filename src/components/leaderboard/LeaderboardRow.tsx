@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Trophy } from 'lucide-react';
 import type { LeaderboardEntry } from '../../lib/leaderboard';
 import { formatFocusTime } from '../../lib/leaderboard';
@@ -19,6 +20,7 @@ const MEDAL: Record<number, string> = {
 };
 
 export const LeaderboardRow = ({ entry, rank, focusSeconds, topFocusSeconds, isCurrentUser, onClick }: LeaderboardRowProps) => {
+  const [avatarError, setAvatarError] = useState(false);
   const barWidth = topFocusSeconds > 0 ? (focusSeconds / topFocusSeconds) * 100 : 0;
   const initial = (entry.display_name ?? 'A').charAt(0).toUpperCase();
 
@@ -49,8 +51,8 @@ export const LeaderboardRow = ({ entry, rank, focusSeconds, topFocusSeconds, isC
 
       {/* Avatar */}
       <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand to-violet-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
-        {entry.avatar_url ? (
-          <img src={entry.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
+        {entry.avatar_url && !avatarError ? (
+          <img src={entry.avatar_url} alt="" onError={() => setAvatarError(true)} className="w-full h-full rounded-full object-cover" />
         ) : (
           initial
         )}

@@ -151,25 +151,34 @@ function Glass({ hours, minutes, seconds, ampm, config, padHours }: DigitalClock
   const i = getAnimationIntensity(config.animationIntensity);
   return (
     <div className="flex items-baseline justify-center select-none" style={{ fontFamily: config.fontFamily }}>
-      <div className="flex items-baseline justify-center gap-3 px-5 py-3" style={{
-        background: `linear-gradient(135deg, ${config.accentColor}18, ${config.accentColor}06)`,
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        border: `1px solid ${config.accentColor}22`,
+      <div className="flex items-baseline justify-center gap-3 px-5 py-3 relative overflow-hidden" style={{
+        background: `linear-gradient(160deg, ${config.accentColor}15 0%, ${config.accentColor}04 50%, ${config.accentColor}08 100%)`,
+        backdropFilter: 'blur(30px)',
+        WebkitBackdropFilter: 'blur(30px)',
+        border: `1px solid ${config.accentColor}15`,
         borderRadius: config.borderRadius || 20,
-        boxShadow: `0 8px 32px ${config.accentColor}11, inset 0 1px 0 ${config.accentColor}11`,
+        boxShadow: `0 8px 32px ${config.accentColor}11, 0 0 0 1px ${config.accentColor}08 inset`,
       }}>
-        <span className="tracking-tight font-light leading-none" style={{ color: `oklch(0.97 0.01 280 / ${config.opacity / 100})` }}>
+        {/* Glass glare reflection */}
+        <div className="absolute inset-0 pointer-events-none" style={{
+          background: `linear-gradient(180deg, ${config.accentColor}15 0%, transparent 40%, transparent 60%, ${config.accentColor}04 100%)`,
+          borderRadius: config.borderRadius || 20,
+        }} />
+        {/* Top edge highlight */}
+        <div className="absolute top-0 left-[10%] right-[10%] h-px" style={{
+          background: `linear-gradient(90deg, transparent, ${config.accentColor}18, transparent)`,
+        }} />
+        <span className="tracking-tight font-light leading-none relative z-10" style={{ color: `oklch(0.97 0.01 260 / ${config.opacity / 100})` }}>
           <span className="text-[1em]">
             <AnimatedDigit value={padHours} intensity={i} />
-            <span className="mx-1 opacity-20" style={{ fontWeight: 100 }}>:</span>
+            <span className="mx-1 opacity-15" style={{ fontWeight: 100 }}>:</span>
             <AnimatedDigit value={minutes.toString().padStart(2, '0')} intensity={i} />
             {config.showSeconds && (
               <><span className="mx-0.5 text-[0.35em] align-middle opacity-10">:</span><span className="text-[0.4em] align-middle opacity-40"><AnimatedDigit value={seconds.toString().padStart(2, '0')} intensity={i} /></span></>
             )}
           </span>
         </span>
-        {config.hour12 && <span className="text-[0.2em] font-medium tracking-wider opacity-30">{ampm}</span>}
+        {config.hour12 && <span className="text-[0.2em] font-medium tracking-wider opacity-25 relative z-10">{ampm}</span>}
       </div>
     </div>
   );
@@ -264,18 +273,25 @@ function Flip({ hours, minutes, seconds, ampm, config, padHours }: DigitalClockP
 /* ── LO-FI ───────────────────────────────────── */
 function Lofi({ hours, minutes, seconds, ampm, config, padHours }: DigitalClockProps & { padHours: string }) {
   const i = getAnimationIntensity(config.animationIntensity);
-  const vinylColors = [config.accentColor, `${config.accentColor}66`, `${config.accentColor}33`, `${config.accentColor}11`];
+  const warmColor = `oklch(0.92 0.04 70 / ${config.opacity / 100})`;
   return (
     <div className="flex flex-col items-center select-none gap-2" style={{ fontFamily: config.fontFamily }}>
       <div className="relative px-5 py-3 overflow-hidden" style={{
-        background: `linear-gradient(145deg, ${config.accentColor}12, ${config.accentColor}06)`,
+        background: `linear-gradient(145deg, ${config.accentColor}18, ${config.accentColor}08)`,
         borderRadius: config.borderRadius || 16,
-        border: `1px solid ${config.accentColor}15`,
-        boxShadow: `0 4px 24px ${config.accentColor}11`,
+        border: `1px solid ${config.accentColor}20`,
+        boxShadow: `0 4px 24px ${config.accentColor}15, inset 0 0 60px ${config.accentColor}06`,
       }}>
-        <div className="absolute -right-4 -top-4 w-16 h-16 rounded-full opacity-[0.04]" style={{ background: `radial-gradient(circle, ${config.accentColor}, transparent)` }} />
-        <div className="flex items-baseline justify-center font-light leading-none tracking-tight" style={{ color: `oklch(0.95 0.02 80 / ${config.opacity / 100})` }}>
-          <span className="text-[1em]">
+        {/* Vinyl record decoration */}
+        <div className="absolute -right-6 -top-6 w-24 h-24 rounded-full" style={{
+          background: `radial-gradient(circle, ${config.accentColor}22 10%, ${config.accentColor}11 40%, transparent 70%)`,
+          filter: 'blur(2px)',
+        }} />
+        <div className="absolute -left-2 bottom-0 w-20 h-px" style={{
+          background: `linear-gradient(90deg, transparent, ${config.accentColor}08, transparent)`,
+        }} />
+        <div className="flex items-baseline justify-center font-light leading-none tracking-tight" style={{ color: warmColor }}>
+          <span className="text-[1em] drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]">
             <AnimatedDigit value={padHours} intensity={i} />
             <span className="mx-1 opacity-25">:</span>
             <AnimatedDigit value={minutes.toString().padStart(2, '0')} intensity={i} />

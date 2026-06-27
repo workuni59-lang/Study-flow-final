@@ -31,7 +31,7 @@ const TIER_CONFIG = {
   },
 };
 
-const QuestCard = ({ quest, progress, index }: { quest: GameQuest; progress: number; index: number }) => {
+const QuestCard = ({ quest, progress, index }: { key?: string; quest: GameQuest; progress: number; index: number }) => {
   const percentage = Math.min(100, (progress / quest.goal) * 100);
   const completed = progress >= quest.goal;
   const cfg = TIER_CONFIG[quest.tier];

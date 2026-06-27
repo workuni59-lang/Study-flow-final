@@ -177,7 +177,7 @@ export default function AnalyticsHeatmap({ userStats }: Props) {
           <div>
             <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest mb-1">Session Density</p>
             <p className="text-2xl font-semibold text-white tabular-nums">
-              {Math.max(0, ...Object.values(totalByHour))}
+              {Math.max(0, ...Object.values(totalByHour) as number[])}
             </p>
             <p className="text-xs text-white/30">max sessions in one hour</p>
           </div>

@@ -75,7 +75,8 @@ export const StudyTimer = ({ onTick, compact, variant = 'card', onToggleFullscre
   const { 
     themeConfig, setThemeConfig, completeFocusSession, logSession, 
     userStats, gameLevel, triggerConfetti, setShowPremiumModal,
-    tasks, selectedTaskId, setSelectedTaskId
+    tasks, selectedTaskId, setSelectedTaskId,
+    setThemeCustomized
   } = useStudy();
   const { setFocusSession } = useFocus();
   const { mode: navMode, activePanel, timerId: navTimerId, themeTab: navThemeTab } = useNavigationContext();
@@ -172,6 +173,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card', onToggleFullscre
     reader.onload = (ev) => {
       const dataUrl = ev.target?.result as string;
       setThemeConfig({ ...themeConfig, wallpaper: 'custom', customWallpaperUrl: dataUrl });
+      setThemeCustomized(true);
     };
     reader.readAsDataURL(file);
     e.target.value = '';
@@ -464,6 +466,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card', onToggleFullscre
     if (gameLevel < levelReq) return;
     if (type === 'atm') setThemeConfig({ ...themeConfig, atmosphere: id });
     else setThemeConfig({ ...themeConfig, wallpaper: id });
+    setThemeCustomized(true);
   };
 
   const resetCountUp = () => {
@@ -624,7 +627,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card', onToggleFullscre
     <motion.div key="atm" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.15 }} className="pt-1">
       <div className="flex gap-2 flex-wrap justify-center">
         {ATMOSPHERES.map(atm => (
-          <button key={atm.id} onClick={() => { if(atm.isPremium && !userStats.isPremium) setShowPremiumModal(true); else setThemeConfig({...themeConfig, atmosphere: atm.id}); }}
+          <button key={atm.id} onClick={() => { if(atm.isPremium && !userStats.isPremium) setShowPremiumModal(true); else { setThemeConfig({...themeConfig, atmosphere: atm.id}); setThemeCustomized(true); } }}
             className={`w-7 h-7 rounded-full ${atm.color} border-2 transition-all relative flex items-center justify-center ${themeConfig.atmosphere === atm.id ? 'border-white scale-110 shadow-xl' : 'border-transparent opacity-40 hover:opacity-80'}`}>
             {atm.isPremium && !userStats.isPremium ? <Crown className="w-2.5 h-2.5 text-white" /> : null}
           </button>
@@ -638,7 +641,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card', onToggleFullscre
       {THEME_PRESETS.map(preset => {
         const isActive = themeConfig.atmosphere === preset.atmosphere && themeConfig.wallpaper === preset.wallpaper;
         return (
-          <button key={preset.id} onClick={() => setThemeConfig({ ...themeConfig, atmosphere: preset.atmosphere, wallpaper: preset.wallpaper, brightness: preset.brightness, saturation: preset.saturation })}
+          <button key={preset.id} onClick={() => { setThemeConfig({ ...themeConfig, atmosphere: preset.atmosphere, wallpaper: preset.wallpaper, brightness: preset.brightness, saturation: preset.saturation }); setThemeCustomized(true); }}
             className={`w-full p-3 rounded-xl flex items-center gap-3 transition-all ${isActive ? 'bg-brand/20 text-white ring-1 ring-brand/30' : 'bg-black/15 backdrop-blur-sm border border-white/10 text-white/50 hover:bg-black/25 hover:text-white/80'}`}>
             <span className="text-lg">{preset.icon}</span>
             <div className="flex-1 text-left">
@@ -660,7 +663,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card', onToggleFullscre
           {WALLPAPERS.filter(w => w.category === 'Moods').map(w => {
             const selected = themeConfig.wallpaper === w.id;
             return (
-              <button key={w.id} onClick={() => { if(w.isPremium && !userStats.isPremium) setShowPremiumModal(true); else setThemeConfig({...themeConfig, wallpaper: w.id}); }}
+              <button key={w.id} onClick={() => { if(w.isPremium && !userStats.isPremium) setShowPremiumModal(true); else { setThemeConfig({...themeConfig, wallpaper: w.id}); setThemeCustomized(true); } }}
                 className={`relative aspect-square rounded-xl transition-all active:scale-90 ${selected ? 'ring-2 ring-white ring-offset-1 ring-offset-[#0f0f1f]' : 'ring-1 ring-white/[0.06] hover:ring-white/25'}`}
                 style={{ background: MOOD_GRADIENTS[w.id] }} title={w.name}>
                 {selected && <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-xl"><Check className="w-4 h-4 text-white drop-shadow-md" /></div>}
@@ -676,7 +679,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card', onToggleFullscre
           {WALLPAPERS.filter(w => w.type === 'animated' && w.category === 'Abstract').map(w => {
             const selected = themeConfig.wallpaper === w.id;
             return (
-              <button key={w.id} onClick={() => { if(w.isPremium && !userStats.isPremium) setShowPremiumModal(true); else setThemeConfig({...themeConfig, wallpaper: w.id}); }}
+              <button key={w.id} onClick={() => { if(w.isPremium && !userStats.isPremium) setShowPremiumModal(true); else { setThemeConfig({...themeConfig, wallpaper: w.id}); setThemeCustomized(true); } }}
                 className={`px-3 py-2 rounded-lg text-[9px] font-semibold uppercase tracking-wider transition-all ${selected ? 'bg-white/15 text-white ring-1 ring-white/30' : 'bg-black/15 border border-white/10 text-white/50 hover:bg-black/25 hover:text-white/80'}`}>
                 {w.name}
               </button>
@@ -693,7 +696,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card', onToggleFullscre
               <div className="text-[9px] font-bold uppercase tracking-wider text-white/40 mb-2">{cat}</div>
               <div className="grid grid-cols-3 gap-2">
                 {catWalls.map(w => (
-                  <button key={w.id} onClick={() => { if(w.isPremium && !userStats.isPremium) setShowPremiumModal(true); else setThemeConfig({...themeConfig, wallpaper: w.id}); }}
+                  <button key={w.id} onClick={() => { if(w.isPremium && !userStats.isPremium) setShowPremiumModal(true); else { setThemeConfig({...themeConfig, wallpaper: w.id}); setThemeCustomized(true); } }}
                     className={`relative aspect-[4/3] rounded-xl overflow-hidden transition-all active:scale-90 ${themeConfig.wallpaper === w.id ? 'ring-2 ring-white ring-offset-1 ring-offset-[#0f0f1f]' : 'ring-1 ring-white/[0.06] hover:ring-white/25'}`}
                     style={{ backgroundImage: `url(${w.url})`, backgroundSize: 'cover', backgroundPosition: 'center' }} title={w.name}>
                     {themeConfig.wallpaper === w.id && <div className="absolute inset-0 flex items-center justify-center bg-black/20"><Check className="w-4 h-4 text-white drop-shadow-md" /></div>}
@@ -710,7 +713,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card', onToggleFullscre
       })()}
       <div>
         <div className="text-[9px] font-bold uppercase tracking-wider text-white/40 mb-2">Custom</div>
-        <button onClick={() => { if(!userStats.isPremium) setShowPremiumModal(true); else setThemeConfig({...themeConfig, wallpaper: 'custom'}); }}
+        <button onClick={() => { if(!userStats.isPremium) setShowPremiumModal(true); else { setThemeConfig({...themeConfig, wallpaper: 'custom'}); setThemeCustomized(true); } }}
           className={`w-full aspect-[4/1] rounded-xl relative overflow-hidden transition-all ${themeConfig.wallpaper === 'custom' ? 'ring-2 ring-brand' : 'ring-1 ring-white/[0.06] hover:ring-white/25'}`}>
           {themeConfig.customWallpaperUrl && !customImgError ? (
             <img src={themeConfig.customWallpaperUrl} alt="Custom" className="absolute inset-0 w-full h-full object-cover" loading="lazy" onError={() => setCustomImgError(true)} />

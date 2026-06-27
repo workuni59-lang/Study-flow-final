@@ -40,6 +40,7 @@ const STORAGE_KEYS = {
   GAME_SHOP: 'sf_game_shop',
   GAME_SESSIONS_TODAY: 'sf_game_sessions_today',
   GAME_SESSIONS_DATE: 'sf_game_sessions_date',
+  THEME_CUSTOMIZED: 'study_flow_theme_customized',
   // Timer custom durations
   CUSTOM_DURATIONS: 'study_flow_custom_durations',
   // Flow mode session log (for adaptive duration)
@@ -81,6 +82,8 @@ export const storage = {
   // --- Themes ---
   saveThemeConfig: (config: any) => safeSet(STORAGE_KEYS.THEME_CONFIG, config),
   getThemeConfig: (): any | null => safeGet(STORAGE_KEYS.THEME_CONFIG),
+  saveThemeCustomized: (val: boolean) => safeSet(STORAGE_KEYS.THEME_CUSTOMIZED, val),
+  loadThemeCustomized: (): boolean => safeGet(STORAGE_KEYS.THEME_CUSTOMIZED) ?? false,
 
   // --- Subjects ---
   saveSubjects: (subjects: any[]) => safeSet(STORAGE_KEYS.SUBJECTS, subjects.map(s => ({ ...s, updated_at: s.updated_at ?? stamp() }))),

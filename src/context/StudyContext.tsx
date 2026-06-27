@@ -92,6 +92,8 @@ interface StudyContextType {
   confettiActive: boolean;
   panicModeActive: boolean;
   setThemeConfig: (config: ThemeConfig) => void;
+  themeCustomized: boolean;
+  setThemeCustomized: (val: boolean) => void;
   addSubject: (name: string, color?: string, initialTopics?: string[]) => string;
   deleteSubject: (id: string) => void;
   addTopic: (subjectId: string, title: string) => void;
@@ -162,8 +164,8 @@ const INITIAL_STATS: UserStats = {
 };
 
 const DEFAULT_THEME: ThemeConfig = {
-  atmosphere: 'indigo',
-  wallpaper: 'mesh',
+  atmosphere: 'amber',
+  wallpaper: 'warm-latte',
   blur: 0,
   brightness: 100,
   saturation: 100,
@@ -187,6 +189,10 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   const [themeConfig, setThemeConfig] = useState<ThemeConfig>(() => {
     const saved = storage.getThemeConfig();
     return { ...DEFAULT_THEME, ...saved };
+  });
+  const [themeCustomized, setThemeCustomized] = useState(() => {
+    const saved = storage.getThemeConfig();
+    return saved !== null;
   });
 
   const [userStats, setUserStats] = useState<UserStats>(() => {
@@ -315,13 +321,27 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => { storage.saveSubjects(subjects); }, [subjects]);
   useEffect(() => { storage.saveTasks(tasks); }, [tasks]);
+
+  // Track URL path to detect focus mode for default theme override
+  const [currentPath, setCurrentPath] = useState(window.location.pathname);
+  useEffect(() => {
+    const handleLocation = () => setCurrentPath(window.location.pathname);
+    window.addEventListener('popstate', handleLocation);
+    return () => window.removeEventListener('popstate', handleLocation);
+  }, []);
+
   useEffect(() => {
     storage.saveThemeConfig(themeConfig);
-    document.documentElement.setAttribute('data-atmosphere', themeConfig.atmosphere);
-    document.documentElement.setAttribute('data-wallpaper', themeConfig.wallpaper);
+    const isFocus = currentPath.startsWith('/focus');
+    const effectiveAtmosphere = !themeCustomized && isFocus ? 'indigo' : themeConfig.atmosphere;
+    const effectiveWallpaper = !themeCustomized && isFocus ? 'mesh' : themeConfig.wallpaper;
+    document.documentElement.setAttribute('data-atmosphere', effectiveAtmosphere);
+    document.documentElement.setAttribute('data-wallpaper', effectiveWallpaper);
     document.documentElement.setAttribute('data-clear-mode', String(themeConfig.clearMode));
     document.documentElement.style.setProperty('--scale-factor', String(themeConfig.scaleFactor));
-  }, [themeConfig]);
+  }, [themeConfig, themeCustomized, currentPath]);
+
+  useEffect(() => { storage.saveThemeCustomized(themeCustomized); }, [themeCustomized]);
   
   useEffect(() => { storage.saveUserStats(userStats); }, [userStats]);
   useEffect(() => { storage.saveUnlockedBadges(unlockedBadges); }, [unlockedBadges]);
@@ -963,7 +983,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   // Optimization: Memoize the Context Value
   const contextValue = useMemo(() => ({
     accessToken, subjects, tasks, quests, themeConfig, userStats, unlockedBadges, activeNotification,
-    confettiActive, panicModeActive, setThemeConfig, addSubject, deleteSubject, addTopic,
+    confettiActive, panicModeActive, themeCustomized, setThemeCustomized, setThemeConfig, addSubject, deleteSubject, addTopic,
     updateTopicMastery, deleteTopic, addTask, toggleTask, deleteTask, updateTask, recalibrateTasks,
     setTasks, earnXp, completeFocusSession, logSession, closeNotification, syncPremiumStatus, triggerConfetti, resetStreak, setPanicMode,
     showPremiumModal, setShowPremiumModal,
@@ -978,7 +998,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     progression, progressionBadges,
   }), [
     accessToken, subjects, tasks, quests, themeConfig, userStats, unlockedBadges, activeNotification,
-    confettiActive, panicModeActive, showPremiumModal,
+    confettiActive, panicModeActive, themeCustomized, setThemeCustomized, showPremiumModal,
     activeTracks, masterVolume, toggleTrack, setTrackVolume, stopAllTracks, setMasterVolume,
     selectedTaskId,
     // Gamification v2 deps

@@ -159,16 +159,16 @@ export const WALLPAPERS: Wallpaper[] = [
 
   // ── SKY & WEATHER ──
   { id: 'desert', name: 'Golden Sands', isPremium: true, type: 'image', category: 'Sky & Weather', url: 'https://images.unsplash.com/photo-1473580044384-7ba9967e16a0?auto=format&fit=crop&w=2000&q=80', brightness: 'light', environment: 'nature' },
-  { id: 'northern-lights', name: 'Northern Lights', isPremium: true, type: 'image', category: 'Sky & Weather', url: 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
+  { id: 'northern-lights', name: 'Northern Lights', isPremium: true, type: 'image', category: 'Sky & Weather', url: 'https://images.unsplash.com/photo-1430132594682-16e1185b17c5?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
   { id: 'stormy-sky', name: 'Stormy Sky', isPremium: true, type: 'image', category: 'Sky & Weather', url: 'https://images.unsplash.com/photo-1527482797697-8795b05a13fe?auto=format&fit=crop&w=2000&q=80', brightness: 'dark', environment: 'nature' },
-  { id: 'golden-sunset', name: 'Golden Sunset', isPremium: false, type: 'image', category: 'Sky & Weather', url: 'https://images.unsplash.com/photo-1495344517868-8ebaf0a2044a?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
+  { id: 'golden-sunset', name: 'Golden Sunset', isPremium: false, type: 'image', category: 'Sky & Weather', url: 'https://images.unsplash.com/photo-1749276873098-7e44bd10575c?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
   { id: 'clouds-above', name: 'Above the Clouds', isPremium: true, type: 'image', category: 'Sky & Weather', url: 'https://images.unsplash.com/photo-1534088568595-a066f410bcda?auto=format&fit=crop&w=2000&q=80', brightness: 'light', environment: 'nature' },
 
   // ── URBAN & ARCHITECTURE ──
   { id: 'tokyo', name: 'Tokyo Midnight', isPremium: true, type: 'image', category: 'Urban', url: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'urban' },
   { id: 'rainy-street', name: 'Rainy Seattle', isPremium: true, type: 'image', category: 'Urban', url: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=2000&q=80', brightness: 'dark', environment: 'urban' },
   { id: 'city-sunset', name: 'City Sunset', isPremium: true, type: 'image', category: 'Urban', url: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'urban' },
-  { id: 'night-city', name: 'Night City', isPremium: false, type: 'image', category: 'Urban', url: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=2000&q=80', brightness: 'dark', environment: 'urban' },
+  { id: 'night-city', name: 'Night City', isPremium: false, type: 'image', category: 'Urban', url: 'https://images.unsplash.com/photo-1662730738534-1ca761dfafcf?auto=format&fit=crop&w=2000&q=80', brightness: 'dark', environment: 'urban' },
   { id: 'bridge-lights', name: 'Bridge Lights', isPremium: true, type: 'image', category: 'Urban', url: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'urban' },
   { id: 'alley-rain', name: 'Alley in Rain', isPremium: true, type: 'image', category: 'Urban', url: 'https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=2000&q=80', brightness: 'dark', environment: 'urban' },
   { id: 'rooftop-night', name: 'Rooftop Night', isPremium: true, type: 'image', category: 'Urban', url: 'https://images.unsplash.com/photo-1518391846015-55a9cc003b25?auto=format&fit=crop&w=2000&q=80', brightness: 'dark', environment: 'urban' },
@@ -177,9 +177,9 @@ export const WALLPAPERS: Wallpaper[] = [
   { id: 'cafe', name: 'Rainy Cafe', isPremium: true, type: 'image', category: 'Cozy', url: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=2000&q=80', brightness: 'light', environment: 'interior' },
   { id: 'library', name: 'Old Library', isPremium: true, type: 'image', category: 'Cozy', url: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=2000&q=80', brightness: 'dark', environment: 'interior' },
   { id: 'cozy-room', name: 'Cozy Room', isPremium: false, type: 'image', category: 'Cozy', url: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=2000&q=80', brightness: 'light', environment: 'interior' },
-  { id: 'window-rain', name: 'Rainy Window', isPremium: true, type: 'image', category: 'Cozy', url: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=2000&q=80', brightness: 'dark', environment: 'interior' },
+  { id: 'window-rain', name: 'Rainy Window', isPremium: true, type: 'image', category: 'Cozy', url: 'https://images.unsplash.com/photo-1536267933728-f5cffe426327?auto=format&fit=crop&w=2000&q=80', brightness: 'dark', environment: 'interior' },
   { id: 'bookshelf', name: 'Bookshelf', isPremium: true, type: 'image', category: 'Cozy', url: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=2000&q=80', brightness: 'dark', environment: 'interior' },
-  { id: 'candlelight', name: 'Candlelight', isPremium: true, type: 'image', category: 'Cozy', url: 'https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=2000&q=80', brightness: 'dark', environment: 'interior' },
+  { id: 'candlelight', name: 'Candlelight', isPremium: true, type: 'image', category: 'Cozy', url: 'https://images.unsplash.com/photo-1726750226670-25e1e56ef39f?auto=format&fit=crop&w=2000&q=80', brightness: 'dark', environment: 'interior' },
 
   // ── SPACE & COSMIC ──
   { id: 'space-station', name: 'Orbit View', isPremium: true, type: 'image', category: 'Space', url: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=2000&q=80', brightness: 'light', environment: 'urban' },
@@ -190,25 +190,25 @@ export const WALLPAPERS: Wallpaper[] = [
   { id: 'planet-glow', name: 'Planet Glow', isPremium: true, type: 'image', category: 'Space', url: 'https://images.unsplash.com/photo-1614732414444-096e5f1122d5?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
 
   // ── ANIMALS ──
-  { id: 'wolf-mountain', name: 'Wolf on Mountain', isPremium: true, type: 'image', category: 'Animals', url: 'https://images.unsplash.com/photo-1518459031867-a89b944bffe4?auto=format&fit=crop&w=2000&q=80', brightness: 'dark', environment: 'nature' },
-  { id: 'owl-night', name: 'Owl at Night', isPremium: true, type: 'image', category: 'Animals', url: 'https://images.unsplash.com/photo-1543549790-8b5f4a028cfb?auto=format&fit=crop&w=2000&q=80', brightness: 'dark', environment: 'nature' },
-  { id: 'deer-forest', name: 'Deer in Forest', isPremium: false, type: 'image', category: 'Animals', url: 'https://images.unsplash.com/photo-1484406566174-9da000fda645?auto=format&fit=crop&w=2000&q=80', brightness: 'dark', environment: 'nature' },
+  { id: 'wolf-mountain', name: 'Wolf on Mountain', isPremium: true, type: 'image', category: 'Animals', url: 'https://images.unsplash.com/photo-1766314286734-f041d0585922?auto=format&fit=crop&w=2000&q=80', brightness: 'dark', environment: 'nature' },
+  { id: 'owl-night', name: 'Owl at Night', isPremium: true, type: 'image', category: 'Animals', url: 'https://images.unsplash.com/photo-1698873246095-2a6be6f1b5b8?auto=format&fit=crop&w=2000&q=80', brightness: 'dark', environment: 'nature' },
+  { id: 'deer-forest', name: 'Deer in Forest', isPremium: false, type: 'image', category: 'Animals', url: 'https://images.unsplash.com/photo-1761502186429-ecf63a1929f1?auto=format&fit=crop&w=2000&q=80', brightness: 'dark', environment: 'nature' },
   { id: 'whale-ocean', name: 'Whale Ocean', isPremium: true, type: 'image', category: 'Animals', url: 'https://images.unsplash.com/photo-1568430462989-44163eb1752f?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
-  { id: 'butterfly-field', name: 'Butterfly Field', isPremium: true, type: 'image', category: 'Animals', url: 'https://images.unsplash.com/photo-1452570053594-1b985d6ea890?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
+  { id: 'butterfly-field', name: 'Butterfly Field', isPremium: true, type: 'image', category: 'Animals', url: 'https://images.unsplash.com/photo-1635769291721-5ce8eecd11b9?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
 
   // ── MINIMAL & AESTHETIC ──
   { id: 'white-minimal', name: 'White Minimal', isPremium: false, type: 'image', category: 'Minimal', url: 'https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?auto=format&fit=crop&w=2000&q=80', brightness: 'light', environment: 'interior' },
   { id: 'paper-texture', name: 'Paper Texture', isPremium: true, type: 'image', category: 'Minimal', url: 'https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=2000&q=80', brightness: 'light', environment: 'interior' },
-  { id: 'marble', name: 'Marble Surface', isPremium: true, type: 'image', category: 'Minimal', url: 'https://images.unsplash.com/photo-1561214078-f3247647fc5e?auto=format&fit=crop&w=2000&q=80', brightness: 'light', environment: 'interior' },
+  { id: 'marble', name: 'Marble Surface', isPremium: true, type: 'image', category: 'Minimal', url: 'https://images.unsplash.com/photo-1694378061101-bf38a2fcc596?auto=format&fit=crop&w=2000&q=80', brightness: 'light', environment: 'interior' },
   { id: 'gradient-dusk', name: 'Gradient Dusk', isPremium: true, type: 'image', category: 'Minimal', url: 'https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'abstract' },
   { id: 'linen-texture', name: 'Linen Texture', isPremium: true, type: 'image', category: 'Minimal', url: 'https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?auto=format&fit=crop&w=2000&q=80', brightness: 'light', environment: 'interior' },
 
   // ── FLOWERS & PLANTS ──
   { id: 'lavender-fields', name: 'Lavender Fields', isPremium: true, type: 'image', category: 'Flowers', url: 'https://images.unsplash.com/photo-1499002238440-d264edd596ec?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
-  { id: 'cherry-blossom', name: 'Cherry Blossom', isPremium: true, type: 'image', category: 'Flowers', url: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
-  { id: 'sunflower-field', name: 'Sunflower Field', isPremium: true, type: 'image', category: 'Flowers', url: 'https://images.unsplash.com/photo-1597848212624-a19eb35e2651?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
-  { id: 'rose-garden', name: 'Rose Garden', isPremium: true, type: 'image', category: 'Flowers', url: 'https://images.unsplash.com/photo-1455659817273-f96807779a8a?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
-  { id: 'tulip-field', name: 'Tulip Field', isPremium: true, type: 'image', category: 'Flowers', url: 'https://images.unsplash.com/photo-1520763185298-1b434c919102?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
+  { id: 'cherry-blossom', name: 'Cherry Blossom', isPremium: true, type: 'image', category: 'Flowers', url: 'https://images.unsplash.com/photo-1740652646168-0d1557a6e8c4?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
+  { id: 'sunflower-field', name: 'Sunflower Field', isPremium: true, type: 'image', category: 'Flowers', url: 'https://images.unsplash.com/photo-1566923846852-0db2f110f6dd?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
+  { id: 'rose-garden', name: 'Rose Garden', isPremium: true, type: 'image', category: 'Flowers', url: 'https://images.unsplash.com/photo-1765124048840-1cdccf9009a8?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
+  { id: 'tulip-field', name: 'Tulip Field', isPremium: true, type: 'image', category: 'Flowers', url: 'https://images.unsplash.com/photo-1749694562670-55caba958ba7?auto=format&fit=crop&w=2000&q=80', brightness: 'vibrant', environment: 'nature' },
 
   // ── MOODS (CSS Gradient — animated/static) ──
   // Free

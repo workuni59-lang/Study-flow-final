@@ -197,6 +197,7 @@ export const ProfileView = ({ userId, onEditProfile }: ProfileViewProps) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
 
   const isOwnProfile = authUser?.uid === userId;
 
@@ -204,6 +205,7 @@ export const ProfileView = ({ userId, onEditProfile }: ProfileViewProps) => {
     let cancelled = false;
     setLoading(true);
     setError(null);
+    setAvatarError(false);
 
     const lbPromise = supabase
       ? supabase.from('leaderboard_entries').select('daily_focus_seconds, weekly_focus_seconds, monthly_focus_seconds, all_time_focus_seconds').eq('user_id', userId).single()
@@ -346,9 +348,9 @@ export const ProfileView = ({ userId, onEditProfile }: ProfileViewProps) => {
                       : `0 0 0 3px ${rankIdentity.color}`,
                   }}
                 >
-                  {profile.avatar_url ? (
-                    <img src={profile.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
-                  ) : initial}
+                  {profile.avatar_url && !avatarError ? (
+                    <img src={profile.avatar_url} alt="" onError={() => setAvatarError(true)} className="w-full h-full rounded-full object-cover" />
+                  ) : <span>{initial}</span>}
                 </div>
                 {/* Rank icon badge */}
                 <div
@@ -413,6 +415,11 @@ export const ProfileView = ({ userId, onEditProfile }: ProfileViewProps) => {
                 {profile.bio && (
                   <p className="text-sm text-white/70 mt-3 leading-relaxed max-w-prose italic drop-shadow-sm">
                     &ldquo;{profile.bio}&rdquo;
+                  </p>
+                )}
+                {profile.country && (
+                  <p className="text-[10px] text-white/50 mt-2 flex items-center gap-1">
+                    <span>📍</span> {profile.country}
                   </p>
                 )}
               </motion.div>

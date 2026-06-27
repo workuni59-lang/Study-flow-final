@@ -46,9 +46,9 @@ export const AUDIO_ASSETS: SoundAsset[] = [
   { id: 'office', name: 'Office', emoji: '🏢', category: 'Interior', layer: 'ambience', isPremium: true, baseVolume: 0.4, preload: false, url: `${OF}/2023/02/Office-ambience-sound-effect.mp3` },
   { id: 'room-fan', name: 'Room Fan', emoji: '🪭', category: 'Interior', layer: 'ambience', isPremium: true, baseVolume: 0.5, preload: false, url: `https://orangefreesounds.com/wp-content/uploads/2018/05/Fan-noises-for-sleeping.mp3` },
   { id: 'keyboard', name: 'Laptop Keyboard', emoji: '⌨️', category: 'Interior', layer: 'ambience', isPremium: true, baseVolume: 0.45, preload: false, url: `https://orangefreesounds.com/wp-content/uploads/2024/02/Keyboard-typing-sound-effect.mp3` },
-  { id: 'clock-ticking', name: 'Clock Ticking', emoji: '🕰️', category: 'Interior', layer: 'ambience', isPremium: true, baseVolume: 0.4, preload: false, url: `${OF}/2014/05/Ticking-clock-grandfather.mp3` },
+  { id: 'clock-ticking', name: 'Clock Ticking', emoji: '🕰️', category: 'Interior', layer: 'ambience', isPremium: true, baseVolume: 0.4, preload: false, url: `${OF}/2014/12/Ticking-clock.mp3` },
   { id: 'cat-purr', name: 'Cat Purr', emoji: '🐈', category: 'Interior', layer: 'ambience', isPremium: true, baseVolume: 0.6, preload: false, url: `${OF}/2021/09/Cat-purring-sound-effect.mp3` },
-  { id: 'japanese-library', name: 'Japanese Library', emoji: '📚', category: 'Interior', layer: 'ambience', isPremium: true, baseVolume: 0.35, preload: false, url: `${OF}/2020/09/Walking-through-city-park-ambience.mp3` },
+  { id: 'japanese-library', name: 'Japanese Library', emoji: '📚', category: 'Interior', layer: 'ambience', isPremium: true, baseVolume: 0.35, preload: false, url: `${OF}/2018/05/Ambience-museum-sound-effect.mp3` },
   { id: 'home-kitchen', name: 'Home Kitchen', emoji: '🍴', category: 'Interior', layer: 'ambience', isPremium: true, baseVolume: 0.45, preload: false, url: `${OF}/2020/03/Peaceful-night-ambient-in-kitchen-sound-effect.mp3` },
   { id: 'air-conditioner', name: 'Air Conditioner', emoji: '❄️', category: 'Interior', layer: 'ambience', isPremium: true, baseVolume: 0.4, preload: false, url: `${OF}/2019/02/Factory-air-conditioner-white-noise.mp3` },
 
@@ -59,7 +59,7 @@ export const AUDIO_ASSETS: SoundAsset[] = [
 
 
   // ── Niche ────────────────────────────────────────────────────
-  { id: 'exam-hall', name: 'Exam Hall', emoji: '🙇', category: 'Niche', layer: 'ambience', isPremium: true, baseVolume: 0.2, preload: false, url: `https://www.orangefreesounds.com/wp-content/uploads/2021/08/Bank-office-ambience.mp3` },
+  { id: 'exam-hall', name: 'Exam Hall', emoji: '🙇', category: 'Niche', layer: 'ambience', isPremium: true, baseVolume: 0.2, preload: false, url: `${OF}/2026/06/Quiet-concert-hall-ambience-sound-effect.mp3` },
   { id: 'bowling-alley', name: 'Bowling Alley', emoji: '🎳', category: 'Niche', layer: 'ambience', isPremium: true, baseVolume: 0.5, preload: false, url: `https://orangefreesounds.com/wp-content/uploads/2023/06/Indoor-playground-for-kids-ambience-sound-effect.mp3` },
   { id: 'record-player', name: 'Record Player Static', emoji: '📀', category: 'Niche', layer: 'ambience', isPremium: true, baseVolume: 0.4, preload: false, url: `${OF}/2014/08/Vinyl-noise-sound-effect.mp3` },
   { id: 'outer-space', name: 'Outer Space Rumble', emoji: '🪐', category: 'Niche', layer: 'ambience', isPremium: true, baseVolume: 0.5, preload: false, url: `https://orangefreesounds.com/wp-content/uploads/2022/09/Outer-space-sound-effect.mp3` },

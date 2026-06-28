@@ -25,7 +25,7 @@ import { Confetti } from '../notifications/Confetti';
 import { LevelUpModal } from '../modals/LevelUpModal';
 import { PanicModeUI } from '../dashboard/PanicModeUI';
 import { WallpaperEngine } from '../navigation/WallpaperEngine';
-import { CustomCursor } from './CustomCursor';
+
 import { ScrollProgress } from './ScrollProgress';
 import { storage } from '../../services/storage';
 import { DashboardSkeleton, ContentSkeleton } from '../ui/skeleton';
@@ -125,7 +125,6 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
 
   return (
     <div className="min-h-screen relative transition-colors duration-1000 noise-overlay" style={{ backgroundColor: section === 'dashboard' ? 'transparent' : '#0f0f1a' }}>
-      <CustomCursor />
       <ScrollProgress />
       {!skipWallpaper && <WallpaperEngine visible={section === 'dashboard'} />}
 

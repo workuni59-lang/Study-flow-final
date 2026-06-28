@@ -27,7 +27,7 @@ import { Confetti } from '../notifications/Confetti';
 import { LevelUpModal } from '../modals/LevelUpModal';
 import { PanicModeUI } from '../dashboard/PanicModeUI';
 import { WallpaperEngine } from '../navigation/WallpaperEngine';
-import { CustomCursor } from './CustomCursor';
+
 import { ScrollProgress } from './ScrollProgress';
 import { storage } from '../../services/storage';
 
@@ -179,7 +179,6 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
 
   return (
     <div className={`min-h-screen transition-colors duration-1000 noise-overlay ${section === 'dashboard' ? '' : (baseBg[themeConfig.atmosphere] || baseBg.indigo)} relative overflow-hidden`} style={{ backgroundAttachment: 'scroll' }}>
-      <CustomCursor />
       <ScrollProgress />
       <style>{skeletonKeyframes}</style>
       

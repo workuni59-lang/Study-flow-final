@@ -54,7 +54,7 @@ export async function getPublicProfile(userId: string): Promise<ProfileWithStats
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('id, display_name, avatar_url, bio, country, created_at, is_premium')
+    .select('id, display_name, avatar_url, bio, created_at, is_premium')
     .eq('id', userId)
     .single();
 

@@ -1,5 +1,5 @@
 import { useState, useEffect, lazy, Suspense, useCallback } from 'react';
-import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { MotionConfig } from 'motion/react';
 import { StudyProvider, FocusProvider, useStudy } from './context/StudyContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -40,17 +40,6 @@ const AppContent = () => {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const handleOpenAuth = () => setAuthModalOpen(true);
   const handleStartDemo = () => activateDemo();
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  // Strip /app prefix in production (SPA is served from /app/)
-  useEffect(() => {
-    const path = location.pathname;
-    if (path === '/app' || path === '/app/' || path.startsWith('/app/')) {
-      const rest = path.replace(/^\/app/, '') || '/';
-      navigate(rest + location.search, { replace: true });
-    }
-  }, []);
 
   // Always apply dark mode (theming handled by atmospheres + wallpapers)
   useEffect(() => {

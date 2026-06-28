@@ -31,7 +31,26 @@ export interface ProfileWithStats {
 
 export async function getPublicProfile(userId: string): Promise<ProfileWithStats | null> {
   if (!supabase) return null;
-  if (userId === 'demo-user-001') return null;
+  if (userId === 'demo-user-001') {
+    return {
+      profile: {
+        id: 'demo-user-001',
+        display_name: 'Demo Student',
+        avatar_url: null,
+        bio: 'Exploring StudyFlow in demo mode. Sign up to save your progress!',
+        country: null,
+        created_at: new Date().toISOString(),
+        is_premium: false,
+      },
+      stats: {
+        total_focus_seconds: 0, total_sessions: 0,
+        current_streak: 0, longest_streak: 0,
+        game_level: 1, game_xp: 0, badges_earned: [],
+      },
+      leaderboardRank: { daily: 0, weekly: 0, monthly: 0, allTime: 0 },
+      dailyActivity: {},
+    };
+  }
 
   const { data: profile } = await supabase
     .from('profiles')

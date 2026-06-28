@@ -13,6 +13,7 @@
 /tasks* /app/index.html 200
 /themes* /app/index.html 200
 /ambience* /app/index.html 200
+/profile* /app/index.html 200
 /reset-password* /app/index.html 200
 /privacy* /app/index.html 200
 /terms* /app/index.html 200

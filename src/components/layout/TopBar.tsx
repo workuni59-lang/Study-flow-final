@@ -78,7 +78,7 @@ export const TopBar = memo(({ mode, onModeChange, onMenuOpen, onOpenAuth, onLead
             <LayoutDashboard className="w-3 h-3" />
             <span className="max-lg:hidden">Home</span>
           </NavLink>
-          <NavLink to={ROUTES.FOCUS}
+          <NavLink data-tour-target="focus" to={ROUTES.FOCUS}
             className={({ isActive }) => `flex items-center gap-1.5 px-3 py-1.5 rounded-[7px] text-[9px] font-semibold uppercase tracking-wider transition-all ${
               isActive
                 ? 'bg-white/10 text-white shadow-xs'
@@ -98,7 +98,7 @@ export const TopBar = memo(({ mode, onModeChange, onMenuOpen, onOpenAuth, onLead
       >
         <SyncStatus />
         {onLeaderboardOpen && (
-          <button onClick={onLeaderboardOpen} title="Leaderboard"
+          <button data-tour-target="leaderboard" onClick={onLeaderboardOpen} title="Leaderboard"
             style={{
               height: '32px',
               padding: '0 10px',

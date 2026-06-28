@@ -105,7 +105,7 @@ export const HomeView = memo(({ onNotepadOpen, onQuestsOpen, onMusicOpen, onProg
       </button>
 
       {/* Central content */}
-      <div className="relative z-10 flex flex-col items-center w-full max-w-sm animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+      <div data-tour-target="dashboard" className="relative z-10 flex flex-col items-center w-full max-w-sm animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
         {/* Greeting */}
         {themeConfig.showGreeting !== false && (
           <p className="text-white/60 text-sm tracking-wide mb-2">
@@ -206,7 +206,7 @@ export const HomeView = memo(({ onNotepadOpen, onQuestsOpen, onMusicOpen, onProg
             </button>
           )}
           {onMusicOpen && (
-            <button onClick={onMusicOpen} className="btn-ghost !p-2.5 !rounded-full">
+            <button data-tour-target="customize" onClick={onMusicOpen} className="btn-ghost !p-2.5 !rounded-full">
               <Music size={16} />
             </button>
           )}

@@ -9,6 +9,7 @@ import { BadgeSvg, type BadgeTier } from '../progression/BadgeSvg';
 import { getDailyQuote } from '../../lib/quotes';
 import { getGreeting } from '../../lib/greetings';
 import ClockRenderer from '../clock/ClockRenderer';
+import { DemoSignUpNudge } from '../notifications/DemoSignUpNudge';
 
 const SUBJECT_ACCENTS: Record<string, { bg: string; icon: string; badge: string; dot: string }> = {
   indigo:  { bg: 'rgba(99,102,241,0.16)', icon: '#a5b4fc', badge: 'rgba(99,102,241,0.2)', dot: '#6366f1' },
@@ -30,12 +31,13 @@ const formatTime = (s: number) => {
   return `${h}h ${m}m`;
 };
 
-export const HomeView = memo(({ onNotepadOpen, onQuestsOpen, onMusicOpen, onProgressionOpen, onSubjectsOpen, menuOpen }: {
+export const HomeView = memo(({ onNotepadOpen, onQuestsOpen, onMusicOpen, onProgressionOpen, onSubjectsOpen, onOpenAuth, menuOpen }: {
   onNotepadOpen?: () => void;
   onQuestsOpen?: () => void;
   onMusicOpen?: () => void;
   onProgressionOpen?: () => void;
   onSubjectsOpen?: (subjectId?: string) => void;
+  onOpenAuth?: () => void;
   menuOpen?: boolean;
 }) => {
   const { user } = useAuth();
@@ -106,26 +108,24 @@ export const HomeView = memo(({ onNotepadOpen, onQuestsOpen, onMusicOpen, onProg
 
       {/* Central content */}
       <div data-tour-target="dashboard" className="relative z-10 flex flex-col items-center w-full max-w-sm animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-        {/* Greeting */}
-        {themeConfig.showGreeting !== false && (
-          <p className="text-white/60 text-sm tracking-wide mb-2">
-            {getGreeting(user?.displayName?.split(' ')[0])}
-          </p>
-        )}
-
-        {/* Quote (moved from top-right) */}
-        {themeConfig.showQuote !== false && (
-          <p className="font-serif italic text-white/80 text-lg text-center max-w-[480px] mb-6 leading-relaxed">
-            &ldquo;{quote.text}&rdquo;
-          </p>
-        )}
-
-        {/* Clock */}
-        {themeConfig.showClock !== false && (
-          <div className="mb-3">
-            <ClockRenderer time={time} focusState={focusSession} />
-          </div>
-        )}
+        {/* Greeting / Quote / Clock — grouped for tour */}
+        <div id="tour-clock-area" className="flex flex-col items-center w-full">
+          {themeConfig.showGreeting !== false && (
+            <p className="text-white/60 text-sm tracking-wide mb-2">
+              {getGreeting(user?.displayName?.split(' ')[0])}
+            </p>
+          )}
+          {themeConfig.showQuote !== false && (
+            <p className="font-serif italic text-white/80 text-lg text-center max-w-[480px] mb-6 leading-relaxed">
+              &ldquo;{quote.text}&rdquo;
+            </p>
+          )}
+          {themeConfig.showClock !== false && (
+            <div className="mb-3">
+              <ClockRenderer time={time} focusState={focusSession} />
+            </div>
+          )}
+        </div>
 
         {/* Focus time label + inline spotlight */}
         <p className={`text-[11px] ${t}/45 mb-4 flex items-center justify-center gap-1.5 flex-wrap`}>
@@ -153,6 +153,7 @@ export const HomeView = memo(({ onNotepadOpen, onQuestsOpen, onMusicOpen, onProg
 
         {/* Daily goal progress ring */}
         <motion.div
+          id="tour-daily-goal"
           className="mb-5 flex flex-col items-center"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -181,7 +182,7 @@ export const HomeView = memo(({ onNotepadOpen, onQuestsOpen, onMusicOpen, onProg
         </motion.div>
 
         {/* Stats row — ultra-light glass cards */}
-        <div className="flex gap-2 w-full max-w-xs">
+        <div id="tour-stats-bar" className="flex gap-2 w-full max-w-xs">
           {statCards.map(({ icon: Icon, value, label, color }) => (
             <div key={label} className={`flex-1 py-2.5 px-1 text-center rounded-xl ${panelBg} border ${panelBorder}`}>
               <Icon size={14} className="mx-auto mb-1" style={{ color }} />
@@ -190,6 +191,9 @@ export const HomeView = memo(({ onNotepadOpen, onQuestsOpen, onMusicOpen, onProg
             </div>
           ))}
         </div>
+
+        {/* Sign-in prompt for demo users */}
+        <DemoSignUpNudge onOpenAuth={onOpenAuth} />
       </div>
 
       {/* Bottom-left icon cluster */}
@@ -206,7 +210,7 @@ export const HomeView = memo(({ onNotepadOpen, onQuestsOpen, onMusicOpen, onProg
             </button>
           )}
           {onMusicOpen && (
-            <button data-tour-target="customize" onClick={onMusicOpen} className="btn-ghost !p-2.5 !rounded-full">
+            <button id="tour-customize-btn" data-tour-target="customize" onClick={onMusicOpen} className="btn-ghost !p-2.5 !rounded-full">
               <Music size={16} />
             </button>
           )}

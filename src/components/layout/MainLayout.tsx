@@ -19,12 +19,11 @@ import { NotesPanel } from '../panels/NotesPanel';
 
 import { TasksPanel } from '../panels/TasksPanel';
 import { PremiumModal } from '../modals/PremiumModal';
-import { DemoSignUpNudge } from '../notifications/DemoSignUpNudge';
 import { AchievementNotification } from '../notifications/AchievementNotification';
 import { Confetti } from '../notifications/Confetti';
 import { LevelUpModal } from '../modals/LevelUpModal';
 import { PanicModeUI } from '../dashboard/PanicModeUI';
-import { OnboardingTour } from '../onboarding/OnboardingTour';
+import { OnboardingTour, startTour } from '../onboarding/OnboardingTour';
 import { WallpaperEngine } from '../navigation/WallpaperEngine';
 
 import { ScrollProgress } from './ScrollProgress';
@@ -194,6 +193,7 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
               onOpenAuth={onOpenAuth}
               onLeaderboardOpen={handleLeaderboardOpen}
               onProfileOpen={user ? handleProfileOpen : undefined}
+              onStartTour={startTour}
             />
             )}
     
@@ -201,7 +201,7 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
             <main className="main-layout-content">
               {mode === 'home' && (
                 <Suspense fallback={<SimpleSpinner />}>
-                  <HomeViewLazy onNotepadOpen={handleNotepadOpen} onQuestsOpen={handleQuestsOpen} onMusicOpen={handleMusicOpen} onProgressionOpen={() => setSection('progression')} onSubjectsOpen={handleSubjectsOpen} menuOpen={menuOpen} />
+                  <HomeViewLazy onNotepadOpen={handleNotepadOpen} onQuestsOpen={handleQuestsOpen} onMusicOpen={handleMusicOpen} onProgressionOpen={() => setSection('progression')} onSubjectsOpen={handleSubjectsOpen} onOpenAuth={onOpenAuth} menuOpen={menuOpen} />
                 </Suspense>
               )}
               {mode === 'focus' && (
@@ -286,7 +286,6 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
       <Confetti active={confettiActive} />
       <LevelUpModal level={levelUpEvent ?? gameLevel} isOpen={showLevelUp} onClose={() => { setShowLevelUp(false); dismissLevelUp(); }} />
       <PremiumModal onOpenAuth={onOpenAuth} />
-      <DemoSignUpNudge onOpenAuth={onOpenAuth} />
       <PanicModeUI />
       <OnboardingTour />
 

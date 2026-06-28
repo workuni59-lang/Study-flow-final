@@ -21,12 +21,11 @@ import { DashboardSkeleton, ContentSkeleton } from '../ui/skeleton';
 
 import { TasksPanel } from '../panels/TasksPanel';
 import { PremiumModal } from '../modals/PremiumModal';
-import { DemoSignUpNudge } from '../notifications/DemoSignUpNudge';
 import { AchievementNotification } from '../notifications/AchievementNotification';
 import { Confetti } from '../notifications/Confetti';
 import { LevelUpModal } from '../modals/LevelUpModal';
 import { PanicModeUI } from '../dashboard/PanicModeUI';
-import { OnboardingTour } from '../onboarding/OnboardingTour';
+import { OnboardingTour, startTour } from '../onboarding/OnboardingTour';
 import { WallpaperEngine } from '../navigation/WallpaperEngine';
 
 import { ScrollProgress } from './ScrollProgress';
@@ -240,13 +239,14 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
               onOpenAuth={onOpenAuth}
               onLeaderboardOpen={handleLeaderboardOpen}
               onProfileOpen={user ? handleProfileOpen : undefined}
+              onStartTour={startTour}
             />
 
             {/* Main content */}
             <main>
               {mode === 'home' && (
                 <Suspense fallback={<MobileSkeleton />}>
-                  <HomeViewLazy onNotepadOpen={handleNotepadOpen} onSubjectsOpen={handleSubjectsOpen} menuOpen={menuOpen} />
+                  <HomeViewLazy onNotepadOpen={handleNotepadOpen} onSubjectsOpen={handleSubjectsOpen} onOpenAuth={onOpenAuth} menuOpen={menuOpen} />
                 </Suspense>
               )}
               {mode === 'focus' && (
@@ -435,7 +435,6 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
       <Confetti active={confettiActive} />
       <LevelUpModal level={levelUpEvent ?? gameLevel} isOpen={showLevelUp} onClose={() => { setShowLevelUp(false); dismissLevelUp(); }} />
       <PremiumModal onOpenAuth={onOpenAuth} />
-      <DemoSignUpNudge onOpenAuth={onOpenAuth} />
       <PanicModeUI />
       <OnboardingTour />
 

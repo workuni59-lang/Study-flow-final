@@ -362,3 +362,41 @@ button, [role="button"], a, input, select, textarea {
 [data-atmosphere="cyan"] { --theme-accent: #06b6d4; --theme-glow: rgba(6,182,212,0.15); }
 [data-atmosphere="pink"] { --theme-accent: #d946ef; --theme-glow: rgba(217,70,239,0.15); }
 [data-atmosphere="neon"] { --theme-accent: #a855f7; --theme-glow: rgba(168,85,247,0.2); }
+
+/* ─── Onboarding tour (driver.js) ─── */
+.driver-popover {
+  background: #1a1a2e !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  border-radius: 12px !important;
+  color: #fff !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
+}
+.driver-popover-title {
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  color: #fff !important;
+}
+.driver-popover-description {
+  font-size: 13px !important;
+  color: rgba(255,255,255,0.7) !important;
+}
+.driver-popover-footer button {
+  background: #6366f1 !important;
+  border-radius: 8px !important;
+  color: #fff !important;
+  border: none !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  padding: 6px 14px !important;
+}
+.driver-popover-footer .driver-popover-btn-disabled {
+  opacity: 0.4 !important;
+}
+.driver-popover-close-btn {
+  font-size: 14px !important;
+  color: rgba(255,255,255,0.4) !important;
+}
+.driver-popover-progress-text {
+  color: rgba(255,255,255,0.3) !important;
+  font-size: 11px !important;
+}

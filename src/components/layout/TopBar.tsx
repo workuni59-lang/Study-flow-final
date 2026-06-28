@@ -16,6 +16,7 @@ interface TopBarProps {
   onOpenAuth?: () => void;
   onLeaderboardOpen?: () => void;
   onProfileOpen?: () => void;
+  onStartTour?: () => void;
 }
 
 const HELP_LINKS = [
@@ -24,7 +25,7 @@ const HELP_LINKS = [
   { icon: '🎮', label: 'Join Discord', url: 'https://discord.gg/tUFvKERC' },
 ];
 
-export const TopBar = memo(({ mode, onModeChange, onMenuOpen, onOpenAuth, onLeaderboardOpen, onProfileOpen }: TopBarProps) => {
+export const TopBar = memo(({ mode, onModeChange, onMenuOpen, onOpenAuth, onLeaderboardOpen, onProfileOpen, onStartTour }: TopBarProps) => {
   const { user, isDemo: isDemoUser } = useAuth();
   const [helpOpen, setHelpOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -68,7 +69,7 @@ export const TopBar = memo(({ mode, onModeChange, onMenuOpen, onOpenAuth, onLead
         </Link>
         <div className="w-px h-4 bg-slate-200 dark:bg-white/10 mx-1 hidden lg:block" />
         <div className="max-[959px]:hidden flex gap-0.5 p-0.5 rounded-[10px] backdrop-blur-xl border border-white/[0.08] bg-black/20">
-          <NavLink to={ROUTES.HOME} end
+          <NavLink id="tour-home-tab" to={ROUTES.HOME} end
             className={({ isActive }) => `flex items-center gap-1.5 px-3 py-1.5 rounded-[7px] text-[9px] font-semibold uppercase tracking-wider transition-all ${
               isActive
                 ? 'bg-white/10 text-white shadow-xs'
@@ -78,7 +79,7 @@ export const TopBar = memo(({ mode, onModeChange, onMenuOpen, onOpenAuth, onLead
             <LayoutDashboard className="w-3 h-3" />
             <span className="max-lg:hidden">Home</span>
           </NavLink>
-          <NavLink data-tour-target="focus" to={ROUTES.FOCUS}
+          <NavLink id="tour-focus-tab" data-tour-target="focus" to={ROUTES.FOCUS}
             className={({ isActive }) => `flex items-center gap-1.5 px-3 py-1.5 rounded-[7px] text-[9px] font-semibold uppercase tracking-wider transition-all ${
               isActive
                 ? 'bg-white/10 text-white shadow-xs'
@@ -246,6 +247,36 @@ export const TopBar = memo(({ mode, onModeChange, onMenuOpen, onOpenAuth, onLead
                   <ExternalLink size={12} style={{ opacity: 0.7, flexShrink: 0 }} />
                 </a>
               ))}
+              {onStartTour && (
+                <>
+                  <div style={{ height: '1px', backgroundColor: 'rgba(255,255,255,0.06)', margin: '4px 0' }} />
+                  <button
+                    onClick={() => { onStartTour(); setHelpOpen(false); }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      width: '100%',
+                      padding: '10px 8px',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      color: 'rgba(255,255,255,0.8)',
+                      fontSize: '13px',
+                      gap: '10px',
+                      background: 'transparent',
+                      border: 'none',
+                      transition: 'background-color 0.15s',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.07)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+                  >
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span>🚀</span>
+                      <span>Take a tour</span>
+                    </span>
+                  </button>
+                </>
+              )}
               <div style={{ height: '1px', backgroundColor: 'rgba(255,255,255,0.06)', margin: '4px 0' }} />
               <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)', textAlign: 'center', margin: '6px 0 2px' }}>
                 v1.0.0 &middot; StudyFlow

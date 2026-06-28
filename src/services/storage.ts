@@ -52,6 +52,8 @@ const STORAGE_KEYS = {
   TODAY_DATE: 'study_flow_today_date',
   // Onboarding tour
   ONBOARDING_COMPLETE: 'study_flow_onboarding_complete',
+  // Wallpaper daily rotation
+  WALLPAPER_ROTATION_DATE: 'study_flow_wallpaper_rotation_date',
 };
 
 const safeGet = (key: string) => {
@@ -213,6 +215,10 @@ export const storage = {
   // --- Onboarding ---
   saveOnboardingComplete: (val: boolean) => safeSet(STORAGE_KEYS.ONBOARDING_COMPLETE, val),
   getOnboardingComplete: (): boolean => safeGet(STORAGE_KEYS.ONBOARDING_COMPLETE) ?? false,
+
+  // --- Wallpaper Rotation ---
+  saveWallpaperRotationDate: (date: string) => safeSet(STORAGE_KEYS.WALLPAPER_ROTATION_DATE, date),
+  getWallpaperRotationDate: (): string | null => safeGet(STORAGE_KEYS.WALLPAPER_ROTATION_DATE),
 
   // --- Generic (scoped: only removes study_flow_* and sf_game_* keys) ---
   clearAll: () => {

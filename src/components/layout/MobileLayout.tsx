@@ -1,6 +1,6 @@
 import { useState, lazy, Suspense, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { X, Palette, Check, Crown } from 'lucide-react';
+import { X, Palette, Check, Crown, Shuffle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../../context/AuthContext';
 import { useStudy } from '../../context/StudyContext';
@@ -160,7 +160,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
       setShowPremiumModal(true);
       return;
     }
-    setThemeConfig(prev => ({ ...prev, wallpaper: id }));
+    setThemeConfig(prev => ({ ...prev, wallpaperRotation: false, wallpaper: id }));
     setThemeCustomized(true);
     setShowMoodPicker(false);
   };
@@ -331,6 +331,25 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
 
               {/* Wallpaper grid */}
               <div className="max-h-[50vh] overflow-y-auto no-scrollbar pb-8 px-5">
+                {/* Shuffle daily toggle */}
+                <button onClick={() => {
+                  const next = !themeConfig.wallpaperRotation;
+                  if (next) {
+                    const free = WALLPAPERS.filter(w => !w.isPremium && w.id !== 'none');
+                    if (free.length > 0) {
+                      const pick = free[Math.floor(Math.random() * free.length)].id;
+                      setThemeConfig(prev => ({ ...prev, wallpaper: pick, wallpaperRotation: true }));
+                    } else {
+                      setThemeConfig(prev => ({ ...prev, wallpaperRotation: true }));
+                    }
+                  } else {
+                    setThemeConfig(prev => ({ ...prev, wallpaperRotation: false }));
+                  }
+                }}
+                  className={`flex items-center gap-1.5 px-3 py-2 mb-4 rounded-xl text-xs font-semibold transition-all ${themeConfig.wallpaperRotation ? 'bg-brand/20 text-brand border border-brand/30' : 'bg-white/[0.04] text-white/40 border border-white/[0.06] hover:bg-white/[0.08] hover:text-white/70'}`}>
+                  <Shuffle className={`w-3.5 h-3.5 ${themeConfig.wallpaperRotation ? 'text-brand' : ''}`} />
+                  Shuffle daily
+                </button>
                 {themeTab === 'moods' ? (
                   <div className="grid grid-cols-5 gap-3">
                     {moodWallpapers.map(w => {

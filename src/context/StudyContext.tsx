@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import confetti from 'canvas-confetti';
 import { audioController } from '../services/AudioController';
 import { storage } from '../services/storage';
-import { UserStats, Badge, ACHIEVEMENTS, Achievement, Quest, XP_PER_TASK, XP_PER_FOCUS_MINUTE, AtmosphereId, WallpaperId, GameQuest, SEED_QUESTS, calculateFormalLevel, goldForTask, goldForSubjectTask, goldForLevelUp, MAX_HP, HP_REGEN_PER_SESSION, INITIAL_HP, HpState, checkDailyHp as checkHpFn, regenHp, shouldResetQuests, ShopItem, SHOP_ITEMS, XP_STREAK_BONUS_PER_DAY } from '../lib/gamification';
+import { UserStats, Badge, ACHIEVEMENTS, Achievement, Quest, XP_PER_TASK, XP_PER_FOCUS_MINUTE, AtmosphereId, WallpaperId, GameQuest, SEED_QUESTS, calculateFormalLevel, goldForTask, goldForSubjectTask, goldForLevelUp, MAX_HP, HP_REGEN_PER_SESSION, INITIAL_HP, HpState, checkDailyHp as checkHpFn, regenHp, shouldResetQuests, ShopItem, SHOP_ITEMS, XP_STREAK_BONUS_PER_DAY, WALLPAPERS } from '../lib/gamification';
 import { getProgress, getRankForLevel, getNextRank, getBadgesForLevel, getNewlyUnlockedBadges, getRewardsBetweenLevels, type ProgressionState, type ProgressionBadge } from '../lib/progression';
 import { syncFocusSession } from '../lib/leaderboard';
 import { syncDailyStats } from '../lib/dailyStats';
@@ -68,14 +68,14 @@ export interface ThemeConfig {
   atmosphere: AtmosphereId;
   wallpaper: WallpaperId;
   customWallpaperUrl?: string;
-  // Granular Controls (Flocus style)
-  blur: number; // 0-20px
-  brightness: number; // 0-100%
-  saturation: number; // 0-200%
+  wallpaperRotation: boolean;
+  blur: number;
+  brightness: number;
+  saturation: number;
   showGreeting: boolean;
   showQuote: boolean;
   showClock: boolean;
-  scaleFactor: number; // 0.5-1.5
+  scaleFactor: number;
   clearMode: boolean;
   autoStartNext: boolean;
 }
@@ -169,6 +169,7 @@ const INITIAL_STATS: UserStats = {
 const DEFAULT_THEME: ThemeConfig = {
   atmosphere: 'indigo',
   wallpaper: 'warm-latte',
+  wallpaperRotation: false,
   blur: 0,
   brightness: 100,
   saturation: 100,
@@ -191,7 +192,20 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   
   const [themeConfig, setThemeConfig] = useState<ThemeConfig>(() => {
     const saved = storage.getThemeConfig();
-    return { ...DEFAULT_THEME, ...saved };
+    const merged = { ...DEFAULT_THEME, ...saved } as ThemeConfig;
+
+    if (merged.wallpaperRotation) {
+      const today = new Date().toISOString().slice(0, 10);
+      const lastRotation = storage.getWallpaperRotationDate();
+      if (lastRotation !== today) {
+        const free = WALLPAPERS.filter(w => !w.isPremium && w.id !== 'none');
+        if (free.length > 0) {
+          merged.wallpaper = free[Math.floor(Math.random() * free.length)].id;
+          storage.saveWallpaperRotationDate(today);
+        }
+      }
+    }
+    return merged;
   });
   const [themeCustomized, setThemeCustomized] = useState(() => {
     const saved = storage.getThemeConfig();

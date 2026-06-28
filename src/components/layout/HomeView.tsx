@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, memo } from 'react';
+import { motion } from 'motion/react';
 import { Clock, Zap, Flame, PenSquare, Target, Music, ArrowUpRight, Sparkles } from 'lucide-react';
 import { useStudy, useFocus } from '../../context/StudyContext';
 import { useAuth } from '../../context/AuthContext';
@@ -39,7 +40,7 @@ export const HomeView = memo(({ onNotepadOpen, onQuestsOpen, onMusicOpen, onProg
 }) => {
   const { user } = useAuth();
   const { focusSession } = useFocus();
-  const { userStats, themeConfig, progression, subjects } = useStudy();
+  const { userStats, themeConfig, progression, subjects, todayFocusSeconds, dailyGoal } = useStudy();
   const [time, setTime] = useState(new Date());
   const [quote] = useState(getDailyQuote());
 
@@ -149,6 +150,35 @@ export const HomeView = memo(({ onNotepadOpen, onQuestsOpen, onMusicOpen, onProg
             </>
           )}
         </p>
+
+        {/* Daily goal progress ring */}
+        <motion.div
+          className="mb-5 flex flex-col items-center"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+        >
+          <svg width="64" height="64" viewBox="0 0 64 64" className="drop-shadow-sm">
+            <circle cx="32" cy="32" r="28" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="5" />
+            <motion.circle
+              cx="32" cy="32" r="28" fill="none"
+              stroke="#10b981" strokeWidth="5" strokeLinecap="round"
+              strokeDasharray={2 * Math.PI * 28}
+              initial={{ strokeDashoffset: 2 * Math.PI * 28 }}
+              animate={{
+                strokeDashoffset: 2 * Math.PI * 28 * (1 - Math.min(todayFocusSeconds / dailyGoal, 1)),
+              }}
+              transition={{ duration: 1, ease: 'easeOut', delay: 0.2 }}
+              transform="rotate(-90 32 32)"
+            />
+            <text x="32" y="38" textAnchor="middle" className="fill-white text-[13px] font-bold" dominantBaseline="middle">
+              {Math.min(Math.round((todayFocusSeconds / dailyGoal) * 100), 100)}%
+            </text>
+          </svg>
+          <span className={`text-[9px] font-semibold uppercase tracking-wider ${t}/40 mt-1`}>
+            {formatTime(dailyGoal)} goal
+          </span>
+        </motion.div>
 
         {/* Stats row — ultra-light glass cards */}
         <div className="flex gap-2 w-full max-w-xs">

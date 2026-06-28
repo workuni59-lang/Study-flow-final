@@ -130,6 +130,9 @@ interface StudyContextType {
   gameQuestProgress: Record<string, number>;
   shopItems: { id: string; unlocked: boolean }[];
   sessionsToday: number;
+  todayFocusSeconds: number;
+  dailyGoal: number;
+  setDailyGoal: (seconds: number) => void;
   levelUpEvent: number | null;
   questCompleteEvent: string | null;
   playerDownEvent: boolean;
@@ -164,7 +167,7 @@ const INITIAL_STATS: UserStats = {
 };
 
 const DEFAULT_THEME: ThemeConfig = {
-  atmosphere: 'amber',
+  atmosphere: 'indigo',
   wallpaper: 'warm-latte',
   blur: 0,
   brightness: 100,
@@ -228,6 +231,13 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   const [shopItems, setShopItems] = useState<{ id: string; unlocked: boolean }[]>(() => storage.getShopItems());
   const [sessionsToday, setSessionsToday] = useState(() => storage.getSessionsToday());
   const [sessionsDate, setSessionsDate] = useState(() => storage.getSessionsDate());
+  const [todayFocusSeconds, setTodayFocusSeconds] = useState(() => {
+    const saved = storage.getTodayFocus();
+    const savedDate = storage.getTodayDate();
+    const today = new Date().toISOString().slice(0, 10);
+    return savedDate === today ? saved : 0;
+  });
+  const [dailyGoal, setDailyGoal] = useState(() => storage.getDailyGoal());
   const [subjectStreaks, setSubjectStreaks] = useState<Record<string, string>>(() => storage.getSubjectStreaks() || {});
 
   const [levelUpEvent, setLevelUpEvent] = useState<number | null>(null);
@@ -356,6 +366,9 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => { storage.saveShopItems(shopItems); }, [shopItems]);
   useEffect(() => { storage.saveSessionsToday(sessionsToday); }, [sessionsToday]);
   useEffect(() => { storage.saveSessionsDate(sessionsDate); }, [sessionsDate]);
+  useEffect(() => { storage.saveTodayFocus(todayFocusSeconds); }, [todayFocusSeconds]);
+  useEffect(() => { storage.saveTodayDate(new Date().toISOString().slice(0, 10)); }, [todayFocusSeconds]);
+  useEffect(() => { storage.saveDailyGoal(dailyGoal); }, [dailyGoal]);
   useEffect(() => { storage.saveSubjectStreaks(subjectStreaks); }, [subjectStreaks]);
 
   // Proactive quest reset (on mount + periodic check)
@@ -861,6 +874,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     setGameHp(prev => regenHp(prev));
     const newTotalFocus = (userStats.totalFocusSeconds || 0) + seconds;
     setUserStats(prev => ({ ...prev, totalFocusSeconds: newTotalFocus }));
+    setTodayFocusSeconds(prev => prev + seconds);
     checkAchievements({ ...userStats, totalFocusSeconds: newTotalFocus });
     if (authUser && isSyncEnabled && seconds >= 60) {
       syncFocusSession(
@@ -990,7 +1004,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     activeTracks, masterVolume, toggleTrack, setTrackVolume, stopAllTracks, setMasterVolume,
     selectedTaskId, setSelectedTaskId,
     // Gamification v2
-    gameGold, gameXp, gameLevel, gameHp, gameQuestProgress, shopItems, sessionsToday,
+    gameGold, gameXp, gameLevel, gameHp, gameQuestProgress, shopItems, sessionsToday, todayFocusSeconds, dailyGoal, setDailyGoal,
     levelUpEvent, questCompleteEvent, playerDownEvent,
     awardGold, awardXp, purchaseItem, checkDailyHp, dismissLevelUp, dismissQuestComplete, dismissPlayerDown,
     updateGameQuestProgress,
@@ -1002,7 +1016,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     activeTracks, masterVolume, toggleTrack, setTrackVolume, stopAllTracks, setMasterVolume,
     selectedTaskId,
     // Gamification v2 deps
-    gameGold, gameXp, gameLevel, gameHp, gameQuestProgress, shopItems, sessionsToday,
+    gameGold, gameXp, gameLevel, gameHp, gameQuestProgress, shopItems, sessionsToday, todayFocusSeconds, dailyGoal,
     levelUpEvent, questCompleteEvent, playerDownEvent,
     awardGold, awardXp, purchaseItem, checkDailyHp, dismissLevelUp, dismissQuestComplete, dismissPlayerDown,
     updateGameQuestProgress,

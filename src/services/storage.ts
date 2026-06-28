@@ -45,6 +45,13 @@ const STORAGE_KEYS = {
   CUSTOM_DURATIONS: 'study_flow_custom_durations',
   // Flow mode session log (for adaptive duration)
   FLOW_LOG: 'study_flow_flow_log',
+  // Daily focus goal (seconds)
+  DAILY_GOAL: 'study_flow_daily_goal',
+  // Today's focus seconds + date (for daily goal ring)
+  TODAY_FOCUS: 'study_flow_today_focus',
+  TODAY_DATE: 'study_flow_today_date',
+  // Onboarding tour
+  ONBOARDING_COMPLETE: 'study_flow_onboarding_complete',
 };
 
 const safeGet = (key: string) => {
@@ -193,6 +200,19 @@ export const storage = {
   },
   loadFlowLog: (): number[] => (safeGet(STORAGE_KEYS.FLOW_LOG) as number[]) ?? [],
   clearFlowLog: () => safeSet(STORAGE_KEYS.FLOW_LOG, []),
+
+  // --- Daily Goal ---
+  saveDailyGoal: (seconds: number) => safeSet(STORAGE_KEYS.DAILY_GOAL, seconds),
+  getDailyGoal: (): number => safeGet(STORAGE_KEYS.DAILY_GOAL) ?? 7200,
+
+  saveTodayFocus: (seconds: number) => safeSet(STORAGE_KEYS.TODAY_FOCUS, seconds),
+  getTodayFocus: (): number => safeGet(STORAGE_KEYS.TODAY_FOCUS) ?? 0,
+  saveTodayDate: (date: string) => safeSet(STORAGE_KEYS.TODAY_DATE, date),
+  getTodayDate: (): string | null => safeGet(STORAGE_KEYS.TODAY_DATE),
+
+  // --- Onboarding ---
+  saveOnboardingComplete: (val: boolean) => safeSet(STORAGE_KEYS.ONBOARDING_COMPLETE, val),
+  getOnboardingComplete: (): boolean => safeGet(STORAGE_KEYS.ONBOARDING_COMPLETE) ?? false,
 
   // --- Generic (scoped: only removes study_flow_* and sf_game_* keys) ---
   clearAll: () => {

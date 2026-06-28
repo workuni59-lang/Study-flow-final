@@ -30,7 +30,8 @@ import {
   Key,
   AlertTriangle,
   ExternalLink,
-  Loader2
+  Loader2,
+  Target,
 } from 'lucide-react';
 import { useStudy } from '../../context/StudyContext';
 import { useAuth } from '../../context/AuthContext';
@@ -63,6 +64,8 @@ export const SettingsView = () => {
     setThemeCustomized,
     setShowPremiumModal,
     triggerConfetti,
+    dailyGoal,
+    setDailyGoal,
   } = useStudy();
 
   const [name, setName] = useState(user?.displayName || '');
@@ -418,6 +421,40 @@ export const SettingsView = () => {
                    <span className="text-[9px] font-black uppercase tracking-widest text-center">Clear Mode</span>
                  </button>
               </div>
+          </DashboardCard>
+
+          {/* Daily Focus Goal */}
+          <DashboardCard className="space-y-6">
+             <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-600 flex items-center justify-center text-white">
+                   <Target className="w-5 h-5" />
+                </div>
+                <h3 className="text-xl font-display font-black dark:text-white uppercase tracking-tight">Daily Focus Goal</h3>
+             </div>
+             <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
+                {[
+                  { label: '30m', value: 1800 },
+                  { label: '1h', value: 3600 },
+                  { label: '1h30m', value: 5400 },
+                  { label: '2h', value: 7200 },
+                  { label: '2h30m', value: 9000 },
+                  { label: '3h', value: 10800 },
+                  { label: '4h', value: 14400 },
+                  { label: '6h', value: 21600 },
+                  { label: '8h', value: 28800 },
+                ].map(opt => (
+                  <button key={opt.value}
+                    onClick={() => setDailyGoal(opt.value)}
+                    className={`p-3 rounded-2xl border-2 transition-all flex flex-col items-center gap-1 ${
+                      dailyGoal === opt.value
+                        ? 'border-emerald-600 bg-emerald-50/50 dark:bg-emerald-900/20'
+                        : 'border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400'
+                    }`}
+                  >
+                    <span className="text-sm font-bold dark:text-white">{opt.label}</span>
+                 </button>
+                ))}
+             </div>
           </DashboardCard>
 
           {/* Focus Engine Config (Premium) */}

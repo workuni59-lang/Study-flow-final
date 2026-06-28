@@ -26,6 +26,7 @@ import { AchievementNotification } from '../notifications/AchievementNotificatio
 import { Confetti } from '../notifications/Confetti';
 import { LevelUpModal } from '../modals/LevelUpModal';
 import { PanicModeUI } from '../dashboard/PanicModeUI';
+import { OnboardingTour } from '../onboarding/OnboardingTour';
 import { WallpaperEngine } from '../navigation/WallpaperEngine';
 
 import { ScrollProgress } from './ScrollProgress';
@@ -436,6 +437,7 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
       <PremiumModal onOpenAuth={onOpenAuth} />
       <DemoSignUpNudge onOpenAuth={onOpenAuth} />
       <PanicModeUI />
+      <OnboardingTour />
 
       <NotesPanel isOpen={activePanel === 'notepad'} onClose={handleClosePanel} />
     </div>

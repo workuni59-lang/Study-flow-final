@@ -23,5 +23,12 @@ ui-audit/**/__snapshots__/
 .lighthouseci/
 lhci-reports/
 
+# Python cache
+__pycache__/
+*.pyc
+
+# Docs / artifacts
+*.docx
+
 # Test run artifacts
 test-results/

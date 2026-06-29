@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, cpSync, renameSync, rmSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, cpSync, renameSync, rmSync, readFileSync, writeFileSync, readdirSync, statSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -45,6 +45,26 @@ for (const file of ['robots.txt', 'sitemap.xml', 'logo.png', '_headers', '_redir
   }
 }
 
+// 4. Copy blog directory to dist (handles nested subdirectories and their index.html files)
+const blogSrc = join(ROOT, 'public', 'blog');
+const blogDst = join(SRC, 'blog');
+if (existsSync(blogSrc)) {
+  // Remove existing blog dir if present
+  if (existsSync(blogDst)) rmSync(blogDst, { recursive: true, force: true });
+  const copyRecursive = (src, dst) => {
+    mkdirSync(dst, { recursive: true });
+    const entries = readdirSync(src, { withFileTypes: true });
+    for (const entry of entries) {
+      const s = join(src, entry.name);
+      const d = join(dst, entry.name);
+      if (entry.isDirectory()) copyRecursive(s, d);
+      else cpSync(s, d);
+    }
+  };
+  copyRecursive(blogSrc, blogDst);
+  console.log('✓ Copied blog/ to dist/');
+}
+
 // 4. Remove Worker config from wrangler.json (no more _worker.mjs)
 const wranglerPath = join(DIST, 'wrangler.json');
 if (existsSync(wranglerPath)) {
@@ -61,7 +81,7 @@ if (existsSync(swPath)) {
   sw = sw.replace(/\{url:"index\.html",revision:"[^"]+"},?/g, '');
   sw = sw.replace(/\{url:"landing\/[^"]+",revision:"[^"]+"},?/g, '');
   // Also remove standalone tool pages from precache (not part of PWA)
-  for (const subdir of ['flip-clock', 'pomodoro-timer', 'study-timer', 'study-planner', 'study-with-me', 'aesthetic-stopwatch', 'studyflow-focus-timer']) {
+  for (const subdir of ['flip-clock', 'pomodoro-timer', 'study-timer', 'study-planner', 'study-with-me', 'aesthetic-stopwatch', 'studyflow-focus-timer', 'blog']) {
     sw = sw.replace(new RegExp(`\\{url:"${subdir}\\/index\\.html",revision:"[^"]+"},?`, 'g'), '');
   }
   writeFileSync(swPath, sw);

@@ -21,6 +21,7 @@ const entries: SitemapEntry[] = [
   { path: '/study-timer/', priority: 0.9, changefreq: 'monthly' },
   { path: '/study-planner/', priority: 0.9, changefreq: 'monthly' },
   { path: '/study-with-me/', priority: 0.9, changefreq: 'weekly' },
+  { path: '/blog/', priority: 0.8, changefreq: 'weekly' },
 ];
 
 // Auto-discover blog posts from public/blog/

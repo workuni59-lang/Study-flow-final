@@ -13,6 +13,7 @@ interface SitemapEntry {
 // Marketing URLs only — Google does not need app/internal routes indexed
 const entries: SitemapEntry[] = [
   { path: '/', priority: 1.0, changefreq: 'weekly' },
+  { path: '/app/', priority: 0.9, changefreq: 'weekly' },
   { path: '/flip-clock/', priority: 0.9, changefreq: 'monthly' },
   { path: '/aesthetic-stopwatch/', priority: 0.9, changefreq: 'monthly' },
   { path: '/studyflow-focus-timer/', priority: 0.9, changefreq: 'weekly' },

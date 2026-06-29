@@ -7,18 +7,24 @@
     <meta name="description" content="StudyFlow – your all-in-one focus timer, study dashboard, and gamified productivity companion. Track sessions, earn badges, and master your subjects." />
     <meta name="theme-color" content="#6366f1" />
     <meta name="color-scheme" content="dark" />
+    <link rel="canonical" href="https://studyflow.space/" />
 
     <!-- Open Graph / Social -->
     <meta property="og:title" content="StudyFlow – Focus Timer & Study Dashboard" />
     <meta property="og:description" content="A timer that feels like a room. Animated wallpapers, ambient sounds, gamified progress — your focus space on the web." />
-    <meta property="og:url" content="https://studyflow.space/app/" />
+    <meta property="og:url" content="https://studyflow.space/" />
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="StudyFlow" />
+    <meta property="og:locale" content="en_US" />
     <meta property="og:image" content="https://studyflow.space/logo.png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
 
     <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="StudyFlow – Focus Timer & Study Dashboard" />
     <meta name="twitter:description" content="A timer that feels like a room. Animated wallpapers, ambient sounds, gamified progress." />
+    <meta name="twitter:image" content="https://studyflow.space/logo.png" />
 
     <!-- Structured Data -->
     <script type="application/ld+json">
@@ -41,6 +47,7 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <link rel="preload" href="/logo.png" as="image" />
     <meta name="build-time" content="2026-06-08T22:20Z" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="icon" type="image/png" href="/logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -82,6 +89,9 @@
   <img src="/logo.png" alt="StudyFlow" style="width: 48px; height: 48px; margin-bottom: 20px; animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;">
   <div class="brand">StudyFlow</div>
   <div class="tagline">Loading your focus session...</div>
+  <div style="max-width:480px;margin-top:20px;font-size:13px;color:#94a3b8;line-height:1.6;">
+    StudyFlow is a focus timer with animated wallpapers, ambient soundscapes, XP streaks, and session analytics. Choose Pomodoro, Deep Focus, or Flow mode.
+  </div>
 </div>
 <style>
 @keyframes pulse {
@@ -89,6 +99,13 @@
   50% { opacity: .7; transform: scale(0.95); }
 }
 </style>
+<noscript>
+  <div style="position:fixed;inset:0;z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0a0c10;color:#e2e8f0;font-family:system-ui,sans-serif;padding:24px;text-align:center;">
+    <h1 style="font-size:24px;margin-bottom:12px;">StudyFlow</h1>
+    <p style="font-size:15px;color:#94a3b8;max-width:400px;line-height:1.6;margin-bottom:20px;">A focus timer with animated wallpapers, ambient soundscapes, and gamified progress tracking. Please enable JavaScript to use the app.</p>
+    <a href="/studyflow-focus-timer/" style="color:#818cf8;font-size:14px;">Learn more about StudyFlow &rarr;</a>
+  </div>
+</noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

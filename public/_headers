@@ -10,7 +10,12 @@
 /manifest.webmanifest
   Content-Type: application/manifest+json
 
-# SPA routes — same-origin embedding only, excluded from search
+# SPA entry point — allowed in search results
+/app/
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+
+# SPA deep routes — excluded from search
 /app/*
   X-Frame-Options: SAMEORIGIN
   Referrer-Policy: strict-origin-when-cross-origin

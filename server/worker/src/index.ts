@@ -235,7 +235,20 @@ async function activatePremium(db: ReturnType<typeof supabaseAdmin>, userId: str
   }
 }
 
-async function findAndActivate(db: ReturnType<typeof supabaseAdmin>, userId: string | undefined, email: string | undefined | null, periodEnd?: string | null, supabaseUrl?: string, serviceKey?: string) {
+async function resolveProfileId(db: ReturnType<typeof supabaseAdmin>, email: string | undefined | null): Promise<string | null> {
+  if (!email) return null;
+  try {
+    const { data, error } = await db.rpc('get_user_id_by_email', { p_email: email }).maybeSingle();
+    const result = data as { id: string } | null;
+    if (!error && result?.id) return result.id;
+    console.error(`[Webhook] get_user_id_by_email failed for ${email}:`, error);
+  } catch (err) {
+    console.error(`[Webhook] get_user_id_by_email error:`, err);
+  }
+  return null;
+}
+
+async function findAndActivate(db: ReturnType<typeof supabaseAdmin>, userId: string | undefined, email: string | undefined | null, periodEnd?: string | null) {
   if (userId) {
     const { data: match } = await db.from('profiles').select('id').eq('id', userId).maybeSingle();
     if (match) {
@@ -244,46 +257,23 @@ async function findAndActivate(db: ReturnType<typeof supabaseAdmin>, userId: str
     }
     console.log(`[Webhook] userId ${userId} not found in profiles`);
   }
-  // Fallback: query auth.users by email via REST API (service_role bypasses auth schema RLS)
-  if (email && supabaseUrl && serviceKey) {
-    try {
-      const url = `${supabaseUrl}/rest/v1/auth/users?select=id&email=eq.${encodeURIComponent(email)}&limit=1`;
-      const res = await fetch(url, {
-        headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` }
-      });
-      if (res.ok) {
-        const users = await res.json() as any[];
-        if (users?.length) {
-          await activatePremium(db, users[0].id, periodEnd);
-          return;
-        }
-      }
-    } catch (err) {
-      console.error(`[Webhook] auth.users lookup failed for ${email}:`, err);
-    }
+  // Fallback: look up by email via Postgres function (queries auth.users)
+  const resolvedId = await resolveProfileId(db, email);
+  if (resolvedId) {
+    await activatePremium(db, resolvedId, periodEnd);
+    return;
   }
   console.error(`[Webhook] No profile found for userId=${userId} email=${email}`);
 }
 
-async function findAndDowngrade(db: ReturnType<typeof supabaseAdmin>, userId: string | undefined, email: string | undefined | null, periodEnd?: string | null, supabaseUrl?: string, serviceKey?: string) {
+async function findAndDowngrade(db: ReturnType<typeof supabaseAdmin>, userId: string | undefined, email: string | undefined | null, periodEnd?: string | null) {
   let id: string | undefined;
   if (userId) {
     const { data: match } = await db.from('profiles').select('id').eq('id', userId).maybeSingle();
     if (match) id = userId;
   }
-  if (!id && email && supabaseUrl && serviceKey) {
-    try {
-      const url = `${supabaseUrl}/rest/v1/auth/users?select=id&email=eq.${encodeURIComponent(email)}&limit=1`;
-      const res = await fetch(url, {
-        headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` }
-      });
-      if (res.ok) {
-        const users = await res.json() as any[];
-        if (users?.length) id = users[0].id;
-      }
-    } catch (err) {
-      console.error(`[Webhook] auth.users lookup failed for downgrade:`, err);
-    }
+  if (!id && email) {
+    id = await resolveProfileId(db, email) || undefined;
   }
   if (id) {
     if (periodEnd && new Date(periodEnd) > new Date()) {
@@ -346,38 +336,18 @@ async function handlePolarWebhook(request: Request, env: Env): Promise<Response>
     const periodEnd = event.data?.current_period_end;
     const subStatus = event.data?.status;
     const checkoutStatus = event.data?.status;
-    const supUrl = env.SUPABASE_URL;
-    const svcKey = env.SUPABASE_SERVICE_ROLE_KEY;
-
-    // Helper for auth.users email lookup
-    async function resolveProfileId(email: string | undefined | null): Promise<string | null> {
-      if (!email || !supUrl || !svcKey) return null;
-      try {
-        const url = `${supUrl}/rest/v1/auth/users?select=id&email=eq.${encodeURIComponent(email)}&limit=1`;
-        const res = await fetch(url, {
-          headers: { apikey: svcKey, Authorization: `Bearer ${svcKey}` }
-        });
-        if (res.ok) {
-          const users = await res.json() as any[];
-          if (users?.length) return users[0].id;
-        }
-      } catch (err) {
-        console.error(`[Webhook] auth.users lookup failed:`, err);
-      }
-      return null;
-    }
 
     // Checkout completed — activate premium
     if (event.type === 'checkout.created' || event.type === 'checkout.updated') {
       if (checkoutStatus === 'succeeded' || checkoutStatus === 'paid' || checkoutStatus === 'confirmed') {
-        await findAndActivate(db, userId, customerEmail, undefined, supUrl, svcKey);
+        await findAndActivate(db, userId, customerEmail);
       }
     }
 
     // Subscription created (trial or instant) — activate premium
     if (event.type === 'subscription.created') {
       if (subStatus === 'trialing' || subStatus === 'active' || subStatus === 'incomplete') {
-        await findAndActivate(db, userId, customerEmail, periodEnd, supUrl, svcKey);
+        await findAndActivate(db, userId, customerEmail, periodEnd);
       } else {
         console.log(`[Webhook] subscription.created ignored (status: ${subStatus})`);
       }
@@ -385,19 +355,19 @@ async function handlePolarWebhook(request: Request, env: Env): Promise<Response>
 
     // Subscription active or updated — activate premium
     if (event.type === 'subscription.active' || event.type === 'subscription.updated') {
-      await findAndActivate(db, userId, customerEmail, periodEnd, supUrl, svcKey);
+      await findAndActivate(db, userId, customerEmail, periodEnd);
     }
 
     // Order events (payment processed) — activate premium
     if (event.type === 'order.paid' || event.type === 'order.created') {
-      await findAndActivate(db, userId, customerEmail, periodEnd, supUrl, svcKey);
+      await findAndActivate(db, userId, customerEmail, periodEnd);
     }
 
     // Customer state changed — sync premium
     if (event.type === 'customer.state_changed') {
       const resolvedId = userId && (await db.from('profiles').select('id').eq('id', userId).maybeSingle()).data?.id
         ? userId
-        : await resolveProfileId(customerEmail);
+        : await resolveProfileId(db, customerEmail);
       if (resolvedId) {
         const hasActiveSub = event.data?.active_subscriptions?.length > 0;
         if (hasActiveSub) {
@@ -410,11 +380,11 @@ async function handlePolarWebhook(request: Request, env: Env): Promise<Response>
 
     // Subscription revoked or canceled
     if (event.type === 'subscription.revoked' || event.type === 'subscription.canceled') {
-      await findAndDowngrade(db, userId, customerEmail, periodEnd, supUrl, svcKey);
+      await findAndDowngrade(db, userId, customerEmail, periodEnd);
     }
 
     if (event.type === 'subscription.uncanceled') {
-      await findAndActivate(db, userId, customerEmail, periodEnd, supUrl, svcKey);
+      await findAndActivate(db, userId, customerEmail, periodEnd);
     }
 
     if (event.type === 'subscription.incomplete' || event.type === 'subscription.past_due') {
@@ -464,23 +434,17 @@ async function handleDiagnose(env: Env, headers: Record<string, string>): Promis
   const results: any = {};
   try {
     const db = supabaseAdmin(env);
-    // List profiles (no email column, just id, display_name, is_premium)
+    // List profiles
     const { data: profiles } = await db.from('profiles').select('id, display_name, is_premium, premium_until').limit(20);
     results.profiles = profiles || [];
-    // Try auth.users lookup by email
-    const supUrl = env.SUPABASE_URL;
-    const svcKey = env.SUPABASE_SERVICE_ROLE_KEY;
-    let authUsers: any[] = [];
-    if (supUrl && svcKey) {
-      try {
-        const url = `${supUrl}/rest/v1/auth/users?select=id,email&email=eq.workuni59%40gmail.com&limit=5`;
-        const res = await fetch(url, {
-          headers: { apikey: svcKey, Authorization: `Bearer ${svcKey}` }
-        });
-        if (res.ok) authUsers = await res.json() as any[];
-      } catch {}
+    // Try auth.users lookup via RPC function
+    try {
+      const { data, error } = await db.rpc('get_user_id_by_email', { p_email: 'workuni59@gmail.com' }).maybeSingle();
+      const result = data as { id: string } | null;
+      results.auth_users_lookup = result ? { found: true, id: result.id } : { found: false, note: error?.message || 'function returned null' };
+    } catch (err: any) {
+      results.auth_users_lookup = { found: false, error: err.message, note: 'function does not exist yet' };
     }
-    results.auth_users_lookup = authUsers.length ? authUsers : { found: false };
     // Check the Polar userId directly
     const { data: byId } = await db.from('profiles').select('id, display_name, is_premium').eq('id', 'c9f55212-8b6a-4b4b-8337-437bf9ae54a8').maybeSingle();
     results.lookup_by_user_id = byId || { found: false };

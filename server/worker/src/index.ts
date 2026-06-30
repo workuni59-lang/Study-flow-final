@@ -188,7 +188,7 @@ async function handleCreateCheckout(
       customer_email: email || undefined,
       metadata: { user_id: userId },
       success_url: returnUrl || `${requestOrigin}/settings?upgrade=success`,
-      product_id: productId,
+      products: [productId],
     }),
   });
 
@@ -230,9 +230,18 @@ async function handlePolarWebhook(request: Request, env: Env): Promise<Response>
 
     if (event.type === 'checkout.created' || event.type === 'checkout.updated') {
       const userId = event.data?.metadata?.user_id;
-      const isPaid = event.data?.status === 'succeeded' || event.data?.status === 'paid';
+      const isPaid = event.data?.status === 'succeeded' || event.data?.status === 'paid' || event.data?.status === 'confirmed';
       if (userId && isPaid) {
         await db.from('profiles').update({ is_premium: true, premium_until: event.data?.expires_at || null }).eq('id', userId);
+      }
+    }
+
+    if (event.type === 'subscription.created') {
+      const userId = event.data?.metadata?.user_id;
+      const subStatus = event.data?.status;
+      // Fires on trial start (status: "trialing") or immediate subscription
+      if (userId && (subStatus === 'trialing' || subStatus === 'active' || subStatus === 'incomplete')) {
+        await db.from('profiles').update({ is_premium: true, premium_until: event.data?.current_period_end || null }).eq('id', userId);
       }
     }
 
@@ -268,8 +277,8 @@ async function handlePolarWebhook(request: Request, env: Env): Promise<Response>
     }
 
     // Log unhandled event types
-    const handledTypes = ['checkout.created', 'checkout.updated', 'subscription.active', 'subscription.updated',
-      'subscription.revoked', 'subscription.canceled', 'subscription.uncanceled',
+    const handledTypes = ['checkout.created', 'checkout.updated', 'subscription.created', 'subscription.active',
+      'subscription.updated', 'subscription.revoked', 'subscription.canceled', 'subscription.uncanceled',
       'subscription.incomplete', 'subscription.past_due'];
     if (!handledTypes.includes(event.type)) {
       console.warn(`[Webhook] Unhandled event type: ${event.type}`);

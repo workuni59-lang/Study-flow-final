@@ -146,7 +146,7 @@ export const PremiumModal = ({ onOpenAuth }: PremiumModalProps) => {
                   </span>
                 )}
               </div>
-              <p className="text-[9px] text-center text-white/30 font-medium mt-1">7-day free trial · Cancel anytime</p>
+              <p className="text-[9px] text-center text-white/30 font-medium mt-1">Subscribe and unlock premium features · Cancel anytime</p>
             </div>
 
             {/* SECTION 3 — CTA BUTTON */}
@@ -191,7 +191,7 @@ export const PremiumModal = ({ onOpenAuth }: PremiumModalProps) => {
                   ) : (
                     <>
                       <Crown className="w-4 h-4" />
-                      Start Free Trial
+                      Subscribe Now
                     </>
                   )}
                 </button>

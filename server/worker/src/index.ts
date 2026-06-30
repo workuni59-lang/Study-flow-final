@@ -259,6 +259,25 @@ async function handlePolarWebhook(request: Request, env: Env): Promise<Response>
 
     console.log(`[Webhook] Received ${event.type}`);
 
+    // Debug: log full payload structure (limit depth to avoid huge logs)
+    const data = event.data;
+    const debugInfo: any = { keys: data ? Object.keys(data) : null };
+    if (data) {
+      debugInfo.metadata = data.metadata;
+      debugInfo.customer_metadata = data.customer_metadata;
+      debugInfo.external_customer_id = data.external_customer_id;
+      debugInfo.status = data.status;
+      debugInfo.has_customer = !!data.customer;
+      if (data.customer) {
+        debugInfo.customer_keys = Object.keys(data.customer);
+        debugInfo.customer_meta = data.customer.metadata;
+        debugInfo.customer_ext_id = data.customer.external_id;
+      }
+      debugInfo.has_subscription_id = !!data.subscription_id;
+      debugInfo.subscription_id = data.subscription_id;
+    }
+    console.log(`[Webhook] Debug ${event.type}:`, JSON.stringify(debugInfo));
+
     // Extract user_id from multiple possible paths
     const userId = extractUserId(event.data);
     const periodEnd = event.data?.current_period_end;

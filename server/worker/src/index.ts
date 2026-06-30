@@ -223,6 +223,7 @@ function extractUserId(data: any): string | undefined {
 }
 
 async function activatePremium(db: ReturnType<typeof supabaseAdmin>, userId: string, periodEnd?: string | null) {
+  if (!userId) return;
   const { error } = await db.from('profiles').update({
     is_premium: true,
     premium_until: periodEnd || null,
@@ -231,6 +232,44 @@ async function activatePremium(db: ReturnType<typeof supabaseAdmin>, userId: str
     console.error(`[Webhook] DB update failed for ${userId}:`, error);
   } else {
     console.log(`[Webhook] Premium activated for ${userId}`);
+  }
+}
+
+async function findAndActivate(db: ReturnType<typeof supabaseAdmin>, userId: string | undefined, email: string | undefined | null, periodEnd?: string | null) {
+  if (userId) {
+    const { data: match } = await db.from('profiles').select('id').eq('id', userId).maybeSingle();
+    if (match) {
+      await activatePremium(db, match.id, periodEnd);
+      return;
+    }
+    console.log(`[Webhook] userId ${userId} not found in profiles, trying email`);
+  }
+  if (email) {
+    const { data: match } = await db.from('profiles').select('id').ilike('email', email).maybeSingle();
+    if (match) {
+      await activatePremium(db, match.id, periodEnd);
+      return;
+    }
+    console.error(`[Webhook] No profile found for userId=${userId} email=${email}`);
+  }
+}
+
+async function findAndDowngrade(db: ReturnType<typeof supabaseAdmin>, userId: string | undefined, email: string | undefined | null, periodEnd?: string | null) {
+  let id = userId;
+  if (id) {
+    const { data: match } = await db.from('profiles').select('id').eq('id', id).maybeSingle();
+    if (!match) id = undefined;
+  }
+  if (!id && email) {
+    const { data: match } = await db.from('profiles').select('id').ilike('email', email).maybeSingle();
+    if (match) id = match.id;
+  }
+  if (id) {
+    if (periodEnd && new Date(periodEnd) > new Date()) {
+      await db.from('profiles').update({ is_premium: true, premium_until: periodEnd }).eq('id', id);
+    } else {
+      await db.from('profiles').update({ is_premium: false, premium_until: null }).eq('id', id);
+    }
   }
 }
 
@@ -282,60 +321,42 @@ async function handlePolarWebhook(request: Request, env: Env): Promise<Response>
 
     // Extract user_id from multiple possible paths
     const userId = extractUserId(event.data);
+    const customerEmail = event.data?.customer?.email || event.data?.email || event.data?.customer_email;
     const periodEnd = event.data?.current_period_end;
     const subStatus = event.data?.status;
     const checkoutStatus = event.data?.status;
 
-    // Checkout completed — activate premium (subscription events will set correct premium_until)
+    // Checkout completed — activate premium
     if (event.type === 'checkout.created' || event.type === 'checkout.updated') {
       if (checkoutStatus === 'succeeded' || checkoutStatus === 'paid' || checkoutStatus === 'confirmed') {
-        if (userId) {
-          await activatePremium(db, userId);
-        } else {
-          console.error(`[Webhook] checkout.${event.type.split('.')[1]} missing userId for status ${checkoutStatus}`);
-        }
+        await findAndActivate(db, userId, customerEmail);
       }
     }
 
     // Subscription created (trial or instant) — activate premium
     if (event.type === 'subscription.created') {
-      if (userId && (subStatus === 'trialing' || subStatus === 'active' || subStatus === 'incomplete')) {
-        await activatePremium(db, userId, periodEnd);
-      } else if (userId) {
-        console.log(`[Webhook] subscription.created ignored (status: ${subStatus})`);
+      if (subStatus === 'trialing' || subStatus === 'active' || subStatus === 'incomplete') {
+        await findAndActivate(db, userId, customerEmail, periodEnd);
       } else {
-        console.error(`[Webhook] subscription.created missing userId`);
+        console.log(`[Webhook] subscription.created ignored (status: ${subStatus})`);
       }
     }
 
     // Subscription active or updated — activate premium
     if (event.type === 'subscription.active' || event.type === 'subscription.updated') {
-      if (userId) {
-        await activatePremium(db, userId, periodEnd);
-      }
+      await findAndActivate(db, userId, customerEmail, periodEnd);
     }
 
     // Order events (payment processed) — activate premium
     if (event.type === 'order.paid' || event.type === 'order.created') {
-      if (userId) {
-        await activatePremium(db, userId, periodEnd);
-      } else {
-        // Try to match by email for order events
-        const customerEmail = event.data?.customer?.email || event.data?.billing_reason;
-        if (customerEmail) {
-          const { data: match } = await db.from('profiles').select('id').eq('email', customerEmail).maybeSingle();
-          if (match) {
-            await activatePremium(db, match.id, periodEnd);
-          }
-        }
-      }
+      await findAndActivate(db, userId, customerEmail, periodEnd);
     }
 
     // Customer state changed — sync premium
     if (event.type === 'customer.state_changed') {
-      const email = event.data?.customer?.email;
-      if (email) {
-        const { data: match } = await db.from('profiles').select('id, is_premium, premium_until').eq('email', email).maybeSingle();
+      // Find user by email
+      if (customerEmail) {
+        const { data: match } = await db.from('profiles').select('id, is_premium, premium_until').ilike('email', customerEmail).maybeSingle();
         if (match) {
           const hasActiveSub = event.data?.active_subscriptions?.length > 0;
           if (hasActiveSub) {
@@ -349,19 +370,11 @@ async function handlePolarWebhook(request: Request, env: Env): Promise<Response>
 
     // Subscription revoked or canceled
     if (event.type === 'subscription.revoked' || event.type === 'subscription.canceled') {
-      if (userId) {
-        if (periodEnd && new Date(periodEnd) > new Date()) {
-          await db.from('profiles').update({ is_premium: true, premium_until: periodEnd }).eq('id', userId);
-        } else {
-          await db.from('profiles').update({ is_premium: false, premium_until: null }).eq('id', userId);
-        }
-      }
+      await findAndDowngrade(db, userId, customerEmail, periodEnd);
     }
 
     if (event.type === 'subscription.uncanceled') {
-      if (userId) {
-        await activatePremium(db, userId, periodEnd);
-      }
+      await findAndActivate(db, userId, customerEmail, periodEnd);
     }
 
     if (event.type === 'subscription.incomplete' || event.type === 'subscription.past_due') {
@@ -411,18 +424,17 @@ async function handleDiagnose(env: Env, headers: Record<string, string>): Promis
   const results: any = {};
   try {
     const db = supabaseAdmin(env);
-    const { data, error } = await db.from('profiles').select('id').limit(1);
-    results.supabase = { ok: !error, error: error?.message || null, hasData: data && data.length > 0 };
-    if (!error) {
-      results.supabase.firstId = data?.[0]?.id;
-    }
-    // Check if the user from Polar webhook exists
+    // List a few profile IDs and emails to find the match
+    const { data: profiles } = await db.from('profiles').select('id, email, is_premium').limit(20);
+    results.profiles = profiles || [];
+    // Try case-insensitive email match
+    const { data: emailMatch } = await db.from('profiles').select('id, email, is_premium').ilike('email', 'workuni59@gmail.com').maybeSingle();
+    results.lookup_by_email_ilike = emailMatch || { found: false };
+    // Check the Polar userId directly
     const { data: byId } = await db.from('profiles').select('id, email, is_premium').eq('id', 'c9f55212-8b6a-4b4b-8337-437bf9ae54a8').maybeSingle();
     results.lookup_by_user_id = byId ? { found: true, email: byId.email, is_premium: byId.is_premium } : { found: false };
-    const { data: byEmail } = await db.from('profiles').select('id, email, is_premium').eq('email', 'workuni59@gmail.com').maybeSingle();
-    results.lookup_by_email = byEmail ? { found: true, id: byEmail.id, is_premium: byEmail.is_premium } : { found: false };
   } catch (err: any) {
-    results.supabase = { ok: false, error: err.message };
+    results.error = err.message;
   }
   results.env = {
     hasSupabaseUrl: !!env.SUPABASE_URL,

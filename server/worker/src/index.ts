@@ -186,7 +186,9 @@ async function handleCreateCheckout(
     body: JSON.stringify({
       organization_id: orgId,
       customer_email: email || undefined,
+      external_customer_id: userId,
       metadata: { user_id: userId },
+      customer_metadata: { user_id: userId },
       success_url: returnUrl || `${requestOrigin}/settings?upgrade=success`,
       products: [productId],
     }),
@@ -201,6 +203,32 @@ async function handleCreateCheckout(
   }
 
   return new Response(JSON.stringify({ url: data?.url }), { status: 200, headers });
+}
+
+function extractUserId(data: any): string | undefined {
+  if (!data) return;
+  // Check metadata at top level (checkout events use this, also copied to subscription)
+  if (data.metadata?.user_id) return String(data.metadata.user_id);
+  // Check customer_metadata on checkout
+  if (data.customer_metadata?.user_id) return String(data.customer_metadata.user_id);
+  // Check customer.metadata (subscription events nest customer)
+  if (data.customer?.metadata?.user_id) return String(data.customer.metadata.user_id);
+  // Check external_customer_id (set on checkout creation)
+  if (data.external_customer_id) return String(data.external_customer_id);
+  // Check customer.external_id
+  if (data.customer?.external_id) return String(data.customer.external_id);
+}
+
+async function activatePremium(db: ReturnType<typeof supabaseAdmin>, userId: string, periodEnd?: string | null) {
+  const { error } = await db.from('profiles').update({
+    is_premium: true,
+    premium_until: periodEnd || null,
+  }).eq('id', userId);
+  if (error) {
+    console.error(`[Webhook] DB update failed for ${userId}:`, error);
+  } else {
+    console.log(`[Webhook] Premium activated for ${userId}`);
+  }
 }
 
 async function handlePolarWebhook(request: Request, env: Env): Promise<Response> {
@@ -228,34 +256,78 @@ async function handlePolarWebhook(request: Request, env: Env): Promise<Response>
     const event = JSON.parse(raw);
     const db = supabaseAdmin(env);
 
+    console.log(`[Webhook] Received ${event.type}`);
+
+    // Extract user_id from multiple possible paths
+    const userId = extractUserId(event.data);
+    const periodEnd = event.data?.current_period_end;
+    const subStatus = event.data?.status;
+    const checkoutStatus = event.data?.status;
+
+    // Checkout completed — activate premium (subscription events will set correct premium_until)
     if (event.type === 'checkout.created' || event.type === 'checkout.updated') {
-      const userId = event.data?.metadata?.user_id;
-      const isPaid = event.data?.status === 'succeeded' || event.data?.status === 'paid' || event.data?.status === 'confirmed';
-      if (userId && isPaid) {
-        await db.from('profiles').update({ is_premium: true, premium_until: event.data?.expires_at || null }).eq('id', userId);
+      if (checkoutStatus === 'succeeded' || checkoutStatus === 'paid' || checkoutStatus === 'confirmed') {
+        if (userId) {
+          await activatePremium(db, userId);
+        } else {
+          console.error(`[Webhook] checkout.${event.type.split('.')[1]} missing userId for status ${checkoutStatus}`);
+        }
       }
     }
 
+    // Subscription created (trial or instant) — activate premium
     if (event.type === 'subscription.created') {
-      const userId = event.data?.metadata?.user_id;
-      const subStatus = event.data?.status;
-      // Fires on trial start (status: "trialing") or immediate subscription
       if (userId && (subStatus === 'trialing' || subStatus === 'active' || subStatus === 'incomplete')) {
-        await db.from('profiles').update({ is_premium: true, premium_until: event.data?.current_period_end || null }).eq('id', userId);
+        await activatePremium(db, userId, periodEnd);
+      } else if (userId) {
+        console.log(`[Webhook] subscription.created ignored (status: ${subStatus})`);
+      } else {
+        console.error(`[Webhook] subscription.created missing userId`);
       }
     }
 
+    // Subscription active or updated — activate premium
     if (event.type === 'subscription.active' || event.type === 'subscription.updated') {
-      const userId = event.data?.metadata?.user_id;
       if (userId) {
-        await db.from('profiles').update({ is_premium: true, premium_until: event.data?.current_period_end || null }).eq('id', userId);
+        await activatePremium(db, userId, periodEnd);
       }
     }
 
-    if (event.type === 'subscription.revoked' || event.type === 'subscription.canceled') {
-      const userId = event.data?.metadata?.user_id;
+    // Order events (payment processed) — activate premium
+    if (event.type === 'order.paid' || event.type === 'order.created') {
       if (userId) {
-        const periodEnd = event.data?.current_period_end;
+        await activatePremium(db, userId, periodEnd);
+      } else {
+        // Try to match by email for order events
+        const customerEmail = event.data?.customer?.email || event.data?.billing_reason;
+        if (customerEmail) {
+          const { data: match } = await db.from('profiles').select('id').eq('email', customerEmail).maybeSingle();
+          if (match) {
+            await activatePremium(db, match.id, periodEnd);
+          }
+        }
+      }
+    }
+
+    // Customer state changed — sync premium
+    if (event.type === 'customer.state_changed') {
+      const email = event.data?.customer?.email;
+      if (email) {
+        const { data: match } = await db.from('profiles').select('id, is_premium, premium_until').eq('email', email).maybeSingle();
+        if (match) {
+          const hasActiveSub = event.data?.active_subscriptions?.length > 0;
+          if (hasActiveSub) {
+            await activatePremium(db, match.id);
+          } else if (match.is_premium) {
+            await db.from('profiles').update({ is_premium: false, premium_until: null }).eq('id', match.id);
+          }
+        }
+      }
+    }
+
+    // Subscription revoked or canceled
+    if (event.type === 'subscription.revoked' || event.type === 'subscription.canceled') {
+      if (userId) {
         if (periodEnd && new Date(periodEnd) > new Date()) {
           await db.from('profiles').update({ is_premium: true, premium_until: periodEnd }).eq('id', userId);
         } else {
@@ -265,21 +337,19 @@ async function handlePolarWebhook(request: Request, env: Env): Promise<Response>
     }
 
     if (event.type === 'subscription.uncanceled') {
-      const userId = event.data?.metadata?.user_id;
       if (userId) {
-        await db.from('profiles').update({ is_premium: true, premium_until: event.data?.current_period_end || null }).eq('id', userId);
+        await activatePremium(db, userId, periodEnd);
       }
     }
 
     if (event.type === 'subscription.incomplete' || event.type === 'subscription.past_due') {
-      const userId = event.data?.metadata?.user_id;
-      console.warn(`[Webhook] Subscription issue for ${userId}: ${event.type}`);
+      console.warn(`[Webhook] Subscription issue for ${userId || '?'}: ${event.type}`);
     }
 
     // Log unhandled event types
     const handledTypes = ['checkout.created', 'checkout.updated', 'subscription.created', 'subscription.active',
       'subscription.updated', 'subscription.revoked', 'subscription.canceled', 'subscription.uncanceled',
-      'subscription.incomplete', 'subscription.past_due'];
+      'subscription.incomplete', 'subscription.past_due', 'order.paid', 'order.created', 'customer.state_changed'];
     if (!handledTypes.includes(event.type)) {
       console.warn(`[Webhook] Unhandled event type: ${event.type}`);
     }

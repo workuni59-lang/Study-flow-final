@@ -17,9 +17,18 @@ interface Env {
 
 // ── Simple in-memory rate limiter (per IP, sliding window) ──
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT_CLEANUP_INTERVAL = 300_000; // 5 min
+let lastCleanup = Date.now();
 
 function checkRateLimit(clientIp: string, maxRequests: number, windowMs: number): boolean {
+  // Lazy cleanup of stale entries
   const now = Date.now();
+  if (now - lastCleanup > RATE_LIMIT_CLEANUP_INTERVAL) {
+    for (const [ip, entry] of rateLimitMap) {
+      if (now > entry.resetAt) rateLimitMap.delete(ip);
+    }
+    lastCleanup = now;
+  }
   const entry = rateLimitMap.get(clientIp);
   if (!entry || now > entry.resetAt) {
     rateLimitMap.set(clientIp, { count: 1, resetAt: now + windowMs });
@@ -29,14 +38,6 @@ function checkRateLimit(clientIp: string, maxRequests: number, windowMs: number)
   entry.count++;
   return true;
 }
-
-// Clean up stale entries every 5 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [ip, entry] of rateLimitMap) {
-    if (now > entry.resetAt) rateLimitMap.delete(ip);
-  }
-}, 5 * 60 * 1000);
 
 function corsHeaders(origin: string, env: Env): Record<string, string> {
   const allowed = env.FRONTEND_URL || 'http://localhost:3000';

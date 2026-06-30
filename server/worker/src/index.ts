@@ -41,7 +41,7 @@ function checkRateLimit(clientIp: string, maxRequests: number, windowMs: number)
 
 function corsHeaders(origin: string, env: Env): Record<string, string> {
   const allowed = env.FRONTEND_URL || 'http://localhost:3000';
-  const isAllowed = !origin || origin === allowed || origin.endsWith('.studyflow.space');
+  const isAllowed = !origin || origin === allowed || origin === 'https://studyflow.space' || origin === 'https://www.studyflow.space' || origin.endsWith('.studyflow.space');
   return {
     'Access-Control-Allow-Origin': isAllowed ? origin : allowed,
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',

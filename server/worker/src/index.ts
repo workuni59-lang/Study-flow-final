@@ -133,6 +133,8 @@ export default {
           return handleCheckoutSuccess(url, env, origin);
         case url.pathname === '/api/dev-activate' && request.method === 'POST':
           return handleDevActivate(request, env, headers);
+        case url.pathname === '/api/diagnose' && request.method === 'GET':
+          return handleDiagnose(env, headers);
         case url.pathname === '/api/send-verification-code' && request.method === 'POST':
           return handleSendVerificationCode(request, env, headers);
         case url.pathname === '/api/verify-code' && request.method === 'POST':
@@ -403,6 +405,29 @@ async function handleCheckoutSuccess(url: URL, env: Env, origin: string): Promis
   }
 
   return new Response(null, { status: 302, headers: { Location: `${frontendUrl}/settings?upgrade=success`, ...csHeaders } });
+}
+
+async function handleDiagnose(env: Env, headers: Record<string, string>): Promise<Response> {
+  const results: any = {};
+  try {
+    const db = supabaseAdmin(env);
+    const { data, error } = await db.from('profiles').select('id').limit(1);
+    results.supabase = { ok: !error, error: error?.message || null, hasData: data && data.length > 0 };
+    if (!error) {
+      results.supabase.firstId = data?.[0]?.id;
+    }
+  } catch (err: any) {
+    results.supabase = { ok: false, error: err.message };
+  }
+  results.env = {
+    hasSupabaseUrl: !!env.SUPABASE_URL,
+    hasServiceKey: !!env.SUPABASE_SERVICE_ROLE_KEY,
+    hasPolarToken: !!env.POLAR_ACCESS_TOKEN,
+    hasWebhookSecret: !!env.POLAR_WEBHOOK_SECRET,
+    frontendUrl: env.FRONTEND_URL || '(not set)',
+    polarApi: env.POLAR_API_URL || '(default)',
+  };
+  return new Response(JSON.stringify(results, null, 2), { status: 200, headers });
 }
 
 async function handleDevActivate(

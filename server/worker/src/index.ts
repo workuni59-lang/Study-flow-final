@@ -416,6 +416,11 @@ async function handleDiagnose(env: Env, headers: Record<string, string>): Promis
     if (!error) {
       results.supabase.firstId = data?.[0]?.id;
     }
+    // Check if the user from Polar webhook exists
+    const { data: byId } = await db.from('profiles').select('id, email, is_premium').eq('id', 'c9f55212-8b6a-4b4b-8337-437bf9ae54a8').maybeSingle();
+    results.lookup_by_user_id = byId ? { found: true, email: byId.email, is_premium: byId.is_premium } : { found: false };
+    const { data: byEmail } = await db.from('profiles').select('id, email, is_premium').eq('email', 'workuni59@gmail.com').maybeSingle();
+    results.lookup_by_email = byEmail ? { found: true, id: byEmail.id, is_premium: byEmail.is_premium } : { found: false };
   } catch (err: any) {
     results.supabase = { ok: false, error: err.message };
   }

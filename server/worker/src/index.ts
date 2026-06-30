@@ -235,34 +235,55 @@ async function activatePremium(db: ReturnType<typeof supabaseAdmin>, userId: str
   }
 }
 
-async function findAndActivate(db: ReturnType<typeof supabaseAdmin>, userId: string | undefined, email: string | undefined | null, periodEnd?: string | null) {
+async function findAndActivate(db: ReturnType<typeof supabaseAdmin>, userId: string | undefined, email: string | undefined | null, periodEnd?: string | null, supabaseUrl?: string, serviceKey?: string) {
   if (userId) {
     const { data: match } = await db.from('profiles').select('id').eq('id', userId).maybeSingle();
     if (match) {
       await activatePremium(db, match.id, periodEnd);
       return;
     }
-    console.log(`[Webhook] userId ${userId} not found in profiles, trying email`);
+    console.log(`[Webhook] userId ${userId} not found in profiles`);
   }
-  if (email) {
-    const { data: match } = await db.from('profiles').select('id').ilike('email', email).maybeSingle();
-    if (match) {
-      await activatePremium(db, match.id, periodEnd);
-      return;
+  // Fallback: query auth.users by email via REST API (service_role bypasses auth schema RLS)
+  if (email && supabaseUrl && serviceKey) {
+    try {
+      const url = `${supabaseUrl}/rest/v1/auth/users?select=id&email=eq.${encodeURIComponent(email)}&limit=1`;
+      const res = await fetch(url, {
+        headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` }
+      });
+      if (res.ok) {
+        const users = await res.json() as any[];
+        if (users?.length) {
+          await activatePremium(db, users[0].id, periodEnd);
+          return;
+        }
+      }
+    } catch (err) {
+      console.error(`[Webhook] auth.users lookup failed for ${email}:`, err);
     }
-    console.error(`[Webhook] No profile found for userId=${userId} email=${email}`);
   }
+  console.error(`[Webhook] No profile found for userId=${userId} email=${email}`);
 }
 
-async function findAndDowngrade(db: ReturnType<typeof supabaseAdmin>, userId: string | undefined, email: string | undefined | null, periodEnd?: string | null) {
-  let id = userId;
-  if (id) {
-    const { data: match } = await db.from('profiles').select('id').eq('id', id).maybeSingle();
-    if (!match) id = undefined;
+async function findAndDowngrade(db: ReturnType<typeof supabaseAdmin>, userId: string | undefined, email: string | undefined | null, periodEnd?: string | null, supabaseUrl?: string, serviceKey?: string) {
+  let id: string | undefined;
+  if (userId) {
+    const { data: match } = await db.from('profiles').select('id').eq('id', userId).maybeSingle();
+    if (match) id = userId;
   }
-  if (!id && email) {
-    const { data: match } = await db.from('profiles').select('id').ilike('email', email).maybeSingle();
-    if (match) id = match.id;
+  if (!id && email && supabaseUrl && serviceKey) {
+    try {
+      const url = `${supabaseUrl}/rest/v1/auth/users?select=id&email=eq.${encodeURIComponent(email)}&limit=1`;
+      const res = await fetch(url, {
+        headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` }
+      });
+      if (res.ok) {
+        const users = await res.json() as any[];
+        if (users?.length) id = users[0].id;
+      }
+    } catch (err) {
+      console.error(`[Webhook] auth.users lookup failed for downgrade:`, err);
+    }
   }
   if (id) {
     if (periodEnd && new Date(periodEnd) > new Date()) {
@@ -325,18 +346,38 @@ async function handlePolarWebhook(request: Request, env: Env): Promise<Response>
     const periodEnd = event.data?.current_period_end;
     const subStatus = event.data?.status;
     const checkoutStatus = event.data?.status;
+    const supUrl = env.SUPABASE_URL;
+    const svcKey = env.SUPABASE_SERVICE_ROLE_KEY;
+
+    // Helper for auth.users email lookup
+    async function resolveProfileId(email: string | undefined | null): Promise<string | null> {
+      if (!email || !supUrl || !svcKey) return null;
+      try {
+        const url = `${supUrl}/rest/v1/auth/users?select=id&email=eq.${encodeURIComponent(email)}&limit=1`;
+        const res = await fetch(url, {
+          headers: { apikey: svcKey, Authorization: `Bearer ${svcKey}` }
+        });
+        if (res.ok) {
+          const users = await res.json() as any[];
+          if (users?.length) return users[0].id;
+        }
+      } catch (err) {
+        console.error(`[Webhook] auth.users lookup failed:`, err);
+      }
+      return null;
+    }
 
     // Checkout completed — activate premium
     if (event.type === 'checkout.created' || event.type === 'checkout.updated') {
       if (checkoutStatus === 'succeeded' || checkoutStatus === 'paid' || checkoutStatus === 'confirmed') {
-        await findAndActivate(db, userId, customerEmail);
+        await findAndActivate(db, userId, customerEmail, undefined, supUrl, svcKey);
       }
     }
 
     // Subscription created (trial or instant) — activate premium
     if (event.type === 'subscription.created') {
       if (subStatus === 'trialing' || subStatus === 'active' || subStatus === 'incomplete') {
-        await findAndActivate(db, userId, customerEmail, periodEnd);
+        await findAndActivate(db, userId, customerEmail, periodEnd, supUrl, svcKey);
       } else {
         console.log(`[Webhook] subscription.created ignored (status: ${subStatus})`);
       }
@@ -344,37 +385,36 @@ async function handlePolarWebhook(request: Request, env: Env): Promise<Response>
 
     // Subscription active or updated — activate premium
     if (event.type === 'subscription.active' || event.type === 'subscription.updated') {
-      await findAndActivate(db, userId, customerEmail, periodEnd);
+      await findAndActivate(db, userId, customerEmail, periodEnd, supUrl, svcKey);
     }
 
     // Order events (payment processed) — activate premium
     if (event.type === 'order.paid' || event.type === 'order.created') {
-      await findAndActivate(db, userId, customerEmail, periodEnd);
+      await findAndActivate(db, userId, customerEmail, periodEnd, supUrl, svcKey);
     }
 
     // Customer state changed — sync premium
     if (event.type === 'customer.state_changed') {
-      // Find user by email
-      if (customerEmail) {
-        const { data: match } = await db.from('profiles').select('id, is_premium, premium_until').ilike('email', customerEmail).maybeSingle();
-        if (match) {
-          const hasActiveSub = event.data?.active_subscriptions?.length > 0;
-          if (hasActiveSub) {
-            await activatePremium(db, match.id);
-          } else if (match.is_premium) {
-            await db.from('profiles').update({ is_premium: false, premium_until: null }).eq('id', match.id);
-          }
+      const resolvedId = userId && (await db.from('profiles').select('id').eq('id', userId).maybeSingle()).data?.id
+        ? userId
+        : await resolveProfileId(customerEmail);
+      if (resolvedId) {
+        const hasActiveSub = event.data?.active_subscriptions?.length > 0;
+        if (hasActiveSub) {
+          await activatePremium(db, resolvedId);
+        } else if ((await db.from('profiles').select('is_premium').eq('id', resolvedId).maybeSingle()).data?.is_premium) {
+          await db.from('profiles').update({ is_premium: false, premium_until: null }).eq('id', resolvedId);
         }
       }
     }
 
     // Subscription revoked or canceled
     if (event.type === 'subscription.revoked' || event.type === 'subscription.canceled') {
-      await findAndDowngrade(db, userId, customerEmail, periodEnd);
+      await findAndDowngrade(db, userId, customerEmail, periodEnd, supUrl, svcKey);
     }
 
     if (event.type === 'subscription.uncanceled') {
-      await findAndActivate(db, userId, customerEmail, periodEnd);
+      await findAndActivate(db, userId, customerEmail, periodEnd, supUrl, svcKey);
     }
 
     if (event.type === 'subscription.incomplete' || event.type === 'subscription.past_due') {
@@ -424,15 +464,26 @@ async function handleDiagnose(env: Env, headers: Record<string, string>): Promis
   const results: any = {};
   try {
     const db = supabaseAdmin(env);
-    // List a few profile IDs and emails to find the match
-    const { data: profiles } = await db.from('profiles').select('id, email, is_premium').limit(20);
+    // List profiles (no email column, just id, display_name, is_premium)
+    const { data: profiles } = await db.from('profiles').select('id, display_name, is_premium, premium_until').limit(20);
     results.profiles = profiles || [];
-    // Try case-insensitive email match
-    const { data: emailMatch } = await db.from('profiles').select('id, email, is_premium').ilike('email', 'workuni59@gmail.com').maybeSingle();
-    results.lookup_by_email_ilike = emailMatch || { found: false };
+    // Try auth.users lookup by email
+    const supUrl = env.SUPABASE_URL;
+    const svcKey = env.SUPABASE_SERVICE_ROLE_KEY;
+    let authUsers: any[] = [];
+    if (supUrl && svcKey) {
+      try {
+        const url = `${supUrl}/rest/v1/auth/users?select=id,email&email=eq.workuni59%40gmail.com&limit=5`;
+        const res = await fetch(url, {
+          headers: { apikey: svcKey, Authorization: `Bearer ${svcKey}` }
+        });
+        if (res.ok) authUsers = await res.json() as any[];
+      } catch {}
+    }
+    results.auth_users_lookup = authUsers.length ? authUsers : { found: false };
     // Check the Polar userId directly
-    const { data: byId } = await db.from('profiles').select('id, email, is_premium').eq('id', 'c9f55212-8b6a-4b4b-8337-437bf9ae54a8').maybeSingle();
-    results.lookup_by_user_id = byId ? { found: true, email: byId.email, is_premium: byId.is_premium } : { found: false };
+    const { data: byId } = await db.from('profiles').select('id, display_name, is_premium').eq('id', 'c9f55212-8b6a-4b4b-8337-437bf9ae54a8').maybeSingle();
+    results.lookup_by_user_id = byId || { found: false };
   } catch (err: any) {
     results.error = err.message;
   }

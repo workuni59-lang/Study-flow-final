@@ -124,7 +124,7 @@ export const HomeView = memo(({ onNotepadOpen, onQuestsOpen, onMusicOpen, onProg
 
         {/* Quote — on mobile (stacked), hidden on desktop */}
         {themeConfig.showQuote !== false && (
-          <p className="font-serif italic text-white/80 text-lg text-center max-w-[480px] mb-6 leading-relaxed lg:hidden">
+          <p className="font-quote text-white/80 text-lg text-center max-w-[480px] mb-6 leading-relaxed lg:hidden">
             &ldquo;{quote.text}&rdquo;
           </p>
         )}
@@ -218,13 +218,18 @@ export const HomeView = memo(({ onNotepadOpen, onQuestsOpen, onMusicOpen, onProg
           )}
         </div>
       )}
-      {/* Quote — left sidebar on desktop */}
+      {/* Quote — right sidebar on desktop, stacked on mobile */}
       {themeConfig.showQuote !== false && (
-        <div className="hidden lg:fixed lg:left-12 lg:top-1/2 lg:-translate-y-1/2 lg:z-20 lg:block lg:max-w-[260px]">
-          <p className="font-serif italic text-white/80 text-base leading-relaxed">
+        <>
+          <div className="hidden lg:fixed lg:right-10 lg:top-28 lg:z-20 lg:block lg:max-w-[260px]">
+            <p className="font-quote text-white/70 text-lg leading-snug">
+              &ldquo;{quote.text}&rdquo;
+            </p>
+          </div>
+          <p className="font-quote text-white/80 text-lg text-center max-w-[480px] mb-6 leading-relaxed lg:hidden">
             &ldquo;{quote.text}&rdquo;
           </p>
-        </div>
+        </>
       )}
     </div>
   );

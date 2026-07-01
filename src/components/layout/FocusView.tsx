@@ -1,6 +1,8 @@
 import { useMemo, memo } from 'react';
-import { CheckSquare, Headphones, PenSquare, Target, X } from 'lucide-react';
+import { CheckSquare, Headphones, PenSquare, Target } from 'lucide-react';
 import { StudyTimer } from '../dashboard/StudyTimer';
+import { StopwatchView } from '../dashboard/StopwatchView';
+import { useNavigationContext } from '../../hooks/useNavigationContext';
 
 interface FocusViewProps {
   onTasksOpen: () => void;
@@ -17,12 +19,17 @@ const panelButtons = [
 ] as const;
 
 export const FocusView = memo(({ onTasksOpen, onMusicOpen, onNotepadOpen, onQuestsOpen }: FocusViewProps) => {
+  const { timerId } = useNavigationContext();
   const handlers = useMemo(() => ({
     tasks: onTasksOpen,
     ambience: onMusicOpen,
     notes: onNotepadOpen,
     quests: onQuestsOpen,
   }), [onTasksOpen, onMusicOpen, onNotepadOpen, onQuestsOpen]);
+
+  if (timerId === 'stopwatch') {
+    return <StopwatchView />;
+  }
 
   return (
     <div className="flex flex-col items-center justify-center px-6 pb-24 lg:pb-12 text-center min-h-screen">

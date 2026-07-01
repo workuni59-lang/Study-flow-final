@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, memo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Clock, Zap, Flame, PenSquare, Target, Music, ArrowUpRight, Sparkles } from 'lucide-react';
+import { Clock, Zap, Flame, PenSquare, Target, Music, ArrowUpRight, Sparkles, StopCircle } from 'lucide-react';
 import { useStudy, useFocus } from '../../context/StudyContext';
 import { useAuth } from '../../context/AuthContext';
 import { PROGRESSION_BADGES } from '../../lib/progression';
@@ -41,6 +42,7 @@ export const HomeView = memo(({ onNotepadOpen, onQuestsOpen, onMusicOpen, onProg
   menuOpen?: boolean;
 }) => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { focusSession } = useFocus();
   const { userStats, themeConfig, progression, subjects, todayFocusSeconds, dailyGoal } = useStudy();
   const [time, setTime] = useState(new Date());
@@ -193,6 +195,15 @@ export const HomeView = memo(({ onNotepadOpen, onQuestsOpen, onMusicOpen, onProg
             </div>
           ))}
         </div>
+
+        {/* Stopwatch trigger */}
+        <button
+          onClick={() => navigate('/focus/stopwatch')}
+          className={`mt-5 w-full max-w-xs flex items-center justify-center gap-2 py-3 rounded-xl ${panelBg} border ${panelBorder} ${panelHover} transition-all text-[11px] font-semibold uppercase tracking-wider ${t}/70`}
+        >
+          <StopCircle size={16} />
+          Stopwatch
+        </button>
 
         {/* Sign-in prompt for demo users */}
         <DemoSignUpNudge onOpenAuth={onOpenAuth} />

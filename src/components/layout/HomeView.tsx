@@ -222,7 +222,7 @@ export const HomeView = memo(({ onNotepadOpen, onQuestsOpen, onMusicOpen, onProg
       {themeConfig.showQuote !== false && (
         <>
           <div className="hidden lg:fixed lg:right-10 lg:top-28 lg:z-20 lg:block lg:max-w-[260px]">
-            <p className="font-quote text-white/70 text-lg leading-snug">
+            <p className="font-quote text-white/75 text-xl leading-snug font-medium">
               &ldquo;{quote.text}&rdquo;
             </p>
           </div>

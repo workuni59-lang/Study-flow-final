@@ -5,7 +5,7 @@
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Outfit", sans-serif;
-  --font-quote: "Instrument Serif", Georgia, serif;
+  --font-quote: "Playfair Display", Georgia, serif;
 
   --color-brand: #6366f1;
   --color-brand-light: #a5b4fc;

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, memo } from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import { ExternalLink, LayoutDashboard, LogIn, Target, Timer } from 'lucide-react';
+import { ExternalLink, LayoutDashboard, LogIn, Target } from 'lucide-react';
 import LadderIcon from '../ui/LadderIcon';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../../context/AuthContext';
@@ -88,16 +88,6 @@ export const TopBar = memo(({ mode, onModeChange, onMenuOpen, onOpenAuth, onLead
           >
             <Target className="w-3 h-3" />
             <span className="max-lg:hidden">Focus</span>
-          </NavLink>
-          <NavLink to={ROUTES.STOPWATCH}
-            className={({ isActive }) => `flex items-center gap-1.5 px-3 py-1.5 rounded-[7px] text-[9px] font-semibold uppercase tracking-wider transition-all ${
-              isActive
-                ? 'bg-white/10 text-white shadow-xs'
-                : 'text-white/60 hover:text-white/80'
-            }`}
-          >
-            <Timer className="w-3 h-3" />
-            <span className="max-lg:hidden">Timer</span>
           </NavLink>
         </div>
       </div>

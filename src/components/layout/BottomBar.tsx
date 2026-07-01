@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Target, Timer, CheckSquare, BarChart3, PenSquare, Zap, Menu } from 'lucide-react';
+import { LayoutDashboard, Target, CheckSquare, BarChart3, PenSquare, Zap, Menu } from 'lucide-react';
 import { ROUTES } from '../../lib/routes';
 import type { Mode } from './TopBar';
 
@@ -38,7 +38,6 @@ export const BottomBar = memo(({ mode, onModeChange, onTasksOpen, onStatsOpen, o
   <nav className="bottom-bar lg:hidden fixed bottom-0 left-0 right-0 z-50 flex flex-col bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
     <div className="flex items-center justify-around h-14 px-1">
       <NavTabButton to={ROUTES.HOME} end icon={LayoutDashboard} label="Home" />
-      <NavTabButton to={ROUTES.STOPWATCH} icon={Timer} label="Timer" />
       <NavTabButton to={ROUTES.FOCUS} icon={Target} label="Focus" tourTarget="focus" />
       
       <ActionTabButton onClick={onTasksOpen} icon={CheckSquare} label="Tasks" />

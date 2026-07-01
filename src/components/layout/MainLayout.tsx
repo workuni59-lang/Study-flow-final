@@ -39,6 +39,7 @@ const ProgressionViewLazy = lazy(() => import('../progression/ProgressionView').
 const LeaderboardViewLazy = lazy(() => import('../leaderboard/LeaderboardView').then(m => ({ default: m.LeaderboardView })));
 const ProfileViewLazy = lazy(() => import('../profile/ProfileView').then(m => ({ default: m.ProfileView })));
 const PomodoroLandingLazy = lazy(() => import('../pomodoro/PomodoroLanding').then(m => ({ default: m.PomodoroLanding })));
+const StopwatchViewLazy = lazy(() => import('../dashboard/StopwatchView').then(m => ({ default: m.StopwatchView })));
 
 const SimpleSpinner = () => <DashboardSkeleton />;
 
@@ -145,6 +146,12 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
             <motion.main key="pomodoro" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.15 }} className="main-layout-content">
               <Suspense fallback={<SimpleSpinner />}>
                 <PomodoroLandingLazy />
+              </Suspense>
+            </motion.main>
+          ) : section === 'stopwatch' ? (
+            <motion.main key="stopwatch" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.15 }} className="main-layout-content">
+              <Suspense fallback={<SimpleSpinner />}>
+                <StopwatchViewLazy />
               </Suspense>
             </motion.main>
           ) : isFullView ? (

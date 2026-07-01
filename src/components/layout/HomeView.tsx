@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Clock, Zap, Flame, PenSquare, Target, Music, ArrowUpRight, Sparkles, StopCircle } from 'lucide-react';
+import { Clock, Zap, Flame, PenSquare, Target, Music, ArrowUpRight, Sparkles, Timer } from 'lucide-react';
 import { useStudy, useFocus } from '../../context/StudyContext';
 import { useAuth } from '../../context/AuthContext';
 import { PROGRESSION_BADGES } from '../../lib/progression';
@@ -196,12 +196,12 @@ export const HomeView = memo(({ onNotepadOpen, onQuestsOpen, onMusicOpen, onProg
           ))}
         </div>
 
-        {/* Stopwatch trigger */}
+        {/* Stopwatch trigger — high contrast brand-colored button */}
         <button
-          onClick={() => navigate('/focus/stopwatch')}
-          className={`mt-5 w-full max-w-xs flex items-center justify-center gap-2 py-3 rounded-xl ${panelBg} border ${panelBorder} ${panelHover} transition-all text-[11px] font-semibold uppercase tracking-wider ${t}/70`}
+          onClick={() => navigate('/stopwatch')}
+          className="mt-5 w-full max-w-xs flex items-center justify-center gap-2.5 py-3 rounded-xl bg-indigo-500/90 hover:bg-indigo-500 text-white text-[11px] font-semibold uppercase tracking-wider transition-all shadow-lg shadow-indigo-500/20 active:scale-[0.98]"
         >
-          <StopCircle size={16} />
+          <Timer size={16} />
           Stopwatch
         </button>
 

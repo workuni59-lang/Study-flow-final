@@ -40,6 +40,7 @@ const QuestsViewLazy = lazy(() => import('../quests/QuestsView').then(m => ({ de
 const LeaderboardViewLazy = lazy(() => import('../leaderboard/LeaderboardView').then(m => ({ default: m.LeaderboardView })));
 const ProfileViewLazy = lazy(() => import('../profile/ProfileView').then(m => ({ default: m.ProfileView })));
 const PomodoroLandingLazy = lazy(() => import('../pomodoro/PomodoroLanding').then(m => ({ default: m.PomodoroLanding })));
+const StopwatchViewLazy = lazy(() => import('../dashboard/StopwatchView').then(m => ({ default: m.StopwatchView })));
 
 const MobileSkeleton = () => <DashboardSkeleton />;
 
@@ -192,6 +193,12 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
             <motion.main key="pomodoro" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.15 }} className="p-3 md:p-4 pb-28">
               <Suspense fallback={<MobileSkeleton />}>
                 <PomodoroLandingLazy />
+              </Suspense>
+            </motion.main>
+          ) : section === 'stopwatch' ? (
+            <motion.main key="stopwatch" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.15 }} className="p-3 md:p-4 pb-28">
+              <Suspense fallback={<MobileSkeleton />}>
+                <StopwatchViewLazy />
               </Suspense>
             </motion.main>
           ) : isFullView ? (

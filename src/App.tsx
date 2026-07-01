@@ -130,6 +130,7 @@ export default function App() {
             <Route path="/settings" element={<AppContent />} />
             <Route path="/themes" element={<AppContent />} />
             <Route path="/pomodoro" element={<AppContent />} />
+            <Route path="/stopwatch" element={<AppContent />} />
             <Route path="/reset-password" element={<ResetPasswordForm />} />
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsPage />} />

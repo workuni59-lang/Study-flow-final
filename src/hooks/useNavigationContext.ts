@@ -56,6 +56,8 @@ export function useNavigationContext(): NavigationContext {
     section = 'profile';
   } else if (path.startsWith('/pomodoro')) {
     section = 'pomodoro';
+  } else if (path.startsWith('/stopwatch')) {
+    section = 'stopwatch';
   } else if (path.includes('/tasks')) {
     section = 'dashboard';
     activePanel = 'tasks';
@@ -76,7 +78,8 @@ export function useNavigationContext(): NavigationContext {
   } else if (path === '/pomodoro') {
     section = 'pomodoro';
     timerId = 'pomodoro';
-  } else if (path.includes('/stopwatch')) {
+  } else if (path === '/stopwatch') {
+    section = 'stopwatch';
     timerId = 'stopwatch';
   } else if (path.includes('/deep')) {
     timerId = 'deep';

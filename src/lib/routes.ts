@@ -11,6 +11,7 @@ export const ROUTES = {
   SETTINGS: '/settings',
   PROFILE: (id: string) => `/profile/${id}`,
   POMODORO: '/pomodoro',
+  STOPWATCH: '/stopwatch',
   
   // Timer Modes
   FOCUS_POMODORO: '/focus/pomodoro',

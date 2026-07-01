@@ -107,25 +107,23 @@ export const HomeView = memo(({ onNotepadOpen, onQuestsOpen, onMusicOpen, onProg
       </button>
 
       {/* Central content */}
-      <div data-tour-target="dashboard" className="relative z-10 flex flex-col items-center w-full max-w-lg lg:max-w-2xl animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+      <div data-tour-target="dashboard" className="relative z-10 flex flex-col items-center w-full max-w-sm animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
         {/* Greeting / Quote / Clock — grouped for tour */}
-        <div id="tour-clock-area" className="flex flex-col lg:flex-row items-center lg:items-start gap-4 lg:gap-8 w-full">
-          <div className="flex flex-col items-center lg:items-start flex-1 min-w-0">
-            {themeConfig.showGreeting !== false && (
-              <p className="text-white/60 text-sm tracking-wide mb-2 text-center lg:text-left">
-                {getGreeting(user?.displayName?.split(' ')[0])}
-              </p>
-            )}
-            {themeConfig.showClock !== false && (
-              <div className="mb-3">
-                <ClockRenderer time={time} focusState={focusSession} />
-              </div>
-            )}
-          </div>
+        <div id="tour-clock-area" className="flex flex-col items-center w-full">
+          {themeConfig.showGreeting !== false && (
+            <p className="text-white/60 text-sm tracking-wide mb-2">
+              {getGreeting(user?.displayName?.split(' ')[0])}
+            </p>
+          )}
           {themeConfig.showQuote !== false && (
-            <p className="font-serif italic text-white/80 text-base text-center lg:text-left max-w-[280px] leading-relaxed shrink-0">
+            <p className="font-serif italic text-white/80 text-lg text-center max-w-[480px] mb-6 leading-relaxed lg:absolute lg:right-8 lg:top-1/3 lg:max-w-[260px] lg:mb-0 lg:text-left">
               &ldquo;{quote.text}&rdquo;
             </p>
+          )}
+          {themeConfig.showClock !== false && (
+            <div className="mb-3">
+              <ClockRenderer time={time} focusState={focusSession} />
+            </div>
           )}
         </div>
 

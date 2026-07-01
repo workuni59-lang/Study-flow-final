@@ -108,16 +108,11 @@ export const HomeView = memo(({ onNotepadOpen, onQuestsOpen, onMusicOpen, onProg
 
       {/* Central content */}
       <div data-tour-target="dashboard" className="relative z-10 flex flex-col items-center w-full max-w-sm animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-        {/* Greeting / Quote / Clock — grouped for tour */}
+        {/* Greeting / Clock — grouped for tour (quote moved to sidebar on desktop) */}
         <div id="tour-clock-area" className="flex flex-col items-center w-full">
           {themeConfig.showGreeting !== false && (
             <p className="text-white/60 text-sm tracking-wide mb-2">
               {getGreeting(user?.displayName?.split(' ')[0])}
-            </p>
-          )}
-          {themeConfig.showQuote !== false && (
-            <p className="font-serif italic text-white/80 text-lg text-center max-w-[480px] mb-6 leading-relaxed lg:absolute lg:right-8 lg:top-1/3 lg:max-w-[260px] lg:mb-0 lg:text-left">
-              &ldquo;{quote.text}&rdquo;
             </p>
           )}
           {themeConfig.showClock !== false && (
@@ -126,6 +121,13 @@ export const HomeView = memo(({ onNotepadOpen, onQuestsOpen, onMusicOpen, onProg
             </div>
           )}
         </div>
+
+        {/* Quote — on mobile (stacked), hidden on desktop */}
+        {themeConfig.showQuote !== false && (
+          <p className="font-serif italic text-white/80 text-lg text-center max-w-[480px] mb-6 leading-relaxed lg:hidden">
+            &ldquo;{quote.text}&rdquo;
+          </p>
+        )}
 
         {/* Focus time label + inline spotlight */}
         <p className={`text-[11px] ${t}/45 mb-4 flex items-center justify-center gap-1.5 flex-wrap`}>
@@ -214,6 +216,14 @@ export const HomeView = memo(({ onNotepadOpen, onQuestsOpen, onMusicOpen, onProg
               <Music size={16} />
             </button>
           )}
+        </div>
+      )}
+      {/* Quote — left sidebar on desktop */}
+      {themeConfig.showQuote !== false && (
+        <div className="hidden lg:fixed lg:left-12 lg:top-1/2 lg:-translate-y-1/2 lg:z-20 lg:block lg:max-w-[260px]">
+          <p className="font-serif italic text-white/80 text-base leading-relaxed">
+            &ldquo;{quote.text}&rdquo;
+          </p>
         </div>
       )}
     </div>

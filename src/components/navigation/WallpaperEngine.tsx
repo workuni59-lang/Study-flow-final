@@ -6,7 +6,7 @@ import { MOOD_GRADIENTS, MOOD_ANIMATED } from '../../lib/wallpapers';
 import { useReduceMotion } from '../../hooks/useReduceMotion';
 
 const VIDEO_WALLPAPERS: Record<string, string> = {
-  'aurora-cabin': 'https://customer-xxxxx.cloudflarestream.com/VIDEO_ID/manifest/video.m3u8',
+  'aurora-cabin': 'https://files.catbox.moe/r1ghol.mp4',
 };
 
 export const WallpaperEngine = ({ visible = true, staticOnly = false }: { visible?: boolean, staticOnly?: boolean }) => {

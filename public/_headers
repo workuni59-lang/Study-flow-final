@@ -4,7 +4,7 @@
   Strict-Transport-Security: max-age=15552000; includeSubDomains
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=()
-   Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' data: fonts.gstatic.com; img-src 'self' data: blob: images.unsplash.com; media-src https://*.orangefreesounds.com https://orangefreesounds.com; script-src 'self' 'unsafe-inline'; connect-src 'self' https://*.orangefreesounds.com https://orangefreesounds.com https://*.supabase.co https://api.polar.sh https://*.polar.sh https://api.resend.com https://studyflow-api.workuni59.workers.dev; frame-src https://open.spotify.com https://www.youtube.com; form-action 'self'; frame-ancestors 'none'; base-uri 'self'
+   Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' data: fonts.gstatic.com; img-src 'self' data: blob: images.unsplash.com; media-src https://*.orangefreesounds.com https://orangefreesounds.com; script-src 'self' 'unsafe-inline'; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com https://*.orangefreesounds.com https://orangefreesounds.com https://*.supabase.co https://api.polar.sh https://*.polar.sh https://api.resend.com https://studyflow-api.workuni59.workers.dev; frame-src https://open.spotify.com https://www.youtube.com; form-action 'self'; frame-ancestors 'none'; base-uri 'self'
 
 # PWA manifest — must have correct MIME type for browser to accept it
 /manifest.webmanifest

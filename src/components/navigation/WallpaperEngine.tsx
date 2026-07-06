@@ -210,7 +210,7 @@ export const WallpaperEngine = ({ visible = true, staticOnly = false }: { visibl
                     autoPlay
                     loop
                     playsInline
-                    className="absolute inset-0 w-full h-full"
+                    className="absolute inset-0 w-full h-full pointer-events-none"
                     style={{ objectFit: 'cover' }}
                   >
                     <source src={VIDEO_WALLPAPERS[themeConfig.wallpaper]} type="video/mp4" />

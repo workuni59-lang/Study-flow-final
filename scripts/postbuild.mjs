@@ -74,11 +74,12 @@ if (existsSync(wranglerPath)) {
   console.log('✓ Removed Worker main from wrangler.json');
 }
 
-// 5. Patch SW precache manifest: remove root index.html (now landing page) and landing/ pages
+// 5. Patch SW precache manifest: update root index.html → app/index.html (SPA was moved), remove landing/ pages
 const swPath = join(SRC, 'sw.js');
 if (existsSync(swPath)) {
   let sw = readFileSync(swPath, 'utf-8');
-  sw = sw.replace(/\{url:"index\.html",revision:"[^"]+"},?/g, '');
+  // SPA was moved from index.html to app/index.html by step 1 — update the URL in precache
+  sw = sw.replace(/\{url:"index\.html",revision:"([^"]+)"}(,?)/g, '{url:"app/index.html",revision:"$1"}$2');
   sw = sw.replace(/\{url:"landing\/[^"]+",revision:"[^"]+"},?/g, '');
   // Also remove standalone tool pages from precache (not part of PWA)
   for (const subdir of ['flip-clock', 'pomodoro-timer', 'study-timer', 'study-planner', 'study-with-me', 'aesthetic-stopwatch', 'studyflow-focus-timer', 'blog']) {

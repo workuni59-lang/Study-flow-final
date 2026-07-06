@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { driver, type DriveStep } from 'driver.js';
 import 'driver.js/dist/driver.css';
 
@@ -86,17 +85,5 @@ export function startTour() {
 }
 
 export const OnboardingTour = () => {
-  useEffect(() => {
-    const done = localStorage.getItem(TOUR_KEY);
-    if (done) return;
-
-    const timeout = setTimeout(() => {
-      const d = createDriver();
-      d.drive();
-    }, 800);
-
-    return () => clearTimeout(timeout);
-  }, []);
-
   return null;
 };

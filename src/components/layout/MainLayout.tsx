@@ -39,8 +39,6 @@ const ProgressionViewLazy = lazy(() => import('../progression/ProgressionView').
 const LeaderboardViewLazy = lazy(() => import('../leaderboard/LeaderboardView').then(m => ({ default: m.LeaderboardView })));
 const ProfileViewLazy = lazy(() => import('../profile/ProfileView').then(m => ({ default: m.ProfileView })));
 const PomodoroLandingLazy = lazy(() => import('../pomodoro/PomodoroLanding').then(m => ({ default: m.PomodoroLanding })));
-const StopwatchViewLazy = lazy(() => import('../dashboard/StopwatchView').then(m => ({ default: m.StopwatchView })));
-
 const SimpleSpinner = () => <DashboardSkeleton />;
 
 interface MainLayoutProps {
@@ -59,6 +57,30 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
   const [ambienceUrl, setAmbienceUrl] = useState<CuratedPlaylist | null>(null);
   const [spotlightSubjectId, setSpotlightSubjectId] = useState<string | null>(null);
   const [focusFullscreen, setFocusFullscreen] = useState(false);
+  const [idle, setIdle] = useState(false);
+  const idleTimer = useRef<ReturnType<typeof setTimeout>>();
+
+  // Auto-hide chrome in focus mode after inactivity
+  useEffect(() => {
+    if (mode !== 'focus') { setIdle(false); return; }
+    const reset = () => {
+      setIdle(false);
+      clearTimeout(idleTimer.current);
+      idleTimer.current = setTimeout(() => setIdle(true), 3000);
+    };
+    reset();
+    document.addEventListener('mousemove', reset, { passive: true });
+    document.addEventListener('touchstart', reset, { passive: true });
+    document.addEventListener('keydown', reset, { passive: true });
+    document.addEventListener('scroll', reset, { passive: true });
+    return () => {
+      clearTimeout(idleTimer.current);
+      document.removeEventListener('mousemove', reset);
+      document.removeEventListener('touchstart', reset);
+      document.removeEventListener('keydown', reset);
+      document.removeEventListener('scroll', reset);
+    };
+  }, [mode]);
 
   const setMode = (m: Mode) => {
     navigate(m === 'focus' ? ROUTES.FOCUS : ROUTES.HOME);
@@ -148,12 +170,6 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
                 <PomodoroLandingLazy />
               </Suspense>
             </motion.main>
-          ) : section === 'stopwatch' ? (
-            <motion.main key="stopwatch" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.15 }} className="main-layout-content">
-              <Suspense fallback={<SimpleSpinner />}>
-                <StopwatchViewLazy />
-              </Suspense>
-            </motion.main>
           ) : isFullView ? (
             <motion.div key={'full-' + section} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.15 }} className="min-h-screen">
               <header className="top-bar sticky top-0 z-30 bg-white/70 dark:bg-[#0a0c10]/70 backdrop-blur-2xl border-b border-slate-100 dark:border-slate-800">
@@ -191,17 +207,19 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
             </motion.div>
           ) : (
           <motion.div key={'dash-' + mode} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.15 }}>
-            {/* Top bar with mode toggle */}
+            {/* Top bar with mode toggle — auto-hides when idle in focus mode */}
             {!focusFullscreen && (
-            <TopBar
-              mode={mode}
-              onModeChange={setMode}
-              onMenuOpen={handleMenuOpen}
-              onOpenAuth={onOpenAuth}
-              onLeaderboardOpen={handleLeaderboardOpen}
-              onProfileOpen={user ? handleProfileOpen : undefined}
-              onStartTour={startTour}
-            />
+            <div className={`transition-all duration-700 ${mode === 'focus' && idle ? 'opacity-0 -translate-y-3 pointer-events-none' : 'opacity-100 translate-y-0'}`}>
+              <TopBar
+                mode={mode}
+                onModeChange={setMode}
+                onMenuOpen={handleMenuOpen}
+                onOpenAuth={onOpenAuth}
+                onLeaderboardOpen={handleLeaderboardOpen}
+                onProfileOpen={user ? handleProfileOpen : undefined}
+                onStartTour={startTour}
+              />
+            </div>
             )}
     
             {/* Main content */}
@@ -227,17 +245,19 @@ export const MainLayout = ({ onOpenAuth }: MainLayoutProps) => {
       )}
       </AnimatePresence>
 
-      {/* Bottom bar — rendered outside AnimatePresence so fixed positioning isn't broken by motion.div transforms */}
+      {/* Bottom bar — rendered outside AnimatePresence so fixed positioning isn't broken by motion.div transforms; auto-hides when idle in focus mode */}
       {!focusFullscreen && (
-      <BottomBar
-        mode={mode}
-        onModeChange={setMode}
-        onTasksOpen={handleTasksOpen}
-        onStatsOpen={handleStatsOpen}
-        onNotepadOpen={handleNotepadOpen}
-        onQuestsOpen={handleQuestsOpen}
-        onMenuOpen={handleMenuOpen}
-      />
+      <div className={`transition-all duration-700 ${mode === 'focus' && idle ? 'opacity-0 translate-y-3 pointer-events-none' : 'opacity-100 translate-y-0'}`}>
+        <BottomBar
+          mode={mode}
+          onModeChange={setMode}
+          onTasksOpen={handleTasksOpen}
+          onStatsOpen={handleStatsOpen}
+          onNotepadOpen={handleNotepadOpen}
+          onQuestsOpen={handleQuestsOpen}
+          onMenuOpen={handleMenuOpen}
+        />
+      </div>
       )}
       </div>
 

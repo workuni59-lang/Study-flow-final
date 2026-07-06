@@ -54,6 +54,10 @@ const STORAGE_KEYS = {
   ONBOARDING_COMPLETE: 'study_flow_onboarding_complete',
   // Wallpaper daily rotation
   WALLPAPER_ROTATION_DATE: 'study_flow_wallpaper_rotation_date',
+  // Stopwatch standalone wallpaper
+  STOPWATCH_WALLPAPER: 'study_flow_stopwatch_wallpaper',
+  // Stopwatch clock layout style
+  STOPWATCH_CLOCK_STYLE: 'study_flow_stopwatch_clock_style',
 };
 
 const safeGet = (key: string) => {
@@ -219,6 +223,14 @@ export const storage = {
   // --- Wallpaper Rotation ---
   saveWallpaperRotationDate: (date: string) => safeSet(STORAGE_KEYS.WALLPAPER_ROTATION_DATE, date),
   getWallpaperRotationDate: (): string | null => safeGet(STORAGE_KEYS.WALLPAPER_ROTATION_DATE),
+
+  // --- Stopwatch Wallpaper ---
+  saveStopwatchWallpaper: (id: string) => safeSet(STORAGE_KEYS.STOPWATCH_WALLPAPER, id),
+  getStopwatchWallpaper: (): string | null => safeGet(STORAGE_KEYS.STOPWATCH_WALLPAPER),
+
+  // --- Stopwatch Clock Style ---
+  saveStopwatchClockStyle: (id: string) => safeSet(STORAGE_KEYS.STOPWATCH_CLOCK_STYLE, id),
+  getStopwatchClockStyle: (): string | null => safeGet(STORAGE_KEYS.STOPWATCH_CLOCK_STYLE),
 
   // --- Generic (scoped: only removes study_flow_* and sf_game_* keys) ---
   clearAll: () => {

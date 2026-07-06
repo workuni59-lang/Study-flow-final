@@ -60,7 +60,7 @@ export type WallpaperId =
   | 'rose-quartz' | 'cobalt-night' | 'harvest' | 'moonlit-fog' | 'terra-cotta'
   | 'cozy-warm' | 'forest-deep'
   // Animated / Abstract
-  | 'none' | 'minimal' | 'dots' | 'mesh' | 'aurora' | 'stardust' | 'cyberpunk' | 'zen'
+  | 'none' | 'minimal' | 'dots' | 'mesh' | 'aurora' | 'stardust' | 'cyberpunk' | 'zen' | 'chroma-drift' | 'aurora-cabin'
   // Forests & Trees
   | 'forest' | 'misty-forest' | 'bamboo-grove' | 'autumn-woods' | 'rainforest' | 'pine-trail'
   // Mountains & Landscapes
@@ -97,7 +97,7 @@ export interface Wallpaper {
   id: WallpaperId;
   name: string;
   isPremium: boolean;
-  type: 'animated' | 'image' | 'custom';
+  type: 'animated' | 'image' | 'custom' | 'video';
   url?: string;
   category?: string;
   brightness?: 'light' | 'dark' | 'vibrant';
@@ -126,6 +126,8 @@ export const WALLPAPERS: Wallpaper[] = [
   { id: 'minimal', name: 'Clean Solid', isPremium: false, type: 'animated', category: 'Abstract', brightness: 'dark', environment: 'abstract' },
   { id: 'mesh', name: 'Animated Mesh', isPremium: false, type: 'animated', category: 'Abstract', brightness: 'dark', environment: 'abstract' },
   { id: 'cyberpunk', name: 'Cyber Library', isPremium: false, type: 'animated', category: 'Abstract', brightness: 'dark', environment: 'abstract' },
+  { id: 'chroma-drift', name: 'Chroma Drift', isPremium: false, type: 'animated', category: 'Abstract', brightness: 'vibrant', environment: 'abstract' },
+  { id: 'aurora-cabin', name: 'Aurora Cabin', isPremium: false, type: 'video', category: 'Abstract', brightness: 'dark', environment: 'nature' },
 
   // ── ANIMATED / ABSTRACT (premium) ──
   { id: 'dots', name: 'Focus Dots', isPremium: true, type: 'animated', category: 'Abstract', brightness: 'dark', environment: 'abstract' },

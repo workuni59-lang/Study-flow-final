@@ -56,8 +56,6 @@ export function useNavigationContext(): NavigationContext {
     section = 'profile';
   } else if (path.startsWith('/pomodoro')) {
     section = 'pomodoro';
-  } else if (path.startsWith('/stopwatch')) {
-    section = 'stopwatch';
   } else if (path.includes('/tasks')) {
     section = 'dashboard';
     activePanel = 'tasks';

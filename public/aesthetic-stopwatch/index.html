@@ -1,853 +1,224 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Free Online Stopwatch — Aesthetic Stopwatch for Study — StudyFlow</title>
-    <meta name="description" content="A free aesthetic stopwatch for students. Time study sessions with millisecond precision, living wallpapers, ambient sounds, and gamified XP — all in one cinematic focus tool." />
-    <link rel="canonical" href="https://studyflow.space/aesthetic-stopwatch/" />
-    <meta name="dateModified" content="2026-06-19" />
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Aesthetic Stopwatch | Study Flow</title>
+  <meta name="description" content="A calm, aesthetic online stopwatch with animated wallpapers. Free and beautiful."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;overflow:hidden;background:#050508;color:#fff;font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased}
+    a{color:inherit;text-decoration:none}
 
-    <meta property="og:title" content="Free Online Stopwatch — Aesthetic Stopwatch for Study" />
-    <meta property="og:description" content="A cinematic aesthetic stopwatch with living wallpapers, ambient sounds, and gamified XP. Time your study sessions with millisecond precision — free, no sign-up." />
-    <meta property="og:url" content="https://studyflow.space/aesthetic-stopwatch/" />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://studyflow.space/logo.png" />
+    #bg{position:fixed;inset:0;z-index:0;transition:background 1s ease}
+    #bg::after{content:'';position:absolute;inset:0;background:rgba(0,0,0,0.3);pointer-events:none}
+    .bg-overlay{position:absolute;inset:0;pointer-events:none;transition:opacity 1s ease}
+    .bg-overlay.hidden{opacity:0}
 
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Free Online Stopwatch — Aesthetic Stopwatch for Study" />
-    <meta name="twitter:description" content="A cinematic aesthetic stopwatch with living wallpapers, ambient sounds, and gamified XP. Free, no sign-up." />
+    #wordmark{position:fixed;top:24px;left:28px;z-index:10;font-size:10px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.25);user-select:none}
 
-    <link rel="icon" type="image/png" href="/logo.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap" />
+    #brush-btn{position:fixed;top:20px;right:24px;z-index:10;width:36px;height:36px;border-radius:12px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.4);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+    #brush-btn:hover{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7)}
+    #brush-btn svg{width:16px;height:16px}
 
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@graph": [
-        {
-          "@type": "WebPage",
-          "name": "Free Online Aesthetic Stopwatch — StudyFlow",
-          "description": "A free aesthetic stopwatch with millisecond precision, living wallpapers, ambient sounds, and gamified XP for focused study sessions.",
-          "url": "https://studyflow.space/aesthetic-stopwatch/",
-          "datePublished": "2026-06-01",
-          "dateModified": "2026-06-19"
-        },
-        {
-          "@type": "BreadcrumbList",
-          "itemListElement": [
-            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://studyflow.space/" },
-            { "@type": "ListItem", "position": 2, "name": "Stopwatch", "item": "https://studyflow.space/aesthetic-stopwatch/" }
-          ]
-        },
-        {
-          "@type": "FAQPage",
-          "mainEntity": [
-            {
-              "@type": "Question",
-              "name": "Is this stopwatch free?",
-              "acceptedAnswer": { "@type": "Answer", "text": "Yes. StudyFlow's aesthetic stopwatch is completely free with no sign-up required. Open it in your browser and start timing instantly — no account, no credit card, no hidden fees." }
-            },
-            {
-              "@type": "Question",
-              "name": "Do I need an account?",
-              "acceptedAnswer": { "@type": "Answer", "text": "No. You can use the stopwatch immediately without creating an account. An optional free account only adds cross-device sync, saved session history, and gamified XP tracking." }
-            },
-            {
-              "@type": "Question",
-              "name": "Can I use it on my phone?",
-              "acceptedAnswer": { "@type": "Answer", "text": "Yes. StudyFlow works on any device with a modern browser, and the stopwatch is fully responsive. You can also install StudyFlow as a PWA for a native-like mobile experience." }
-            },
-            {
-              "@type": "Question",
-              "name": "Does it sync across devices?",
-              "acceptedAnswer": { "@type": "Answer", "text": "Yes. With a free account, your stopwatch session history, XP, streaks, and settings sync across all your devices automatically." }
-            },
-            {
-              "@type": "Question",
-              "name": "What makes this different from a regular stopwatch?",
-              "acceptedAnswer": { "@type": "Answer", "text": "Most stopwatches are purely functional. StudyFlow's stopwatch wraps timing in a complete focus environment: living wallpapers, ambient soundscapes, gamified XP and streaks, session analytics, and task integration — turning a basic timer into an intentional study ritual." }
-            }
-          ]
-        }
-      ]
+    #wp-picker{position:fixed;top:64px;right:24px;z-index:10;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:12px;display:none;flex-direction:column;gap:6px;min-width:150px;box-shadow:0 12px 40px rgba(0,0,0,0.6)}
+    #wp-picker.open{display:flex}
+    #wp-picker button{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;border:none;background:transparent;color:rgba(255,255,255,0.5);cursor:pointer;font-size:11px;font-weight:500;font-family:'Inter',sans-serif;transition:all 0.15s;text-align:left;width:100%}
+    #wp-picker button:hover{background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.8)}
+    #wp-picker button.active{background:rgba(255,255,255,0.08);color:#fff}
+    .wp-swatch{width:28px;height:28px;border-radius:8px;flex-shrink:0;border:1px solid rgba(255,255,255,0.06);overflow:hidden}
+
+    #stopwatch{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:5;text-align:center;user-select:none}
+    #stopwatch .time{font-weight:700;letter-spacing:-0.02em;line-height:1;color:rgba(255,255,255,0.92);text-shadow:0 2px 24px rgba(0,0,0,0.5),0 0 60px rgba(0,0,0,0.2)}
+    #stopwatch .cs{font-weight:300;opacity:0.35}
+    #stopwatch .status{font-size:10px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.2);margin-top:12px}
+
+    #go-to-app{position:fixed;bottom:28px;right:28px;z-index:10;padding:8px 18px;border-radius:12px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.03);color:rgba(255,255,255,0.35);font-size:11px;font-weight:500;font-family:'Inter',sans-serif;cursor:pointer;transition:all 0.2s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+    #go-to-app:hover{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.65)}
+
+    /* Wallpapers */
+    .wp-aurora{background:linear-gradient(135deg,#0d0d24,#1b0f3a,#0f0d2e,#1b0f3a,#0d0d24);background-size:400% 400%;animation:drift 12s ease-in-out infinite}
+    .wp-aurora .bg-overlay{background:linear-gradient(180deg,transparent,rgba(129,140,248,0.06) 30%,rgba(167,139,250,0.04) 50%,transparent 70%);background-size:200% 200%;animation:aurora 8s ease-in-out infinite alternate}
+
+    .wp-monolith{background:linear-gradient(135deg,#050508,#0f0f1a,#050508)}
+    .wp-monolith .bg-overlay{top:45%;left:50%;width:50vmin;height:50vmin;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(129,140,248,0.08) 0%,rgba(99,102,241,0.03) 40%,transparent 70%);animation:breathe 6s ease-in-out infinite}
+
+    .wp-wisp{background:linear-gradient(180deg,#0f0d0a,#1a1410,#0f0d0a)}
+    .wp-wisp .bg-overlay{background:radial-gradient(ellipse at 50% 45%,rgba(245,158,11,0.06) 0%,transparent 60%)}
+    .wisp-particles{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+    .wisp-particle{position:absolute;border-radius:50%;filter:blur(1px);animation:float 10s ease-in-out infinite;opacity:0}
+    .wisp-particle:nth-child(1){width:3px;height:3px;left:18%;background:rgba(245,158,11,0.4);animation-duration:9s;animation-delay:0s}
+    .wisp-particle:nth-child(2){width:2px;height:2px;left:42%;background:rgba(245,158,11,0.3);animation-duration:11s;animation-delay:1.2s}
+    .wisp-particle:nth-child(3){width:4px;height:4px;left:65%;background:rgba(245,158,11,0.5);animation-duration:8s;animation-delay:2.4s}
+    .wisp-particle:nth-child(4){width:2px;height:2px;left:30%;background:rgba(245,158,11,0.35);animation-duration:13s;animation-delay:3.6s}
+    .wisp-particle:nth-child(5){width:3px;height:3px;left:78%;background:rgba(245,158,11,0.3);animation-duration:10s;animation-delay:4.8s}
+    .wisp-particle:nth-child(6){width:2px;height:2px;left:52%;background:rgba(245,158,11,0.45);animation-duration:7s;animation-delay:6s}
+    .wisp-particle:nth-child(7){width:3px;height:3px;left:12%;background:rgba(245,158,11,0.25);animation-duration:12s;animation-delay:7.2s}
+    .wisp-particle:nth-child(8){width:2px;height:2px;left:88%;background:rgba(245,158,11,0.4);animation-duration:9s;animation-delay:8.4s}
+
+    @keyframes drift{0%,100%{background-position:0% 50%}25%{background-position:100% 0%}50%{background-position:50% 100%}75%{background-position:100% 50%}}
+    @keyframes aurora{0%{opacity:0.4}100%{opacity:1}}
+    @keyframes breathe{0%,100%{opacity:0.3;transform:translate(-50%,-50%) scale(1)}50%{opacity:0.7;transform:translate(-50%,-50%) scale(1.15)}}
+    @keyframes float{0%,100%{transform:translateY(0) translateX(0);opacity:0}20%{opacity:0.7}50%{opacity:0.4}80%{opacity:0.6}100%{transform:translateY(-100px) translateX(20px);opacity:0}}
+
+    @media (prefers-reduced-motion:reduce){
+      #bg,.bg-overlay,.wisp-particle{animation:none!important;transition:none!important}
+      .wp-aurora,.wp-wisp,.wp-monolith{animation:none!important}
+      .wp-aurora{background:linear-gradient(135deg,#0d0d24,#1b0f3a)}
+      .wp-wisp{background:linear-gradient(180deg,#0f0d0a,#1a1410)}
     }
-    </script>
 
-    <style>
-      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-      :root {
-        --bg-0: #0a0a0f;
-        --bg-1: #12121a;
-        --text: #ffffff;
-        --text-2: #a1a1aa;
-        --text-3: #52525b;
-        --glass: rgba(255,255,255,0.04);
-        --glass-strong: rgba(255,255,255,0.06);
-        --glass-border: rgba(255,255,255,0.06);
-        --accent-1: #8b5cf6;
-        --accent-2: #f472b6;
-        --accent-3: #14b8a6;
-        --gradient: linear-gradient(135deg, #8b5cf6 0%, #f472b6 50%, #14b8a6 100%);
-        --gradient-soft: linear-gradient(135deg, rgba(139,92,246,0.18), rgba(244,114,182,0.12), rgba(20,184,166,0.18));
-      }
-      html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
-      body {
-        font-family: 'Inter', system-ui, -apple-system, sans-serif;
-        font-weight: 400;
-        background: var(--bg-0);
-        color: var(--text);
-        line-height: 1.6;
-        overflow-x: hidden;
-        position: relative;
-      }
-      body::before {
-        content: ""; position: fixed; inset: 0; z-index: -2;
-        background:
-          radial-gradient(900px 600px at 12% -5%, rgba(139,92,246,0.18), transparent 60%),
-          radial-gradient(800px 600px at 92% 8%, rgba(244,114,182,0.14), transparent 60%),
-          radial-gradient(1000px 700px at 50% 110%, rgba(20,184,166,0.14), transparent 60%),
-          linear-gradient(180deg, var(--bg-0) 0%, var(--bg-1) 100%);
-      }
-      h1, h2, h3, h4 { font-family: 'Outfit', 'Inter', system-ui, sans-serif; line-height: 1.1; letter-spacing: -0.02em; }
-      a { color: inherit; text-decoration: none; }
-      img { max-width: 100%; display: block; }
-      button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+    @media (max-width:480px){
+      #stopwatch .time{font-size:clamp(2.4rem,14vw,4.5rem)!important}
+      #wordmark{top:16px;left:18px;font-size:8px}
+      #brush-btn{top:14px;right:14px;width:32px;height:32px}
+      #wp-picker{top:52px;right:14px}
+      #go-to-app{bottom:20px;right:16px;font-size:10px;padding:6px 14px}
+    }
+  </style>
+</head>
+<body>
 
-      /* ===== Three.js background ===== */
-      #bg-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; opacity: 0.9; }
-
-      /* ===== Layout ===== */
-      .container { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
-      .container-narrow { max-width: 860px; margin: 0 auto; padding: 0 24px; }
-
-      /* ===== Header ===== */
-      .header {
-        position: sticky; top: 0; z-index: 50;
-        display: flex; align-items: center; justify-content: space-between;
-        padding: 14px 24px; max-width: 1120px; margin: 0 auto;
-        background: rgba(10,10,15,0.55);
-        backdrop-filter: blur(24px) saturate(140%);
-        -webkit-backdrop-filter: blur(24px) saturate(140%);
-        border-bottom: 1px solid var(--glass-border);
-      }
-      .header-logo { display: flex; align-items: center; gap: 10px; font-family: 'Outfit','Inter',sans-serif; font-weight: 800; font-size: 19px; letter-spacing: -0.3px; }
-      .header-logo img { width: 32px; height: 32px; border-radius: 9px; box-shadow: 0 4px 18px rgba(139,92,246,0.35); }
-      .header-nav { display: flex; align-items: center; gap: 28px; }
-      .header-nav a { font-size: 14px; font-weight: 500; color: var(--text-2); transition: color 0.2s ease; position: relative; }
-      .header-nav a:not(.header-cta)::after { content: ""; position: absolute; left: 0; bottom: -6px; width: 0; height: 2px; background: var(--gradient); border-radius: 2px; transition: width 0.25s ease; }
-      .header-nav a:not(.header-cta):hover { color: var(--text); }
-      .header-nav a:not(.header-cta):hover::after { width: 100%; }
-      .header-cta {
-        position: relative; display: inline-flex; align-items: center; gap: 7px;
-        padding: 10px 22px; font-size: 14.5px; font-weight: 700; color: #fff; border-radius: 12px;
-        background: var(--gradient); overflow: hidden;
-        box-shadow: 0 6px 22px rgba(139,92,246,0.5), inset 0 0 0 1px rgba(255,255,255,0.14);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        animation: ctaPulse 2.6s ease-in-out infinite;
-      }
-      .header-cta > span { position: relative; z-index: 2; }
-      .header-cta > svg { position: relative; z-index: 2; width: 14px; height: 14px; transition: transform 0.2s ease; }
-      .header-cta:hover { transform: translateY(-2px); box-shadow: 0 14px 34px rgba(139,92,246,0.72), inset 0 0 0 1px rgba(255,255,255,0.2); }
-      .header-cta:hover > svg { transform: translateX(2px); }
-      .header-cta::before {
-        content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 60%; z-index: 1;
-        background: linear-gradient(105deg, transparent, rgba(255,255,255,0.42), transparent);
-        transform: translateX(-180%);
-        animation: ctaShine 3.4s ease-in-out infinite;
-        animation-delay: 0.7s;
-      }
-      @keyframes ctaPulse {
-        0%, 100% { box-shadow: 0 6px 22px rgba(139,92,246,0.45), inset 0 0 0 1px rgba(255,255,255,0.14), 0 0 0 0 rgba(139,92,246,0.4); }
-        50%      { box-shadow: 0 8px 28px rgba(139,92,246,0.62), inset 0 0 0 1px rgba(255,255,255,0.2),  0 0 24px 4px rgba(139,92,246,0.32); }
-      }
-      @keyframes ctaShine {
-        0% { transform: translateX(-180%); }
-        40%, 100% { transform: translateX(320%); }
-      }
-      .hamburger { display: none; width: 42px; height: 42px; align-items: center; justify-content: center; border-radius: 11px; background: var(--glass); border: 1px solid var(--glass-border); }
-      .hamburger span { display: block; width: 18px; height: 2px; background: var(--text); border-radius: 2px; position: relative; transition: transform 0.25s ease, opacity 0.2s ease; }
-      .hamburger span::before, .hamburger span::after { content: ""; position: absolute; left: 0; width: 18px; height: 2px; background: var(--text); border-radius: 2px; transition: transform 0.25s ease; }
-      .hamburger span::before { top: -6px; } .hamburger span::after { top: 6px; }
-      .hamburger.open span { background: transparent; }
-      .hamburger.open span::before { transform: translateY(6px) rotate(45deg); }
-      .hamburger.open span::after { transform: translateY(-6px) rotate(-45deg); }
-
-      .menu-overlay {
-        position: fixed; inset: 0; z-index: 40;
-        background: rgba(10,10,15,0.92); backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
-        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
-        opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
-      }
-      .menu-overlay.open { opacity: 1; pointer-events: auto; }
-      .menu-overlay a { font-family: 'Outfit',sans-serif; font-size: 26px; font-weight: 700; color: var(--text); padding: 14px 24px; opacity: 0; transform: translateY(12px); transition: opacity 0.4s ease, transform 0.4s ease, color 0.2s ease; }
-      .menu-overlay.open a { opacity: 1; transform: translateY(0); }
-      .menu-overlay a:hover { color: var(--accent-2); }
-      .menu-overlay .menu-cta {
-        position: relative; overflow: hidden; margin-top: 14px; padding: 14px 38px; border-radius: 14px;
-        background: var(--gradient); font-size: 17px; font-weight: 700;
-        box-shadow: 0 10px 30px rgba(139,92,246,0.5), inset 0 0 0 1px rgba(255,255,255,0.16);
-        animation: ctaPulse 2.6s ease-in-out infinite;
-      }
-      .menu-overlay .menu-cta::before {
-        content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 60%; z-index: 1;
-        background: linear-gradient(105deg, transparent, rgba(255,255,255,0.42), transparent);
-        transform: translateX(-180%);
-        animation: ctaShine 3.4s ease-in-out infinite;
-        animation-delay: 0.7s;
-      }
-
-      /* ===== Hero ===== */
-      .hero { position: relative; text-align: center; padding: 96px 24px 56px; }
-      .hero .eyebrow {
-        display: inline-flex; align-items: center; gap: 8px; padding: 7px 16px; margin-bottom: 26px;
-        font-size: 12.5px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
-        color: var(--text-2); background: var(--glass); border: 1px solid var(--glass-border);
-        border-radius: 999px; backdrop-filter: blur(10px);
-      }
-      .hero .eyebrow .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-3); box-shadow: 0 0 12px var(--accent-3); }
-      .hero h1 { font-size: clamp(38px, 7vw, 76px); font-weight: 900; margin: 0 auto 22px; max-width: 900px; }
-      .hero h1 .grad { background: var(--gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
-      .hero p.tagline { font-size: clamp(16px, 2vw, 19px); color: var(--text-2); max-width: 600px; margin: 0 auto 40px; line-height: 1.7; font-weight: 400; }
-
-      /* ===== Stopwatch card ===== */
-      .stopwatch-card {
-        max-width: 520px; margin: 0 auto 38px; padding: 38px 34px 30px; border-radius: 26px;
-        background: var(--glass); border: 1px solid var(--glass-border);
-        backdrop-filter: blur(24px) saturate(140%); -webkit-backdrop-filter: blur(24px) saturate(140%);
-        box-shadow: 0 30px 80px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06);
-        position: relative; overflow: hidden;
-      }
-      .stopwatch-card::before { content: ""; position: absolute; inset: 0; background: var(--gradient-soft); opacity: 0.5; pointer-events: none; }
-      .stopwatch-card.running { box-shadow: 0 30px 80px rgba(0,0,0,0.45), 0 0 0 1px rgba(139,92,246,0.4), 0 0 60px rgba(139,92,246,0.18), inset 0 1px 0 rgba(255,255,255,0.08); }
-      .sw-label { position: relative; font-size: 12px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-3); margin-bottom: 14px; }
-      .sw-display {
-        position: relative; font-family: 'Outfit', sans-serif; font-weight: 800; letter-spacing: -0.03em;
-        font-size: clamp(40px, 9vw, 62px); line-height: 1; margin-bottom: 6px;
-        display: flex; align-items: baseline; justify-content: center; gap: 2px;
-      }
-      .sw-display .unit { display: inline-block; min-width: 1.1ch; text-align: center; }
-      .sw-display .sep { color: var(--text-3); margin: 0 1px; }
-      .sw-display .ms { font-size: 0.5em; color: var(--accent-2); margin-left: 6px; font-weight: 700; }
-      .sw-display.paused .unit, .sw-display.paused .sep { color: var(--text-2); }
-      .sw-controls { position: relative; display: flex; gap: 10px; justify-content: center; margin: 26px 0 6px; }
-      .sw-btn {
-        flex: 1; max-width: 150px; padding: 13px 14px; border-radius: 13px; font-size: 14.5px; font-weight: 600;
-        border: 1px solid var(--glass-border); background: var(--glass-strong); color: var(--text);
-        transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-        backdrop-filter: blur(8px);
-      }
-      .sw-btn:hover { transform: translateY(-2px); background: rgba(255,255,255,0.1); }
-      .sw-btn:active { transform: translateY(0); }
-      .sw-btn.primary { background: var(--gradient); border-color: transparent; box-shadow: 0 8px 24px rgba(139,92,246,0.4); }
-      .sw-btn.primary:hover { box-shadow: 0 12px 32px rgba(139,92,246,0.55); }
-      .sw-btn.ghost { color: var(--text-2); }
-      .sw-laps-wrap { position: relative; margin-top: 18px; }
-      .sw-laps-title { font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-3); margin-bottom: 8px; display: flex; justify-content: space-between; }
-      .sw-laps { max-height: 150px; overflow-y: auto; list-style: none; padding-right: 4px; }
-      .sw-laps::-webkit-scrollbar { width: 6px; } .sw-laps::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 6px; }
-      .sw-laps li { display: flex; justify-content: space-between; align-items: center; padding: 9px 14px; margin-bottom: 6px; border-radius: 10px; font-size: 13.5px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.04); animation: lapIn 0.3s ease; }
-      .sw-laps li .lap-n { color: var(--text-3); font-weight: 600; } .sw-laps li .lap-t { font-family: 'Outfit',sans-serif; font-weight: 600; color: var(--text); } .sw-laps li .lap-d { color: var(--accent-3); font-family: 'Outfit',sans-serif; font-weight: 600; font-size: 12px; }
-      .sw-laps-empty { text-align: center; color: var(--text-3); font-size: 13px; padding: 16px 0; }
-      @keyframes lapIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
-
-      .hero-cta-row { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; align-items: center; }
-      .hero-cta {
-        display: inline-flex; align-items: center; gap: 9px; padding: 16px 34px;
-        font-size: 16px; font-weight: 700; color: #fff; border-radius: 14px;
-        background: var(--gradient); box-shadow: 0 12px 38px rgba(139,92,246,0.42);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-      }
-      .hero-cta:hover { transform: translateY(-2px); box-shadow: 0 18px 48px rgba(139,92,246,0.6); }
-      .hero-cta svg { width: 18px; height: 18px; }
-      .hero-ghost { display: inline-flex; align-items: center; gap: 8px; padding: 16px 26px; font-size: 15px; font-weight: 600; color: var(--text-2); border-radius: 14px; background: var(--glass); border: 1px solid var(--glass-border); transition: color 0.2s ease, border-color 0.2s ease; }
-      .hero-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.18); }
-
-      .hero-stats { display: flex; gap: 40px; justify-content: center; flex-wrap: wrap; margin-top: 56px; }
-      .hero-stat { text-align: center; }
-      .hero-stat .num { font-family: 'Outfit',sans-serif; font-weight: 800; font-size: 30px; background: var(--gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-      .hero-stat .lbl { font-size: 12.5px; color: var(--text-3); margin-top: 4px; letter-spacing: 0.04em; }
-
-      /* ===== Sections ===== */
-      .section { padding: 92px 24px; position: relative; }
-      .section-head { text-align: center; max-width: 700px; margin: 0 auto 56px; }
-      .section-tag { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent-2); margin-bottom: 16px; }
-      .section h2 { font-size: clamp(30px, 5vw, 48px); font-weight: 800; margin-bottom: 16px; }
-      .section h2 .grad { background: var(--gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-      .section .lede { font-size: 17px; color: var(--text-2); line-height: 1.7; }
-
-      .glass-card {
-        background: var(--glass); border: 1px solid var(--glass-border); border-radius: 20px;
-        backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-        padding: 28px; transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
-      }
-      .glass-card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.12); box-shadow: 0 20px 50px rgba(0,0,0,0.35); }
-
-      .why-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
-      .why-item { display: flex; gap: 16px; align-items: flex-start; padding: 24px; }
-      .why-icon { flex-shrink: 0; width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; background: var(--gradient-soft); border: 1px solid var(--glass-border); }
-      .why-item h3 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
-      .why-item p { font-size: 14.5px; color: var(--text-2); line-height: 1.6; }
-
-      .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
-      .feature { padding: 30px 26px; }
-      .feature .ficon { width: 48px; height: 48px; border-radius: 13px; display: flex; align-items: center; justify-content: center; margin-bottom: 18px; background: var(--gradient-soft); border: 1px solid var(--glass-border); }
-      .feature .ficon svg { width: 24px; height: 24px; stroke: var(--text); }
-      .feature h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
-      .feature p { font-size: 14.5px; color: var(--text-2); line-height: 1.65; }
-
-      /* ===== FAQ ===== */
-      .faq-list { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
-      .faq-item { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 16px; overflow: hidden; transition: border-color 0.25s ease; backdrop-filter: blur(18px); }
-      .faq-item.open { border-color: rgba(139,92,246,0.35); }
-      .faq-q { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 22px 26px; font-family: 'Outfit',sans-serif; font-size: 17px; font-weight: 600; text-align: left; color: var(--text); }
-      .faq-q .chev { flex-shrink: 0; width: 22px; height: 22px; transition: transform 0.3s ease; color: var(--text-2); }
-      .faq-item.open .faq-q .chev { transform: rotate(45deg); color: var(--accent-2); }
-      .faq-a { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; }
-      .faq-a-inner { padding: 0 26px 24px; font-size: 15px; color: var(--text-2); line-height: 1.7; }
-
-      /* ===== CTA ===== */
-      .cta-section { text-align: center; padding: 100px 24px; position: relative; }
-      .cta-glass { max-width: 820px; margin: 0 auto; padding: 64px 40px; border-radius: 30px; background: var(--glass); border: 1px solid var(--glass-border); backdrop-filter: blur(26px); -webkit-backdrop-filter: blur(26px); position: relative; overflow: hidden; }
-      .cta-glass::before { content: ""; position: absolute; inset: 0; background: var(--gradient-soft); opacity: 0.6; pointer-events: none; }
-      .cta-glass h2 { position: relative; font-size: clamp(30px, 5vw, 46px); font-weight: 800; margin-bottom: 14px; }
-      .cta-glass p { position: relative; font-size: 16px; color: var(--text-2); margin-bottom: 32px; }
-      .cta-button { position: relative; display: inline-flex; align-items: center; gap: 10px; padding: 18px 40px; font-size: 17px; font-weight: 700; color: #fff; border-radius: 16px; background: var(--gradient); box-shadow: 0 14px 42px rgba(139,92,246,0.45); transition: transform 0.2s ease, box-shadow 0.2s ease; }
-      .cta-button:hover { transform: translateY(-2px); box-shadow: 0 20px 56px rgba(139,92,246,0.62); }
-      .cta-button svg { width: 20px; height: 20px; }
-
-      /* ===== Footer ===== */
-      .footer { padding: 56px 24px 40px; border-top: 1px solid var(--glass-border); position: relative; }
-      .footer-inner { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 24px; }
-      .footer-brand { display: flex; align-items: center; gap: 10px; font-family: 'Outfit',sans-serif; font-weight: 800; font-size: 18px; }
-      .footer-brand img { width: 28px; height: 28px; border-radius: 8px; }
-      .footer-links { display: flex; gap: 26px; flex-wrap: wrap; justify-content: center; }
-      .footer-links a { font-size: 14px; color: var(--text-2); transition: color 0.2s ease; }
-      .footer-links a:hover { color: var(--accent-2); }
-      .footer-copy { font-size: 13px; color: var(--text-3); }
-
-      /* ===== Reveal animation (IntersectionObserver fallback) ===== */
-      .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1); }
-      .reveal.in { opacity: 1; transform: translateY(0); }
-
-      /* ===== Responsive ===== */
-      @media (max-width: 900px) {
-        .features-grid { grid-template-columns: repeat(2, 1fr); }
-      }
-      @media (max-width: 640px) {
-        .header-nav { display: none; }
-        .hamburger { display: flex; }
-        .hero { padding: 64px 20px 44px; }
-        .section { padding: 64px 20px; }
-        .cta-section { padding: 70px 20px; }
-        .cta-glass { padding: 44px 24px; }
-        .why-grid, .features-grid { grid-template-columns: 1fr; }
-        .stopwatch-card { padding: 28px 20px 24px; }
-        .sw-controls { flex-wrap: wrap; }
-        .sw-btn { min-width: 120px; }
-        .hero-stats { gap: 28px; }
-      }
-
-      /* ===== Reduced motion ===== */
-      @media (prefers-reduced-motion: reduce) {
-        *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
-        .reveal { opacity: 1; transform: none; }
-        #bg-canvas { display: none; }
-        .header-cta, .menu-overlay .menu-cta { animation: none !important; box-shadow: 0 6px 22px rgba(139,92,246,0.5), inset 0 0 0 1px rgba(255,255,255,0.14); }
-        html { scroll-behavior: auto; }
-      }
-    </style>
-  </head>
-  <body>
-    <canvas id="bg-canvas" aria-hidden="true"></canvas>
-
-    <header class="header">
-      <a href="/" class="header-logo"><img src="/logo.png" alt="StudyFlow" width="32" height="32" />StudyFlow</a>
-      <nav class="header-nav" aria-label="Primary">
-        <a href="/focus/pomodoro">Pomodoro</a>
-        <a href="/subjects">Planner</a>
-        <a href="/focus">Focus</a>
-        <a href="/focus" class="header-cta"><span>Open App</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-      </nav>
-      <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false" aria-controls="menuOverlay"><span></span></button>
-    </header>
-
-    <div class="menu-overlay" id="menuOverlay" role="dialog" aria-modal="true" aria-label="Mobile menu">
-      <a href="/focus/pomodoro">Pomodoro</a>
-      <a href="/subjects">Planner</a>
-      <a href="/focus">Focus</a>
-      <a href="/focus" class="menu-cta">Open App</a>
+  <!-- Wallpaper layer -->
+  <div id="bg" class="wp-aurora">
+    <div class="bg-overlay"></div>
+    <div class="wisp-particles" style="display:none">
+      <div class="wisp-particle"></div>
+      <div class="wisp-particle"></div>
+      <div class="wisp-particle"></div>
+      <div class="wisp-particle"></div>
+      <div class="wisp-particle"></div>
+      <div class="wisp-particle"></div>
+      <div class="wisp-particle"></div>
+      <div class="wisp-particle"></div>
     </div>
+  </div>
 
-    <section class="hero">
-      <span class="eyebrow" id="heroEyebrow"><span class="dot"></span>Cinematic focus timing</span>
-      <h1 id="heroTitle">The Most Beautiful <span class="grad">Stopwatch</span><br />You've Ever Used</h1>
-      <p class="tagline" id="heroTag">Time every study session with millisecond precision, wrapped in living wallpapers, ambient soundscapes, and gamified XP. This isn't a timer — it's a ritual.</p>
+  <!-- Wordmark -->
+  <div id="wordmark">Study Flow</div>
 
-      <div class="stopwatch-card" id="swCard">
-        <div class="sw-label">Aesthetic Stopwatch · Live Demo</div>
-        <div class="sw-display" id="swDisplay" aria-live="off">
-          <span class="unit" id="swH">00</span><span class="sep">:</span><span class="unit" id="swM">00</span><span class="sep">:</span><span class="unit" id="swS">00</span><span class="ms" id="swMs">.00</span>
-        </div>
-        <div class="sw-controls">
-          <button class="sw-btn primary" id="swStart">Start</button>
-          <button class="sw-btn ghost" id="swLap" disabled>Lap</button>
-          <button class="sw-btn ghost" id="swReset" disabled>Reset</button>
-        </div>
-        <div class="sw-laps-wrap">
-          <div class="sw-laps-title"><span>Lap log</span><span id="swLapCount">0 laps</span></div>
-          <ul class="sw-laps" id="swLaps">
-            <li class="sw-laps-empty">No laps yet — press Start, then Lap to record splits.</li>
-          </ul>
-        </div>
-      </div>
+  <!-- Brush icon -->
+  <button id="brush-btn" aria-label="Change wallpaper" onclick="togglePicker()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M18.37 2.63 14 7l-1.59 1.59a2 2 0 0 0-.59 1.41V11a1 1 0 0 0 1 1h1a2 2 0 0 0 1.41-.59L21 8.63a3 3 0 0 0-2.63-5z"/>
+      <path d="M9 13H5a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h4"/>
+      <path d="M10 21a2 2 0 0 0 2-2v-4"/>
+    </svg>
+  </button>
 
-      <div class="hero-cta-row">
-        <a href="/app/" class="hero-cta" id="heroCta">
-          Use the Stopwatch
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </a>
-        <a href="/focus" class="hero-ghost">Explore the focus suite</a>
-      </div>
+  <!-- Wallpaper picker -->
+  <div id="wp-picker">
+    <button class="active" data-wp="aurora" onclick="setWallpaper('aurora')">
+      <span class="wp-swatch" style="background:linear-gradient(135deg,#1a1a3e,#2d1b69,#1a1a3e)"></span>
+      Aurora
+    </button>
+    <button data-wp="monolith" onclick="setWallpaper('monolith')">
+      <span class="wp-swatch" style="background:linear-gradient(135deg,#0a0a0f,#16162a,#0a0a0f)"></span>
+      Monolith
+    </button>
+    <button data-wp="wisp" onclick="setWallpaper('wisp')">
+      <span class="wp-swatch" style="background:linear-gradient(180deg,#1a1410,#2d2018,#1a1410)"></span>
+      Wisp
+    </button>
+  </div>
 
-      <div class="hero-stats">
-        <div class="hero-stat"><div class="num" data-count="1.2" data-suffix="M">0</div><div class="lbl">Sessions timed</div></div>
-        <div class="hero-stat"><div class="num" data-count="50" data-suffix="+">0</div><div class="lbl">Living wallpapers</div></div>
-        <div class="hero-stat"><div class="num" data-count="4.9" data-suffix="">0</div><div class="lbl">Average rating</div></div>
-      </div>
-    </section>
+  <!-- Stopwatch -->
+  <div id="stopwatch">
+    <div class="time" id="time" style="font-size:clamp(3rem,14vw,8rem)">00:00</div>
+    <div class="cs" id="cs" style="font-size:clamp(0.8rem,3.5vw,1.8rem)">.00</div>
+    <div class="status" id="status">Ready</div>
+  </div>
 
-    <section class="section" id="why">
-      <div class="container-narrow">
-        <div class="section-head reveal">
-          <span class="section-tag">Why this stopwatch</span>
-          <h2>Stopwatch, <span class="grad">Reimagined.</span></h2>
-          <p class="lede">Most stopwatches feel like tools — clinical digits on a blank rectangle. We rebuilt the stopwatch to feel intentional. Precise where it counts, beautiful everywhere else, and quietly motivating with every tick.</p>
-        </div>
-        <div class="why-grid">
-          <div class="glass-card why-item reveal">
-            <div class="why-icon">🎯</div>
-            <div><h3>Precision to the centisecond</h3><p>Millisecond-accurate timing updated 60 times a second, so every split feels instant and trustworthy — not jumpy or laggy.</p></div>
-          </div>
-          <div class="glass-card why-item reveal">
-            <div class="why-icon">🌗</div>
-            <div><h3>Designed for long sessions</h3><p>Soft typography, deep dark canvas, and breathing ambience keep your eyes calm across hours of deep work.</p></div>
-          </div>
-          <div class="glass-card why-item reveal">
-            <div class="why-icon">🪟</div>
-            <div><h3>Glass, not clutter</h3><p>Every element floats on frosted glass with a gradient glow — controls are obvious without ever shouting at you.</p></div>
-          </div>
-          <div class="glass-card why-item reveal">
-            <div class="why-icon">⚡</div>
-            <div><h3>Lives inside your workflow</h3><p>The stopwatch plugs into living wallpapers, ambient sounds, XP, and task links — a tool that grows with your focus.</p></div>
-          </div>
-        </div>
-      </div>
-    </section>
+  <!-- Go to App -->
+  <a id="go-to-app" href="/app/">Go to App →</a>
 
-    <section class="section" id="features">
-      <div class="container">
-        <div class="section-head reveal">
-          <span class="section-tag">Features</span>
-          <h2>Everything a stopwatch <span class="grad">should be</span></h2>
-          <p class="lede">Six pillars that turn a humble timer into the centerpiece of your study practice.</p>
-        </div>
-        <div class="features-grid">
-          <div class="glass-card feature reveal">
-            <div class="ficon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/></svg></div>
-            <h3>Start · Stop · Reset</h3><p>One-tap controls with instant response and millisecond accuracy. Pause and resume without losing a single tick.</p>
-          </div>
-          <div class="glass-card feature reveal">
-            <div class="ficon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg></div>
-            <h3>Session History</h3><p>Every session auto-saves with date, duration, and an optional task or subject link. Scroll back through your focus story anytime.</p>
-          </div>
-          <div class="glass-card feature reveal">
-            <div class="ficon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.4H22l-6 4.4 2.3 7.2L12 16.6 5.7 21l2.3-7.2-6-4.4h7.6z"/></svg></div>
-            <h3>Gamified XP &amp; Streaks</h3><p>Earn XP, build daily streaks, climb levels, and unlock badges. Every second you focus moves you forward.</p>
-          </div>
-          <div class="glass-card feature reveal">
-            <div class="ficon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
-            <h3>Task Integration</h3><p>Attach each stopwatch session to a subject or task, then watch your per-subject analytics fill in automatically.</p>
-          </div>
-          <div class="glass-card feature reveal">
-            <div class="ficon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="11" width="3" height="6"/><rect x="12" y="7" width="3" height="10"/><rect x="17" y="13" width="3" height="4"/></svg></div>
-            <h3>Deep Analytics</h3><p>See total focus hours, daily heatmaps, streak trends, and subject breakdowns — proof of your progress at a glance.</p>
-          </div>
-          <div class="glass-card feature reveal">
-            <div class="ficon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 3v6h-6"/><path d="M21 9a9 9 0 0 0-9-3"/></svg></div>
-            <h3>Cross-device Sync</h3><p>Timers, history, XP, and settings sync across every device. Start on laptop, finish on phone — seamlessly.</p>
-          </div>
-        </div>
-      </div>
-    </section>
+  <script>
+    /* ─── Wallpaper switcher ─── */
+    var currentWallpaper = localStorage.getItem('sf_landing_wp') || 'aurora';
 
-    <section class="section" id="faq">
-      <div class="container-narrow">
-        <div class="section-head reveal">
-          <span class="section-tag">FAQ</span>
-          <h2>Questions, <span class="grad">answered</span></h2>
-        </div>
-        <div class="faq-list">
-          <div class="faq-item reveal">
-            <button class="faq-q" aria-expanded="false">Is this free?<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
-            <div class="faq-a"><div class="faq-a-inner">Yes. StudyFlow's aesthetic stopwatch is completely free with no sign-up required. Open it in your browser and start timing instantly — no account, no credit card, no hidden fees. Optional features like cross-device sync are part of a free account.</div></div>
-          </div>
-          <div class="faq-item reveal">
-            <button class="faq-q" aria-expanded="false">Do I need an account?<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
-            <div class="faq-a"><div class="faq-a-inner">No. You can use the stopwatch immediately without creating an account. A free, optional account only adds cross-device sync, saved session history, and gamified XP tracking.</div></div>
-          </div>
-          <div class="faq-item reveal">
-            <button class="faq-q" aria-expanded="false">Can I use it on my phone?<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
-            <div class="faq-a"><div class="faq-a-inner">Yes. StudyFlow works on any device with a modern browser, and the stopwatch is fully responsive. You can also install StudyFlow as a Progressive Web App for a native-like mobile experience with offline support.</div></div>
-          </div>
-          <div class="faq-item reveal">
-            <button class="faq-q" aria-expanded="false">Does it sync across devices?<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
-            <div class="faq-a"><div class="faq-a-inner">Yes. With a free account, your stopwatch session history, XP, streaks, settings, and task links sync automatically across all your devices — laptop, tablet, and phone.</div></div>
-          </div>
-          <div class="faq-item reveal">
-            <button class="faq-q" aria-expanded="false">What makes this different from a regular stopwatch?<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
-            <div class="faq-a"><div class="faq-a-inner">Most stopwatches are purely functional. StudyFlow's stopwatch wraps timing in a complete focus environment: living wallpapers, ambient soundscapes, gamified XP and streaks, session analytics, and task integration — turning a basic timer into an intentional study ritual.</div></div>
-          </div>
-        </div>
-      </div>
-    </section>
+    function togglePicker() {
+      var p = document.getElementById('wp-picker');
+      p.classList.toggle('open');
+    }
 
-    <section class="cta-section">
-      <div class="cta-glass reveal">
-        <h2>Start Your <span class="grad">Focus Journey</span></h2>
-        <p>Free. No sign-up. Stopwatch + living wallpapers + ambient sounds + XP.</p>
-        <a href="/app/" class="cta-button">
-          Launch StudyFlow
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </a>
-      </div>
-    </section>
+    function setWallpaper(id) {
+      var bg = document.getElementById('bg');
+      bg.className = id === 'aurora' ? 'wp-aurora' : id === 'monolith' ? 'wp-monolith' : 'wp-wisp';
+      var particles = bg.querySelector('.wisp-particles');
+      if (particles) particles.style.display = id === 'wisp' ? 'block' : 'none';
+      localStorage.setItem('sf_landing_wp', id);
+      currentWallpaper = id;
+      document.querySelectorAll('#wp-picker button').forEach(function(b) { b.classList.remove('active'); });
+      var btn = document.querySelector('#wp-picker button[data-wp="' + id + '"]');
+      if (btn) btn.classList.add('active');
+      closePickerOutside();
+    }
 
-    <footer class="footer">
-      <div class="footer-inner">
-        <a href="/" class="footer-brand"><img src="/logo.png" alt="StudyFlow" width="28" height="28" />StudyFlow</a>
-        <nav class="footer-links" aria-label="Footer">
-          <a href="/">Home</a>
-          <a href="/blog/">Blog</a>
-          <a href="/flip-clock/">Flip Clock</a>
-          <a href="/aesthetic-stopwatch/">Stopwatch</a>
-          <a href="/pomodoro-timer/">Pomodoro Timer</a>
-          <a href="/study-timer/">Study Timer</a>
-          <a href="/study-planner/">Study Planner</a>
-          <a href="/studyflow-focus-timer/">StudyFlow Focus Timer</a>
-        </nav>
-        <p class="footer-copy">&copy; 2026 StudyFlow</p>
-      </div>
-    </footer>
+    function closePickerOutside() {
+      var p = document.getElementById('wp-picker');
+      if (p) p.classList.remove('open');
+    }
 
-    <!-- ===== CDN: Three.js + GSAP (graceful degradation via feature checks) ===== -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-
-    <script>
-    (function () {
-      "use strict";
-      var REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-      /* ===================== STOPWATCH ===================== */
-      var elStart = document.getElementById("swStart");
-      var elLap = document.getElementById("swLap");
-      var elReset = document.getElementById("swReset");
-      var elH = document.getElementById("swH");
-      var elM = document.getElementById("swM");
-      var elS = document.getElementById("swS");
-      var elMs = document.getElementById("swMs");
-      var elDisplay = document.getElementById("swDisplay");
-      var elCard = document.getElementById("swCard");
-      var elLaps = document.getElementById("swLaps");
-      var elLapCount = document.getElementById("swLapCount");
-
-      var running = false, elapsed = 0, lastTick = 0, rafId = null;
-      var laps = [], lapBase = 0;
-
-      function pad(n, len) { var s = String(n); while (s.length < len) s = "0" + s; return s; }
-
-      function render(ms) {
-        var total = Math.max(0, ms | 0);
-        var h = Math.floor(total / 3600000);
-        var m = Math.floor((total % 3600000) / 60000);
-        var s = Math.floor((total % 60000) / 1000);
-        var cs = Math.floor((total % 1000) / 10);
-        elH.textContent = pad(h, 2);
-        elM.textContent = pad(m, 2);
-        elS.textContent = pad(s, 2);
-        elMs.textContent = "." + pad(cs, 2);
+    document.addEventListener('click', function(e) {
+      var p = document.getElementById('wp-picker');
+      var b = document.getElementById('brush-btn');
+      if (p && p.classList.contains('open') && !p.contains(e.target) && !b.contains(e.target)) {
+        p.classList.remove('open');
       }
+    });
 
-      function tick(now) {
-        if (!running) return;
-        elapsed = now - lastTick;
-        render(elapsed);
-        rafId = requestAnimationFrame(tick);
-      }
+    // Restore saved wallpaper
+    setWallpaper(currentWallpaper);
 
-      function startResume() {
-        if (running) {
-          // Pause
-          running = false;
-          if (rafId) cancelAnimationFrame(rafId);
-          elStart.textContent = "Resume";
-          elDisplay.classList.add("paused");
-          elCard.classList.remove("running");
-        } else {
-          // Start / resume — anchor lastTick so elapsed continues from where it stopped
-          lastTick = performance.now() - elapsed;
-          running = true;
-          elStart.textContent = "Pause";
-          elDisplay.classList.remove("paused");
-          elCard.classList.add("running");
-          elLap.disabled = false;
-          elReset.disabled = false;
-          rafId = requestAnimationFrame(tick);
-        }
-      }
+    /* ─── Stopwatch ─── */
+    var sw = { elapsed: 0, running: false, cumulated: 0, runStart: 0, raf: null };
+    var timeEl = document.getElementById('time');
+    var csEl = document.getElementById('cs');
+    var statusEl = document.getElementById('status');
 
-      function recordLap() {
-        if (!running) return;
-        var total = elapsed;
-        var delta = total - lapBase;
-        lapBase = total;
-        laps.unshift({ n: laps.length + 1, total: total, delta: delta });
-        renderLaps();
-      }
+    function pad2(n) { return n.toString().padStart(2, '0'); }
 
-      function formatLap(ms) {
-        var total = Math.max(0, ms | 0);
-        var m = Math.floor(total / 60000);
-        var s = Math.floor((total % 60000) / 1000);
-        var cs = Math.floor((total % 1000) / 10);
-        return pad(m, 2) + ":" + pad(s, 2) + "." + pad(cs, 2);
-      }
+    function formatTime(s) {
+      var h = Math.floor(s / 3600);
+      var m = Math.floor((s % 3600) / 60);
+      var sec = Math.floor(s % 60);
+      if (h > 0) return h + ':' + pad2(m) + ':' + pad2(sec);
+      return pad2(m) + ':' + pad2(sec);
+    }
 
-      function renderLaps() {
-        elLapCount.textContent = laps.length + (laps.length === 1 ? " lap" : " laps");
-        if (laps.length === 0) {
-          elLaps.innerHTML = '<li class="sw-laps-empty">No laps yet — press Start, then Lap to record splits.</li>';
-          return;
-        }
-        var html = laps.map(function (l) {
-          return '<li><span class="lap-n">Lap ' + l.n + '</span>' +
-                 '<span class="lap-t">' + formatLap(l.total) + '</span>' +
-                 '<span class="lap-d">+' + formatLap(l.delta) + '</span></li>';
-        }).join("");
-        elLaps.innerHTML = html;
-      }
+    function tick() {
+      var now = performance.now();
+      var total = sw.cumulated + (now - sw.runStart) / 1000;
+      sw.elapsed = total;
+      var cs = Math.floor((total - Math.floor(total)) * 100);
+      timeEl.textContent = formatTime(total);
+      csEl.textContent = '.' + pad2(cs);
+      sw.raf = requestAnimationFrame(tick);
+    }
 
-      function reset() {
-        running = false;
-        if (rafId) cancelAnimationFrame(rafId);
-        elapsed = 0; lapBase = 0; laps = [];
-        render(0);
-        renderLaps();
-        elStart.textContent = "Start";
-        elLap.disabled = true;
-        elReset.disabled = true;
-        elDisplay.classList.add("paused");
-        elCard.classList.remove("running");
-      }
-
-      elStart.addEventListener("click", startResume);
-      elLap.addEventListener("click", recordLap);
-      elReset.addEventListener("click", reset);
-      render(0);
-      elDisplay.classList.add("paused");
-
-      /* ===================== FAQ ACCORDION ===================== */
-      var faqItems = document.querySelectorAll(".faq-item");
-      faqItems.forEach(function (item) {
-        var btn = item.querySelector(".faq-q");
-        var ans = item.querySelector(".faq-a");
-        btn.addEventListener("click", function () {
-          var isOpen = item.classList.contains("open");
-          faqItems.forEach(function (other) {
-            other.classList.remove("open");
-            other.querySelector(".faq-q").setAttribute("aria-expanded", "false");
-            other.querySelector(".faq-a").style.maxHeight = null;
-          });
-          if (!isOpen) {
-            item.classList.add("open");
-            btn.setAttribute("aria-expanded", "true");
-            ans.style.maxHeight = ans.scrollHeight + "px";
-          }
-        });
-      });
-
-      /* ===================== HAMBURGER MENU ===================== */
-      var burger = document.getElementById("hamburger");
-      var overlay = document.getElementById("menuOverlay");
-      function closeMenu() {
-        burger.classList.remove("open");
-        overlay.classList.remove("open");
-        burger.setAttribute("aria-expanded", "false");
-        document.body.style.overflow = "";
-      }
-      burger.addEventListener("click", function () {
-        var willOpen = !overlay.classList.contains("open");
-        burger.classList.toggle("open", willOpen);
-        overlay.classList.toggle("open", willOpen);
-        burger.setAttribute("aria-expanded", willOpen ? "true" : "false");
-        document.body.style.overflow = willOpen ? "hidden" : "";
-      });
-      overlay.querySelectorAll("a").forEach(function (a) { a.addEventListener("click", closeMenu); });
-
-      /* ===================== SCROLL REVEAL (IntersectionObserver) ===================== */
-      var reveals = Array.prototype.slice.call(document.querySelectorAll(".reveal"));
-      if ("IntersectionObserver" in window) {
-        var io = new IntersectionObserver(function (entries) {
-          entries.forEach(function (e) {
-            if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
-          });
-        }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
-        reveals.forEach(function (el, i) {
-          el.style.transitionDelay = ((i % 4) * 60) + "ms";
-          io.observe(el);
-        });
+    function toggleStopwatch() {
+      if (sw.running) {
+        cancelAnimationFrame(sw.raf);
+        sw.cumulated += (performance.now() - sw.runStart) / 1000;
+        sw.running = false;
+        statusEl.textContent = 'Paused';
       } else {
-        reveals.forEach(function (el) { el.classList.add("in"); });
+        if (sw.elapsed === 0) statusEl.textContent = 'Running';
+        else statusEl.textContent = 'Running';
+        sw.runStart = performance.now();
+        sw.running = true;
+        sw.raf = requestAnimationFrame(tick);
       }
+    }
 
-      /* ===================== COUNT-UP STATS ===================== */
-      function animateCount(el) {
-        var target = parseFloat(el.getAttribute("data-count"));
-        var suffix = el.getAttribute("data-suffix") || "";
-        var isFloat = /\./.test(String(target));
-        var dur = 1400, start = null;
-        function step(ts) {
-          if (!start) start = ts;
-          var p = Math.min((ts - start) / dur, 1);
-          var eased = 1 - Math.pow(1 - p, 3);
-          var val = target * eased;
-          el.textContent = (isFloat ? val.toFixed(1) : Math.round(val)) + suffix;
-          if (p < 1) requestAnimationFrame(step);
-          else el.textContent = (isFloat ? target.toFixed(1) : target) + suffix;
-        }
-        requestAnimationFrame(step);
-      }
-      var counted = false;
-      function runCounters() {
-        if (counted) return; counted = true;
-        document.querySelectorAll(".hero-stat .num[data-count]").forEach(REDUCED ? function (el) {
-          var t = parseFloat(el.getAttribute("data-count")); var s = el.getAttribute("data-suffix") || "";
-          el.textContent = (/\./.test(String(t)) ? t.toFixed(1) : t) + s;
-        } : animateCount);
-      }
-      if (!REDUCED && "IntersectionObserver" in window) {
-        var heroIO = new IntersectionObserver(function (entries) {
-          entries.forEach(function (e) { if (e.isIntersecting) { runCounters(); heroIO.disconnect(); } });
-        }, { threshold: 0.4 });
-        heroIO.observe(document.querySelector(".hero-stats"));
-      } else { runCounters(); }
+    document.addEventListener('keydown', function(e) {
+      if (e.code === 'Space' && !e.repeat) { e.preventDefault(); toggleStopwatch(); }
+    });
 
-      /* ===================== THREE.JS BACKGROUND ===================== */
-      if (!REDUCED) {
-        try {
-          if (typeof THREE !== "undefined") {
-            var canvas = document.getElementById("bg-canvas");
-            var scene = new THREE.Scene();
-            var camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
-            camera.position.z = 14;
-            var renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            renderer.setSize(window.innerWidth, window.innerHeight);
-
-            var palette = [0x8b5cf6, 0xf472b6, 0x14b8a6];
-            var group = new THREE.Group();
-            scene.add(group);
-            var shapes = [];
-
-            function makeShape(geomFn, color, scale, pos, wire) {
-              var geo = geomFn();
-              var mat = wire
-                ? new THREE.MeshBasicMaterial({ color: color, wireframe: true, transparent: true, opacity: 0.32 })
-                : new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: 0.06 });
-              var mesh = new THREE.Mesh(geo, mat);
-              var wire2 = new THREE.Mesh(geo.clone(), new THREE.MeshBasicMaterial({ color: color, wireframe: true, transparent: true, opacity: 0.22 }));
-              var node = new THREE.Group();
-              node.add(mesh); node.add(wire2);
-              node.scale.setScalar(scale);
-              node.position.set(pos.x, pos.y, pos.z);
-              node.userData = { rs: { x: (Math.random() - 0.5) * 0.004, y: (Math.random() - 0.5) * 0.004, z: (Math.random() - 0.5) * 0.003 }, flo: Math.random() * Math.PI * 2, amp: 0.4 + Math.random() * 0.6, baseY: pos.y };
-              group.add(node); shapes.push(node);
-            }
-
-            var builders = [
-              function () { return new THREE.IcosahedronGeometry(1.3, 0); },
-              function () { return new THREE.TorusKnotGeometry(0.9, 0.28, 80, 10); },
-              function () { return new THREE.OctahedronGeometry(1.2, 0); }
-            ];
-            var spread = [
-              { x: -8, y: 2, z: -3 }, { x: 8, y: 3, z: -2 }, { x: -5, y: -4, z: -1 },
-              { x: 6, y: -3, z: -3 }, { x: 0, y: 5, z: -4 }, { x: 3, y: -6, z: -2 },
-              { x: -9, y: -1, z: -4 }, { x: 9, y: 0, z: -3 }
-            ];
-            spread.forEach(function (p, i) {
-              makeShape(builders[i % builders.length], palette[i % palette.length], 0.9 + Math.random() * 0.8, p, true);
-            });
-
-            var target = { x: 0, y: 0 }, current = { x: 0, y: 0 };
-            window.addEventListener("mousemove", function (e) {
-              target.x = (e.clientX / window.innerWidth - 0.5);
-              target.y = (e.clientY / window.innerHeight - 0.5);
-            }, { passive: true });
-
-            var visible = true;
-            document.addEventListener("visibilitychange", function () { visible = !document.hidden; });
-
-            var clock = new THREE.Clock();
-            function animate3D() {
-              requestAnimationFrame(animate3D);
-              if (!visible) return;
-              var t = clock.getElapsedTime();
-              current.x += (target.x - current.x) * 0.05;
-              current.y += (target.y - current.y) * 0.05;
-              group.rotation.y = current.x * 0.6;
-              group.rotation.x = current.y * 0.4;
-              shapes.forEach(function (s) {
-                s.rotation.x += s.userData.rs.x;
-                s.rotation.y += s.userData.rs.y;
-                s.rotation.z += s.userData.rs.z;
-                s.position.y = s.userData.baseY + Math.sin(t * 0.6 + s.userData.flo) * s.userData.amp;
-              });
-              renderer.render(scene, camera);
-            }
-            animate3D();
-
-            window.addEventListener("resize", function () {
-              camera.aspect = window.innerWidth / window.innerHeight;
-              camera.updateProjectionMatrix();
-              renderer.setSize(window.innerWidth, window.innerHeight);
-            });
-          }
-        } catch (err) {
-          // Three.js failed to load or init — page stays fully functional, canvas stays hidden
-          var c = document.getElementById("bg-canvas"); if (c) c.style.display = "none";
-        }
-      } else {
-        var cc = document.getElementById("bg-canvas"); if (cc) cc.style.display = "none";
-      }
-
-      /* ===================== GSAP HERO INTRO ===================== */
-      if (!REDUCED) {
-        try {
-          if (typeof gsap !== "undefined") {
-            if (typeof ScrollTrigger !== "undefined") { gsap.registerPlugin(ScrollTrigger); }
-            gsap.from("#heroEyebrow", { opacity: 0, y: 18, duration: 0.7, ease: "power3.out", delay: 0.05 });
-            gsap.from("#heroTitle", { opacity: 0, y: 28, duration: 0.9, ease: "power3.out", delay: 0.12 });
-            gsap.from("#heroTag", { opacity: 0, y: 20, duration: 0.8, ease: "power3.out", delay: 0.22 });
-            gsap.from("#swCard", { opacity: 0, scale: 0.92, y: 30, duration: 1, ease: "power3.out", delay: 0.3 });
-            gsap.from([".hero-cta-row > *", ".hero-stat"], { opacity: 0, y: 22, duration: 0.7, ease: "power3.out", delay: 0.5, stagger: 0.08 });
-          }
-        } catch (err) { /* GSAP intro failed — elements already visible by default */ }
-      }
-    })();
-    </script>
-  </body>
+    document.getElementById('stopwatch').addEventListener('click', toggleStopwatch);
+  </script>
+</body>
 </html>

@@ -1,9 +1,7 @@
 import { useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
 import { useStudy } from '../../context/StudyContext';
-import { storage } from '../../services/storage';
 import { Reorder } from 'motion/react';
-import { CheckSquare, GripVertical, Trash2 } from 'lucide-react';
+import { CheckSquare, Trash2 } from 'lucide-react';
 
 const DURATION_OPTIONS = [
   { value: 5, label: '5m' },
@@ -113,17 +111,6 @@ export const TasksPanel = () => {
                         task.completed ? 'opacity-50 line-through' : ''
                       }`}
                     />
-                    <select
-                      value={task.estimatedMinutes ?? 25}
-                      onChange={(e) => updateTask(task.id, { estimatedMinutes: Number(e.target.value) })}
-                      className="appearance-none bg-white/[0.08] rounded-full text-white/70 text-[10px] px-2 py-1 border-none outline-none focus:ring-1 focus:ring-[#7432FF] cursor-pointer shrink-0"
-                    >
-                      {DURATION_OPTIONS.map((opt) => (
-                        <option key={opt.value} value={opt.value} className="bg-[#1a1a2e] text-white">
-                          {opt.label}
-                        </option>
-                      ))}
-                    </select>
                     <button
                       onClick={() => deleteTask(task.id)}
                       className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/60 hover:bg-red-500/20 hover:text-red-400 transition-colors shrink-0"
@@ -140,9 +127,9 @@ export const TasksPanel = () => {
                       className="bg-white/[0.08] rounded-md text-[10px] px-2 py-1 text-white/60 border-none outline-none hover:bg-white/[0.12] transition-colors"
                       style={{ color: subject?.color || 'inherit' }}
                     >
-                      <option value="none">No Subject</option>
+                      <option value="none" className="bg-[#1a1a2e] text-white">No Subject</option>
                       {subjects.map(s => (
-                        <option key={s.id} value={s.id}>{s.name}</option>
+                        <option key={s.id} value={s.id} className="bg-[#1a1a2e] text-white">{s.name}</option>
                       ))}
                     </select>
 
@@ -152,18 +139,15 @@ export const TasksPanel = () => {
                         onChange={(e) => updateTask(task.id, { topicId: e.target.value === 'none' ? undefined : e.target.value })}
                         className="bg-white/[0.08] rounded-md text-[10px] px-2 py-1 text-white/60 border-none outline-none hover:bg-white/[0.12] transition-colors max-w-[100px] truncate"
                       >
-                        <option value="none">General Topic</option>
+                        <option value="none" className="bg-[#1a1a2e] text-white">General Topic</option>
                         {topics.map(t => (
-                          <option key={t.id} value={t.id}>{t.title}</option>
+                          <option key={t.id} value={t.id} className="bg-[#1a1a2e] text-white">{t.title}</option>
                         ))}
                       </select>
                     )}
 
                     {subject && (
-                      <div className="flex items-center gap-1 shrink-0 ml-auto">
-                        <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: subject.color || '#7432FF' }} />
-                        <span className="text-[10px] font-medium text-white/40 uppercase tracking-wider">{subject.name}</span>
-                      </div>
+                      <span className="text-[10px] font-medium text-white/30 ml-auto shrink-0">{subject.name}</span>
                     )}
                   </div>
                 </Reorder.Item>

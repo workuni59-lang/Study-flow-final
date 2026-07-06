@@ -14,6 +14,9 @@ import { ROUTES } from '../../lib/routes';
 import { ATMOSPHERES, WALLPAPERS, THEME_PRESETS } from '../../lib/gamification';
 import { MOOD_GRADIENTS, MOOD_ANIMATED } from '../../lib/wallpapers';
 import { playAlertSound } from '../../lib/alertSounds';
+import { ClockFace } from '../../lib/stopwatchClockComponents';
+import { CLOCK_STYLES, CLOCK_STYLE_DEFAULT } from '../../lib/stopwatchClockStyles';
+import { useReduceMotion } from '../../hooks/useReduceMotion';
 
 const formatTimeBase = (seconds: number) => {
   const m = Math.floor(seconds / 60);
@@ -95,6 +98,11 @@ export const StudyTimer = ({ onTick, compact, variant = 'card', onToggleFullscre
   const [tallyStyle, setTallyStyle] = useState('dots');
   const [elapsedTime, setElapsedTime] = useState(0);
   const [laps, setLaps] = useState<number[]>([]);
+  const [stopwatchClockStyle, setStopwatchClockStyle] = useState(() =>
+    storage.getStopwatchClockStyle() ?? CLOCK_STYLE_DEFAULT
+  );
+
+  const reduceMotion = useReduceMotion();
 
   // Custom timer durations (premium)
   const [customDurations, setCustomDurations] = useState(() => storage.loadCustomDurations());
@@ -292,6 +300,11 @@ export const StudyTimer = ({ onTick, compact, variant = 'card', onToggleFullscre
       storage.saveTimerState(timeLeft);
     } catch {}
   }, [mode, direction, sessionsCompleted, elapsedTime]);
+
+  // Persist stopwatch clock style
+  useEffect(() => {
+    storage.saveStopwatchClockStyle(stopwatchClockStyle);
+  }, [stopwatchClockStyle]);
 
   // Track session start for analytics
   useEffect(() => {
@@ -695,7 +708,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card', onToggleFullscre
       <div>
         <div className="text-[9px] font-bold uppercase tracking-wider text-white/40 mb-2">Animated</div>
         <div className="flex gap-2 flex-wrap">
-          {WALLPAPERS.filter(w => w.type === 'animated' && w.category === 'Abstract').map(w => {
+          {WALLPAPERS.filter(w => (w.type === 'animated' || w.type === 'video') && w.category === 'Abstract').map(w => {
             const selected = themeConfig.wallpaper === w.id;
             return (
               <button key={w.id} onClick={() => { if(w.isPremium && !userStats.isPremium) setShowPremiumModal(true); else { setThemeConfig({...themeConfig, wallpaperRotation: false, wallpaper: w.id}); setThemeCustomized(true); } }}
@@ -856,9 +869,22 @@ export const StudyTimer = ({ onTick, compact, variant = 'card', onToggleFullscre
     </motion.div>
   );
 
+  const renderStopwatchFace = () => (
+    <div className="relative flex flex-col items-center justify-center">
+      <div
+        className="relative flex items-center justify-center select-none"
+        style={{
+          fontSize: stopwatchClockStyle === 'dial' ? undefined : 'clamp(3rem, 10vw, 7rem)',
+        }}
+      >
+        <ClockFace clockStyle={stopwatchClockStyle} elapsed={elapsedTime} reduceMotion={reduceMotion} />
+      </div>
+    </div>
+  );
+
   const renderTimerFace = () => (
     <div className="flex flex-col items-center">
-      <TimerDisplay floating />
+      {mode === 'stopwatch' ? renderStopwatchFace() : <TimerDisplay floating />}
     </div>
   );
 
@@ -955,6 +981,19 @@ export const StudyTimer = ({ onTick, compact, variant = 'card', onToggleFullscre
                           <ChevronDown className="w-2.5 h-2.5" />
                         </motion.span>
                       </button>
+                      {mode === 'stopwatch' && (
+                        <button onClick={() => setStopwatchClockStyle(prev => {
+                          const ids = CLOCK_STYLES.map(c => c.id);
+                          const idx = ids.indexOf(prev);
+                          return ids[(idx + 1) % ids.length];
+                        })}
+                          className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/15 backdrop-blur-sm border border-white/10 hover:bg-black/25 transition-colors text-[9px] font-semibold uppercase tracking-wider text-white/60"
+                          title="Cycle clock style"
+                        >
+                          <Clock className="w-3 h-3 text-brand-light" />
+                          {CLOCK_STYLES.find(c => c.id === stopwatchClockStyle)?.label ?? 'Style'}
+                        </button>
+                      )}
                     </div>
                   {renderControls()}
                 </motion.div>
@@ -982,6 +1021,17 @@ export const StudyTimer = ({ onTick, compact, variant = 'card', onToggleFullscre
                   <span className="text-[9px] font-semibold uppercase tracking-wider text-white/70">{mode === 'stopwatch' ? 'Stopwatch' : activePreset.name}</span>
                 </button>
                 <div className="flex items-center gap-1">
+                  {mode === 'stopwatch' && (
+                    <button onClick={() => setStopwatchClockStyle(prev => {
+                      const ids = CLOCK_STYLES.map(c => c.id);
+                      return ids[(ids.indexOf(prev) + 1) % ids.length];
+                    })}
+                      className="p-2 rounded-xl text-white/50 hover:text-white/80 hover:bg-white/5 transition-all"
+                      title="Cycle clock style"
+                    >
+                      <Clock className="w-4 h-4" />
+                    </button>
+                  )}
                   <button onClick={() => setShowThemePicker(!showThemePicker)} className={`p-2 rounded-xl transition-all ${showThemePicker ? 'bg-brand text-white shadow-lg' : 'text-white/50 hover:text-white/80 hover:bg-black/10 backdrop-blur-sm border border-white/10'}`}>
                     <Palette className="w-4 h-4" />
                   </button>
@@ -1019,7 +1069,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card', onToggleFullscre
                 </div>
               )}
 
-              <TimerDisplay />
+              {mode === 'stopwatch' ? renderStopwatchFace() : <TimerDisplay />}
 
               {/* Laps for stopwatch */}
               {mode === 'stopwatch' && laps.length > 0 && (
@@ -1050,6 +1100,17 @@ export const StudyTimer = ({ onTick, compact, variant = 'card', onToggleFullscre
                   <span className="text-[9px] font-semibold uppercase tracking-wider text-white/70">{mode === 'stopwatch' ? 'Stopwatch' : activePreset.name}</span>
                 </button>
                 <div className="flex items-center gap-1">
+                  {mode === 'stopwatch' && (
+                    <button onClick={() => setStopwatchClockStyle(prev => {
+                      const ids = CLOCK_STYLES.map(c => c.id);
+                      return ids[(ids.indexOf(prev) + 1) % ids.length];
+                    })}
+                      className="p-2 rounded-xl text-white/50 hover:text-white/80 hover:bg-white/5 transition-all"
+                      title="Cycle clock style"
+                    >
+                      <Clock className="w-4 h-4" />
+                    </button>
+                  )}
                   <button onClick={() => setShowThemePicker(!showThemePicker)} className={`p-2 rounded-xl transition-all ${showThemePicker ? 'bg-brand text-white shadow-lg' : 'text-white/50 hover:text-white/80 hover:bg-black/10 backdrop-blur-sm border border-white/10'}`}>
                     <Palette className="w-4 h-4" />
                   </button>
@@ -1087,7 +1148,7 @@ export const StudyTimer = ({ onTick, compact, variant = 'card', onToggleFullscre
                 </div>
               )}
 
-              <TimerDisplay />
+              {mode === 'stopwatch' ? renderStopwatchFace() : <TimerDisplay />}
 
               {/* Laps for stopwatch */}
               {mode === 'stopwatch' && laps.length > 0 && (

@@ -261,8 +261,8 @@
   pointer-events: none;
   z-index: -15;
   background:
-    linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.08) 20%, rgba(0,0,0,0.04) 50%, rgba(0,0,0,0.08) 80%, rgba(0,0,0,0.35) 100%),
-    radial-gradient(ellipse at 50% 0%, rgba(0,0,0,0.12) 0%, transparent 70%);
+    linear-gradient(180deg, rgba(0,0,0,0.20) 0%, rgba(0,0,0,0.04) 20%, rgba(0,0,0,0.02) 50%, rgba(0,0,0,0.04) 80%, rgba(0,0,0,0.20) 100%),
+    radial-gradient(ellipse at 50% 0%, rgba(0,0,0,0.06) 0%, transparent 70%);
 }
 
 /* ─── Clear Mode ─── */

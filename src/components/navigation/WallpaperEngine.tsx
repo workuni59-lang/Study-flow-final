@@ -1,14 +1,19 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, useSpring, useMotionValue, useTransform, AnimatePresence } from 'motion/react';
 import { useStudy } from '../../context/StudyContext';
 import { WALLPAPERS } from '../../lib/gamification';
 import { MOOD_GRADIENTS, MOOD_ANIMATED } from '../../lib/wallpapers';
 import { useReduceMotion } from '../../hooks/useReduceMotion';
 
+const VIDEO_WALLPAPERS: Record<string, string> = {
+  'aurora-cabin': '/videos/aurora-cabin.mp4',
+};
+
 export const WallpaperEngine = ({ visible = true, staticOnly = false }: { visible?: boolean, staticOnly?: boolean }) => {
   const { themeConfig } = useStudy();
   const reduceMotion = useReduceMotion();
   const shouldReduceMotion = reduceMotion || staticOnly;
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   // Mouse Tracking for Interactive Parallax (disabled when reduceMotion is active)
   const mouseX = useMotionValue(0.5);
@@ -37,6 +42,17 @@ export const WallpaperEngine = ({ visible = true, staticOnly = false }: { visibl
   // Parallax for Image Wallpapers
   const imageX = useTransform(springX, [0, 1], ["-2%", "2%"]);
   const imageY = useTransform(springY, [0, 1], ["-2%", "2%"]);
+
+  // Pause/resume video wallpaper based on visibility and reduced motion
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (!visible || reduceMotion) {
+      video.pause();
+    } else {
+      video.play().catch(() => {});
+    }
+  }, [visible, reduceMotion, themeConfig.wallpaper]);
 
   useEffect(() => {
     if (reduceMotion) return;
@@ -74,9 +90,9 @@ export const WallpaperEngine = ({ visible = true, staticOnly = false }: { visibl
   const currentWallpaper = WALLPAPERS.find(w => w.id === themeConfig.wallpaper) || WALLPAPERS[0];
   const staticFallback = WALLPAPERS.find(w => w.type === 'image' && w.id !== 'none') || currentWallpaper;
   
-  // On mobile (staticOnly), we allow both Photos (type: image) and Moods (category: Moods)
+  // On mobile (staticOnly), we allow Photos (type: image), Moods, and video wallpapers
   const effectiveWallpaper = staticOnly
-    ? (WALLPAPERS.find(w => (w.type === 'image' || w.category === 'Moods') && w.id === themeConfig.wallpaper) || staticFallback)
+    ? (WALLPAPERS.find(w => (w.type === 'image' || w.category === 'Moods' || w.type === 'video') && w.id === themeConfig.wallpaper) || staticFallback)
     : currentWallpaper;
   const baseClass = baseBackgrounds[themeConfig.atmosphere] || baseBackgrounds.indigo;
   const currentGlow = atmosphereGlows[themeConfig.atmosphere] || atmosphereGlows.indigo;
@@ -128,13 +144,33 @@ export const WallpaperEngine = ({ visible = true, staticOnly = false }: { visibl
                 50% { background-position: 100% 50%; }
                 100% { background-position: 0% 50%; }
               }
+              @keyframes cd-drift-1 {
+                0%, 100% { transform: translate(0%, 0%) scale(1); }
+                33% { transform: translate(12%, -8%) scale(1.1); }
+                66% { transform: translate(-6%, 14%) scale(0.9); }
+              }
+              @keyframes cd-drift-2 {
+                0%, 100% { transform: translate(0%, 0%) scale(1); }
+                33% { transform: translate(-10%, 10%) scale(0.95); }
+                66% { transform: translate(8%, -12%) scale(1.08); }
+              }
+              @keyframes cd-drift-3 {
+                0%, 100% { transform: translate(0%, 0%) scale(1); }
+                33% { transform: translate(-8%, -14%) scale(1.05); }
+                66% { transform: translate(14%, 6%) scale(0.92); }
+              }
+              @keyframes cd-drift-4 {
+                0%, 100% { transform: translate(0%, 0%) scale(1); }
+                33% { transform: translate(6%, 12%) scale(0.93); }
+                66% { transform: translate(-14%, -8%) scale(1.12); }
+              }
             `}
           </style>
         )}
 
         {isEnabled && (
           <div className="absolute inset-0 overflow-hidden" style={{ filter: filterStyle, willChange: 'filter' }}>
-            {/* Image Wallpaper Layer */}
+            {/* Image / Video Wallpaper Layer */}
             <AnimatePresence mode="wait">
               {(effectiveWallpaper.type === 'image' || themeConfig.wallpaper === 'custom') && (
                 <motion.div
@@ -156,6 +192,29 @@ export const WallpaperEngine = ({ visible = true, staticOnly = false }: { visibl
                     }}
                     className={`absolute inset-[-5%] ${isMobile && !shouldReduceMotion ? 'animate-[mobile-breathing_40s_infinite_linear]' : ''}`}
                   />
+                  <div className="absolute inset-0 bg-black/5 dark:bg-black/20" />
+                </motion.div>
+              )}
+              {effectiveWallpaper.type === 'video' && (
+                <motion.div
+                  key={themeConfig.wallpaper}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 1.5 }}
+                  className="absolute inset-0"
+                >
+                  <video
+                    ref={videoRef}
+                    muted
+                    autoPlay
+                    loop
+                    playsInline
+                    className="absolute inset-0 w-full h-full"
+                    style={{ objectFit: 'cover' }}
+                  >
+                    <source src={VIDEO_WALLPAPERS[themeConfig.wallpaper]} type="video/mp4" />
+                  </video>
                   <div className="absolute inset-0 bg-black/5 dark:bg-black/20" />
                 </motion.div>
               )}
@@ -200,6 +259,22 @@ export const WallpaperEngine = ({ visible = true, staticOnly = false }: { visibl
                     style={{ left: `${(i * 8.3) + 2}%` }}
                   />
                 ))}
+              </div>
+            )}
+
+            {/* Chroma Drift */}
+            {!staticOnly && !reduceMotion && themeConfig.wallpaper === 'chroma-drift' && (
+              <div className="absolute inset-0 overflow-hidden">
+                <div className="absolute -inset-[50%] opacity-80" style={{ filter: 'blur(50px)' }}>
+                  <div className="absolute w-[55%] h-[55%] top-[5%] left-[5%] rounded-full opacity-80"
+                    style={{ background: '#DF437A', animation: 'cd-drift-1 14s ease-in-out infinite' }} />
+                  <div className="absolute w-[45%] h-[45%] bottom-[5%] right-[5%] rounded-full opacity-70"
+                    style={{ background: '#3d57d6', animation: 'cd-drift-2 18s ease-in-out infinite' }} />
+                  <div className="absolute w-[40%] h-[40%] top-[25%] right-[15%] rounded-full opacity-70"
+                    style={{ background: '#a117fd', animation: 'cd-drift-3 12s ease-in-out infinite' }} />
+                  <div className="absolute w-[45%] h-[45%] bottom-[10%] left-[10%] rounded-full opacity-60"
+                    style={{ background: '#ec634b', animation: 'cd-drift-4 16s ease-in-out infinite' }} />
+                </div>
               </div>
             )}
 

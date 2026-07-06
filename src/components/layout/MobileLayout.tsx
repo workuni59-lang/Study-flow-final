@@ -40,8 +40,6 @@ const QuestsViewLazy = lazy(() => import('../quests/QuestsView').then(m => ({ de
 const LeaderboardViewLazy = lazy(() => import('../leaderboard/LeaderboardView').then(m => ({ default: m.LeaderboardView })));
 const ProfileViewLazy = lazy(() => import('../profile/ProfileView').then(m => ({ default: m.ProfileView })));
 const PomodoroLandingLazy = lazy(() => import('../pomodoro/PomodoroLanding').then(m => ({ default: m.PomodoroLanding })));
-const StopwatchViewLazy = lazy(() => import('../dashboard/StopwatchView').then(m => ({ default: m.StopwatchView })));
-
 const MobileSkeleton = () => <DashboardSkeleton />;
 
 const skeletonKeyframes = `@keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.7; } }`;
@@ -77,6 +75,29 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [themeTab, setThemeTab] = useState<'moods' | 'photos'>('moods');
   const [spotlightSubjectId, setSpotlightSubjectId] = useState<string | null>(null);
+  const [idle, setIdle] = useState(false);
+  const idleTimer = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => {
+    if (mode !== 'focus') { setIdle(false); return; }
+    const reset = () => {
+      setIdle(false);
+      clearTimeout(idleTimer.current);
+      idleTimer.current = setTimeout(() => setIdle(true), 3000);
+    };
+    reset();
+    document.addEventListener('mousemove', reset, { passive: true });
+    document.addEventListener('touchstart', reset, { passive: true });
+    document.addEventListener('keydown', reset, { passive: true });
+    document.addEventListener('scroll', reset, { passive: true });
+    return () => {
+      clearTimeout(idleTimer.current);
+      document.removeEventListener('mousemove', reset);
+      document.removeEventListener('touchstart', reset);
+      document.removeEventListener('keydown', reset);
+      document.removeEventListener('scroll', reset);
+    };
+  }, [mode]);
 
   const showMoodPicker = activePanel === 'themes';
 
@@ -195,12 +216,6 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
                 <PomodoroLandingLazy />
               </Suspense>
             </motion.main>
-          ) : section === 'stopwatch' ? (
-            <motion.main key="stopwatch" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.15 }} className="p-3 md:p-4 pb-28">
-              <Suspense fallback={<MobileSkeleton />}>
-                <StopwatchViewLazy />
-              </Suspense>
-            </motion.main>
           ) : isFullView ? (
             <motion.div key={'full-' + section} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.15 }} className="min-h-screen">
               <header className="sticky top-0 z-30 bg-white/70 dark:bg-[#0a0c10]/70 backdrop-blur-2xl border-b border-slate-100 dark:border-slate-800 pt-safe">
@@ -238,16 +253,18 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
             </motion.div>
           ) : (
           <motion.div key={'dash-' + mode} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.15 }}>
-            {/* Floating toolbar */}
-            <TopBar
-              mode={mode}
-              onModeChange={setMode}
-              onMenuOpen={handleMenuOpen}
-              onOpenAuth={onOpenAuth}
-              onLeaderboardOpen={handleLeaderboardOpen}
-              onProfileOpen={user ? handleProfileOpen : undefined}
-              onStartTour={startTour}
-            />
+            {/* Floating toolbar — auto-hides when idle in focus mode */}
+            <div className={`transition-all duration-700 ${mode === 'focus' && idle ? 'opacity-0 -translate-y-3 pointer-events-none' : 'opacity-100 translate-y-0'}`}>
+              <TopBar
+                mode={mode}
+                onModeChange={setMode}
+                onMenuOpen={handleMenuOpen}
+                onOpenAuth={onOpenAuth}
+                onLeaderboardOpen={handleLeaderboardOpen}
+                onProfileOpen={user ? handleProfileOpen : undefined}
+                onStartTour={startTour}
+              />
+            </div>
 
             {/* Main content */}
             <main>
@@ -271,15 +288,17 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
         )}
         </AnimatePresence>
 
-        {/* Bottom bar — rendered outside AnimatePresence so fixed positioning isn't broken by motion.div transforms */}
-        <BottomBar
-          mode={mode}
-          onModeChange={setMode}
-          onTasksOpen={handleTasksOpen}
-          onStatsOpen={handleStatsOpen}
-          onNotepadOpen={handleNotepadOpen}
-          onMenuOpen={handleMenuOpen}
-        />
+        {/* Bottom bar — rendered outside AnimatePresence; auto-hides when idle in focus mode */}
+        <div className={`transition-all duration-700 ${mode === 'focus' && idle ? 'opacity-0 translate-y-3 pointer-events-none' : 'opacity-100 translate-y-0'}`}>
+          <BottomBar
+            mode={mode}
+            onModeChange={setMode}
+            onTasksOpen={handleTasksOpen}
+            onStatsOpen={handleStatsOpen}
+            onNotepadOpen={handleNotepadOpen}
+            onMenuOpen={handleMenuOpen}
+          />
+        </div>
       </div>
 
       {/* Mood picker bottom sheet */}

@@ -196,15 +196,6 @@ export const HomeView = memo(({ onNotepadOpen, onQuestsOpen, onMusicOpen, onProg
           ))}
         </div>
 
-        {/* Stopwatch trigger — high contrast brand-colored button */}
-        <button
-          onClick={() => navigate('/stopwatch')}
-          className="mt-5 w-full max-w-xs flex items-center justify-center gap-2.5 py-3 rounded-xl bg-indigo-500/90 hover:bg-indigo-500 text-white text-[11px] font-semibold uppercase tracking-wider transition-all shadow-lg shadow-indigo-500/20 active:scale-[0.98]"
-        >
-          <Timer size={16} />
-          Stopwatch
-        </button>
-
         {/* Sign-in prompt for demo users */}
         <DemoSignUpNudge onOpenAuth={onOpenAuth} />
       </div>

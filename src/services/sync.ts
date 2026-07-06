@@ -158,6 +158,38 @@ class SyncService {
     this.timer = setTimeout(() => this.process(), nextRetry);
   }
 
+  private static COLUMN_MAP: Record<string, Record<string, string>> = {
+    tasks: {
+      dueDate: 'due_date',
+      estimatedMinutes: 'estimated_minutes',
+      subjectId: 'subject_id',
+      topicId: 'topic_id',
+    },
+  };
+
+  private static DB_COLUMNS: Record<string, Set<string>> = {
+    tasks: new Set([
+      'id', 'user_id', 'title', 'completed', 'category', 'priority',
+      'due_date', 'estimated_minutes', 'subject_id', 'topic_id',
+      'created_at', 'updated_at',
+    ]),
+  };
+
+  private buildPayload(table: TableName, data: Record<string, any>): Record<string, any> {
+    const payload: Record<string, any> = {
+      user_id: this._userId,
+      updated_at: new Date().toISOString(),
+    };
+    const columnMap = SyncService.COLUMN_MAP[table] ?? {};
+    const allowedColumns = SyncService.DB_COLUMNS[table];
+    for (const [key, value] of Object.entries(data)) {
+      const dbKey = columnMap[key] ?? key;
+      if (allowedColumns && !allowedColumns.has(dbKey)) continue;
+      payload[dbKey] = value;
+    }
+    return payload;
+  }
+
   private async process(): Promise<void> {
     if (this.processing || this.queue.length === 0) return;
     if (!supabase) return;
@@ -179,7 +211,7 @@ class SyncService {
       if (!change) break;
       try {
         if (change.operation === 'upsert') {
-          const payload = { ...change.data, user_id: this._userId, updated_at: new Date().toISOString() };
+          const payload = this.buildPayload(change.table, change.data);
           const conflict = change.table === 'gamification_state' ? 'user_id' : 'id';
           const { error } = await supabase
             .from(change.table)

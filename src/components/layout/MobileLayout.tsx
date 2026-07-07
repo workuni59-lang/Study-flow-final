@@ -253,19 +253,6 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
             </motion.div>
           ) : (
           <motion.div key={'dash-' + mode} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.15 }}>
-            {/* Floating toolbar — auto-hides when idle in focus mode */}
-            <div className={`transition-all duration-700 ${mode === 'focus' && idle ? 'opacity-0 -translate-y-3 pointer-events-none' : 'opacity-100 translate-y-0'}`}>
-              <TopBar
-                mode={mode}
-                onModeChange={setMode}
-                onMenuOpen={handleMenuOpen}
-                onOpenAuth={onOpenAuth}
-                onLeaderboardOpen={handleLeaderboardOpen}
-                onProfileOpen={user ? handleProfileOpen : undefined}
-                onStartTour={startTour}
-              />
-            </div>
-
             {/* Main content */}
             <main>
               {mode === 'home' && (
@@ -288,8 +275,23 @@ export const MobileLayout = ({ onOpenAuth }: MobileLayoutProps) => {
         )}
         </AnimatePresence>
 
+        {/* Top bar — only on dashboard, rendered outside AnimatePresence so fixed positioning isn't broken by motion.div transforms; auto-hides when idle in focus mode */}
+        {!isFullView && (
+        <div className={`transition-opacity duration-700 ${mode === 'focus' && idle ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+          <TopBar
+            mode={mode}
+            onModeChange={setMode}
+            onMenuOpen={handleMenuOpen}
+            onOpenAuth={onOpenAuth}
+            onLeaderboardOpen={handleLeaderboardOpen}
+            onProfileOpen={user ? handleProfileOpen : undefined}
+            onStartTour={startTour}
+          />
+        </div>
+        )}
+
         {/* Bottom bar — rendered outside AnimatePresence; auto-hides when idle in focus mode */}
-        <div className={`transition-all duration-700 ${mode === 'focus' && idle ? 'opacity-0 translate-y-3 pointer-events-none' : 'opacity-100 translate-y-0'}`}>
+        <div className={`transition-opacity duration-700 ${mode === 'focus' && idle ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
           <BottomBar
             mode={mode}
             onModeChange={setMode}

@@ -26,8 +26,8 @@ Replace default presets (indigo atmosphere, daily focus goal, onboarding tour) a
 - Build & lint pass cleanly
 - 3 commits ready: `07bb8f5` (remove country), `bf828a6` (presets overhaul), `b925277` (spotlight tour)
 
-## In Progress
-- (none)
+## Done
+- **Button unclickability root cause & fix** — `position: fixed` elements (TopBar, BottomBar) break when any ancestor has CSS `transform` (even `translateY(0)`). Two sources: (1) `motion.div` with Framer Motion `animate={{ y: 0 }}` creates `transform: translateY(0px)`, making `fixed` children relative to the container instead of viewport. (2) TopBar/BottomBar wrappers used `translate-y-0`/`-translate-y-3` for auto-hide animation, adding another transform. Fix: moved TopBar outside `AnimatePresence`/`motion.div`, replaced `translate-y` classes with `transition-opacity` only, added `!isFullView` guard so TopBar only renders on dashboard.
 
 ## Blocked
 - Push blocked (no git credentials in environment) — user must `git push` from their terminal
@@ -40,6 +40,8 @@ Replace default presets (indigo atmosphere, daily focus goal, onboarding tour) a
 - `closeBtnText` not used — driver.js v1.6.0 Config rejects it; close button shows default X icon
 - `allowClose` left as default (true) — users can skip via X or overlay click; `onDestroyed` marks tour complete either way
 - `country` removed from SELECT but kept in `PublicProfile` interface — returns `undefined` for real users; UI handles falsy
+- **`position: fixed` + `transform`** — any ancestor with `transform` (Framer Motion animations, `translate-y` classes) breaks `fixed` positioning. BottomBar was moved outside `motion.div` in commit `3d90ae3`; TopBar had the same issue but was left inside until now.
+- **Auto-hide animation** — removed `translate-y` from TopBar/BottomBar auto-hide wrappers since even `translate-y-0` (no-op visually) creates a CSS `transform` that breaks `position: fixed`. Only `opacity` is used now.
 
 ## Next Steps
 1. User runs `git push` from their terminal

@@ -169,7 +169,7 @@ export const WallpaperEngine = ({ visible = true, staticOnly = false }: { visibl
         )}
 
         {isEnabled && (
-          <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ filter: filterStyle, willChange: 'filter' }}>
+          <div className="absolute inset-0 overflow-hidden pointer-events-none" style={effectiveWallpaper.type === 'video' ? {} : { filter: filterStyle, willChange: 'filter' }}>
             {/* Image / Video Wallpaper Layer */}
             <AnimatePresence mode="wait">
               {(effectiveWallpaper.type === 'image' || themeConfig.wallpaper === 'custom') && (
@@ -210,6 +210,7 @@ export const WallpaperEngine = ({ visible = true, staticOnly = false }: { visibl
                     autoPlay
                     loop
                     playsInline
+                    preload="auto"
                     className="absolute inset-0 w-full h-full pointer-events-none"
                     style={{ objectFit: 'cover' }}
                   >
